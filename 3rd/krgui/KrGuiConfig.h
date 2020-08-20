@@ -1,0 +1,9 @@
+﻿#ifndef __KK_KRGUI_CONFIG_H__
+#define __KK_KRGUI_CONFIG_H__
+
+#define KRGUI_COMPILE_WITH_OPENGL3
+
+#define KRGUI_NUM_OF_POPUPS 256
+#define KRGUI_POPUP_DEPTH 10
+
+#endif
