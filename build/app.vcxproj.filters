@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{e2aa6e70-7ace-45b2-9e6f-7cac65868519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Geometry">
+      <UniqueIdentifier>{c028cd95-75de-4200-bad7-2d5e97b0f2cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene3D">
+      <UniqueIdentifier>{72c33279-eba5-4d05-a340-6c90ed71bbfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Plugins">
+      <UniqueIdentifier>{ee39e2ba-a934-4881-9d91-4b959d29dd5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GUI">
+      <UniqueIdentifier>{7509defd-bff1-4056-a887-85191d443ea8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Viewport">
+      <UniqueIdentifier>{8572f5d6-f3cc-4777-b0d1-2745a06b73cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Shaders">
+      <UniqueIdentifier>{ae088332-5896-426e-a3cd-88f02bae275a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Materials">
+      <UniqueIdentifier>{6f4a02d9-def5-4f9a-9dc7-0b080e5d4b70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RenderManager">
+      <UniqueIdentifier>{27f38ea0-051f-42eb-b895-324ce0e79601}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\app\Application.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\EventConsumer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\window_callbacks.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Functions.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Geometry\GeometryCreator.cpp">
+      <Filter>src\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Geometry\Vertex.cpp">
+      <Filter>src\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Scene3D\Scene3DObject.cpp">
+      <Filter>src\Scene3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Scene3D\Scene3D.cpp">
+      <Filter>src\Scene3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Plugins\PluginManager.cpp">
+      <Filter>src\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Plugins\PluginCommonInterface.cpp">
+      <Filter>src\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Plugins\Plugin.cpp">
+      <Filter>src\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Geometry\PolygonalModel.cpp">
+      <Filter>src\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Geometry\Polygon3D.cpp">
+      <Filter>src\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\ShortcutManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\gl3w\GL\gl3w.c">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\main_app.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Viewport\ViewportCamera.cpp">
+      <Filter>src\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Viewport\ViewportCameraUpdateCallback.cpp">
+      <Filter>src\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Viewport\Viewport.cpp">
+      <Filter>src\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Viewport\ViewportOptimizations.cpp">
+      <Filter>src\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Shaders\simple.cpp">
+      <Filter>src\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Gizmo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Shaders\points.cpp">
+      <Filter>src\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Plugins\PluginGUI.cpp">
+      <Filter>src\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Plugins\PluginGUIWindow.cpp">
+      <Filter>src\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Plugins\PluginObjectCategory.cpp">
+      <Filter>src\Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\MainMenuBar.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\MainMenuCommands.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\MainMenu_objectCreatorCategories.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\GUIResources.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\DrawRightPart.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Materials\kkMaterialTypeImpl.cpp">
+      <Filter>src\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Materials\MaterialEditor.cpp">
+      <Filter>src\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Shaders\scene3DobjectDefault.cpp">
+      <Filter>src\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\RenderManager\RenderManager.cpp">
+      <Filter>src\RenderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Fonts.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Shaders\linemodel.cpp">
+      <Filter>src\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\krGuiOpenGL.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiPictureBox.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiPopupMenu.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiRangeSlider.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiRectangle.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiText.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\krGui.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiButton.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiFont.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiFontCreation.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiGroup.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiNodeEditor.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\MainMenu_mainToolBar.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\Shaders\ShaderScene3DObjectDefault_polymodeforlinerender.cpp">
+      <Filter>src\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiMenuBar.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\GUI\DrawLeftToolBar.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiCheckbox.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\app\Application.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\EventConsumer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Functions.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Geometry\GeometryCreator.h">
+      <Filter>src\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Geometry\Vertex.h">
+      <Filter>src\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Scene3D\Scene3D.h">
+      <Filter>src\Scene3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Scene3D\Scene3DObject.h">
+      <Filter>src\Scene3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Plugins\PluginCommonInterface.h">
+      <Filter>src\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Plugins\PluginManager.h">
+      <Filter>src\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Plugins\Plugin.h">
+      <Filter>src\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Geometry\PolygonalModel.h">
+      <Filter>src\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Geometry\Polygon3D.h">
+      <Filter>src\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\ShortcutManager.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Viewport\Viewport.h">
+      <Filter>src\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Viewport\ViewportCamera.h">
+      <Filter>src\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Viewport\ViewportOptimizations.h">
+      <Filter>src\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Shaders\simple.h">
+      <Filter>src\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Gizmo.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Shaders\points.h">
+      <Filter>src\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Plugins\PluginGUI.h">
+      <Filter>src\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Plugins\PluginGUIWindow.h">
+      <Filter>src\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Plugins\PluginObjectCategory.h">
+      <Filter>src\Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\GUI\GUIResources.h">
+      <Filter>src\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Materials\MaterialEditor.h">
+      <Filter>src\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Materials\kkMaterialTypeImpl.h">
+      <Filter>src\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Shaders\scene3DobjectDefault.h">
+      <Filter>src\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\RenderManager\RenderManager.h">
+      <Filter>src\RenderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\src\app\Shaders\linemodel.h">
+      <Filter>src\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\app\Shaders\ShaderScene3DObjectDefault_polymodeforlinerender.h">
+      <Filter>src\Shaders</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+</Project>

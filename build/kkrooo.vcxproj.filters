@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\Memory">
+      <UniqueIdentifier>{ed80214e-cd26-499d-b369-569928584b89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\MainSystem">
+      <UniqueIdentifier>{a6f9779d-75ab-4e56-af42-a497a21754f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GraphicsSystem">
+      <UniqueIdentifier>{ae5e762e-0ba4-4e8a-93de-e06bdab067e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Window">
+      <UniqueIdentifier>{a94966a2-527f-4363-9e57-5bd8334fd376}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\EventSystem">
+      <UniqueIdentifier>{5b8ed0d3-9b48-4b84-9f76-5bb4b768bea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\InputSystem">
+      <UniqueIdentifier>{1cb024b4-4d6f-4f84-ac75-ff9d7da98cc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\SceneSystem">
+      <UniqueIdentifier>{3a20b2d2-8fb0-4b60-8186-bc8a61c61579}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\FileSystem">
+      <UniqueIdentifier>{dc888d29-4336-41b8-a7f6-e7a9c1c6b50a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\zstd">
+      <UniqueIdentifier>{2dd3db1b-a307-45f3-99ef-fdd06443becc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\engine\main_kkrooo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\Memory\kkMemory.cpp">
+      <Filter>src\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\Memory\kkMemorySystemImpl.cpp">
+      <Filter>src\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\MainSystem\kkMainSystemImpl.cpp">
+      <Filter>src\MainSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\Window\kkWindowWin32.cpp">
+      <Filter>src\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\EventSystem\kkEventSystemImpl.cpp">
+      <Filter>src\EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\InputSystem\kkInputSystemImpl.cpp">
+      <Filter>src\InputSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\MainSystem\kkMainSystemImpl_Win32.cpp">
+      <Filter>src\MainSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\kkEasyFunctionsImpl.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\SceneSystem\kkSceneSystemImpl.cpp">
+      <Filter>src\SceneSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\SceneSystem\kkCameraImpl.cpp">
+      <Filter>src\SceneSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\FileSystem\kkFileWin32.cpp">
+      <Filter>src\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\FileSystem\kkXMLDocumentImpl.cpp">
+      <Filter>src\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\FileSystem\kkXMLImpl.cpp">
+      <Filter>src\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\FileSystem\kkFileSystemCommon.cpp">
+      <Filter>src\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\FileSystem\kkFileSystemWin32.cpp">
+      <Filter>src\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLModel.cpp">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLShader.cpp">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLTexture.cpp">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLWin32.cpp">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\GraphicsSystem\kkGraphicsSystemImpl.cpp">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGL.cpp">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\gl3w\GL\gl3w.c">
+      <Filter>src\GraphicsSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_fast.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_lazy.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_ldm.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_opt.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstdmt_compress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\fse_compress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\hist.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\huf_compress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_compress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_compress_literals.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_compress_sequences.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_double_fast.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_decompress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_decompress_block.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\decompress\huf_decompress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_ddict.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\pool.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\threading.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\xxhash.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\zstd_common.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\debug.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\entropy_common.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\error_private.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\zstd\lib\common\fse_decompress.c">
+      <Filter>src\zstd</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\engine\Memory\kkMemorySystemImpl.h">
+      <Filter>src\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\Window\kkWindowWin32.h">
+      <Filter>src\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\EventSystem\kkEventSystemImpl.h">
+      <Filter>src\EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\InputSystem\kkInputSystemImpl.h">
+      <Filter>src\InputSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\SceneSystem\kkSceneSystemImpl.h">
+      <Filter>src\SceneSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\SceneSystem\kkCameraImpl.h">
+      <Filter>src\SceneSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\FileSystem\kkFileSystemWin32.h">
+      <Filter>src\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\FileSystem\kkFileWin32.h">
+      <Filter>src\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\FileSystem\kkXMLDocumentImpl.h">
+      <Filter>src\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\engine\FileSystem\kkFileSystemCommon.h">
+      <Filter>src\FileSystem</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
