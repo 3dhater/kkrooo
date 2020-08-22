@@ -49,6 +49,8 @@ public:
 	virtual void hide() = 0;
 	virtual void show() = 0;
 	virtual void setFocus(bool toTop) = 0;
+	virtual void moveWindow(const v2i& position) = 0;
+	virtual void resizeWindow(const v2i& size) = 0;
 
 
 	/// HWND

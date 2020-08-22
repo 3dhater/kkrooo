@@ -104,8 +104,8 @@ extern "C"
 		importData->export_window->SetType(kkPluginGUIWindowType::Export);
 
 		// можно изменить размер
-		importData->import_window->SetSize(v2i(400,300));
-		importData->export_window->SetSize(v2i(400,300));
+		importData->import_window->SetSize(v2i(300,300));
+		importData->export_window->SetSize(v2i(300,300));
 
 		// передать данные для того чтобы потом был к ним доступ из коллбэк функций
 		importData->import_window->SetUserData(importData);

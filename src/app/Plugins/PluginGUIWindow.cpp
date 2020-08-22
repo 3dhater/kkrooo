@@ -108,7 +108,7 @@ void PluginGUIWindow::Activate()
     m_isActive = true;
     if( m_type == kkPluginGUIWindowType::Export || m_type == kkPluginGUIWindowType::Import )
     {
-        m_app->showImportExportWindow(this);
+        m_app->showImportExportWindow(this, m_size);
     }
 }
 

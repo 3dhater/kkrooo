@@ -35,6 +35,8 @@ public:
 	void hide();
 	void show();
 	void setFocus(bool toTop);
+	void moveWindow(const v2i& position);
+	void resizeWindow(const v2i& size);
 
 	HDC  m_dc;
 };

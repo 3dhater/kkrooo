@@ -34,6 +34,19 @@ kkWindowWin32::~kkWindowWin32()
 	}
 }
 
+void kkWindowWin32::moveWindow(const v2i& position)
+{
+	auto size = m_window_rect.getWidthAndHeight();
+	MoveWindow(m_hWnd, position.x, position.y, size.x, size.y, TRUE);
+}
+
+void kkWindowWin32::resizeWindow(const v2i& size)
+{
+	MoveWindow(m_hWnd, m_window_rect.x, m_window_rect.y, size.x, size.y, TRUE);
+	m_window_rect.z = m_window_rect.x + size.x;
+	m_window_rect.w = m_window_rect.y + size.y;
+}
+
 void kkWindowWin32::hide()
 {
 	if( m_is_init )
@@ -349,9 +362,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_GETMINMAXINFO:
 	{
-		LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
-		lpMMI->ptMinTrackSize.x = 800;
-		lpMMI->ptMinTrackSize.y = 600;
+		if(pD)
+		{
+			if( pD->m_style & kk::window::style::size_limit )
+			{
+				LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
+				lpMMI->ptMinTrackSize.x = 800;
+				lpMMI->ptMinTrackSize.y = 600;
+			}
+		}
 	}break;
 	case WM_ERASEBKGND:
 		if( pD )
@@ -657,6 +676,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	return DefWindowProc( hWnd, message, wParam, lParam );
 }
+
+
 
 #endif
 

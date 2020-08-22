@@ -442,7 +442,7 @@ public:
 
 	bool isWindowActive(E_WINDOW_ID);
 	
-	void showImportExportWindow(PluginGUIWindow*);
+	void showImportExportWindow(PluginGUIWindow*, const v2i& size);
 };
 
 

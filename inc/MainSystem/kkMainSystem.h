@@ -20,6 +20,7 @@ namespace kk
 			constexpr u32 center   = 8;
 			constexpr u32 on_top   = 16;
 			constexpr u32 modal    = 32;
+			constexpr u32 size_limit    = 64;
 		}
 		namespace state
 		{

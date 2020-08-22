@@ -241,7 +241,7 @@ void Application::_init_plugins()
 void Application::_init_mainWindow()
 {
 	m_mainWindow = m_main_system->createWindow( 
-        kk::window::style::resize | kk::window::style::center | kk::window::style::maximize, 
+        kk::window::style::resize | kk::window::style::center | kk::window::style::maximize | kk::window::style::size_limit, 
         v4i(0,0,800,600), kk::window::state::hide, 0, E_WINDOW_ID::EWID_MAIN_WINDOW );
 	if( !m_mainWindow.ptr() )
 	{
@@ -2389,8 +2389,10 @@ bool Application::isWindowActive(E_WINDOW_ID id)
     return m_activeOSWindow == id;
 }
 
-void Application::showImportExportWindow(PluginGUIWindow* w)
+void Application::showImportExportWindow(PluginGUIWindow* w, const v2i& size)
 {
+    m_importExportWindow->resizeWindow(size);
+    m_importExportWindow->moveWindow(v2i(50,50));
     m_importExportWindow->show();
     m_importExportGUIWindow = w;
 }
