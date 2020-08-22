@@ -35,71 +35,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\3rd\gl3w\GL\gl3w.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\debug.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\entropy_common.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\error_private.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\fse_decompress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\pool.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\threading.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\xxhash.c" />
-    <ClCompile Include="..\3rd\zstd\lib\common\zstd_common.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\fse_compress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\hist.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\huf_compress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstdmt_compress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_compress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_compress_literals.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_compress_sequences.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_double_fast.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_fast.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_lazy.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_ldm.c" />
-    <ClCompile Include="..\3rd\zstd\lib\compress\zstd_opt.c" />
-    <ClCompile Include="..\3rd\zstd\lib\decompress\huf_decompress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_ddict.c" />
-    <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_decompress.c" />
-    <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_decompress_block.c" />
-    <ClCompile Include="..\src\engine\EventSystem\kkEventSystemImpl.cpp" />
-    <ClCompile Include="..\src\engine\FileSystem\kkFileSystemCommon.cpp" />
-    <ClCompile Include="..\src\engine\FileSystem\kkFileSystemWin32.cpp" />
-    <ClCompile Include="..\src\engine\FileSystem\kkFileWin32.cpp" />
-    <ClCompile Include="..\src\engine\FileSystem\kkXMLDocumentImpl.cpp" />
-    <ClCompile Include="..\src\engine\FileSystem\kkXMLImpl.cpp" />
-    <ClCompile Include="..\src\engine\GraphicsSystem\kkGraphicsSystemImpl.cpp" />
-    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGL.cpp" />
-    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLModel.cpp" />
-    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLShader.cpp" />
-    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLTexture.cpp" />
-    <ClCompile Include="..\src\engine\GraphicsSystem\kkOpenGLWin32.cpp" />
-    <ClCompile Include="..\src\engine\InputSystem\kkInputSystemImpl.cpp" />
-    <ClCompile Include="..\src\engine\kkEasyFunctionsImpl.cpp" />
-    <ClCompile Include="..\src\engine\MainSystem\kkMainSystemImpl.cpp" />
-    <ClCompile Include="..\src\engine\MainSystem\kkMainSystemImpl_Win32.cpp" />
-    <ClCompile Include="..\src\engine\main_kkrooo.cpp" />
-    <ClCompile Include="..\src\engine\Memory\kkMemory.cpp" />
-    <ClCompile Include="..\src\engine\Memory\kkMemorySystemImpl.cpp" />
-    <ClCompile Include="..\src\engine\SceneSystem\kkCameraImpl.cpp" />
-    <ClCompile Include="..\src\engine\SceneSystem\kkSceneSystemImpl.cpp" />
-    <ClCompile Include="..\src\engine\Window\kkWindowWin32.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\engine\EventSystem\kkEventSystemImpl.h" />
-    <ClInclude Include="..\src\engine\FileSystem\kkFileSystemCommon.h" />
-    <ClInclude Include="..\src\engine\FileSystem\kkFileSystemWin32.h" />
-    <ClInclude Include="..\src\engine\FileSystem\kkFileWin32.h" />
-    <ClInclude Include="..\src\engine\FileSystem\kkXMLDocumentImpl.h" />
-    <ClInclude Include="..\src\engine\InputSystem\kkInputSystemImpl.h" />
-    <ClInclude Include="..\src\engine\Memory\kkMemorySystemImpl.h" />
-    <ClInclude Include="..\src\engine\SceneSystem\kkCameraImpl.h" />
-    <ClInclude Include="..\src\engine\SceneSystem\kkSceneSystemImpl.h" />
-    <ClInclude Include="..\src\engine\Window\kkWindowWin32.h" />
+    <ClCompile Include="import.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{27D538AC-C32F-43E4-988D-15A9C42A9975}</ProjectGuid>
-    <RootNamespace>kkrooo</RootNamespace>
+    <ProjectGuid>{27D53FFC-AAAA-A3E4-918D-15A9C42A9975}</ProjectGuid>
+    <RootNamespace>FI_tiff</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>FI_tiff</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -125,7 +69,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Finale_Intel|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 19.1</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -188,77 +132,83 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>$(ProjectName)_debug</TargetName>
+    <TargetExt>.kkp</TargetExt>
+    <TargetName>FI_tiff</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>../bin64/</OutDir>
-    <TargetName>$(ProjectName).engine_debug</TargetName>
+    <OutDir>../../bin64/stdplugins/</OutDir>
+    <TargetName>FI_tiff</TargetName>
     <IntDir>$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.kkp</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.kkp</TargetExt>
+    <TargetName>FI_tiff</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Finale|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../bin32/</OutDir>
-    <TargetName>$(ProjectName).engine</TargetName>
+    <TargetExt>.kkp</TargetExt>
+    <TargetName>FI_tiff</TargetName>
+    <OutDir>../../bin32/stdplugins/</OutDir>
     <IntDir>$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Finale_Intel|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.kkp</TargetExt>
+    <TargetName>FI_tiff</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../bin64/</OutDir>
-    <TargetName>$(ProjectName).engine</TargetName>
+    <OutDir>../../bin64/stdplugins/</OutDir>
+    <TargetName>FI_tiff</TargetName>
     <IntDir>$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.kkp</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Finale|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../bin64/</OutDir>
-    <TargetName>$(ProjectName).engine</TargetName>
+    <OutDir>../../bin64/stdplugins/</OutDir>
+    <TargetName>FI_tiff</TargetName>
     <IntDir>$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.kkp</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Finale_Intel|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../bin64_I/</OutDir>
-    <TargetName>$(ProjectName).engine</TargetName>
+    <OutDir>../../bin64_I/stdplugins/</OutDir>
+    <TargetName>FI_tiff</TargetName>
     <IntDir>$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.kkp</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;;..\..\3rd\krgui\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;..\..\3rd\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>../lib/x64/$(TargetName).lib</ImportLibrary>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalLibraryDirectories>..\..\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -267,12 +217,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;;..\..\3rd\krgui\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -280,8 +230,6 @@
       <OptimizeReferences>false</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Finale|Win32'">
@@ -290,15 +238,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>MaxSpeed</Optimization>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;;..\..\3rd\krgui\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -306,9 +253,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>../lib/x86/$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Finale_Intel|Win32'">
@@ -317,21 +261,21 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;;..\..\3rd\krgui\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>false</EnableCOMDATFolding>
-      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -340,14 +284,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;..\..\3rd\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -355,9 +297,9 @@
       <OptimizeReferences>false</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <ImportLibrary>../lib/x64/$(TargetName).lib</ImportLibrary>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalLibraryDirectories>..\..\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Finale|x64'">
@@ -366,15 +308,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;..\..\3rd\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -382,9 +324,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <ImportLibrary>../lib/x64/$(TargetName).lib</ImportLibrary>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalLibraryDirectories>..\..\lib\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Finale_Intel|x64'">
@@ -393,21 +335,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);KK_LIBRARY;WIN32</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\zstd\lib\;..\3rd\zstd\lib\common\</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\inc\;..\..\3rd\FreeImage\Source\;..\..\3rd\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <EnableMatrixMultiplyLibraryCall>Yes</EnableMatrixMultiplyLibraryCall>
-      <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
-      <DebugInformationFormat>None</DebugInformationFormat>
-      <StringPooling>true</StringPooling>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <StructMemberAlignment>8Bytes</StructMemberAlignment>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -415,9 +350,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <ImportLibrary>../lib/x64_I/$(TargetName).lib</ImportLibrary>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalLibraryDirectories>..\..\lib\x64_I\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

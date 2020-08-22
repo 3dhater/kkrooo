@@ -99,7 +99,7 @@ kkFileWin32::~kkFileWin32()
 u32	kkFileWin32::write( u8 * data, u32 size )
 {
 
-	KK_ASSERT(m_desiredAccess & GENERIC_WRITE);
+	assert(m_desiredAccess & GENERIC_WRITE);
 
 	if( !m_handle )
 	{
@@ -122,7 +122,7 @@ u32	kkFileWin32::write( u8 * data, u32 size )
 
 void	kkFileWin32::write( const kkStringA& string )
 {
-	KK_ASSERT( m_isTextFile );
+	assert( m_isTextFile );
 	if( !m_handle )
 	{
 		fprintf( stderr, "Can not write text to file. m_handle == nullptr\n" );
@@ -139,7 +139,7 @@ void	kkFileWin32::write( const kkStringA& string )
 
 void	kkFileWin32::write( const kkString& string )
 {
-	KK_ASSERT( m_isTextFile );
+	assert( m_isTextFile );
 	if( !m_handle )
 	{
 		fprintf( stderr, "Can not write text to file. m_handle == nullptr\n" );
@@ -156,7 +156,7 @@ void	kkFileWin32::write( const kkString& string )
 
 void	kkFileWin32::write( const kkString32& string )
 {
-	KK_ASSERT( m_isTextFile );
+	assert( m_isTextFile );
 	if( !m_handle )
 	{
 		fprintf( stderr, "Can not write text to file. m_handle == nullptr\n" );
@@ -182,7 +182,7 @@ void	kkFileWin32::flush()
 
 u64	kkFileWin32::read( u8 * data, u64 size )
 {
-	KK_ASSERT( m_desiredAccess & GENERIC_READ );
+	assert( m_desiredAccess & GENERIC_READ );
 	if( m_handle )
 	{
 		DWORD readBytesNum = 0;

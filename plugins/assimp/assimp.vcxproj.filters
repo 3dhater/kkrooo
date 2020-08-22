@@ -1,0 +1,907 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="assimp">
+      <UniqueIdentifier>{e19758d7-d285-48e1-b19e-6fdbc86fa368}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common">
+      <UniqueIdentifier>{9ed29827-65b1-418b-80b6-fe27bef06eec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\CApi">
+      <UniqueIdentifier>{43ae137d-9b0e-4185-974c-68d8b513e621}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\PostProcessing">
+      <UniqueIdentifier>{4bebe12b-c01b-4f46-90c9-83c834d2ac8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Collada">
+      <UniqueIdentifier>{9d9fc1e3-526f-4fc0-8dfc-1c8e3acc1fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Material">
+      <UniqueIdentifier>{27f9618c-316f-40dc-9b30-b92ac96a182b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\X">
+      <UniqueIdentifier>{56c1a052-4352-4ab0-832b-34d5ee992027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\irrXML">
+      <UniqueIdentifier>{8de12013-6dc1-4713-9443-2af56271f22c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Obj">
+      <UniqueIdentifier>{0b9fafbc-739f-47c0-b7a4-1c8dcde20efe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\STL">
+      <UniqueIdentifier>{9a21c9e2-c281-4b4e-86da-44d30f7042b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Ply">
+      <UniqueIdentifier>{f3696e81-e50f-452a-8572-3935cda8ba41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\3DS">
+      <UniqueIdentifier>{f949389b-6890-439a-8729-b908a58a2caa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\glTF">
+      <UniqueIdentifier>{615a8773-1929-4f3b-9f6e-2ff0fd0f7bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\glTF2">
+      <UniqueIdentifier>{fe1f6e2a-a930-4f35-8302-9a3aeb716d99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Assbin">
+      <UniqueIdentifier>{831ebf10-bafd-4f48-b9b1-673f87e7c2a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Assjson">
+      <UniqueIdentifier>{22c1d0e9-9d94-4772-9c73-46b512dc9769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Assxml">
+      <UniqueIdentifier>{223e0519-c0b3-4684-9f16-ddb7945d4be9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\B3D">
+      <UniqueIdentifier>{fec5f848-6b52-4fe1-886c-15ef3224536f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\zip">
+      <UniqueIdentifier>{78fada11-bca6-43bd-b985-17ed180669a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\zlib">
+      <UniqueIdentifier>{a61cc773-1ed8-4bf3-8bf8-2cfd9094dac6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\X3D">
+      <UniqueIdentifier>{3c01a6be-fb0a-438d-8ee5-bfd5e291dcf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\SMD">
+      <UniqueIdentifier>{5a9f0cff-04d9-4233-b024-54f6feef7c82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MD2">
+      <UniqueIdentifier>{f193d702-2d64-4e87-9b40-3dd63845bc6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MD3">
+      <UniqueIdentifier>{37baa3f5-600c-4b52-aeb4-3edd4540afdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MD4">
+      <UniqueIdentifier>{a3ddbcab-b07f-4b8e-abfd-6536c1314c5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MD5">
+      <UniqueIdentifier>{49c14f85-99ef-4ee9-a5e8-3c8c54f2449e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\FBX">
+      <UniqueIdentifier>{149d8ed7-b76c-43b3-bece-a7d77a88c782}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\3MF">
+      <UniqueIdentifier>{84f9f294-889b-4e1e-8846-e61e8455bc13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\AMF">
+      <UniqueIdentifier>{2719ebd3-4fa6-4257-9ee3-b57f60eb8750}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\AC">
+      <UniqueIdentifier>{6a220994-7071-41fa-987f-908b04bc190b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\ASE">
+      <UniqueIdentifier>{404f1c94-2e5c-4fd9-baba-32883e1a84bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MDL">
+      <UniqueIdentifier>{763067cf-9430-433d-a536-68a782b06a50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MDC">
+      <UniqueIdentifier>{60b83cad-b9c8-4eb1-80c7-18b13cea55e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MMD">
+      <UniqueIdentifier>{7b313316-0b76-457d-92a5-2ddc9c47117a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\MS3D">
+      <UniqueIdentifier>{ff77e9a8-ec88-4853-9d82-b52d63c073ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\HMP">
+      <UniqueIdentifier>{ee46e310-9cac-43a7-8a1c-5d17920560ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Irr">
+      <UniqueIdentifier>{c1df1ee7-6770-4d7b-bae5-618984c91a56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\LWO">
+      <UniqueIdentifier>{176e57ea-778d-47a6-b7c2-b51243bca65d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\LWS">
+      <UniqueIdentifier>{1a8f3917-14df-4d62-a953-6aada07cd043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\DXF">
+      <UniqueIdentifier>{d9091c84-e1bb-4f28-bae4-a96ca6c75a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\COB">
+      <UniqueIdentifier>{6d5cc6dc-c4d0-44d8-9832-fc4a4cc4fde1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\C4D">
+      <UniqueIdentifier>{4413ad4e-6d26-41bb-ba99-2224f002a3a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\BVH">
+      <UniqueIdentifier>{e219e418-2f8c-4ad3-9d5e-0582acd9cd5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Blender">
+      <UniqueIdentifier>{e36f6ee5-9626-4c21-a8fd-93c2ec30a307}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\poly2tri">
+      <UniqueIdentifier>{d688d3fc-93a7-405d-b998-a9de0e905568}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\NFF">
+      <UniqueIdentifier>{9d7c9edd-2dc1-4d31-9ba4-b3ee03f85c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\NDO">
+      <UniqueIdentifier>{eb63c71f-dcfd-48c2-8518-9102a5d36527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Raw">
+      <UniqueIdentifier>{9902c687-ef38-4e87-9a48-684e7b258555}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\SIB">
+      <UniqueIdentifier>{f638decf-2a36-416c-afe1-653bc22fa54a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Q3BSP">
+      <UniqueIdentifier>{5e436b98-b634-4371-a00d-483762815c60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\OFF">
+      <UniqueIdentifier>{dda43a95-23ac-45dd-ad28-162584942f40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Ogre">
+      <UniqueIdentifier>{c152768c-7cfc-4fd8-8f7d-7ec0d924388d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\OpenGEX">
+      <UniqueIdentifier>{8c1c5b60-2f3f-4355-b9a3-5827cbcde32f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Q3D">
+      <UniqueIdentifier>{43d070d3-35b6-492d-862c-0a4d68782b16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Terragen">
+      <UniqueIdentifier>{c8bb0dfe-360c-4743-8338-bc5b4b46621a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\Unreal">
+      <UniqueIdentifier>{4988824c-9888-4a92-b36e-74570b73c2f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\CSM">
+      <UniqueIdentifier>{64a2ae83-ff35-495f-9aee-2b2ae41d94ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\IFC">
+      <UniqueIdentifier>{8b71c295-45bd-492a-8fac-0203ecb0dc09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\Common\XGL">
+      <UniqueIdentifier>{58036213-6d4e-4d29-abbf-cb7e567139d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\openddlparser">
+      <UniqueIdentifier>{9374c548-7d54-4c0e-99bb-4de40cb10279}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assimp\unzip">
+      <UniqueIdentifier>{c30803ad-27a7-497d-98e7-a051d5ab3356}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\ScenePrivate.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\simd.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\SplitByBoneCountProcess.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\StdOStreamLogStream.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\TargetAnimation.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\VertexTriangleAdjacency.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\Win32DebugLogStream.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\assbin_chunks.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\BaseProcess.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\DefaultProgressHandler.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\FileLogStream.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\FileSystemFilter.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\IFF.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\Importer.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\PolyTools.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rd\assimp\code\Common\ScenePreprocessor.h">
+      <Filter>assimp\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\SGSpatialSort.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\simd.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\SkeletonMeshBuilder.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\SpatialSort.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\SplitByBoneCountProcess.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\StandardShapes.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\Subdivision.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\TargetAnimation.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\Version.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\VertexTriangleAdjacency.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\ZipArchiveIOSystem.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\Assimp.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\BaseImporter.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\BaseProcess.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\Bitmap.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\CreateAnimMesh.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\DefaultIOStream.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\DefaultIOSystem.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\DefaultLogger.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\Exporter.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\Importer.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\ImporterRegistry.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\PostStepRegistry.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\RemoveComments.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\scene.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\SceneCombiner.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Common\ScenePreprocessor.cpp">
+      <Filter>assimp\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\CApi\CInterfaceIOWrapper.cpp">
+      <Filter>assimp\Common\CApi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\CApi\AssimpCExport.cpp">
+      <Filter>assimp\Common\CApi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\LimitBoneWeightsProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\MakeVerboseFormat.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\OptimizeGraph.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\OptimizeMeshes.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\PretransformVertices.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\ProcessHelper.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\RemoveRedundantMaterials.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\RemoveVCProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\ScaleProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\SortByPTypeProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\SplitLargeMeshes.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\TextureTransform.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\TriangulateProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\ValidateDataStructure.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\CalcTangentsProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\ComputeUVMappingProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\ConvertToLHProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\DeboneProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\DropFaceNormalsProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\EmbedTexturesProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\FindDegenerates.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\FindInstancesProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\FindInvalidDataProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\FixNormalsStep.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\GenBoundingBoxesProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\GenFaceNormalsProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\GenVertexNormalsProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\ImproveCacheLocality.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\PostProcessing\JoinVerticesProcess.cpp">
+      <Filter>assimp\Common\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Collada\ColladaLoader.cpp">
+      <Filter>assimp\Common\Collada</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Collada\ColladaParser.cpp">
+      <Filter>assimp\Common\Collada</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Collada\ColladaExporter.cpp">
+      <Filter>assimp\Common\Collada</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Material\MaterialSystem.cpp">
+      <Filter>assimp\Common\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X\XFileImporter.cpp">
+      <Filter>assimp\Common\X</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X\XFileParser.cpp">
+      <Filter>assimp\Common\X</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X\XFileExporter.cpp">
+      <Filter>assimp\Common\X</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\irrXML\irrXML.cpp">
+      <Filter>assimp\irrXML</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Obj\ObjFileImporter.cpp">
+      <Filter>assimp\Common\Obj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Obj\ObjFileMtlImporter.cpp">
+      <Filter>assimp\Common\Obj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Obj\ObjFileParser.cpp">
+      <Filter>assimp\Common\Obj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Obj\ObjExporter.cpp">
+      <Filter>assimp\Common\Obj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\STL\STLLoader.cpp">
+      <Filter>assimp\Common\STL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\STL\STLExporter.cpp">
+      <Filter>assimp\Common\STL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ply\PlyLoader.cpp">
+      <Filter>assimp\Common\Ply</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ply\PlyParser.cpp">
+      <Filter>assimp\Common\Ply</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ply\PlyExporter.cpp">
+      <Filter>assimp\Common\Ply</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\3DS\3DSExporter.cpp">
+      <Filter>assimp\Common\3DS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\3DS\3DSLoader.cpp">
+      <Filter>assimp\Common\3DS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\3DS\3DSConverter.cpp">
+      <Filter>assimp\Common\3DS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\glTF\glTFExporter.cpp">
+      <Filter>assimp\Common\glTF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\glTF\glTFImporter.cpp">
+      <Filter>assimp\Common\glTF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\glTF\glTFCommon.cpp">
+      <Filter>assimp\Common\glTF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\glTF2\glTF2Importer.cpp">
+      <Filter>assimp\Common\glTF2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\glTF2\glTF2Exporter.cpp">
+      <Filter>assimp\Common\glTF2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Assbin\AssbinExporter.cpp">
+      <Filter>assimp\Common\Assbin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Assbin\AssbinLoader.cpp">
+      <Filter>assimp\Common\Assbin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Assjson\json_exporter.cpp">
+      <Filter>assimp\Common\Assjson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Assjson\mesh_splitter.cpp">
+      <Filter>assimp\Common\Assjson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Assjson\cencode.c">
+      <Filter>assimp\Common\Assjson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Assxml\AssxmlExporter.cpp">
+      <Filter>assimp\Common\Assxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\B3D\B3DImporter.cpp">
+      <Filter>assimp\Common\B3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zip\src\zip.c">
+      <Filter>assimp\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\gzclose.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\gzlib.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\gzread.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\gzwrite.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\infback.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\inffast.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\inflate.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\inftrees.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\trees.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\uncompr.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\zutil.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\adler32.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\compress.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\crc32.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\zlib\deflate.c">
+      <Filter>assimp\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DVocabulary.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\FIReader.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DExporter.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Geometry2D.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Geometry3D.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Group.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Light.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Metadata.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Networking.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Postprocess.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Rendering.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Shape.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\X3D\X3DImporter_Texturing.cpp">
+      <Filter>assimp\Common\X3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\SMD\SMDLoader.cpp">
+      <Filter>assimp\Common\SMD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MD2\MD2Loader.cpp">
+      <Filter>assimp\Common\MD2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MD3\MD3Loader.cpp">
+      <Filter>assimp\Common\MD3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MD5\MD5Loader.cpp">
+      <Filter>assimp\Common\MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MD5\MD5Parser.cpp">
+      <Filter>assimp\Common\MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXImporter.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXMaterial.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXMeshGeometry.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXModel.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXNodeAttribute.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXParser.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXProperties.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXTokenizer.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXUtil.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXAnimation.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXBinaryTokenizer.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXConverter.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXDeformer.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXDocument.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXDocumentUtil.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXExporter.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXExportNode.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\FBX\FBXExportProperty.cpp">
+      <Filter>assimp\Common\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\3MF\D3MFImporter.cpp">
+      <Filter>assimp\Common\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\3MF\D3MFOpcPackage.cpp">
+      <Filter>assimp\Common\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\3MF\D3MFExporter.cpp">
+      <Filter>assimp\Common\3MF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\AMF\AMFImporter_Material.cpp">
+      <Filter>assimp\Common\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\AMF\AMFImporter_Postprocess.cpp">
+      <Filter>assimp\Common\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\AMF\AMFImporter.cpp">
+      <Filter>assimp\Common\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\AMF\AMFImporter_Geometry.cpp">
+      <Filter>assimp\Common\AMF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\AC\ACLoader.cpp">
+      <Filter>assimp\Common\AC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\ASE\ASELoader.cpp">
+      <Filter>assimp\Common\ASE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\ASE\ASEParser.cpp">
+      <Filter>assimp\Common\ASE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MDL\MDLMaterialLoader.cpp">
+      <Filter>assimp\Common\MDL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MDL\MDLLoader.cpp">
+      <Filter>assimp\Common\MDL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MDC\MDCLoader.cpp">
+      <Filter>assimp\Common\MDC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MMD\MMDPmxParser.cpp">
+      <Filter>assimp\Common\MMD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MMD\MMDImporter.cpp">
+      <Filter>assimp\Common\MMD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\MS3D\MS3DLoader.cpp">
+      <Filter>assimp\Common\MS3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\HMP\HMPLoader.cpp">
+      <Filter>assimp\Common\HMP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Irr\IRRMeshLoader.cpp">
+      <Filter>assimp\Common\Irr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Irr\IRRShared.cpp">
+      <Filter>assimp\Common\Irr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Irr\IRRLoader.cpp">
+      <Filter>assimp\Common\Irr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\LWO\LWOLoader.cpp">
+      <Filter>assimp\Common\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\LWO\LWOMaterial.cpp">
+      <Filter>assimp\Common\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\LWO\LWOAnimation.cpp">
+      <Filter>assimp\Common\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\LWO\LWOBLoader.cpp">
+      <Filter>assimp\Common\LWO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\LWS\LWSLoader.cpp">
+      <Filter>assimp\Common\LWS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\DXF\DXFLoader.cpp">
+      <Filter>assimp\Common\DXF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\COB\COBLoader.cpp">
+      <Filter>assimp\Common\COB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\C4D\C4DImporter.cpp">
+      <Filter>assimp\Common\C4D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\BVH\BVHLoader.cpp">
+      <Filter>assimp\Common\BVH</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderLoader.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderModifier.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderScene.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderTessellator.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderBMesh.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderCustomData.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Blender\BlenderDNA.cpp">
+      <Filter>assimp\Common\Blender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\poly2tri\poly2tri\sweep\cdt.cc">
+      <Filter>assimp\poly2tri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\poly2tri\poly2tri\sweep\sweep.cc">
+      <Filter>assimp\poly2tri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\poly2tri\poly2tri\sweep\sweep_context.cc">
+      <Filter>assimp\poly2tri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\poly2tri\poly2tri\sweep\advancing_front.cc">
+      <Filter>assimp\poly2tri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\NFF\NFFLoader.cpp">
+      <Filter>assimp\Common\NFF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\NDO\NDOLoader.cpp">
+      <Filter>assimp\Common\NDO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Raw\RawLoader.cpp">
+      <Filter>assimp\Common\Raw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\SIB\SIBImporter.cpp">
+      <Filter>assimp\Common\SIB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Q3BSP\Q3BSPFileImporter.cpp">
+      <Filter>assimp\Common\Q3BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Q3BSP\Q3BSPFileParser.cpp">
+      <Filter>assimp\Common\Q3BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\OFF\OFFLoader.cpp">
+      <Filter>assimp\Common\OFF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ogre\OgreMaterial.cpp">
+      <Filter>assimp\Common\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ogre\OgreStructs.cpp">
+      <Filter>assimp\Common\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ogre\OgreXmlSerializer.cpp">
+      <Filter>assimp\Common\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ogre\OgreBinarySerializer.cpp">
+      <Filter>assimp\Common\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Ogre\OgreImporter.cpp">
+      <Filter>assimp\Common\Ogre</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\OpenGEX\OpenGEXImporter.cpp">
+      <Filter>assimp\Common\OpenGEX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\OpenGEX\OpenGEXExporter.cpp">
+      <Filter>assimp\Common\OpenGEX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Q3D\Q3DLoader.cpp">
+      <Filter>assimp\Common\Q3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Terragen\TerragenLoader.cpp">
+      <Filter>assimp\Common\Terragen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Unreal\UnrealLoader.cpp">
+      <Filter>assimp\Common\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\CSM\CSMLoader.cpp">
+      <Filter>assimp\Common\CSM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCProfile.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCReaderGen_4.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCReaderGen1_2x3.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCReaderGen2_2x3.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCUtil.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCBoolean.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCCurve.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCGeometry.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCLoader.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCMaterial.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\Importer\IFC\IFCOpenings.cpp">
+      <Filter>assimp\Common\IFC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\code\XGL\XGLLoader.cpp">
+      <Filter>assimp\Common\XGL</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="..\..\3rd\assimp\contrib\poly2tri\poly2tri\common\shapes.cc">
+      <Filter>assimp\poly2tri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\openddlparser\code\OpenDDLCommon.cpp">
+      <Filter>assimp\openddlparser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\openddlparser\code\OpenDDLExport.cpp">
+      <Filter>assimp\openddlparser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\openddlparser\code\OpenDDLParser.cpp">
+      <Filter>assimp\openddlparser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\openddlparser\code\OpenDDLStream.cpp">
+      <Filter>assimp\openddlparser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\openddlparser\code\Value.cpp">
+      <Filter>assimp\openddlparser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\openddlparser\code\DDLNode.cpp">
+      <Filter>assimp\openddlparser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\unzip\ioapi.c">
+      <Filter>assimp\unzip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rd\assimp\contrib\unzip\unzip.c">
+      <Filter>assimp\unzip</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

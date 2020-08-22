@@ -401,13 +401,13 @@ public:
 
 	f32&       operator[]( u32 i )
 	{
-		KK_ASSERT(i<4);
+		assert(i<4);
 		return this->_f32[i];
 	}
 		
 	const f32& operator[]( u32 i ) const 
 	{ 
-		KK_ASSERT(i<4);
+		assert(i<4);
 		return this->_f32[i];
 	}
 

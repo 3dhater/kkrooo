@@ -17,15 +17,4 @@
 #include <cstdio>
 #define KK_PRINT_FAILED	printf( "Failed [%s][%s][%i]:(\n", KK_FILE, KK_FUNCTION, KK_LINE )
 
-
-#ifdef KK_DEBUG
-#define KK_ASSERT(expr) if(!(expr)){ \
-						KK_PRINT_FAILED; \
-						KK_MSGBOX;\
-						KK_DEBUGBREAK;\
-						}
-#else
-#define KK_ASSERT(expr)
-#endif
-
 #endif

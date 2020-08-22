@@ -287,6 +287,7 @@
       <AdditionalIncludeDirectories>..\inc\;..\3rd\gl3w\;..\3rd\imgui\;..\3rd\boost\;..\3rd\OpenCL\include\;..\3rd\krgui\;..\3rd\libpng\;..\3rd\zlib\</AdditionalIncludeDirectories>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -302,7 +303,7 @@
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
-      <AdditionalDependencies>kkrooo.engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kkrooo.engine_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

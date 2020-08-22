@@ -41,7 +41,7 @@ public:
 
 	static void destroy( _type * ptr )
 	{
-		KK_ASSERT(ptr);
+		assert(ptr);
 
 		ptr->~_type();
 		kkMemory::free( ptr );
@@ -61,7 +61,7 @@ _type * kkCreate(Args&&... args)
 template<typename _type>
 void kkDestroy( _type * ptr )
 {
-	KK_ASSERT(ptr);
+	assert(ptr);
 	kkObjectCreator<_type>::destroy(ptr);
 }
 

@@ -578,7 +578,7 @@ void kkOpenGL::setScissor( int x1, int y1, int x2, int y2 )
 
 bool kkOpenGL::createShader( kkShader* out_shader, const char * v, const char * v_main, const char * f, const char * f_main, const char * g, const char * g_main )
 {
-	KK_ASSERT(out_shader!=nullptr);
+	assert(out_shader!=nullptr);
 
 	auto shader_vert = kkOpenGLShader::_createShader(GL_VERTEX_SHADER,v);
 	if(!kkOpenGLShader::_checkShader(shader_vert))
@@ -622,7 +622,7 @@ bool kkOpenGL::createShader( kkShader* out_shader, const char * v, const char * 
 
 void kkOpenGL::drawPoint3D( const kkVector4& p, kkShader * shader )
 {
-	KK_ASSERT(shader!=nullptr);
+	assert(shader!=nullptr);
 
 	glDisable(GL_CULL_FACE);
 	

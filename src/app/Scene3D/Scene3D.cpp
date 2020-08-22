@@ -119,13 +119,13 @@ u32 Scene3D::getNumOfSelectedObjects()
 
 kkScene3DObject* Scene3D::getObjectOnScene( u32 i )
 {
-	KK_ASSERT(i<m_objects.size());
+	assert(i<m_objects.size());
 	return m_objects[i];
 }
 
 kkScene3DObject* Scene3D::getSelectedObject( u32 i )
 {
-	KK_ASSERT(i<m_objects_selected.size());
+	assert(i<m_objects_selected.size());
 	return m_objects_selected[i];
 }
 

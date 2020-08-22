@@ -18,7 +18,7 @@ void*  kkMemory::reallocate( void * p, u64 size )
 
 void   kkMemory::free( void * ptr )
 {
-	KK_ASSERT(ptr);
+	assert(ptr);
 	kkSingleton<kkMemorySystemImpl>::s_instance->free( ptr );
 }
 
@@ -29,7 +29,7 @@ void*  kkMemory::allocateAligned( u64 size, u64 align )
 
 void   kkMemory::freeAligned( void * ptr )
 {
-	KK_ASSERT(ptr);
+	assert(ptr);
 	kkSingleton<kkMemorySystemImpl>::s_instance->freeAligned( ptr );
 }
 

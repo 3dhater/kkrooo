@@ -7,6 +7,7 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
+#include <cassert>
 
 #include "Common/kkConfig.h"
 #include "Common/kkInfo.h"
