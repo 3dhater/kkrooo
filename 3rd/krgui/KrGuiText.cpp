@@ -174,6 +174,15 @@ void Gui::GuiSystem::addText(const char16_t* text, Gui::Style* style)
 	else
 		_checkMouseHover();
 
+	if((m_lastCursorMoveItemId == m_uniqueIdCounter) 
+		|| (m_lastCursorHoverItemId == m_uniqueIdCounter))
+	{
+		if(m_mouseIsLMB_firstClick)
+		{
+			m_pressedItemIdLMB = m_uniqueIdCounter;
+		}
+	}
+
 	m_textColor = style->commonTextColor;
 	m_textColor.w = style->commonTextAlpha;
 

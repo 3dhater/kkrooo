@@ -44,6 +44,8 @@ enum class IconFontSymbol
 	EditVertex,
 	EditEdge,
 	EditFace,
+	CheckBoxCheck,
+	CheckBoxUncheck,
 };
 
 namespace kkrooo

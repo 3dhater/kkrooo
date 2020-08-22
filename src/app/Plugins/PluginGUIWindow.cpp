@@ -4,9 +4,11 @@
 #include "../Application.h"
 
 #include "PluginGUIWindow.h"
+#include "../Functions.h"
 
-//#include "imgui.h"
 #include <sstream>
+
+using namespace Kr;
 
 int PluginGUIWindow::s_windowCounter = 0;
 
@@ -108,7 +110,7 @@ void PluginGUIWindow::Activate()
     m_isActive = true;
     if( m_type == kkPluginGUIWindowType::Export || m_type == kkPluginGUIWindowType::Import )
     {
-        m_app->showImportExportWindow(this, m_size);
+        m_app->showImportExportWindow(this, m_size, m_name.data());
     }
 }
 
@@ -151,6 +153,12 @@ void PluginGUIWindow::Reset()
         kkDestroy(m_guiElements[i]);
     }
     m_guiElements.clear();
+
+    for( auto ptr : m_groupsForDelete )
+    {
+        kkDestroy(ptr);
+    }
+    m_groupsForDelete.clear();
 }
 
 void PluginGUIWindow::SetName( const char16_t* name )
@@ -168,6 +176,20 @@ void PluginGUIWindow::SetSize( const v2i& s )
     m_size = s;
 }
 
+void PluginGUIWindow::BeginGroup(const char16_t* text, bool expanded)
+{
+    if(m_currentGroup)
+        kkDestroy(m_currentGroup);
+    m_currentGroup = kkCreate<PluginGUIWindowElementGroup>();
+    m_currentGroup->m_text = text;
+    m_currentGroup->m_expanded = expanded;
+}
+
+void PluginGUIWindow::EndGroup()
+{
+    m_groupsForDelete.push_back(m_currentGroup);
+    m_currentGroup = nullptr;
+}
 
 kkPluginGUIWindowElement* PluginGUIWindow::AddButton( const char16_t* text, const v2f& size, kkPluginGUICallback f, s32 id, kkPluginGUIParameterType pt )
 {
@@ -178,6 +200,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddButton( const char16_t* text, cons
     e->m_callback = f;
     e->m_id = id;
     e->m_size = size;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }
@@ -188,6 +211,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddNewLine( f32 Y_offset, kkPluginGUI
     e->m_type     = PluginGUIWindowElementType::NewLine;
     e->m_offset1 = Y_offset;
     e->m_paramType = pt;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }
@@ -200,6 +224,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddText( const char16_t* text, u32 co
     e->m_gui_color.makeColor(color_argb);
     e->m_paramType = pt;
     e->m_offset1 = text_Y_offset;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }
@@ -210,6 +235,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddMoveLeftRight( f32 value, kkPlugin
     e->m_type     = PluginGUIWindowElementType::MoveLeftRight;
     e->m_paramType = pt;
     e->m_offset1  = value;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }
@@ -226,6 +252,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddRangeSliderFloat( f32 minimum, f32
     e->m_horizontal = horizontal;
     e->m_speed = speed;
     e->m_callback = cb;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }
@@ -242,6 +269,19 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddRangeSliderInt( s32 minimum, s32 m
     e->m_horizontal = horizontal;
     e->m_speed = speed;
     e->m_callback = cb;
+    e->m_group_ptr = m_currentGroup;
+    m_guiElements.push_back( e );
+    return e;
+}
+
+kkPluginGUIWindowElement* PluginGUIWindow::AddCheckBox( const char16_t* text, bool* ptr, kkPluginGUIParameterType pt)
+{
+    PluginGUIWindowElement * e = kkCreate<PluginGUIWindowElement>();
+    e->m_type     = PluginGUIWindowElementType::CheckBox;
+    e->m_paramType = pt;
+    e->m_checkbox_ptr  = ptr;
+    e->m_text  = text;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }
@@ -256,7 +296,17 @@ void PluginGUIWindow::draw()
         m_app->m_KrGuiSystem->addText(m_name.data());
         m_app->m_KrGuiSystem->newLine();
     }
+    else
+    {
+        Kr::Gui::Style groupStyle;
+        groupStyle.groupBackgroundAlpha = 0.f;
+        groupStyle.groupHoverColor1 = 0x00000000;
+        groupStyle.groupHoverColor2 = 0x00000000;
+        m_app->m_KrGuiSystem->setScrollMultipler(30.f);
+        m_app->m_KrGuiSystem->beginGroup( Kr::Gui::Vec2f(m_size.x,m_size.y), 0, &groupStyle );
+    }
 
+    PluginGUIWindowElementGroup * old_group = nullptr;
     for( auto item : m_guiElements )
     {
         switch (m_app->m_editMode)
@@ -290,6 +340,47 @@ void PluginGUIWindow::draw()
             default: continue;
             }
         break;
+        }
+
+        PluginGUIWindowElementGroup * current_group = item->m_group_ptr;
+        if(current_group != old_group && current_group != nullptr)
+        {
+            auto textFont = m_app->m_KrGuiSystem->getCurrentFont();
+            Kr::Gui::Style expandCollapseButtonStyle;
+            expandCollapseButtonStyle.buttonBackgroundAlpha = 0.f;
+            expandCollapseButtonStyle.buttonTextIdleColor = Kr::Gui::ColorWhite;
+
+            m_app->m_KrGuiSystem->setCurrentFont(m_app->m_iconsFont);
+            m_app->m_KrGuiSystem->newLine(3.f);
+            if(current_group->m_expanded)
+            {
+                if( m_app->m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::CollapseCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
+                {
+                    current_group->m_expanded = false;
+                }
+            }
+            else
+            {
+                if( m_app->m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::ExpandCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
+                {
+                    current_group->m_expanded = true;
+                }
+            }
+            m_app->m_KrGuiSystem->setCurrentFont(textFont);
+            m_app->m_KrGuiSystem->addText(current_group->m_text.data());
+            if(m_app->m_KrGuiSystem->isLastItemPressedOnce())
+            {
+                current_group->m_expanded = current_group->m_expanded ? false : true;
+            }
+            m_app->m_KrGuiSystem->newLine(3.f);
+
+            old_group = current_group;
+        }
+
+        if(current_group)
+        {
+            if(!current_group->m_expanded)
+                continue;
         }
 
         switch( item->m_type )
@@ -348,7 +439,25 @@ void PluginGUIWindow::draw()
                     }
                 }
             }break;
+            case PluginGUIWindowElementType::CheckBox:
+            {
+                if(item->m_checkbox_ptr)
+                {
+                    Gui::Style checkBoxStyle;
+                    checkBoxStyle.iconFont = m_app->m_iconsFont;
+                    checkBoxStyle.checkboxCheckSymbol = kkrooo::getIconFontChar(IconFontSymbol::CheckBoxCheck);
+                    checkBoxStyle.checkboxUncheckSymbol = kkrooo::getIconFontChar(IconFontSymbol::CheckBoxUncheck);
+                    checkBoxStyle.buttonTextIdleColor = Gui::ColorWhite;
+                    checkBoxStyle.buttonTextPositionAdd.y += 3.f;
+                    m_app->m_KrGuiSystem->addCheckBox( item->m_checkbox_ptr, &checkBoxStyle, item->m_text.data() );
+                }
+            }break;
         }
+    }
+    
+    if( m_type == kkPluginGUIWindowType::Import || m_type == kkPluginGUIWindowType::Export )
+    {
+        m_app->m_KrGuiSystem->endGroup();
     }
 
     //if( is_windowBegin || is_params )

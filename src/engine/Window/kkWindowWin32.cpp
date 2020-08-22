@@ -45,6 +45,7 @@ void kkWindowWin32::resizeWindow(const v2i& size)
 	MoveWindow(m_hWnd, m_window_rect.x, m_window_rect.y, size.x, size.y, TRUE);
 	m_window_rect.z = m_window_rect.x + size.x;
 	m_window_rect.w = m_window_rect.y + size.y;
+	m_creation_size = size;
 }
 
 void kkWindowWin32::hide()
@@ -75,6 +76,8 @@ bool kkWindowWin32::init( u32 i, u32 _style, const v4i& rect, kkWindow* parent, 
 	m_state = state;
 	m_style = _style;
 	m_window_rect = rect;
+
+	m_creation_size = rect.getWidthAndHeight();
 
 	DWORD style = WS_BORDER | WS_CAPTION | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU | WS_MINIMIZEBOX; // DWORD - ýòî unsigned long
 
@@ -367,8 +370,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if( pD->m_style & kk::window::style::size_limit )
 			{
 				LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
-				lpMMI->ptMinTrackSize.x = 800;
-				lpMMI->ptMinTrackSize.y = 600;
+				lpMMI->ptMinTrackSize.x = pD->m_creation_size.x;
+				lpMMI->ptMinTrackSize.y = pD->m_creation_size.y;
 			}
 		}
 	}break;

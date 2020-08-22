@@ -40,6 +40,8 @@ namespace kkrooo
 		case IconFontSymbol::EditUV: return u"3";
 		case IconFontSymbol::ExpandCategory: return u"4";
 		case IconFontSymbol::CollapseCategory: return u"5";
+		case IconFontSymbol::CheckBoxCheck: return u"6";
+		case IconFontSymbol::CheckBoxUncheck: return u"7";
 
 		case IconFontSymbol::Cross1: return u"A";
 		case IconFontSymbol::Add1:   return u"B";

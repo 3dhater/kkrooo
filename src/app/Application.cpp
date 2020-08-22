@@ -335,7 +335,7 @@ void Application::init()
     _init_renderWindow();
 
     m_importExportWindow = m_main_system->createWindow(  
-        kk::window::style::resize | kk::window::style::center | kk::window::style::maximize, 
+        kk::window::style::size_limit, 
         v4i(0,0,100,100), 
         kk::window::state::hide,
         m_mainWindow.ptr(), 
@@ -2389,8 +2389,9 @@ bool Application::isWindowActive(E_WINDOW_ID id)
     return m_activeOSWindow == id;
 }
 
-void Application::showImportExportWindow(PluginGUIWindow* w, const v2i& size)
+void Application::showImportExportWindow(PluginGUIWindow* w, const v2i& size, const char16_t* title)
 {
+    m_importExportWindow->setWindowText(title);
     m_importExportWindow->resizeWindow(size);
     m_importExportWindow->moveWindow(v2i(50,50));
     m_importExportWindow->show();

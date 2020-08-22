@@ -226,7 +226,6 @@ namespace Kr
 			int m_lastCursorMoveItemId  = 0; // if mouse move in area of item
 			int m_lastDisabledItemId    = 0;
 			int m_lastItemId            = 0;
-			int m_lastGroupExpColButtonPressedId            = 0;
 
 			int m_currentGroupInRectId        = 0;
 			int m_lastGroupInRectId           = 0;
@@ -482,6 +481,7 @@ namespace Kr
 			bool isLastItemCursorHover();
 			bool isLastItemCursorMove();
 			bool isLastItemPressed();
+			bool isLastItemPressedOnce();
 			bool isLastItemDisabled();
 			bool isLastGroupExpColButtonPressed();
 

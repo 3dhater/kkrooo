@@ -116,67 +116,32 @@ extern "C"
 
 
 		// заполнение окон
-		// для демонстрации
-		// лучше не делать вложенные tabbar и treenode
-		/*importData->import_window->tabbarBegin("tabbar");
-			importData->import_window->tabbarItemBegin("First");
-				importData->import_window->addButton("button1",0);
-				importData->import_window->addButton("button2",0);
-				importData->import_window->addButton("button3",0);
-			importData->import_window->tabbarItemEnd();
-			importData->import_window->tabbarItemBegin("Second");
-				importData->import_window->addButton("Same line 1",0);
-				importData->import_window->sameLine(0.f);
-				importData->import_window->addSmallButton("Same line 2",0);
-				importData->import_window->addButton("With offset",0);
-				importData->import_window->sameLine(140.f);
-				importData->import_window->addButton("this",0);
-			importData->import_window->tabbarItemEnd();
-		importData->import_window->tabbarEnd();
-		importData->import_window->addSeparator(); // простая линия
-		importData->import_window->treeBegin("opened tree",true);
-			enum arrowButtonDir
-			{
-				arrowButtonDir_None    = -1,
-				arrowButtonDir_Left    = 0,
-				arrowButtonDir_Right   = 1,
-				arrowButtonDir_Up      = 2,
-				arrowButtonDir_Down    = 3,
-			};
-			importData->import_window->addArrowButton("ab1",arrowButtonDir::arrowButtonDir_None,0);
-			importData->import_window->sameLine(0.f);
-			importData->import_window->addArrowButton("ab2",arrowButtonDir::arrowButtonDir_Left,0);
-			importData->import_window->sameLine(0.f);
-			importData->import_window->addArrowButton("ab3",arrowButtonDir::arrowButtonDir_Right,0);
-			importData->import_window->sameLine(0.f);
-			importData->import_window->addArrowButton("ab4",arrowButtonDir::arrowButtonDir_Up,0);
-			importData->import_window->sameLine(0.f);
-			importData->import_window->addArrowButton("ab5",arrowButtonDir::arrowButtonDir_Down,0);
-		importData->import_window->treeEnd();
-		importData->import_window->treeBegin("closed tree",false);
-			static bool check_box_1 = true;
-			static bool check_box_2 = false;
-			importData->import_window->addCheckbox("Checkbox1",&check_box_1);
-			importData->import_window->addCheckbox("Checkbox2",&check_box_2);
-			static int radio_0_0 = 0;
-			importData->import_window->addRadioButton("R1,",&radio_0_0, 0);
-			importData->import_window->addRadioButton("R2,",&radio_0_0, 1);
-			importData->import_window->addRadioButton("R3,",&radio_0_0, 2);
-			importData->import_window->addSeparator();
-			static int radio_0_1 = 0;
-			importData->import_window->addRadioButton("R11,",&radio_0_1, 0);
-			importData->import_window->addRadioButton("R12,",&radio_0_1, 1);
-			importData->import_window->addRadioButton("R13,",&radio_0_1, 2);
-			importData->import_window->addText("text");
-		importData->import_window->treeEnd();
-		importData->import_window->childBegin("child1",v2f(150,50),true);
-			importData->import_window->addText("Child window");
-		importData->import_window->childEnd();
-		importData->import_window->sameLine();
-		importData->import_window->childBegin("child2",v2f(150,50),true);
-			static float progress = 0.5f;
-			importData->import_window->addProgressbar(&progress);
-		importData->import_window->childEnd();*/
+		
+		
+		importData->import_window->BeginGroup(u"Common", true);
+		importData->import_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddCheckBox(u"Import materials",&importData->option_import_materials, kkPluginGUIParameterType::Object);
+		importData->import_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddCheckBox(u"Triangulate",&importData->option_triangulate, kkPluginGUIParameterType::Object);
+		importData->import_window->EndGroup();
+
+		importData->import_window->BeginGroup(u"Fix", true);
+		importData->import_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddCheckBox(u"Flip normals",&importData->fix_flip_normals, kkPluginGUIParameterType::Object);
+		importData->import_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddCheckBox(u"Generate normals",&importData->fix_generate_normals, kkPluginGUIParameterType::Object);
+		importData->import_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddCheckBox(u"Generate flat normals",&importData->fix_generate_flat_normals, kkPluginGUIParameterType::Object);
+		importData->import_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->import_window->AddCheckBox(u"Z Up",&importData->fix_z_up, kkPluginGUIParameterType::Object);
+		importData->import_window->EndGroup();
+
 
 		/*importData->import_window->treeBegin("Common",true);
 		importData->import_window->addCheckbox("Import materials",&importData->option_import_materials);

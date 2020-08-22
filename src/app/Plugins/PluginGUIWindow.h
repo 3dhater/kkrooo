@@ -15,6 +15,13 @@ enum class PluginGUIWindowElementType
 	MoveLeftRight,
 	RangeSlider,
 	RangeSliderInteger,
+	CheckBox,
+};
+
+struct PluginGUIWindowElementGroup
+{
+	kkString m_text;
+	bool m_expanded = true;
 };
 
 class PluginGUIWindowElement : public kkPluginGUIWindowElement
@@ -52,6 +59,10 @@ public:
 	f32 m_offset1 = 0.f;
 	f32 m_speed = 0.f;
 	Kr::Gui::Vec4f m_gui_color;
+
+	bool * m_checkbox_ptr = nullptr;
+
+	PluginGUIWindowElementGroup* m_group_ptr = nullptr;
 };
 
 class Application;
@@ -76,6 +87,9 @@ class PluginGUIWindow : public kkPluginGUIWindow
 	kkPluginGUICallback m_onActivate = nullptr;
 
 	void * m_userData = nullptr;
+	
+	PluginGUIWindowElementGroup* m_currentGroup = nullptr;
+	std::vector<PluginGUIWindowElementGroup*> m_groupsForDelete;
 
 	static int s_windowCounter;
 
@@ -97,7 +111,7 @@ public:
 	
 	void SetOnOK( kkPluginGUICallback );
 	void SetOnActivate( kkPluginGUICallback );
-	//void setOnOKPython( PyObject* );
+	
 
 	kkPluginGUIWindowElement* AddButton( const char16_t* text, const v2f& size, kkPluginGUICallback, s32 id, kkPluginGUIParameterType pt );
 	kkPluginGUIWindowElement* AddNewLine( f32 Y_offset, kkPluginGUIParameterType pt);
@@ -105,31 +119,13 @@ public:
 	kkPluginGUIWindowElement* AddMoveLeftRight( f32 value, kkPluginGUIParameterType pt);
 	kkPluginGUIWindowElement* AddRangeSliderFloat( f32 minimum, f32 maximum, f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt);
 	kkPluginGUIWindowElement* AddRangeSliderInt( s32 minimum, s32 maximum, s32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt);
+	kkPluginGUIWindowElement* AddCheckBox( const char16_t* text, bool* ptr, kkPluginGUIParameterType pt);
 
-	/*kkPluginGUIWindowElement* addDummy(float x, float y);
-	kkPluginGUIWindowElement* addSmallButton( const char* label, kkPluginGUICallback, s32 id );
-	kkPluginGUIWindowElement* addArrowButton( const char* str_id, int dir, kkPluginGUICallback, s32 id );
-	kkPluginGUIWindowElement* addCheckbox(const char* label, bool* v);
-	kkPluginGUIWindowElement* addRadioButton(const char* label, int* v, int v_button);
-	kkPluginGUIWindowElement* addSeparator();
-	kkPluginGUIWindowElement* addText(const char* text);
-	kkPluginGUIWindowElement* sameLine( float offset = 0.f );
-	kkPluginGUIWindowElement* treeBegin(const char* name, bool open);
-	kkPluginGUIWindowElement* treeEnd();
-	kkPluginGUIWindowElement* addProgressbar(float* v);
-	kkPluginGUIWindowElement* childBegin(const char* name, const v2f& size, bool borders );
-	kkPluginGUIWindowElement* childEnd();
-	kkPluginGUIWindowElement* tabbarBegin(const char* name);
-	kkPluginGUIWindowElement* tabbarEnd();
-	kkPluginGUIWindowElement* tabbarItemBegin(const char* name);
-	kkPluginGUIWindowElement* tabbarItemEnd();
-	kkPluginGUIWindowElement* addDragFloat( float width,const char* label, float* v, kkPluginGUICallback, float v_speed = 1.0f, float v_min = 0.f, float v_max = 0.f );
-	kkPluginGUIWindowElement* addDragInt( float width,const char* label, int* v, kkPluginGUICallback, float v_speed = 1.0f, int v_min = 0, int v_max = 0 );*/
+	void BeginGroup(const char16_t* text, bool expanded);
+	void EndGroup();
 
 	void draw();
 	
-	//void addCheckboxPython(const char* label, PyObject* o);
-
 	void callOnActivate();
 };
 

@@ -25,6 +25,7 @@ class kkWindow
 protected:
 	v4i				m_client_rect;
 	v4i				m_window_rect;
+	v2i				m_creation_size;
 	void (*f_onMove)(kkWindow*) = nullptr;
 	void (*f_onSize)(kkWindow*) = nullptr;
 	void (*f_onPaint)(kkWindow*) = nullptr;

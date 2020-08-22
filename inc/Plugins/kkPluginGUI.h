@@ -88,6 +88,12 @@ public:
 	virtual kkPluginGUIWindowElement* AddMoveLeftRight( f32 value, kkPluginGUIParameterType pt ) = 0;
 	virtual kkPluginGUIWindowElement* AddRangeSliderFloat( f32 minimum, f32 maximum, f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt) = 0;
 	virtual kkPluginGUIWindowElement* AddRangeSliderInt( s32 minimum, s32 maximum, s32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt) = 0;
+	virtual kkPluginGUIWindowElement* AddCheckBox( const char16_t* text, bool* ptr, kkPluginGUIParameterType pt) = 0;
+
+	// начать группу. элементы добавленные между BeginGroup и EndGroup
+	//   будут сгруппированы. Можно скрывать элементы и показывать опять
+	virtual void BeginGroup(const char16_t* text, bool expanded) = 0;
+	virtual void EndGroup() = 0;
 
 	// грубо говоря это обёртка для imgui
 	//virtual kkPluginGUIWindowElement* addDummy(float x, float y) = 0;

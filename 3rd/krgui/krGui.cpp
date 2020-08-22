@@ -351,8 +351,8 @@ void Gui::GuiSystem::drawLine( const Vec2f& begin, const Vec2f& end, float size,
 bool Gui::GuiSystem::isLastItemCursorHover(){ return m_lastCursorHoverItemId == m_lastItemId;}
 bool Gui::GuiSystem::isLastItemCursorMove() { return m_lastCursorMoveItemId == m_lastItemId;}
 bool Gui::GuiSystem::isLastItemPressed()    { return m_pressedItemIdLMB == m_lastItemId;  }
+bool Gui::GuiSystem::isLastItemPressedOnce(){ bool result = m_pressedItemIdLMB == m_lastItemId; if(result)m_pressedItemIdLMB = -1; return result;  }
 bool Gui::GuiSystem::isLastItemDisabled()   { return m_lastDisabledItemId == m_lastItemId;}
-bool Gui::GuiSystem::isLastGroupExpColButtonPressed()    { return m_lastGroupExpColButtonPressedId == m_lastItemId;}
 
 
 void Gui::GuiSystem::newLine(float offset)
