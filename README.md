@@ -1,5 +1,5 @@
 # kkrooo
-3D Editor... with rendering... and plugins
+3D Editor... with rendering... and plugins...
 
 
 <img src="res/repository-open-graph-template.png">
