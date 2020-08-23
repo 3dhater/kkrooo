@@ -216,8 +216,8 @@ bool Application::_initFonts()
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::EditVertex), Gui::Vec4f(171,155,190,174), 0, 0, 0, 602,640 ); 
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::EditEdge), Gui::Vec4f(192,155,211,174), 0, 0, 0, 602,640 ); 
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::EditFace), Gui::Vec4f(213,155,232,174), 0, 0, 0, 602,640 ); 
-	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::CheckBoxCheck), Gui::Vec4f(45,8,64,27), 0, 0, 0, 602,640 ); 
-	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::CheckBoxUncheck), Gui::Vec4f(66,8,85,27), 0, 0, 0, 602,640 ); 
+	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::CheckBoxUncheck), Gui::Vec4f(45,8,64,27), 0, 0, 0, 602,640 ); 
+	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::CheckBoxCheck), Gui::Vec4f(66,8,85,27), 0, 0, 0, 602,640 ); 
 
 	return true;
 }

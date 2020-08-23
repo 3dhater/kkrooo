@@ -458,7 +458,24 @@ void PluginGUIWindow::draw()
     if( m_type == kkPluginGUIWindowType::Import || m_type == kkPluginGUIWindowType::Export )
     {
         m_app->m_KrGuiSystem->endGroup();
+        auto size = m_app->m_importExportWindow->getClientRect().getWidthAndHeight();
+        m_app->m_KrGuiSystem->setDrawPointPosition(10.f, size.y - 30.f);
+
+        const char16_t * buttontext = u"Import";
+        if(m_type == kkPluginGUIWindowType::Export)
+            buttontext = u"Export";
+        if( m_app->m_KrGuiSystem->addButton( buttontext, 0, Gui::Vec2f(50.f, 20.f) ) )
+        {
+            if(m_onOK)
+            {
+                m_onOK(-1, m_userData);
+                m_isActive = false;
+                m_app->m_importExportWindow->hide();
+                m_app->m_activeOSWindow = E_WINDOW_ID::EWID_MAIN_WINDOW; 
+            }
+        }
     }
+
 
     //if( is_windowBegin || is_params )
     //{

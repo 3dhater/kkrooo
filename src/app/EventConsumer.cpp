@@ -110,7 +110,14 @@ void EventConsumer::processEvent( const kkEvent& ev )
 			else if( ev.windowEvent.window == m_app->m_renderWindow.ptr() )
 			{
 				m_app->m_activeOSWindow = E_WINDOW_ID::EWID_RENDER_WINDOW;
-				//printf("focus EWID_RENDER_WINDOW\n");
+			}
+			else if( ev.windowEvent.window == m_app->m_importExportWindow.ptr() )
+			{
+				m_app->m_activeOSWindow = E_WINDOW_ID::EWID_IMPORTEXPORT_WINDOW;
+			}
+			else
+			{
+				KK_PRINT_FAILED;
 			}
 
 			// это здесь потому что возникает проблема когда фокус находится не у главного окна,

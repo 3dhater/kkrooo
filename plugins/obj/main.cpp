@@ -142,34 +142,35 @@ extern "C"
 		importData->import_window->AddCheckBox(u"Z Up",&importData->fix_z_up, kkPluginGUIParameterType::Object);
 		importData->import_window->EndGroup();
 
+		importData->export_window->BeginGroup(u"Common", true);
+		importData->export_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Selected only",&importData->selected_only, kkPluginGUIParameterType::Object);
+		importData->export_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Write materials",&importData->option_write_materials, kkPluginGUIParameterType::Object);
+		importData->export_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Write normals",&importData->option_write_normals, kkPluginGUIParameterType::Object);
+		importData->export_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Write UVs",&importData->option_write_UVs, kkPluginGUIParameterType::Object);
+		importData->export_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Triangulate",&importData->option_triangulate_export, kkPluginGUIParameterType::Object);
+		importData->export_window->EndGroup();
 
-		/*importData->import_window->treeBegin("Common",true);
-		importData->import_window->addCheckbox("Import materials",&importData->option_import_materials);
-		importData->import_window->addCheckbox("Triangulate",&importData->option_triangulate);
-		importData->import_window->treeEnd();
-		importData->import_window->treeBegin("Fix",true);
-		importData->import_window->addCheckbox("Flip normals",&importData->fix_flip_normals);
-		importData->import_window->addCheckbox("Generate normals",&importData->fix_generate_normals);
-		importData->import_window->addCheckbox("Generate flat normals",&importData->fix_generate_flat_normals);
-		importData->import_window->addCheckbox("Z Up",&importData->fix_z_up);
-		importData->import_window->treeEnd();
-
-
-		importData->export_window->treeBegin("Common",true);
-		importData->export_window->addCheckbox("Selected only",&importData->selected_only);
-		importData->export_window->addSeparator();
-		importData->export_window->addCheckbox("Write materials",&importData->option_write_materials);
-		importData->export_window->addCheckbox("Write normals",&importData->option_write_normals);
-		importData->export_window->addCheckbox("Write UVs",&importData->option_write_UVs);
-		importData->export_window->addSeparator();
-		importData->export_window->addCheckbox("Triangulate",&importData->option_triangulate_export);
-		importData->export_window->treeEnd();*/
-
-		/*importData->export_window->treeBegin("Optimize",true);
-		importData->export_window->addCheckbox("Optimize positions",&importData->optimize_positions);
-		importData->export_window->addCheckbox("Optimize normals",&importData->optimize_normals);
-		importData->export_window->addCheckbox("Optimize UVs",&importData->optimize_UVs);
-		importData->export_window->treeEnd();*/
+		importData->export_window->BeginGroup(u"Optimize", true);
+		importData->export_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Optimize positions",&importData->optimize_positions, kkPluginGUIParameterType::Object);
+		importData->export_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Optimize normals",&importData->optimize_normals, kkPluginGUIParameterType::Object);
+		importData->export_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
+		importData->export_window->AddCheckBox(u"Optimize UVs",&importData->optimize_UVs, kkPluginGUIParameterType::Object);
+		importData->export_window->EndGroup();
 
 
 		return 1;
