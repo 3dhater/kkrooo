@@ -136,7 +136,9 @@ class Application
 
 	std::unique_ptr<EventConsumer>   m_event_consumer;
 
-	kkPluginGUIWindow * m_editPolygons_paramWindow = nullptr;
+	kkPluginGUIWindow * m_edit_params_window = nullptr;
+	void _initEditParamsWindow();
+
 
 	void _showRightTab(bool);
 	bool m_showRightTab = false;
@@ -302,7 +304,8 @@ class Application
 	friend void window_onMove(kkWindow* window);
 	friend void window_onPaint(kkWindow* window);
 	friend void window_onClose(kkWindow* window);
-
+	friend void Application_editParamsWindow_onActivate(s32 id, void* data);
+	
 
 	const char * m_tootipText = nullptr;
 
@@ -443,6 +446,8 @@ public:
 	bool isWindowActive(E_WINDOW_ID);
 	
 	void showImportExportWindow(PluginGUIWindow*, const v2i& size, const char16_t* title);
+	void convertSelectedObjectToPolygonalObject();
+	bool isSelectedObjectNeedConvert();
 };
 
 

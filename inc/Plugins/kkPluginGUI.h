@@ -89,32 +89,12 @@ public:
 	virtual kkPluginGUIWindowElement* AddRangeSliderFloat( f32 minimum, f32 maximum, f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt) = 0;
 	virtual kkPluginGUIWindowElement* AddRangeSliderInt( s32 minimum, s32 maximum, s32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt) = 0;
 	virtual kkPluginGUIWindowElement* AddCheckBox( const char16_t* text, bool* ptr, kkPluginGUIParameterType pt) = 0;
+	virtual kkPluginGUIWindowElement* AddValueSelectorFloat( f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt) = 0;
 
 	// начать группу. элементы добавленные между BeginGroup и EndGroup
 	//   будут сгруппированы. Можно скрывать элементы и показывать опять
 	virtual void BeginGroup(const char16_t* text, bool expanded) = 0;
 	virtual void EndGroup() = 0;
-
-	// грубо говоря это обёртка для imgui
-	//virtual kkPluginGUIWindowElement* addDummy(float x, float y) = 0;
-	//virtual kkPluginGUIWindowElement* addSmallButton( const char* label, kkPluginGUICallback, s32 id ) = 0;
-	//virtual kkPluginGUIWindowElement* addArrowButton( const char* str_id, int dir/*0123*/, kkPluginGUICallback, s32 id ) = 0;
-	//virtual kkPluginGUIWindowElement* addCheckbox(const char* label, bool* v) = 0;
-	//virtual kkPluginGUIWindowElement* addRadioButton(const char* label, int* v, int v_button) = 0;
-	//virtual kkPluginGUIWindowElement* addSeparator() = 0;
-	//virtual kkPluginGUIWindowElement* addText(const char* text) = 0;
-	//virtual kkPluginGUIWindowElement* sameLine( float offset = 0.f ) = 0; //расположить следующий элемент на той-же линии
-	//virtual kkPluginGUIWindowElement* treeBegin(const char* name, bool open) = 0;
-	//virtual kkPluginGUIWindowElement* treeEnd() = 0;
-	//virtual kkPluginGUIWindowElement* addProgressbar(float* v) = 0;
-	//virtual kkPluginGUIWindowElement* childBegin(const char* name, const v2f& size, bool borders ) = 0;
-	//virtual kkPluginGUIWindowElement* childEnd() = 0;
-	//virtual kkPluginGUIWindowElement* tabbarBegin(const char* name) = 0;
-	//virtual kkPluginGUIWindowElement* tabbarEnd() = 0;
-	//virtual kkPluginGUIWindowElement* tabbarItemBegin(const char* name) = 0;
-	//virtual kkPluginGUIWindowElement* tabbarItemEnd() = 0;
-	//virtual kkPluginGUIWindowElement* addDragFloat( float width, const char* label, float* v, kkPluginGUICallback, float v_speed = 1.0f, float v_min = 0.f, float v_max = 0.f ) = 0;
-	//virtual kkPluginGUIWindowElement* addDragInt( float width, const char* label, int* v, kkPluginGUICallback, float v_speed = 1.0f, int v_min = 0, int v_max = 0 ) = 0;
 };
 
 class kkPluginGUI

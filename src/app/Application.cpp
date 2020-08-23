@@ -379,10 +379,7 @@ void Application::init()
 
     updateViewports();
     
-    m_editPolygons_paramWindow = m_pluginGUI->createWindow();
-    m_editPolygons_paramWindow->SetSize(v2i(200,0));
-    m_editPolygons_paramWindow->SetType( kkPluginGUIWindowType::Parameters );
-    m_editPolygons_paramWindow->SetName(u"Editable mesh");
+    _initEditParamsWindow();
 
     _init_materialEditor(false);
     
@@ -404,6 +401,35 @@ void Application::init()
     //m_materialEditorNewMaterialWindow->show();
 
 }
+
+bool Application::isSelectedObjectNeedConvert()
+{
+    if( m_current_scene3D->getNumOfSelectedObjects() == 1 )
+    {
+        auto object = (Scene3DObject *)m_current_scene3D->getSelectedObject(0);
+        if(object->GetType() == kkScene3DObjectType::PolygonObject)
+        {
+            if( object->m_paramsWindow == (PluginGUIWindow*)m_edit_params_window)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+void Application::convertSelectedObjectToPolygonalObject()
+{
+    if( m_current_scene3D->getNumOfSelectedObjects() == 1 )
+    {
+        auto object = (Scene3DObject *)m_current_scene3D->getSelectedObject(0);
+        if(object->GetType() == kkScene3DObjectType::PolygonObject)
+        {
+            object->m_paramsWindow = (PluginGUIWindow*)m_edit_params_window;
+        }
+    }
+}
+
+
 
 const v2i& Application::getWindowClientSize(){	return m_window_client_size;}
 const v2i& Application::getWindowSize()      {  return m_window_size;}
@@ -721,6 +747,8 @@ void Application::setStateKeyboard(AppState_keyboard s)
     m_state_keyboard = s;
 }
 AppState_keyboard Application::getStateKeyboard(){    return m_state_keyboard;}
+
+
 
 void Application::updateInput()
 {
@@ -1469,22 +1497,7 @@ void Application::_setEditMode( EditMode m )
     {
         if( m_current_scene3D->getNumOfSelectedObjects() )
         {
-            //m_editMode = m;
-
-            /*for( u32 i = 0, sz = m_current_scene3D->getNumOfSelectedObjects(); i < sz; ++i )
-            {
-                auto object = m_current_scene3D->getSelectedObject(i);
-                if( object->GetType() == kkScene3DObjectType::PolygonObject )
-                {
-                    if( object->GetPluginGUIWindow() != m_editPolygons_paramWindow )
-                    {
-                        object->SetPluginGUIWindow(this->m_editPolygons_paramWindow);
-                        auto ptr = object->DropParametersWindowData();
-                        if( ptr )
-                            kkMemory::free(ptr);
-                    }
-                }
-            }*/
+            m_editMode = m;
         }
     }
     else

@@ -80,9 +80,9 @@ struct ControlVertexHash
 		str = bytes;
 	}
 
-	void set(const kkVector4& v)
+	void set(kkVector4* v)
 	{
-		char * ptr = (char *)v.data();
+		char * ptr = (char *)v->data();
 		bytes[ 0 ] = ptr[ 0 ];
 		bytes[ 1 ] = ptr[ 1 ];
 		bytes[ 2 ] = ptr[ 2 ];

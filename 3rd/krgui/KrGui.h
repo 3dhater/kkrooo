@@ -448,6 +448,11 @@ namespace Kr
 				float speed = 1.f, Style* style = nullptr,
 				const Vec4f& rounding = Vec4f() );
 
+			bool addValueSelector( float * value, const Vec2f& size,
+				bool isHorizontal = true,
+				float speed = 1.f, Style* style = nullptr,
+				const Vec4f& rounding = Vec4f() );
+
 			//bool beginGroup( Group * group );
 			bool beginGroup(const Vec2f& size, bool * expandCollapse = nullptr, Style* style = nullptr);
 			void setCurrentGroupContentHeight(float);

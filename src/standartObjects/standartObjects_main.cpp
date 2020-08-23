@@ -84,13 +84,11 @@ extern "C"
 		planeParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		planeParams->window->AddText(u"X:", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
 		// надо сохранить элемент, чтобы потом изменить значение - поменять указатель
-		planeParams->width_element = planeParams->window->AddRangeSliderFloat(0.f, 100.f, &planeParams->width, 0.1f, true, v2f(80.f, 20.f), planeCallback, kkPluginGUIParameterType::Object);
+		planeParams->width_element = planeParams->window->AddValueSelectorFloat(&planeParams->width, 0.1f, true, v2f(80.f, 20.f), planeCallback, kkPluginGUIParameterType::Object);
 		// почти то же самое, только надо будет поменять текст
-		planeParams->width_text_element = planeParams->window->AddText(u"0.0", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
 		planeParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		planeParams->window->AddText(u"Y:", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
-		planeParams->height_element = planeParams->window->AddRangeSliderFloat(0.f, 100.f, &planeParams->height, 0.1f, true, v2f(80.f, 20.f), planeCallback, kkPluginGUIParameterType::Object);
-		planeParams->height_text_element = planeParams->window->AddText(u"0.0", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
+		planeParams->height_element = planeParams->window->AddValueSelectorFloat(&planeParams->height, 0.1f, true, v2f(80.f, 20.f), planeCallback, kkPluginGUIParameterType::Object);
 		planeParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		planeParams->window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
 		planeParams->window->AddText(u"Segments:", 0xffffffff, 0.f, kkPluginGUIParameterType::Object);
@@ -119,16 +117,13 @@ extern "C"
 		boxParams->window->AddText(u"Size:", 0xffffffff, 0.f, kkPluginGUIParameterType::Object);
 		boxParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		boxParams->window->AddText(u"X:", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
-		boxParams->size_x_element = boxParams->window->AddRangeSliderFloat(0.f, 100.f, &boxParams->size_x, 0.1f, true, v2f(80.f, 20.f), boxCallback, kkPluginGUIParameterType::Object);
-		boxParams->text_size_x_element = boxParams->window->AddText(u"0.0", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
+		boxParams->size_x_element = boxParams->window->AddValueSelectorFloat(&boxParams->size_x, 0.1f, true, v2f(80.f, 20.f), boxCallback, kkPluginGUIParameterType::Object);
 		boxParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		boxParams->window->AddText(u"Y:", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
-		boxParams->size_y_element = boxParams->window->AddRangeSliderFloat(0.f, 100.f, &boxParams->size_y, 0.1f, true, v2f(80.f, 20.f), boxCallback, kkPluginGUIParameterType::Object);
-		boxParams->text_size_y_element = boxParams->window->AddText(u"0.0", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
+		boxParams->size_y_element = boxParams->window->AddValueSelectorFloat(&boxParams->size_y, 0.1f, true, v2f(80.f, 20.f), boxCallback, kkPluginGUIParameterType::Object);
 		boxParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		boxParams->window->AddText(u"Z:", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
-		boxParams->size_z_element = boxParams->window->AddRangeSliderFloat(0.f, 100.f, &boxParams->size_z, 0.1f, true, v2f(80.f, 20.f), boxCallback, kkPluginGUIParameterType::Object);
-		boxParams->text_size_z_element = boxParams->window->AddText(u"0.0", 0xffffffff, 3.f, kkPluginGUIParameterType::Object);
+		boxParams->size_z_element = boxParams->window->AddValueSelectorFloat( &boxParams->size_z, 0.1f, true, v2f(80.f, 20.f), boxCallback, kkPluginGUIParameterType::Object);
 		boxParams->window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
 		boxParams->window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
 		boxParams->window->AddText(u"Segments:", 0xffffffff, 0.f, kkPluginGUIParameterType::Object);

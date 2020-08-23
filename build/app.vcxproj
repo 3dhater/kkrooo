@@ -50,7 +50,9 @@
     <ClCompile Include="..\3rd\krgui\KrGuiRangeSlider.cpp" />
     <ClCompile Include="..\3rd\krgui\KrGuiRectangle.cpp" />
     <ClCompile Include="..\3rd\krgui\KrGuiText.cpp" />
+    <ClCompile Include="..\3rd\krgui\KrGuiValueSelector.cpp" />
     <ClCompile Include="..\src\app\Application.cpp" />
+    <ClCompile Include="..\src\app\Application_editParamsWindow_onActivate.cpp" />
     <ClCompile Include="..\src\app\EventConsumer.cpp" />
     <ClCompile Include="..\src\app\Fonts.cpp" />
     <ClCompile Include="..\src\app\Functions.cpp" />

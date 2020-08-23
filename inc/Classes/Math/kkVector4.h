@@ -137,7 +137,7 @@ public:
 	{
 	}
 
-	const f32 * data() const
+	f32 * data()
 	{
 		return &_f32[0];
 	}

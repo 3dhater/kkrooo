@@ -195,7 +195,7 @@ void PolygonalModel::createControlPoints()
 
 			bool needBetterSolution = false;
 
-			h.set(V->m_Position);
+			h.set(&V->m_Position);
 			ControlVertex * cv = nullptr;
 
 			if( V->m_weld )

@@ -190,21 +190,14 @@ void onActivatePlaneCallback(s32 id, void * d)
 	
 	// дать новые значения нужным элементам
 	plane_data->width_element->SetPointerFloat(&plane_data->width);
-	plane_data->width_text_element->SetText(u"%f", plane_data->width);
 
 	plane_data->height_element->SetPointerFloat(&plane_data->height);
-	plane_data->height_text_element->SetText(u"%f", plane_data->height);
 
 	plane_data->width_segments_element->SetPointerInt(&plane_data->width_segments);
 	plane_data->width_segments_text_element->SetText(u"%i", plane_data->width_segments);
 
 	plane_data->height_segments_element->SetPointerInt(&plane_data->height_segments);
 	plane_data->height_segments_text_element->SetText(u"%i", plane_data->height_segments);
-
-	/*plane_data->height_segments_element->setPointerInt(&plane_data->height_segments);
-	plane_data->width_segments_element->setPointerInt(&plane_data->width_segments);
-	plane_data->height_element->setPointerFloat(&plane_data->height);
-	plane_data->width_element->setPointerFloat(&plane_data->width);*/
 
 	// и установить\вернуть на место данные
 	object->SetParametersWindowData(plane_data);

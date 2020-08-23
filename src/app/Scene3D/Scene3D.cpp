@@ -166,7 +166,7 @@ Scene3DObject * Scene3D::createNewPolygonalObject( const char16_t* n, PolygonalM
 		if(colorIndex == g_edgeColorNumber) colorIndex = 0;
 
 		new_object->m_scene3D = this;
-		new_object->SetPluginGUIWindow(m_app->m_editPolygons_paramWindow);
+		new_object->SetPluginGUIWindow(m_app->m_edit_params_window);
 		new_object->SetName(name.data());
 		new_object->setPosition(kkVector4(position.x,position.y,position.z));
 		new_object->ApplyPivot();

@@ -286,11 +286,24 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddCheckBox( const char16_t* text, bo
     return e;
 }
 
+kkPluginGUIWindowElement* PluginGUIWindow::AddValueSelectorFloat( f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt)
+{
+    PluginGUIWindowElement * e = kkCreate<PluginGUIWindowElement>();
+    e->m_type     = PluginGUIWindowElementType::ValueSelectorFloat;
+    e->m_paramType = pt;
+    e->m_float_ptr  = ptr;
+    e->m_speed  = speed;
+    e->m_horizontal = horizontal;
+    e->m_callback = cb;
+    e->m_size = size;
+    m_guiElements.push_back( e );
+    return e;
+}
+
 void PluginGUIWindow::draw()
 {
     if(!m_isActive)
         return;
-
     if( m_type != kkPluginGUIWindowType::Import && m_type != kkPluginGUIWindowType::Export )
     {
         m_app->m_KrGuiSystem->addText(m_name.data());
@@ -452,6 +465,20 @@ void PluginGUIWindow::draw()
                     m_app->m_KrGuiSystem->addCheckBox( item->m_checkbox_ptr, &checkBoxStyle, item->m_text.data() );
                 }
             }break;
+            case PluginGUIWindowElementType::ValueSelectorFloat:
+            {
+                if(item->m_float_ptr)
+                {
+                    if( m_app->m_KrGuiSystem->addValueSelector( item->m_float_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
+                        item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
+                    {
+                        if(item->m_callback)
+                        {
+                            item->m_callback(item->m_id, m_userData);
+                        }
+                    }
+                }
+            }break;
         }
     }
     
@@ -475,259 +502,13 @@ void PluginGUIWindow::draw()
             }
         }
     }
+    else if( m_type == kkPluginGUIWindowType::Parameters && m_app->isSelectedObjectNeedConvert() )
+    {
+        m_app->m_KrGuiSystem->newLine(10.f);
+        if( m_app->m_KrGuiSystem->addButton( u"Apply", 0, Gui::Vec2f(50.f, 20.f), true, true, Gui::Vec4f(2.f,2.f,2.f,2.f) ) )
+        {
+            m_app->convertSelectedObjectToPolygonalObject();
+        }
+    }
 
-
-    //if( is_windowBegin || is_params )
-    //{
-    //    ImGui::BeginChild("main", ImVec2((float)m_size.x,(float)m_size.y - y_indent), true, 0 );
-
-    //    static bool is_tree_node_begin = false;
-    //    static bool is_tree_node       = false;
-
-    //    static bool is_tabbar_begin = false;
-    //    static bool is_tabbar       = false;
-
-    //    if( is_params )
-    //    {
-    //       // ImGui::Text(m_name.data());
-    //    }
-
-    //    for( auto item : m_guiElements )
-    //    {
-    //        switch( item->type )
-    //        {
-    //        case PluginGUIWindowElementType::_button:
-    //        default:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            if( ImGui::Button(item->label) )
-    //            {
-    //                if(item->callback)
-    //                {
-    //                    m_app->setNeedToSave(true);
-    //                    item->callback(item->id,m_userData);
-    //                }
-    //                else
-    //                {
-    //                    fprintf(stderr,"PluginGUIWindow - Button [%s] without callback\n", item->label);
-    //                }
-    //            }
-    //            break;
-    //        case PluginGUIWindowElementType::_smallButton:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            if( ImGui::SmallButton(item->label) )
-    //            {
-    //                if(item->callback)
-    //                {
-    //                    m_app->setNeedToSave(true);
-    //                    item->callback(item->id,m_userData);
-    //                }
-    //                else
-    //                {
-    //                    fprintf(stderr,"PluginGUIWindow - Button [%s] without callback\n", item->label);
-    //                }
-    //            }
-    //            break;
-    //        case PluginGUIWindowElementType::_arrowButton:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            if( ImGui::ArrowButton(item->label,item->direction) )
-    //            {
-    //                if(item->callback)
-    //                {
-    //                    m_app->setNeedToSave(true);
-    //                    item->callback(item->id,m_userData);
-    //                }
-    //                else
-    //                {
-    //                    fprintf(stderr,"PluginGUIWindow - Button [%s] without callback\n", item->label);
-    //                }
-    //            }
-    //            break;
-    //            case PluginGUIWindowElementType::_checkBox:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::Checkbox(item->label,item->check);
-    //            break;
-    //        /*case PluginGUIWindowElementType::_checkBox_Py:
-    //        {
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-
-    //            if( ImGui::Checkbox(item->label,&item->py_check) )
-    //            {
-    //            }
-    //            if(ImGui::IsItemClicked())
-    //            {
-    //                auto obj = PyObject_CallObject(item->py_object, 0);
-			 //       if(!obj)
-			 //       {
-				//        PyErr_Print();
-			 //       }
-			 //       else
-			 //       {
-				//        Py_DECREF(obj);
-			 //       }
-    //            }
-    //        }break;*/
-    //        case PluginGUIWindowElementType::_dragFloat:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::SetNextItemWidth(item->offset);
-    //            ImGui::DragFloat(item->label,item->drag_f,item->drag_speed, item->drag_min, item->drag_max);
-    //            if( item->callback )
-    //            {
-    //                if(ImGui::IsItemEdited())
-    //                {
-    //                    m_app->setNeedToSave(true);
-    //                    item->callback(item->id,m_userData);
-    //                }
-    //            }
-    //            if( ImGui::IsItemHovered() ) m_app->m_enterTextMode = true;
-    //            break;
-    //        case PluginGUIWindowElementType::_dragInt:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::SetNextItemWidth(item->offset);
-    //            ImGui::DragInt(item->label,item->drag_i,item->drag_speed, item->drag_min_i, item->drag_max_i);
-    //            if( item->callback )
-    //            {
-    //                if(ImGui::IsItemEdited())
-    //                {
-    //                    m_app->setNeedToSave(true);
-    //                    item->callback(item->id,m_userData);
-    //                }
-    //            }
-    //            if( ImGui::IsItemHovered() ) m_app->m_enterTextMode = true;
-    //            break;
-    //        case PluginGUIWindowElementType::_radioButton:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::RadioButton(item->label,item->radio_v,item->v_button);
-    //            break;
-    //        case PluginGUIWindowElementType::_sameline:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::SameLine(item->offset);
-    //            break;
-    //        case PluginGUIWindowElementType::_separator:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::Separator();
-    //            break;
-    //        case PluginGUIWindowElementType::_dummy:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::Dummy(ImVec2(item->size.x, item->size.y));
-    //            break;
-    //        case PluginGUIWindowElementType::_text:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::Text(item->label);
-    //            break;
-    //        case PluginGUIWindowElementType::_treeBegin:
-    //        {
-    //            is_tree_node = true;
-    //            if( item->open )
-    //            {
-    //                ImGui::SetNextTreeNodeOpen(item->open);
-    //                item->open = false;
-    //            }
-    //            if( ImGui::TreeNode(item->label) )
-    //            {
-    //                is_tree_node_begin = true;
-    //            }
-    //        }
-    //            break;
-    //        case PluginGUIWindowElementType::_treeEnd:
-    //            is_tree_node = false;
-    //            if( is_tree_node_begin )
-    //            {
-    //                ImGui::TreePop();
-    //                is_tree_node_begin = false;
-    //            }
-    //            break;
-    //        case PluginGUIWindowElementType::_progressbar:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::ProgressBar(*item->progress);
-    //            break;
-    //        case PluginGUIWindowElementType::_childBegin:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::BeginChild( item->label, ImVec2(item->size.x,item->size.y), item->borders, 0 );
-    //            break;
-    //        case PluginGUIWindowElementType::_childEnd:
-    //            if( is_tree_node ) { if( !is_tree_node_begin ) break; }
-    //            if( is_tabbar ) { if( !is_tabbar_begin ) break; }
-    //            ImGui::EndChild();
-    //            break;
-    //        case PluginGUIWindowElementType::_tabbarBegin:
-    //            ImGui::BeginTabBar(item->label);
-    //            break;
-    //        case PluginGUIWindowElementType::_tabbarEnd:
-    //            ImGui::EndTabBar();
-    //            break;
-    //        case PluginGUIWindowElementType::_tabbarItemBegin:
-    //            is_tabbar = true;
-    //            if( ImGui::BeginTabItem(item->label) )
-    //            {
-    //                is_tabbar_begin = true;
-    //            }
-    //            break;
-    //        case PluginGUIWindowElementType::_tabbarItemEnd:
-    //            is_tabbar = false;
-    //            if( is_tabbar_begin )
-    //            {
-    //                is_tabbar_begin = false;
-    //                ImGui::EndTabItem();
-    //            }
-    //            break;
-    //        }
-    //    }
-
-    //    ImGui::EndChild();
-
-    //    if(!is_params)
-    //    {
-    //        ImGui::BeginChild("buttons", ImVec2((float)m_size.x - 20.f,35.f), true, 0 );
-    //        const char * label = "OK";
-    //        if( m_type == kkPluginGUIWindowType::_export ){ label = "Export"; }
-    //        else if( m_type == kkPluginGUIWindowType::_import ){ label = "Import"; }
-    //        if( ImGui::Button(label) )
-    //        {
-    //            if(m_onOK)
-    //            {
-    //                m_onOK(-1, m_userData);
-    //                m_isActive = false;
-    //            }
-    //           /* else if( m_py_onOK )
-    //            {
-    //                PyObject_CallObject(m_py_onOK, 0);
-
-    //                if (PyErr_Occurred())
-				//	    PyErr_Print();
-
-    //                m_isActive = false;
-    //            }*/
-    //            else
-    //            {
-    //                fprintf(stderr,"PluginGUIWindow - Button [%s] without callback\n", label);
-    //            }
-    //        }
-    //        ImGui::SameLine((float)m_size.x - 80.f);
-    //        if( ImGui::Button("Cancel") )
-    //        {
-    //            m_isActive = false;
-    //        }
-    //        ImGui::EndChild();
-    //    }
-    //}
-
-
-    //if(!is_params && is_windowBegin)
-    //{
-    //    ImGui::End();
-    //}
 }

@@ -24,8 +24,6 @@ struct ParametersPlane
 	// те элементы, значения которых нужно будет изменить
 	kkPluginGUIWindowElement * height_element;
 	kkPluginGUIWindowElement * width_element;
-	kkPluginGUIWindowElement * width_text_element;
-	kkPluginGUIWindowElement * height_text_element;
 
 	kkPluginGUIWindowElement * height_segments_element;
 	kkPluginGUIWindowElement * width_segments_element;
@@ -52,8 +50,6 @@ inline void copyParametersPlane( ParametersPlane* src, ParametersPlane* dst )
 
 	dst->height_element = src->height_element;
 	dst->width_element = src->width_element;
-	dst->width_text_element = src->width_text_element;
-	dst->height_text_element = src->height_text_element;
 	dst->height_segments_element = src->height_segments_element;
 	dst->width_segments_element = src->width_segments_element;
 	
@@ -74,9 +70,6 @@ struct ParametersBox
 	kkPluginGUIWindowElement * seg_y_element = nullptr;
 	kkPluginGUIWindowElement * seg_z_element = nullptr;
 
-	kkPluginGUIWindowElement * text_size_x_element = nullptr;
-	kkPluginGUIWindowElement * text_size_y_element = nullptr;
-	kkPluginGUIWindowElement * text_size_z_element = nullptr;
 	kkPluginGUIWindowElement * text_seg_x_element = nullptr;
 	kkPluginGUIWindowElement * text_seg_y_element = nullptr;
 	kkPluginGUIWindowElement * text_seg_z_element = nullptr;
@@ -106,9 +99,6 @@ inline void copyParametersBox( ParametersBox* src, ParametersBox* dst )
 	dst->seg_y_element = src->seg_y_element;
 	dst->seg_z_element = src->seg_z_element;
 
-	dst->text_size_x_element = src->text_size_x_element;
-	dst->text_size_y_element = src->text_size_y_element;
-	dst->text_size_z_element = src->text_size_z_element;
 	dst->text_seg_x_element = src->text_seg_x_element;
 	dst->text_seg_y_element = src->text_seg_y_element;
 	dst->text_seg_z_element = src->text_seg_z_element;

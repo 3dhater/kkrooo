@@ -192,6 +192,12 @@
     <ClCompile Include="..\3rd\krgui\KrGuiCheckbox.cpp">
       <Filter>src\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\app\Application_editParamsWindow_onActivate.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd\krgui\KrGuiValueSelector.cpp">
+      <Filter>src\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\app\Application.h">

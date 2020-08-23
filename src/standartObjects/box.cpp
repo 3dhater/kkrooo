@@ -531,9 +531,6 @@ void onActivateBoxCallback(s32 id, void * d)
 	box_data->size_x_element->SetPointerFloat(&box_data->size_x);
 	box_data->size_y_element->SetPointerFloat(&box_data->size_y);
 	box_data->size_z_element->SetPointerFloat(&box_data->size_z);
-	box_data->text_size_x_element->SetText(u"%f",box_data->size_x);
-	box_data->text_size_y_element->SetText(u"%f",box_data->size_y);
-	box_data->text_size_z_element->SetText(u"%f",box_data->size_z);
 
 	box_data->seg_x_element->SetPointerInt(&box_data->x_segments);
 	box_data->seg_y_element->SetPointerInt(&box_data->y_segments);
@@ -541,14 +538,6 @@ void onActivateBoxCallback(s32 id, void * d)
 	box_data->text_seg_x_element->SetText(u"%i",box_data->x_segments);
 	box_data->text_seg_y_element->SetText(u"%i",box_data->y_segments);
 	box_data->text_seg_z_element->SetText(u"%i",box_data->z_segments);
-
-	/*box_data->size_x_element->setPointerFloat(&box_data->size_x);
-	box_data->size_y_element->setPointerFloat(&box_data->size_y);
-	box_data->size_z_element->setPointerFloat(&box_data->size_z);
-
-	box_data->seg_x_element->setPointerInt(&box_data->x_segments);
-	box_data->seg_y_element->setPointerInt(&box_data->y_segments);
-	box_data->seg_z_element->setPointerInt(&box_data->z_segments);*/
 
 	// и установить\вернуть на место данные
 	object->SetParametersWindowData(box_data);
