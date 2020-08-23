@@ -37,10 +37,7 @@ void Gui::GuiSystem::_addText(const Vec4f& clipRect, const Vec4f& textRect, cons
 
 		command->texture.texture_address = m_currentFont->m_textures[g.textureID]->texture_address;
 
-		Gui::Vertex vertex1;
-		Gui::Vertex vertex2;
-		Gui::Vertex vertex3;
-		Gui::Vertex vertex4;
+		Gui::Vertex vertex1, vertex2, vertex3, vertex4;
 		
 		auto TXN = text_pointer.x;
 		auto TXP = TXN + g.width;

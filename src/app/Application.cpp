@@ -318,6 +318,7 @@ void Application::_init_renderManager()
 void Application::init()
 {
 	m_main_system  = kkGetMainSystem();
+    m_deltaTime = m_main_system->getDeltaTime();
     m_programName += u"Kkrooo";
 
 #ifdef KK_PLATFORM_WINDOWS
@@ -473,7 +474,7 @@ void Application::run()
 
             if( m_cursor_position.x < -4000 ) m_cursor_position.x = 0;
             if( m_cursor_position.y < -4000 ) m_cursor_position.y = 0;
-            m_mouseWheel = Kr::Gui::GuiSystem::wheel_delta;
+            m_mouseWheel = Kr::Gui::GuiSystem::m_wheel_delta;
         }
 
         
@@ -632,7 +633,7 @@ void Application::drawAll()
         drawBegin();
         drawViewport();
 
-        m_KrGuiSystem->newFrame(&m_guiMainWindow);
+        m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
         // тут рисование в главное окно
         _drawMainMenuBar();
         _drawMainToolBar();
@@ -788,7 +789,10 @@ void Application::updateInput()
 
         // обработка тех горячих клавиш, действие команд которых более шире чем у например узкоспециализированных типа вьюпорта
         // вполне возможно что для редактора текстурных координат (или чего-то ещё) придётся делать свой _processShortcuts
-        _processShortcuts();
+        if(!this->isGlobalInputBlocked())
+        {
+            _processShortcuts();
+        }
     }
 }
 

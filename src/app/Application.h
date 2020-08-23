@@ -289,7 +289,7 @@ class Application
     kkString m_sceneName;
     kkString m_sceneFilePath;
 
-
+	f32 * m_deltaTime = nullptr;
 
 	friend class EventConsumer;
 	friend class Viewport;

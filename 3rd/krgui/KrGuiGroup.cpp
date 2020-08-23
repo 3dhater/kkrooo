@@ -126,24 +126,24 @@ void Gui::GuiSystem::endGroup()
 	bool scroll = currentGroup->m_inRect && ( currentGroup->m_contentHeight > currentGroup->m_size.y * m_guiZoom );
 	if(!scroll) //если размер маленький но прокрутка уже была
 	{
-		if( wheel_delta > 0 && currentGroup->m_scrollValue < 0.f  )
+		if( m_wheel_delta > 0 && currentGroup->m_scrollValue < 0.f  )
 		{
 			scroll = true;
 		}
 	}
 	if( scroll && currentGroup->m_inRect )
 	{
-		if( wheel_delta > 0 )
+		if( m_wheel_delta > 0 )
 		{
-			currentGroup->m_scrollValue += wheel_delta;
+			currentGroup->m_scrollValue += m_wheel_delta;
 			if( currentGroup->m_scrollValue > 0.f )
 			{
 				currentGroup->m_scrollValue = 0.f;
 			}
 		}
-		if( wheel_delta < 0 )
+		if( m_wheel_delta < 0 )
 		{
-			currentGroup->m_scrollValue += wheel_delta;
+			currentGroup->m_scrollValue += m_wheel_delta;
 			auto scrollValue = std::abs(currentGroup->m_scrollValue * m_scrollMultipler);
 			auto scrollLimitY = currentGroup->m_contentHeight - currentGroup->m_size.y * m_guiZoom;
 			if( scrollValue > scrollLimitY )

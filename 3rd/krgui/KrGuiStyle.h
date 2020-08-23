@@ -98,6 +98,11 @@ namespace Kr
 			Vec4f rangeSliderBgColor = 0xff797979;
 			Vec4f rangeSliderFgColor = ColorLightGray;
 
+			Vec4f textInputBgColor = 0xff000000;
+			Vec4f textInputTextColor = 0xffFFFFFF;
+			Vec4f textInputSelectedTextColor = 0xff000000;
+			Vec4f textInputSelectedBgColor = 0xff0000AA;
+
 			float    checkboxBoxTextOffset = 5.f;
 			char16_t checkboxCheckSymbol   = u'#';
 			char16_t checkboxUncheckSymbol = u'_';

@@ -156,6 +156,37 @@ void EventConsumer::processEvent( const kkEvent& ev )
 	{
 		if( ev.keyboardEvent.state_is_pressed == 1 )
 		{
+			if( ev.keyboardEvent.character )
+			{
+				Kr::Gui::GuiSystem::m_character = (char16_t)ev.keyboardEvent.character;
+			}
+
+			switch (ev.keyboardEvent.key)
+			{
+			case kkKey::K_LEFT:
+				Kr::Gui::GuiSystem::m_IsLeft = true;
+				break;
+			case kkKey::K_RIGHT:
+				Kr::Gui::GuiSystem::m_IsRight = true;
+				break;
+			case kkKey::K_DELETE:
+				Kr::Gui::GuiSystem::m_IsDelete = true;
+				break;
+			case kkKey::K_BACKSPACE:
+				Kr::Gui::GuiSystem::m_IsBackspace = true;
+				break;
+			case kkKey::K_HOME:
+				Kr::Gui::GuiSystem::m_IsHome = true;
+				break;
+			case kkKey::K_END:
+				Kr::Gui::GuiSystem::m_IsEnd = true;
+				break;
+			default:
+				break;
+			}
+		}
+		if( ev.keyboardEvent.state_is_pressed == 1 )
+		{
 			m_keys_down[(s32)ev.keyboardEvent.key] = 1;
 
 			if( m_keys_down_once_state[(s32)ev.keyboardEvent.key] == 0 )
@@ -180,7 +211,7 @@ void EventConsumer::processEvent( const kkEvent& ev )
 	}break;
 	case kkEventType::MouseWheel:
 	{
-		Kr::Gui::GuiSystem::wheel_delta = ev.mouseEvent.wheel;
+		Kr::Gui::GuiSystem::m_wheel_delta = ev.mouseEvent.wheel;
 	//	printf("%i\n",ev.mouseEvent.wheel);
 
 		if( ev.mouseEvent.wheel != 0 )

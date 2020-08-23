@@ -12,7 +12,11 @@
 struct EditPolyObjectsGUIElements
 {
     kkPluginGUIWindowElement * m_object_position_x_element = nullptr;
+    kkPluginGUIWindowElement * m_object_position_y_element = nullptr;
+    kkPluginGUIWindowElement * m_object_position_z_element = nullptr;
     f32 * m_position_x = nullptr;
+    f32 * m_position_y = nullptr;
+    f32 * m_position_z = nullptr;
 }g_EditPolyObjectsGUIElements;
 
 void change_position_x_callback(s32 id, void* data)
@@ -27,6 +31,44 @@ void change_position_x_callback(s32 id, void* data)
             auto pivot = object->GetPivot();
 
             object->setPosition( kkVector4(*g_EditPolyObjectsGUIElements.m_position_x,pivot._f32[1],pivot._f32[2],pivot._f32[3]) );
+            object->ApplyPivot();
+            object->UpdateAabb();
+            scene->updateSceneAabb();
+            scene->updateSelectionAabb();
+        }
+    }
+}
+void change_position_y_callback(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    if( scene->getNumOfSelectedObjects() == 1 )
+    {
+        auto object = (Scene3DObject *)scene->getSelectedObject(0);
+        if(object->GetType() == kkScene3DObjectType::PolygonObject)
+        {
+            auto pivot = object->GetPivot();
+
+            object->setPosition( kkVector4(pivot._f32[0],*g_EditPolyObjectsGUIElements.m_position_y,pivot._f32[2],pivot._f32[3]) );
+            object->ApplyPivot();
+            object->UpdateAabb();
+            scene->updateSceneAabb();
+            scene->updateSelectionAabb();
+        }
+    }
+}
+void change_position_z_callback(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    if( scene->getNumOfSelectedObjects() == 1 )
+    {
+        auto object = (Scene3DObject *)scene->getSelectedObject(0);
+        if(object->GetType() == kkScene3DObjectType::PolygonObject)
+        {
+            auto pivot = object->GetPivot();
+
+            object->setPosition( kkVector4(pivot._f32[0],pivot._f32[1],*g_EditPolyObjectsGUIElements.m_position_z,pivot._f32[3]) );
             object->ApplyPivot();
             object->UpdateAabb();
             scene->updateSceneAabb();
@@ -49,7 +91,11 @@ void Application_editParamsWindow_onActivate(s32 id, void* data)
             auto data = object->GetPivot().data();
 
             g_EditPolyObjectsGUIElements.m_object_position_x_element->SetPointerFloat(&data[0]);
+            g_EditPolyObjectsGUIElements.m_object_position_y_element->SetPointerFloat(&data[1]);
+            g_EditPolyObjectsGUIElements.m_object_position_z_element->SetPointerFloat(&data[2]);
             g_EditPolyObjectsGUIElements.m_position_x = &data[0];
+            g_EditPolyObjectsGUIElements.m_position_y = &data[1];
+            g_EditPolyObjectsGUIElements.m_position_z = &data[2];
         }
     }
 };
@@ -65,9 +111,16 @@ void Application::_initEditParamsWindow()
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Position", 0xFFFFFFFF, 0.f, kkPluginGUIParameterType::Object);
+ 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"X:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
-    
-    g_EditPolyObjectsGUIElements.m_object_position_x_element = 
-        m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_position_x_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
+ 
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddText(u"Y:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_position_y_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
+
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddText(u"Z:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_position_z_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
 }

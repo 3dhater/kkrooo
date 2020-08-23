@@ -189,6 +189,8 @@ namespace Kr
 		
 			bool   m_IsShift    = false;
 			bool   m_IsAlt      = false;
+			bool   m_IsEnter    = false;
+			
 
 			bool   m_mouseIsLMB_up = false;
 			bool   m_mouseIsLMB    = false;
@@ -226,6 +228,8 @@ namespace Kr
 			int m_lastCursorMoveItemId  = 0; // if mouse move in area of item
 			int m_lastDisabledItemId    = 0;
 			int m_lastItemId            = 0;
+			int m_lastKeyboardInputItemId            = 0;
+			int m_lastKeyboardInputItemIdExit        = 0;
 
 			int m_currentGroupInRectId        = 0;
 			int m_lastGroupInRectId           = 0;
@@ -370,6 +374,7 @@ namespace Kr
 			void _checkItemHeight(float size_y);
 			void _checkZoomPosition(Vec2f* point);
 
+			float m_deltaTime = 0.f;
 
 			friend GuiSystem* CreateSystem( GraphicsSystemType type, const char* defaultFontDir, const char* defaultFontFileName );
 			friend void GraphicsSystem_OpenGL3Draw(GuiSystem*);
@@ -379,7 +384,7 @@ namespace Kr
 			~GuiSystem();
 
 			// prepare GUI for new frame
-			void newFrame( Window * guiWindow );
+			void newFrame( Window * guiWindow, float deltaTime );
 			void endFrame();
 
 			// set new window for drawing
@@ -453,6 +458,8 @@ namespace Kr
 				float speed = 1.f, Style* style = nullptr,
 				const Vec4f& rounding = Vec4f() );
 
+			bool addTextInputPopup(const Vec2f& size, char16_t* buf, size_t buf_size, bool(*filter)(char16_t), Style* style = nullptr );
+
 			//bool beginGroup( Group * group );
 			bool beginGroup(const Vec2f& size, bool * expandCollapse = nullptr, Style* style = nullptr);
 			void setCurrentGroupContentHeight(float);
@@ -463,10 +470,6 @@ namespace Kr
 
 			bool beginNodeEditor( NodeEditor * nodeEditor );
 			bool beginNode( NodeEditorNode * node );
-			/*void nextButtonIsNodeSocket()
-			{
-				m_nexButtonIsNodeSocket=true;
-			}*/
 			void setCurrentNodeContentOffset(const Vec2f& offset)
 			{
 				m_currentNodeContentOffset = offset;
@@ -488,7 +491,8 @@ namespace Kr
 			bool isLastItemPressed();
 			bool isLastItemPressedOnce();
 			bool isLastItemDisabled();
-			bool isLastGroupExpColButtonPressed();
+			bool isLastItemKeyboardInput();
+			bool isLastItemKeyboardInputExit();
 
 			void setScrollMultipler( float v ){m_scrollMultipler = v;}
 
@@ -534,9 +538,16 @@ namespace Kr
 
 			const Vec4f& getLastClipRect();
 
-			static int wheel_delta;
+			static int m_wheel_delta;
 			static Vec2f m_mouseDelta;
 			static Vec2f m_cursorCoords;
+			static bool  m_IsLeft;
+			static bool  m_IsRight;
+			static bool  m_IsDelete;
+			static bool  m_IsBackspace;
+			static bool  m_IsHome;
+			static bool  m_IsEnd;
+			static char16_t  m_character;
 
 			float getZoom(){return m_guiZoom;}
 			void setZoom(float v){m_guiZoom = v;}

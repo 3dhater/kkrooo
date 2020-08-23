@@ -8,7 +8,14 @@
 using namespace Kr;//Gui;
 
 
-int Gui::GuiSystem::wheel_delta = 0;
+int Gui::GuiSystem::m_wheel_delta = 0;
+bool Gui::GuiSystem::m_IsLeft = false;
+bool Gui::GuiSystem::m_IsRight = false;
+bool Gui::GuiSystem::m_IsDelete = false;
+bool Gui::GuiSystem::m_IsBackspace = false;
+bool Gui::GuiSystem::m_IsHome = false;
+bool Gui::GuiSystem::m_IsEnd = false;
+char16_t Gui::GuiSystem::m_character = 0;
 Gui::Vec2f Gui::GuiSystem::m_mouseDelta = Gui::Vec2f();
 Gui::Vec2f Gui::GuiSystem::m_cursorCoords = Gui::Vec2f();
 
@@ -123,8 +130,9 @@ void Gui::GuiSystem::setCurrentFont(Gui::Font* font)
 	m_currentFont = font ?  font : m_defaultFont;
 }
 
-void Gui::GuiSystem::newFrame(Gui::Window * guiWindow)
+void Gui::GuiSystem::newFrame(Gui::Window * guiWindow, float deltaTime)
 {
+	m_deltaTime = deltaTime;
 	m_currentWindow = guiWindow;
 
 	if( !m_mouseIsLMB ) m_pressedItemIdLMB = 0;
@@ -134,11 +142,14 @@ void Gui::GuiSystem::newFrame(Gui::Window * guiWindow)
 	m_lastCursorMoveItemId  = 0;
 	m_lastDisabledItemId    = 0;
 	m_lastItemId            = 0;
+	m_lastKeyboardInputItemId            = 0;
+	m_lastKeyboardInputItemIdExit            = 0;
 
 	m_groupInfoCount = 0;
 
-	 m_IsShift = false;
-	 m_IsAlt   = false;
+	m_IsShift = false;
+	m_IsAlt   = false;
+	m_IsEnter   = false;
 
 	m_mouseIsLMB_old = m_mouseIsLMB;
 	m_mouseIsLMB = false;
@@ -186,10 +197,6 @@ void Gui::GuiSystem::switchWindow( Gui::Window * guiWindow )
 		HWND hwnd = reinterpret_cast<HWND>(guiWindow->OSWindow);
 		if( GetActiveWindow() == hwnd )
 		{
-			/*char str[256];
-			str[50]=0;
-			GetWindowTextA(hwnd,str,50);
-			printf("%s\n",str);*/
 			m_doWindowInput = true;
 		}
 		
@@ -213,49 +220,51 @@ void Gui::GuiSystem::switchWindow( Gui::Window * guiWindow )
 
 		if( GetAsyncKeyState(VK_SHIFT) ) m_IsShift = true;
 		if( GetAsyncKeyState(VK_MENU) )  m_IsAlt   = true;
+
+		if( GetAsyncKeyState(VK_RETURN) )  m_IsEnter   = true;
 	}
 #else
 #error Please implement me
 #endif
 
-	static bool m_lmb_once = false;
-	static bool m_mmb_once = false;
-	static bool m_rmb_once = false;
+	static bool m_lmb_firstClick = false;
+	static bool m_mmb_firstClick = false;
+	static bool m_rmb_firstClick = false;
 
 	if( m_mouseIsLMB_old && !m_mouseIsLMB )
 	{
 		m_mouseIsLMB_up = true; // отжали LMB
-		m_lmb_once = false;
+		m_lmb_firstClick = false;
 	}
 
 	if( m_mouseIsMMB_old && !m_mouseIsMMB )
 	{
 		m_mouseIsMMB_up = true; // отжали MMB
-		m_mmb_once = false;
+		m_mmb_firstClick = false;
 	}
 
 	if( m_mouseIsRMB_old && !m_mouseIsRMB )
 	{
 		m_mouseIsRMB_up = true; // отжали RMB
-		m_rmb_once = false;
+		m_rmb_firstClick = false;
 	}
 
-	if( m_mouseIsLMB && !m_lmb_once && m_doWindowInput)
+	if( m_mouseIsLMB && !m_lmb_firstClick && m_doWindowInput)
 	{
 		m_mouseIsLMB_firstClick = true;
-		m_lmb_once = true; // закрыли проход. открыть - при отжатии
+		m_lmb_firstClick = true; // закрыли проход. открыть - при отжатии
 	}
 
-	if( m_mouseIsMMB && !m_mmb_once && m_doWindowInput)
+	if( m_mouseIsMMB && !m_mmb_firstClick && m_doWindowInput)
 	{
 		m_mouseIsMMB_firstClick = true;
-		m_mmb_once = true; // закрыли проход. открыть - при отжатии
+		m_mmb_firstClick = true; // закрыли проход. открыть - при отжатии
 	}
 
-	if( m_mouseIsRMB && !m_rmb_once && m_doWindowInput)
+	if( m_mouseIsRMB && !m_rmb_firstClick && m_doWindowInput)
 	{
 		m_mouseIsRMB_firstClick = true;
-		m_rmb_once = true; // закрыли проход. открыть - при отжатии
+		m_rmb_firstClick = true; // закрыли проход. открыть - при отжатии
 	}
 
 	m_OSWindowClientSize.x = m_OSWindowClientRect.z - m_OSWindowClientRect.x;
@@ -265,7 +274,14 @@ void Gui::GuiSystem::switchWindow( Gui::Window * guiWindow )
 void Gui::GuiSystem::endFrame()
 {
 	m_popupMenuInfoCount = 0;
-	this->wheel_delta = 0;
+	m_wheel_delta = 0;
+	m_IsLeft = false;
+	m_IsRight = false;
+	m_IsDelete = false;
+	m_IsBackspace = false;
+	m_IsHome = false;
+	m_IsEnd = false;
+	m_character = 0;
 }
 
 void Gui::GuiSystem::render()
@@ -353,6 +369,8 @@ bool Gui::GuiSystem::isLastItemCursorMove() { return m_lastCursorMoveItemId == m
 bool Gui::GuiSystem::isLastItemPressed()    { return m_pressedItemIdLMB == m_lastItemId;  }
 bool Gui::GuiSystem::isLastItemPressedOnce(){ bool result = m_pressedItemIdLMB == m_lastItemId; if(result)m_pressedItemIdLMB = -1; return result;  }
 bool Gui::GuiSystem::isLastItemDisabled()   { return m_lastDisabledItemId == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemKeyboardInput(){ return m_lastKeyboardInputItemId == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemKeyboardInputExit(){ return m_lastKeyboardInputItemIdExit == m_lastItemId;}
 
 
 void Gui::GuiSystem::newLine(float offset)

@@ -472,10 +472,20 @@ void PluginGUIWindow::draw()
                     if( m_app->m_KrGuiSystem->addValueSelector( item->m_float_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
                         item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
                     {
+
                         if(item->m_callback)
                         {
                             item->m_callback(item->m_id, m_userData);
                         }
+                    }
+                    
+                    if(m_app->m_KrGuiSystem->isLastItemKeyboardInput())
+                    {
+                        m_app->m_globalInputBlock = true;
+                    }
+                    if(m_app->m_KrGuiSystem->isLastItemKeyboardInputExit())
+                    {
+                        m_app->m_globalInputBlock = false;
                     }
                 }
             }break;

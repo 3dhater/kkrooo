@@ -2,11 +2,18 @@
 
 using namespace Kr;
 
+char16_t g_textBufForTextinput[32];
+bool valueSelector_inputCallback(char16_t ch)
+{
+	return true;
+};
+
 bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 			bool isHorizontal, float speed, Gui::Style* style,
 			const Vec4f& rounding )
 {
 	assert(value);
+
 
 	auto old_value = *value;
 
@@ -15,6 +22,9 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 
 	_checkStyle(&style);
 	_newId();
+	
+	static bool input_mode = false;
+	static int input_mode_elementID = -1;
 	
 	Vec2f size = _size;
 	_checkSize(&size);
@@ -53,12 +63,32 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 	m_secondColor = style->rangeSliderBgColor;
 	_addRectangle(m_currentClipRect, buildRect, rounding);
 
+	char textBuf[32];
+	sprintf(textBuf, "%f", *value);
 
 	if( !m_blockInputGlobal )
 	{
 		_updateMouseInput(mouseButton::LMB);
+
+		if( _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentClipRect ) && m_mouseIsRMB_up)
+		{
+			input_mode = true;
+			input_mode_elementID = m_uniqueIdCounter;
+
+			for( int i = 0; i < 32; ++i )
+			{
+				g_textBufForTextinput[i] = (char16_t)textBuf[i];
+			}
+		}
 	}
-	if( m_pressedItemIdLMB == m_uniqueIdCounter )// if pressed
+
+	bool inputmode = false;
+	if( input_mode && m_uniqueIdCounter == input_mode_elementID )
+	{
+		inputmode = true;
+	}
+
+	if( m_pressedItemIdLMB == m_uniqueIdCounter && !inputmode )// if pressed
 	{
 		if( isHorizontal )
 		{
@@ -72,17 +102,29 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 
 	m_drawPointer.x += (m_currentClipRect.z - m_currentClipRect.x) * (1.f/m_guiZoom);
 	
+	
+
 	auto back_position = m_drawPointer;
-
-	char textBuf[32];
-	sprintf(textBuf, "%f", *value);
-	setNextItemIgnoreInput();
-	
 	m_drawPointer = front_position;
-	
-	addText(textBuf);
-
+	if(!inputmode)
+	{
+		setNextItemIgnoreInput();
+		addText(textBuf);
+	}
+	else
+	{
+		if( addTextInputPopup(size, g_textBufForTextinput, 32, valueSelector_inputCallback, 0) )
+		{
+			input_mode = false;
+			m_lastKeyboardInputItemIdExit = m_uniqueIdCounter;
+		}
+		else
+		{
+			m_lastKeyboardInputItemId = m_uniqueIdCounter;
+		}
+	}
 	m_drawPointer = back_position;
+
 
 	return old_value != *value;
 }

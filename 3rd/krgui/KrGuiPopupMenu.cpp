@@ -111,14 +111,14 @@ void Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
 		auto scrollLimit = (activePopup->m_position.y + activePopup->m_sizeEnd.y) - m_OSWindowClientRect.w;
 		if( scrollLimit > 0 ) // can scroll
 		{
-			if( wheel_delta > 0 )
+			if( m_wheel_delta > 0 )
 			{
 				activePopup->m_scrollValue += activePopup->m_scrollSpeed;
 				if( activePopup->m_scrollValue > 0.f )
 					activePopup->m_scrollValue = 0.f;
 			}
 
-			if( wheel_delta < 0 )
+			if( m_wheel_delta < 0 )
 			{
 			//	printf("[%f] [%f]\n", activePopup->m_scrollValue, scrollLimit);
 				activePopup->m_scrollValue -= activePopup->m_scrollSpeed;

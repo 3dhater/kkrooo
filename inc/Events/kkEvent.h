@@ -146,7 +146,7 @@ struct kkEventMouse
 struct kkEventKeyboard
 {
 	kkKey key = kkKey::K_NONE;
-	char32_t character = U' ';
+	char32_t character = 0;
 		
 	s8 state_is_pressed = 0;
 	s8 state_is_relesed = 0;

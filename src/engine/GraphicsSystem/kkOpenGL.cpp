@@ -449,7 +449,7 @@ void kkOpenGL::update_onSize()
 
 
 
-void kkOpenGL::drawLine3D( const kkVector4& p1, const kkVector4& p2, const kkColor& color, kkShader * shader )
+void kkOpenGL::drawLine3D( const kkVector4& _p1, const kkVector4& _p2, const kkColor& color, kkShader * shader )
 {
 	if( m_active_camera )
 	{
@@ -467,6 +467,8 @@ void kkOpenGL::drawLine3D( const kkVector4& p1, const kkVector4& p2, const kkCol
 
 			auto WVP = P * V * kkMatrix4();
 
+			auto p1 = _p1;
+			auto p2 = _p2;
 			glUniformMatrix4fv(m_shader_3dline->getUniform(0), 1, GL_FALSE, WVP.getPtr() );
 			glUniform4fv(m_shader_3dline->getUniform(1), 1, p1.data() );
 			glUniform4fv(m_shader_3dline->getUniform(2), 1, p2.data() );

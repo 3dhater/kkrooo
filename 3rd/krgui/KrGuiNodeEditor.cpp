@@ -128,11 +128,11 @@ void Gui::GuiSystem::endNodeEditor()
 	{
 		float v = 0.04f + (0.1f * m_currentNodeEditor->m_zoomValue);
 
-		if( wheel_delta > 0 )
+		if( m_wheel_delta > 0 )
 		{
 			nodeEditorZoomIn(m_currentNodeEditor, v);
 		}
-		if( wheel_delta < 0 )
+		if( m_wheel_delta < 0 )
 		{
 			nodeEditorZoomOut(m_currentNodeEditor, v);
 		}
