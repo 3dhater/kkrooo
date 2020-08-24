@@ -295,6 +295,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddValueSelectorFloat( f32 * ptr, f32
     e->m_speed  = speed;
     e->m_horizontal = horizontal;
     e->m_callback = cb;
+    e->m_group_ptr = m_currentGroup;
     e->m_size = size;
     m_guiElements.push_back( e );
     return e;
@@ -309,6 +310,7 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddTextInput( const char16_t* text, c
     e->m_text = text;
     e->m_textInputFilter = filter;
     e->m_textInputResult = textInputResult;
+    e->m_group_ptr = m_currentGroup;
     m_guiElements.push_back( e );
     return e;
 }

@@ -107,6 +107,9 @@ public:
 	virtual kkMatrix4& GetMatrix()  = 0;
 	virtual kkMatrix4& GetMatrixWorld()  = 0;
 	virtual void UpdateWorldMatrix() = 0;
+	virtual kkVector4& GetRotationPitchYawRoll() = 0;
+	virtual kkVector4& GetRotationAngles() = 0;
+	virtual kkVector4& GetScale() = 0;
 
 	virtual kkPluginGUIWindow* GetPluginGUIWindow() = 0;
 

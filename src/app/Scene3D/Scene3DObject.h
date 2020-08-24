@@ -54,6 +54,11 @@ protected:
 	kkString  m_name;
 	kkVector4 m_pivot;
 
+	// для GUI
+	kkVector4 m_rotationPitchYawRoll;
+	kkVector4 m_rotationAngles;
+	kkVector4 m_scale;
+
 	// значение равное m_pivot но не изменияется
 	// его нужно сохранить вызвав applyPivot
 	// используется тогда когда необходимо не изменять оригинальный m_pivot
@@ -97,7 +102,9 @@ protected:
 
 	kkColor m_edgeColor = kkColorWhite;
 public:
-	Scene3DObjectCommon()	{	}
+	Scene3DObjectCommon(){
+		m_scale.set(1.f,1.f,1.f,1.f);
+	}
 	virtual ~Scene3DObjectCommon()
 	{
 		if( m_parameterWindowData )
@@ -111,7 +118,7 @@ public:
 	void SetMatrix(const kkMatrix4& m){ 	m_matrix = m; 	}
 	kkAabb& Aabb(){ 	return m_aabbModified;  }
 	kkObb&  Obb(){      return m_obb; 	}
-	
+	void ApplyFixedMatrix(){m_matrixFixed = m_matrix;}
 
 	void UpdateAabb()
 	{
@@ -187,6 +194,10 @@ public:
 	kkMatrix4& GetMatrix(){		return m_matrix;	}
 	kkMatrix4& GetMatrixWorld(){	return m_worldMatrix;	}
 	
+	kkVector4& GetRotationPitchYawRoll(){return m_rotationPitchYawRoll;}
+	kkVector4& GetRotationAngles(){return m_rotationAngles;}
+	kkVector4& GetScale(){return m_scale;}
+
 	void UpdateWorldMatrix()
 	{
 		auto R = m_matrix;
@@ -202,7 +213,6 @@ public:
 		m_worldMatrix = R;
 
 		m_worldMatrix = T * m_worldMatrix;
-
 	}
 
 

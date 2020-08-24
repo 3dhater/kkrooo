@@ -1514,6 +1514,14 @@ void Scene3DObject::resetMatrices()
 	m_matrix			= kkMatrix4();
 	m_matrixFixed		= m_matrix;
 	m_matrixOnlyRotation= m_matrix;
+
+	auto & s = GetScale();
+    s.set(1.f,1.f,1.f,1.f);
+    auto & r = GetRotationAngles();
+    r.set(0.f,0.f,0.f,0.f);
+    r = GetRotationPitchYawRoll();
+    r.set(0.f,0.f,0.f,0.f);
+
 	//updateMatrixPosition();
 	UpdateAabb();
 }
