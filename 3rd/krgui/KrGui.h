@@ -272,7 +272,10 @@ namespace Kr
 		
 			void _addRectangle(const Vec4f& clipRect, const Vec4f& buildRect, const Vec4f& rounding = Vec4f() );
 			void _addPictureBox(const Vec4f& clipRect, const Vec4f& buildRect, unsigned long long textureAddressOrID);
-			void _addText(const Vec4f& clipRect, const Vec4f& textRect, const char16_t* text, int numOfChars, float spacing, float spaceAdd, bool );
+			void _addText(const Vec4f& clipRect, const Vec4f& textRect, const char16_t* text, int numOfChars, float spacing, float spaceAdd, bool centerOnZoom);
+
+			std::u16string m_inputTextBuffer;
+			std::u16string m_inputTextBuffer_out;
 
 			bool m_nextItemIgnoreInput = false;
 
@@ -460,6 +463,18 @@ namespace Kr
 				bool isHorizontal = true,
 				float speed = 1.f, Style* style = nullptr,
 				const Vec4f& rounding = Vec4f() );
+
+			// true when quit editing
+			bool addTextInput( 
+				const char16_t* text,
+				const Vec2f& size,
+				bool(*filter)(char16_t),
+				Style* style = nullptr,
+				const Vec4f& rounding = Vec4f() );
+			const char16_t* getTextInputResult()
+			{
+				return m_inputTextBuffer_out.c_str();
+			}
 
 			bool addTextInputPopup(const Vec2f& size, char16_t* buf, size_t buf_size, size_t char_limit, bool(*filter)(char16_t), Style* style = nullptr );
 

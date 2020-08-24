@@ -17,6 +17,7 @@ enum class PluginGUIWindowElementType
 	RangeSliderInteger,
 	CheckBox,
 	ValueSelectorFloat,
+	TextInput,
 };
 
 struct PluginGUIWindowElementGroup
@@ -48,6 +49,8 @@ public:
 	kkPluginGUIParameterType m_paramType = kkPluginGUIParameterType::Object;
 
 	kkPluginGUICallback       m_callback = nullptr;
+	bool(*m_textInputFilter)(char16_t) = nullptr;
+	void(*m_textInputResult)(const char16_t*) = nullptr;
 	s32  m_id  = -1;
 
 	bool m_horizontal = true;
@@ -122,6 +125,7 @@ public:
 	kkPluginGUIWindowElement* AddRangeSliderInt( s32 minimum, s32 maximum, s32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt);
 	kkPluginGUIWindowElement* AddCheckBox( const char16_t* text, bool* ptr, kkPluginGUIParameterType pt);
 	kkPluginGUIWindowElement* AddValueSelectorFloat( f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt);
+	kkPluginGUIWindowElement* AddTextInput( const char16_t* text, const v2f& size, bool(*filter)(char16_t), void(*textInputResult)(const char16_t*), kkPluginGUIParameterType pt);
 
 	void BeginGroup(const char16_t* text, bool expanded);
 	void EndGroup();

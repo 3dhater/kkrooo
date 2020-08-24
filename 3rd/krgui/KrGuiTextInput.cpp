@@ -2,6 +2,94 @@
 
 using namespace Kr;
 
+bool Gui::GuiSystem::addTextInput( 
+	const char16_t* text,
+	const Vec2f& _size, 
+	bool(*filter)(char16_t),
+	Style* style, 
+	const Vec4f& rounding )
+{
+	bool result = false;
+
+	_checkStyle(&style);
+	_newId();
+	static bool input_mode = false;
+	static int input_mode_elementID = -1;
+	Vec2f size = _size;
+	_checkSize(&size);
+	auto front_position = m_drawPointer;
+	auto end_x_position = m_drawPointer.x + size.x;
+	_checkNewLine(end_x_position);
+	_checkItemHeight(size.y);
+	auto position = m_drawPointer;
+	if( m_currentNodePosition )
+	{
+		position.x = m_currentNodePosition->x + m_currentNodeContentOffset.x;
+		position.y = m_currentNodePosition->y + m_currentNodeContentOffset.y;
+		position.x += m_currentNodeEditor->m_eyePosition.x;
+		position.y += m_currentNodeEditor->m_eyePosition.y;
+		position.x *=  m_guiZoom;
+		position.y *=  m_guiZoom;
+		auto centerOffset = m_currentNodeEditor->m_center;
+		position.x += centerOffset.x;
+		position.y += centerOffset.y;
+	}
+	_setCurrentClipRect(position, size);
+	auto buildRect = m_currentClipRect;
+	_checkParentClipRect();
+	m_firstColor  = style->buttonIdleColor1;
+	m_secondColor = style->buttonIdleColor1;
+	_addRectangle(m_currentClipRect, buildRect, rounding);
+	
+	if( !m_blockInputGlobal )
+	{
+		_updateMouseInput(mouseButton::LMB);
+
+		if( _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentClipRect ) && m_mouseIsLMB_up)
+		{
+			input_mode = true;
+			input_mode_elementID = m_uniqueIdCounter;
+			m_inputTextBuffer.clear();
+			m_inputTextBuffer.reserve(1024);
+			for( int i = 0; i < 32; ++i )
+			{
+				m_inputTextBuffer += (char16_t)text[i];
+			}
+		}
+	}
+
+	bool inputmode = false;
+	if( input_mode && m_uniqueIdCounter == input_mode_elementID )
+	{
+		inputmode = true;
+	}
+
+	auto back_position = m_drawPointer;
+	m_drawPointer = front_position;
+	if(!inputmode)
+	{
+		setNextItemIgnoreInput();
+		m_textColor  = style->buttonTextIdleColor;
+		_addText(m_currentClipRect, buildRect, text, _internal::strLen(text), style->buttonTextSpacing, style->buttonTextSpaceAddSize, false);
+	}
+	else
+	{
+		if( addTextInputPopup(size, m_inputTextBuffer.data(), 1024, 32, filter, 0) )
+		{
+			input_mode = false;
+			m_lastKeyboardInputItemIdExit = m_uniqueIdCounter;
+			m_inputTextBuffer_out = m_inputTextBuffer;
+			result = true;
+		}
+		else
+		{
+			m_lastKeyboardInputItemId = m_uniqueIdCounter;
+		}
+	}
+	m_drawPointer = back_position;
+	return result;
+}
+
 // данная вещь предполагается использовать только один раз за кадр.
 // он работает как popup окно (не технически а визуально). он включается например при нажатии ПКМ на valueSelector
 // возможно нужно написать чуть по другому. чтобы было множество полей с вводом текста

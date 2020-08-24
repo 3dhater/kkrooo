@@ -17,6 +17,8 @@ struct EditPolyObjectsGUIElements
     f32 * m_position_x = nullptr;
     f32 * m_position_y = nullptr;
     f32 * m_position_z = nullptr;
+    
+    kkPluginGUIWindowElement * m_object_name_element = nullptr;
 }g_EditPolyObjectsGUIElements;
 
 void change_position_x_callback(s32 id, void* data)
@@ -96,9 +98,24 @@ void Application_editParamsWindow_onActivate(s32 id, void* data)
             g_EditPolyObjectsGUIElements.m_position_x = &data[0];
             g_EditPolyObjectsGUIElements.m_position_y = &data[1];
             g_EditPolyObjectsGUIElements.m_position_z = &data[2];
+            
+            g_EditPolyObjectsGUIElements.m_object_name_element->SetText(object->GetName());
         }
     }
 };
+bool nameInputFilter(char16_t ch)
+{
+    return true;
+}
+void textInputResult(const char16_t* text)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    if( scene->getNumOfSelectedObjects() == 1 )
+    {
+        scene->renameObject(scene->getSelectedObject(0), text);
+    }
+}
 void Application::_initEditParamsWindow()
 {
     m_edit_params_window = m_pluginGUI->createWindow();
@@ -110,17 +127,23 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->SetUserData(m_edit_params_window);
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddText(u"Name", 0xFFFFFFFF, 0.f, kkPluginGUIParameterType::Object);
+
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_name_element = m_edit_params_window->AddTextInput(u"hello", v2f(130.f, 20.f), nameInputFilter, textInputResult, kkPluginGUIParameterType::Object);
+
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Position", 0xFFFFFFFF, 0.f, kkPluginGUIParameterType::Object);
  
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"X:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
-    g_EditPolyObjectsGUIElements.m_object_position_x_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_position_x_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
  
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Y:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
-    g_EditPolyObjectsGUIElements.m_object_position_y_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_position_y_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Z:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
-    g_EditPolyObjectsGUIElements.m_object_position_z_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(100.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
+    g_EditPolyObjectsGUIElements.m_object_position_z_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
 }

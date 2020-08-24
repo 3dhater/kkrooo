@@ -300,6 +300,19 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddValueSelectorFloat( f32 * ptr, f32
     return e;
 }
 
+kkPluginGUIWindowElement* PluginGUIWindow::AddTextInput( const char16_t* text, const v2f& size, bool(*filter)(char16_t), void(*textInputResult)(const char16_t*), kkPluginGUIParameterType pt)
+{
+    PluginGUIWindowElement * e = kkCreate<PluginGUIWindowElement>();
+    e->m_type     = PluginGUIWindowElementType::TextInput;
+    e->m_paramType = pt;
+    e->m_size = size;
+    e->m_text = text;
+    e->m_textInputFilter = filter;
+    e->m_textInputResult = textInputResult;
+    m_guiElements.push_back( e );
+    return e;
+}
+
 void PluginGUIWindow::draw()
 {
     if(!m_isActive)
@@ -479,6 +492,26 @@ void PluginGUIWindow::draw()
                         }
                     }
                     
+                    if(m_app->m_KrGuiSystem->isLastItemKeyboardInput())
+                    {
+                        m_app->m_globalInputBlock = true;
+                    }
+                    if(m_app->m_KrGuiSystem->isLastItemKeyboardInputExit())
+                    {
+                        m_app->m_globalInputBlock = false;
+                    }
+                }
+            }break;
+            case PluginGUIWindowElementType::TextInput:
+            {
+                if( item->m_textInputResult )
+                {
+                    if( m_app->m_KrGuiSystem->addTextInput( 
+                        item->m_text.data(),
+                        Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), item->m_textInputFilter, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ))
+                    {
+                        item->m_textInputResult(m_app->m_KrGuiSystem->getTextInputResult());
+                    }
                     if(m_app->m_KrGuiSystem->isLastItemKeyboardInput())
                     {
                         m_app->m_globalInputBlock = true;

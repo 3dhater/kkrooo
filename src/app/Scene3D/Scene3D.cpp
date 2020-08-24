@@ -208,6 +208,25 @@ bool Scene3D::nameIsFree( const char16_t* n )
 	return true;
 }
 
+void Scene3D::renameObject(kkScene3DObject* object, const char16_t* newName)
+{
+	kkString new_name = newName;
+	s32 count = 0;
+	while(true)
+	{
+		if(nameIsFree(new_name.c_str()))
+		{
+			object->SetName(new_name.c_str());
+			return;
+		}
+		else
+		{
+			new_name = newName;
+			new_name += count++;
+		}
+	}
+}
+
 kkString Scene3D::nameCreateNew( const char16_t* n )
 {
 	kkString new_name = n;

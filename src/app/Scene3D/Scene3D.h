@@ -114,6 +114,7 @@ public:
 	Scene3DObject * createNewPolygonalObject( const char16_t* name, PolygonalModel*, const v4f& );
 	bool      nameIsFree( const char16_t* n );
 	kkString  nameCreateNew( const char16_t* n );
+	void      renameObject(kkScene3DObject*, const char16_t* newName);
 
 	void	  updateSelectionAabb();
 	void      updateSceneAabb();

@@ -31,8 +31,6 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 			const Vec4f& rounding )
 {
 	assert(value);
-
-
 	auto old_value = *value;
 
 	if( m_IsShift ) speed *= 10.f;
@@ -131,7 +129,7 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 	}
 	else
 	{
-		if( addTextInputPopup(size, g_textBufForTextinput, 32, 8, valueSelector_inputCallback, 0) )
+		if( addTextInputPopup(size, g_textBufForTextinput, 32, 18, valueSelector_inputCallback, 0) )
 		{
 			input_mode = false;
 			m_lastKeyboardInputItemIdExit = m_uniqueIdCounter;
