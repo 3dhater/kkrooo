@@ -163,6 +163,18 @@ void EventConsumer::processEvent( const kkEvent& ev )
 
 			switch (ev.keyboardEvent.key)
 			{
+			case kkKey::K_A:
+				Kr::Gui::GuiSystem::m_IsA = true;
+				break;
+			case kkKey::K_X:
+				Kr::Gui::GuiSystem::m_IsX = true;
+				break;
+			case kkKey::K_C:
+				Kr::Gui::GuiSystem::m_IsC = true;
+				break;
+			case kkKey::K_V:
+				Kr::Gui::GuiSystem::m_IsV = true;
+				break;
 			case kkKey::K_LEFT:
 				Kr::Gui::GuiSystem::m_IsLeft = true;
 				break;
@@ -234,7 +246,10 @@ void EventConsumer::processEvent( const kkEvent& ev )
 		m_cursor_coords_old.x = ev.mouseEvent.x;
 		m_cursor_coords_old.y = ev.mouseEvent.y;
 
-
+		if( ev.mouseEvent.isLeftButtonDouble() )
+		{
+			Kr::Gui::GuiSystem::m_IsLMBDouble = true;
+		}
 		if( ev.mouseEvent.isLeftButtonDown() )  { m_lmb_down = true;  m_input_update = true; if( !m_lmb_once_state ){m_lmb_once = true;m_lmb_once_state = true;}}
 		if( ev.mouseEvent.isRightButtonDown() ) { m_rmb_down = true;  m_input_update = true; if( !m_rmb_once_state ){m_rmb_once = true;m_rmb_once_state = true;}}
 		if( ev.mouseEvent.isMiddleButtonDown() ){ m_mmb_down = true;  m_input_update = true; if( !m_mmb_once_state ){m_mmb_once = true;m_mmb_once_state = true;}}

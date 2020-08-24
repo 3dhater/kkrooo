@@ -190,6 +190,9 @@ namespace Kr
 			bool   m_IsShift    = false;
 			bool   m_IsAlt      = false;
 			bool   m_IsEnter    = false;
+			bool   m_IsCtrl     = false;
+			bool   m_IsEsc     = false;
+			
 			
 
 			bool   m_mouseIsLMB_up = false;
@@ -547,7 +550,12 @@ namespace Kr
 			static bool  m_IsBackspace;
 			static bool  m_IsHome;
 			static bool  m_IsEnd;
+			static bool   m_IsA;
+			static bool   m_IsX ;
+			static bool   m_IsC  ;
+			static bool   m_IsV   ;
 			static char16_t  m_character;
+			static bool  m_IsLMBDouble;
 
 			float getZoom(){return m_guiZoom;}
 			void setZoom(float v){m_guiZoom = v;}
@@ -573,8 +581,9 @@ namespace Kr
 			}
 			return ptr;
 		}
-
-
+	
+		void CopyToClipboard( const char16_t* str);
+		std::u16string GetTextFromClipboard();
 	}
 }
 

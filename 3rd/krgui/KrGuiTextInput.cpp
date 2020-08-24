@@ -9,79 +9,292 @@ bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t
 {
 	assert(value);
 
-	static size_t cursor_position = 0;
+	static size_t cursor_position = 0; // text cursor
 	static bool is_selected = false;
-	static size_t select_begin = 0;
+	static size_t select_begin = 0; // if(select_begin==select_end)then no selection
 	static size_t select_end = 0;
-	static size_t select_num = 0;
-	//printf("%zu\n",select_num);
 	auto str_len = _internal::strLen(buf);
-	if( m_IsDelete )
+	auto _delete_selection = [&]()
+	{
+
+		size_t sel_1 = select_begin;
+		size_t sel_2 = select_end;
+		if( sel_1 > sel_2 )
+		{
+			sel_1 = sel_2;
+			sel_2 = select_begin;
+		}
+		//printf("count %zu\n", sel_2 - sel_1);
+		auto num_to_delete = sel_2 - sel_1;
+
+		for(size_t i = sel_1; i < str_len; ++i)
+		{
+			buf[i] = buf[i+num_to_delete];
+		}
+		buf[str_len-num_to_delete] = 0;
+		
+		cursor_position = sel_1;
+
+		is_selected = false;
+	};
+	if( m_IsEsc )
+	{
+		if(is_selected)
+		{
+			is_selected = false;
+		}
+	}
+	else if( (m_IsCtrl && m_IsA) || m_IsLMBDouble)
+	{
+		is_selected = true;
+		select_begin = 0;
+		select_end = str_len;
+		cursor_position = select_end;
+	}
+	else if( m_IsCtrl && m_IsX )
+	{
+		if(is_selected)
+		{
+			std::u16string strToClipboard;
+			size_t sel_1 = select_begin;
+			size_t sel_2 = select_end;
+			if( sel_1 > sel_2 )
+			{
+				sel_1 = sel_2;
+				sel_2 = select_begin;
+			}
+			auto num_to_select = sel_2 - sel_1;
+			for(size_t i = sel_1; i < sel_2; ++i)
+			{
+				strToClipboard += buf[i];
+			}
+			CopyToClipboard(strToClipboard.c_str());
+		}
+		_delete_selection();
+	}
+	else if( m_IsCtrl && m_IsC )
+	{
+		if(is_selected)
+		{
+			std::u16string strToClipboard;
+			size_t sel_1 = select_begin;
+			size_t sel_2 = select_end;
+			if( sel_1 > sel_2 )
+			{
+				sel_1 = sel_2;
+				sel_2 = select_begin;
+			}
+			auto num_to_select = sel_2 - sel_1;
+			for(size_t i = sel_1; i < sel_2; ++i)
+			{
+				strToClipboard += buf[i];
+			}
+			CopyToClipboard(strToClipboard.c_str());
+		}
+	}
+	else if( m_IsCtrl && m_IsV )
+	{
+		if(is_selected)
+		{
+			_delete_selection();
+			str_len = _internal::strLen(buf);
+		}
+		auto text = GetTextFromClipboard();
+		auto text_size = text.size();
+		if(text_size)
+		{
+			size_t i = str_len;
+			while(i >= cursor_position)
+			{
+				auto next = i + text_size;
+				if(next < char_limit)
+				{
+					buf[next] = buf[i];
+					buf[i]=u' ';
+				}
+				if(i == 0)
+					break;
+				--i;
+			}
+
+			for( i = cursor_position; i < text_size; ++i )
+			{
+				buf[i] = text[i - cursor_position];
+			}
+		}
+	}
+	else if( m_IsDelete )
 	{
 		bool ok = false;
-		for( size_t i = cursor_position; i < str_len; ++i )
+		if(is_selected)
 		{
-			ok = true;
-			if( i+1 == str_len )
-				break;
-			buf[i] = buf[i+1];
+			_delete_selection();
 		}
-		if(ok)
-			buf[str_len-1] = 0;
+		else
+		{
+			for( size_t i = cursor_position; i < str_len; ++i )
+			{
+				ok = true;
+				if( i+1 == str_len )
+					break;
+				buf[i] = buf[i+1];
+			}
+			if(ok)
+				buf[str_len-1] = 0;
+		}
 	}
 	else if( m_IsBackspace )
 	{
 		bool ok = false;
-		for( size_t i = cursor_position; i < str_len; ++i )
+		if(is_selected)
 		{
-			if(i == 0)
-				break;
-			
-			ok = true;
-
-			buf[i-1] = buf[i];
+			_delete_selection();
 		}
-		if(cursor_position == str_len && !ok)
+		else
 		{
-			ok = true;
-		}
-
-		if(ok)
-		{
-			if(str_len-1 >= 0)
+			for( size_t i = cursor_position; i < str_len; ++i )
 			{
-				--cursor_position;
-				buf[str_len-1] = 0;
+				if(i == 0)
+					break;
+			
+				ok = true;
+
+				buf[i-1] = buf[i];
+			}
+			if(cursor_position == str_len && !ok)
+			{
+				ok = true;
+			}
+
+			if(ok)
+			{
+				if(str_len-1 >= 0)
+				{
+					--cursor_position;
+					buf[str_len-1] = 0;
+				}
 			}
 		}
 	}
 	else if( m_IsHome )
 	{
-		
+		if( cursor_position > 0 )
+		{
+			if( m_IsShift )
+			{
+				if(!is_selected)
+				{
+					is_selected = true;
+					select_begin = cursor_position;
+				}
+				select_end = 0;
+			}
+		}
+		if( !m_IsShift )
+		{
+			is_selected = false;
+		}
 		cursor_position = 0;
 	}
 	else if( m_IsEnd )
 	{
+		if(cursor_position != str_len )
+		{
+			if( m_IsShift )
+			{
+				if(!is_selected)
+				{
+					is_selected = true;
+					select_begin = cursor_position;
+				}
+				select_end = str_len;
+			}
+		}
+		if( !m_IsShift )
+		{
+			is_selected = false;
+		}
 		cursor_position = str_len;
 	}
 	else if( m_IsLeft )
 	{
+		if( !m_IsShift )
+		{
+			if(is_selected)
+			{
+				is_selected = false;
+				if(select_begin > select_end)
+				{
+					++cursor_position;
+				}
+				else
+				{
+					cursor_position = select_begin+1;
+				}
+			}
+		}
+
 		if( cursor_position > 0 )
 		{
+			if( m_IsShift )
+			{
+				if(!is_selected)
+				{
+					is_selected = true;
+					select_begin = cursor_position;
+				}
+				select_end = cursor_position - 1;
+			}
 			--cursor_position;
 		}
 	}
 	else if( m_IsRight )
 	{
+		if( m_IsShift )
+		{
+			if(!is_selected)
+			{
+				is_selected = true;
+				select_begin = cursor_position;
+			}
+		}
+		else
+		{
+			if(is_selected)
+			{
+				is_selected = false;
+				if(select_begin > select_end)
+				{
+					cursor_position = select_begin-1;
+				}
+				else
+				{
+					--cursor_position;
+				}
+			}
+		}
+
 		++cursor_position;
 		if( cursor_position > str_len )
 			cursor_position = str_len;
 		if(cursor_position == char_limit) --cursor_position;
+	
+		if( m_IsShift )
+		{
+			select_end = cursor_position;
+			if(!str_len)
+				is_selected = false;
+		}
 	}
-	else if( m_character && filter )
+	else if( m_character && filter && !m_IsCtrl )
 	{
 		if( filter(m_character) )
 		{
+			if(is_selected)
+			{
+				_delete_selection();
+			}
+
 			if(str_len > char_limit) 
 				str_len = char_limit;
 			
@@ -160,6 +373,7 @@ bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t
 			sel_2 = select_begin;
 		}
 		this->_setNewDrawGroup(false);
+		--sel_2;
 	}
 	Gui::DrawCommands * command = _getDrawCommand();
 	command->inds.clear();

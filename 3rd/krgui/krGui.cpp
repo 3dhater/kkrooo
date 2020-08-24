@@ -15,10 +15,60 @@ bool Gui::GuiSystem::m_IsDelete = false;
 bool Gui::GuiSystem::m_IsBackspace = false;
 bool Gui::GuiSystem::m_IsHome = false;
 bool Gui::GuiSystem::m_IsEnd = false;
+bool Gui::GuiSystem::m_IsA = false;
+bool Gui::GuiSystem::m_IsX = false;
+bool Gui::GuiSystem::m_IsC = false;
+bool Gui::GuiSystem::m_IsV = false;
+bool Gui::GuiSystem::m_IsLMBDouble = false;
 char16_t Gui::GuiSystem::m_character = 0;
 Gui::Vec2f Gui::GuiSystem::m_mouseDelta = Gui::Vec2f();
 Gui::Vec2f Gui::GuiSystem::m_cursorCoords = Gui::Vec2f();
 
+std::u16string Gui::GetTextFromClipboard()
+{
+	std::u16string result;
+#ifdef KRGUI_PLATFORM_WINDOWS
+	if(!OpenClipboard(0))
+		return result;
+
+	HANDLE hData = GetClipboardData( CF_UNICODETEXT );
+	char16_t* buffer = (char16_t*)GlobalLock( hData );
+	GlobalUnlock( hData );
+	CloseClipboard();
+	result = buffer;
+#else
+#error Implement....
+#endif
+	return result;
+}
+void Gui::CopyToClipboard( const char16_t* str)
+{
+	assert(str);
+
+	auto len = Gui::_internal::stl_len(str);
+	if(!len)
+		return;
+
+#ifdef KRGUI_PLATFORM_WINDOWS
+	if(!OpenClipboard(0))
+		return;
+	EmptyClipboard();
+	HGLOBAL clipbuffer;
+	clipbuffer = GlobalAlloc(GMEM_DDESHARE, (len+1) * sizeof(WCHAR));
+
+	wchar_t* buffer;
+	buffer = (wchar_t*)GlobalLock(clipbuffer);
+
+	memcpy(buffer, str, len * sizeof(char16_t));
+	buffer[len] = 0;
+
+	GlobalUnlock(clipbuffer);
+	SetClipboardData(CF_UNICODETEXT, clipbuffer);
+	CloseClipboard();
+#else
+#error Implement....
+#endif
+}
 
 Gui::GuiSystem::GuiSystem()
 {
@@ -147,9 +197,12 @@ void Gui::GuiSystem::newFrame(Gui::Window * guiWindow, float deltaTime)
 
 	m_groupInfoCount = 0;
 
+	m_IsEsc = false;
 	m_IsShift = false;
 	m_IsAlt   = false;
-	m_IsEnter   = false;
+	m_IsCtrl  = false;
+	m_IsEnter = false;
+	
 
 	m_mouseIsLMB_old = m_mouseIsLMB;
 	m_mouseIsLMB = false;
@@ -222,6 +275,8 @@ void Gui::GuiSystem::switchWindow( Gui::Window * guiWindow )
 		if( GetAsyncKeyState(VK_MENU) )  m_IsAlt   = true;
 
 		if( GetAsyncKeyState(VK_RETURN) )  m_IsEnter   = true;
+		if( GetAsyncKeyState(VK_CONTROL) )  m_IsCtrl   = true;
+		if( GetAsyncKeyState(VK_ESCAPE) )  m_IsEsc   = true;
 	}
 #else
 #error Please implement me
@@ -281,6 +336,11 @@ void Gui::GuiSystem::endFrame()
 	m_IsBackspace = false;
 	m_IsHome = false;
 	m_IsEnd = false;
+	m_IsA = false;
+	m_IsC = false;
+	m_IsX = false;
+	m_IsV = false;
+	m_IsLMBDouble = false;
 	m_character = 0;
 }
 
@@ -680,3 +740,5 @@ const Gui::Vec4f& Gui::GuiSystem::getLastClipRect()
 {
 	return m_currentClipRect;
 }
+
+

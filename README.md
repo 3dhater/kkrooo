@@ -18,7 +18,6 @@ Check last release.
 * Creating material from plugins
 * Save scene file / load from file
 * Undo-Redo
-* Remove dear imgui
 
 ## Goals for the future
 
