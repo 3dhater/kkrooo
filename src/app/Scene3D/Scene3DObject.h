@@ -248,6 +248,7 @@ public:
 	bool IsMaterial( const char16_t* name ){ if(!name)return false; if(!m_materialName) return false; 
 		return kkString(name) == kkString(m_materialName); };
 	const char16_t* GetMaterial(){return m_materialName;};
+
 };
 
 // вся настройка графики объекта для realtime рендеринга здесь
@@ -428,6 +429,7 @@ public:
 
 	void setShaderParameter_diffuseColor( const kkColor& color );
 	void setShaderParameter_diffuseTexture( kkImageContainerNode* texture );
+	void ChangePivotPosition(const kkVector4& position);
 };
 
 

@@ -24,7 +24,7 @@ void Application::_drawMainMenu_ObjectCreatorCategories()
                             if( item.m_callback )
                             {
                                 _setRightTabMode(RightTabMode::Edit);
-                                _setEditMode(EditMode::Object);
+                                setEditMode(EditMode::Object);
                                 item.m_callback(item.m_id,item.m_data);
                             }
                         }

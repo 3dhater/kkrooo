@@ -267,8 +267,6 @@ class Application
 
 	bool m_minimized = false;
 
-	void _setSelectMode( SelectMode );
-	void _setEditMode( EditMode );
 
 	void _openImportWindowWithAllTypes();
 
@@ -381,6 +379,8 @@ public:
 	
 	void drawToolTip(const char*);
 
+	void setSelectMode( SelectMode );
+	void setEditMode( EditMode );
 	EditMode getEditMode(){ return m_editMode; }
 	SelectMode getSelectMode(){ return m_selectMode; }
 

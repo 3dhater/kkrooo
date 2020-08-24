@@ -29,7 +29,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::SelectModeSelect), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setSelectMode( SelectMode::JustSelect );
+		setSelectMode( SelectMode::JustSelect );
 	}
 	m_KrGuiSystem->newLine();
 
@@ -42,7 +42,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::TransformMove), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setSelectMode( SelectMode::Move );
+		setSelectMode( SelectMode::Move );
 	}
 	m_KrGuiSystem->newLine();
 
@@ -55,7 +55,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::TransformScale), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setSelectMode( SelectMode::Scale );
+		setSelectMode( SelectMode::Scale );
 	}
 	m_KrGuiSystem->newLine();
 
@@ -68,7 +68,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::TransformRotate), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setSelectMode( SelectMode::Rotate );
+		setSelectMode( SelectMode::Rotate );
 	}
 	m_KrGuiSystem->newLine();
 
@@ -81,7 +81,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::EditVertex), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setEditMode( EditMode::Vertex );
+		setEditMode( EditMode::Vertex );
 	}
 	m_KrGuiSystem->newLine();
 
@@ -94,7 +94,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::EditEdge), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setEditMode( EditMode::Edge );
+		setEditMode( EditMode::Edge );
 	}
 	m_KrGuiSystem->newLine();
 
@@ -107,7 +107,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::EditFace), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
-		_setEditMode( EditMode::Polygon );
+		setEditMode( EditMode::Polygon );
 	}
 	m_KrGuiSystem->newLine();
 

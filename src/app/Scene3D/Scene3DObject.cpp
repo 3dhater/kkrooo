@@ -847,209 +847,6 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 	return ret;
 }
 
-// создание дополнительных точек
-//void Scene3DObject_updateScreenSpacePoints_object( kkVector4& p1, kkVector4& p2, kkCamera * camera, const v2f& rect_sz, const v2f& offset )
-//{
-//	auto p1_2d = kkrooo::worldToScreen( p1, camera, rect_sz, offset );
-//	auto p2_2d = kkrooo::worldToScreen( p2, camera, rect_sz, offset );
-//
-//	auto len = p1_2d.distance(p2_2d);
-//
-//	if( len > 4000 )
-//	{
-//	}
-//	printf( " len %i \n", len );
-//}
-
-// точки для выделения самого объекта
-//void Scene3DObject::_updateScreenSpacePoints_object()
-//{
-//	m_pointsInScreen.clear();
-//	Point2DInformation pointInformation;
-//
-//	auto viewport = kkSingleton<Application>::s_instance->getActiveViewport();
-//	auto rect     = viewport->getRect();
-//	auto rect_sz  = rect.getWidthAndHeight();
-//	auto camera   = viewport->getCamera();
-//	auto frustum  = camera->getFrustum();
-//	auto offset   = v2f(rect.x,rect.y);
-//	Vertex*     vertex1;
-//	kkVector4 p1 = m_pivot;
-//
-//	/// НУЖНО ПРИДУМАТЬ И СДЕЛАТЬ ТАК ЧТОБЫ ТАКОЙ WVP (W = kkMatrix4()) WVP ВЫЧИСЛЯЛАСЬ ТОЛЬКО 1 РАЗ...если оно понадобится где-то ещё
-//	auto VP = camera->getViewProjectionMatrix();
-//	bool skip_some = false;
-//	
-//
-//	if( m_PolyModel->m_controlPoints.size() > 5000 ) 
-//		skip_some = true;
-//
-//	auto M = m_matrix;
-//
-//	u64 sz = m_PolyModel->m_controlPoints.size();
-//	for(u64 i = 0; i < sz; ++i )
-//	{
-//		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
-//		vertex1 = (Vertex*)m_PolyModel->m_verts[CV->m_vertexIndex[0]];
-//
-//		p1 = math::mul( vertex1->m_Position, M ) + m_pivot;
-//		p1.KK_W = 1.f;
-//
-//		if( frustum->pointInFrustum( p1 ) )
-//		{
-//			pointInformation.m_2d_coords = kkrooo::worldToScreen( VP, p1, rect_sz, offset );
-//			m_pointsInScreen.append( pointInformation ) ;
-//		}
-//			//m_pointsInScreen.append( kkrooo::worldToScreen( VP, p1, rect_sz, offset ) ) ;
-//
-//		if( skip_some )
-//		{
-//			++i;
-//		}
-//	}
-//
-//	if( !sz )
-//	{
-//		//m_pointsInScreen.append( kkrooo::worldToScreen( VP, p1, rect_sz, offset ) ) ;
-//		pointInformation.m_2d_coords = kkrooo::worldToScreen( VP, p1, rect_sz, offset );
-//		m_pointsInScreen.append( pointInformation ) ;
-//	}
-//}
-//
-//void Scene3DObject::_updateScreenSpacePoints_vertex()
-//{
-//	Point2DInformation pointInformation;
-//	m_pointsInScreen.clear();
-//	//m_pointsInScreen_IDs.clear();
-//
-//	auto viewport = kkSingleton<Application>::s_instance->getActiveViewport();
-//	auto rect     = viewport->getRect();
-//	auto rect_sz  = rect.getWidthAndHeight();
-//	auto camera   = viewport->getCamera();
-//	auto frustum  = camera->getFrustum();
-//	auto offset   = v2f(rect.x,rect.y);
-//	Vertex*     vertex1;
-//	kkVector4 p1;
-//
-//	auto VP = camera->getViewProjectionMatrix();
-//	auto M = m_matrix;
-//
-//	for(u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-//	{
-//		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
-//		vertex1 = (Vertex*)m_PolyModel->m_verts[CV->m_vertexIndex[0]];
-//
-//		p1 = math::mul( vertex1->m_Position, M ) + m_pivot;
-//		p1.KK_W = 1.f;
-//
-//		if( frustum->pointInFrustum( p1 ) )
-//		{
-//			pointInformation.m_2d_coords = kkrooo::worldToScreen( VP, p1, rect_sz, offset );
-//			pointInformation.m_ID = (s32)i;
-//			m_pointsInScreen.append( pointInformation ) ;
-//			//m_pointsInScreen.append( kkrooo::worldToScreen( VP, p1, rect_sz, offset ) ) ;
-//			//m_pointsInScreen_IDs.append(v2i((s32)i,0));
-//		}
-//	}
-//}
-
-//void Scene3DObject::_updateScreenSpacePoints_edge()
-//{
-//	m_pointsInScreen.clear();
-//
-//	auto viewport = kkSingleton<Application>::s_instance->getActiveViewport();
-//	auto rect     = viewport->getRect();
-//	auto rect_sz  = rect.getWidthAndHeight();
-//	auto camera   = viewport->getCamera();
-//	auto frustum  = camera->getFrustum();
-//	auto offset   = v2f(rect.x,rect.y);
-//	
-//	auto VP = camera->getViewProjectionMatrix();
-//	auto M = m_matrix;
-//	
-//	createEdges();
-//
-//	for(u64 i = 0, sz = m_edges.size(); i < sz; ++i )
-//	{
-//		auto edge = m_edges[i];
-//		auto CV1 = edge->m_firstPoint;
-//		auto CV2 = edge->m_secondPoint;
-//		
-//		auto V1 = (Vertex*)m_PolyModel->m_verts[CV1->m_vertexIndex[0]];
-//		auto V2 = (Vertex*)m_PolyModel->m_verts[CV2->m_vertexIndex[0]];
-//
-//		kkVector4 p1, p2;
-//		p1 = math::mul( V1->m_Position, M ) + m_pivot;
-//		p1.KK_W = 1.f;
-//		p2 = math::mul( V2->m_Position, M ) + m_pivot;
-//		p2.KK_W = 1.f;
-//	
-//		/*if( !kkrooo::pointOnFrontSideCamera(p1, VP) && !kkrooo::pointOnFrontSideCamera(p2, VP) )
-//			continue;*/
-//
-//		auto p2d_1 = kkrooo::worldToScreen( VP, p1, rect_sz, offset );
-//		auto p2d_2 = kkrooo::worldToScreen( VP, p2, rect_sz, offset );
-//		
-//		Point2DInformation pointInformation;
-//		
-//
-//		pointInformation.m_2d_coords = p2d_1;
-//		
-//		if( kkrooo::pointInRect(pointInformation.m_2d_coords, rect) )
-//			m_pointsInScreen.append( pointInformation ) ;
-//
-//		pointInformation.m_2d_coords = p2d_2;
-//		if( kkrooo::pointInRect(pointInformation.m_2d_coords, rect) )
-//			m_pointsInScreen.append( pointInformation ) ;
-//		
-//		v3f start((f32)p2d_1.x, (f32)p2d_1.y, 1.f);
-//		v3f end((f32)p2d_2.x, (f32)p2d_2.y, 1.f);
-//
-//		f32 dist = start.distance(end);
-//
-//		const f32 addddd = 10.f;
-//		f32 add_val = addddd;
-//		while(true)
-//		{
-//			v3f new_p = start + (end - start).normalize() * add_val;
-//			
-//			f32 new_dist = start.distance(new_p);
-//
-//			if( new_dist >= dist )
-//				break;
-//
-//			pointInformation.m_2d_coords.set((s32)new_p.x, (s32)new_p.y);
-//			if( kkrooo::pointInRect(pointInformation.m_2d_coords, rect) )
-//				m_pointsInScreen.append( pointInformation );
-//
-//			add_val += addddd;
-//		}
-//	}
-//}
-
-//void Scene3DObject::UpdateScreenSpacePoints()
-//{
-//	auto em = kkSingleton<Application>::s_instance->getEditMode();
-//	switch(em)
-//	{
-//	case EditMode::Object:
-//		_updateScreenSpacePoints_object();
-//		break;
-//	case EditMode::Vertex:
-//		_updateScreenSpacePoints_vertex();
-//		break;
-//	case EditMode::Edge:
-//		_updateScreenSpacePoints_vertex();
-//	//	_updateScreenSpacePoints_edge();
-//		break;
-//	case EditMode::Polygon:
-//		break;
-//	default:
-//		fprintf(stderr,"Need to implement! [%s]\n", KK_FUNCTION);
-//		break;
-//	}
-//}
-
 void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVertex*>& verts)
 {
 	struct verts_points{  v3f _pos;  v4f _col;  };
@@ -1069,10 +866,8 @@ void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVerte
 	hardware_models_for_update_points.reserve(4000);
 
 	auto M = m_matrix;
-	
 	M.invert();
 	V.KK_W = 1.f;
-
 	V = math::mul(V,M);
 
 	for( size_t i = 0, sz = verts.size(); i < sz; ++i )
@@ -1483,21 +1278,16 @@ void        Scene3DObject::updateAABB_vertex()
 
 void Scene3DObject::applyMatrices()
 {
-	ControlVertex * cv;
-	
-	kkMatrix4 M = m_matrix;
-
-	kkMatrix4 M2 = m_matrix;
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
-		cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+		ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 
 		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
 		{
 			auto V_id    = cv->m_vertexIndex[i2];
 			auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
 		
-			vertex->m_Position = math::mul(vertex->m_Position_fix,M);
+			vertex->m_Position = math::mul(vertex->m_Position_fix,m_matrix);
 			vertex->m_Position_fix = vertex->m_Position;
 		}
 	}
@@ -1753,5 +1543,29 @@ void Scene3DObject::createEdges()
 	m_isEdgesCreated = true;
 }
 
+void Scene3DObject::ChangePivotPosition(const kkVector4& position)
+{
+	auto V = m_pivotFixed - position;
+	auto M = m_matrix;
+	M.invert();
+	V.KK_W = 1.f;
+	V = math::mul(V,M);
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+
+		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		{
+			auto V_id    = cv->m_vertexIndex[i2];
+			auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			vertex->m_Position = vertex->m_Position_fix + V;
+			vertex->m_Position_fix = vertex->m_Position;
+		}
+	}
+	_rebuildModel();
+
+	ApplyPivot();
+	UpdateAabb();
+}
 
 

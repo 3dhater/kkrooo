@@ -835,14 +835,14 @@ void Application::_processShortcuts()
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectInvert)){m_current_scene3D->selectInvert();}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::Redo)){}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::Undo)){}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeJustSelect)){_setSelectMode( SelectMode::JustSelect );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeMove)){_setSelectMode( SelectMode::Move);}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeRotate)){_setSelectMode( SelectMode::Rotate );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeScale)){_setSelectMode( SelectMode::Scale );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModeObject)){_setEditMode( EditMode::Object );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModeVertex)){_setEditMode( EditMode::Vertex );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModeEdge)){_setEditMode( EditMode::Edge );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModePolygon)){_setEditMode( EditMode::Polygon );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeJustSelect)){setSelectMode( SelectMode::JustSelect );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeMove)){setSelectMode( SelectMode::Move);}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeRotate)){setSelectMode( SelectMode::Rotate );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeScale)){setSelectMode( SelectMode::Scale );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModeObject)){setEditMode( EditMode::Object );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModeVertex)){setEditMode( EditMode::Vertex );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModeEdge)){setEditMode( EditMode::Edge );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModePolygon)){setEditMode( EditMode::Polygon );}
     
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EnterTransformation)){m_drawTransformWindow = true;}
     
@@ -919,7 +919,7 @@ void Application::resetScene3D()
 
     m_active_viewport->onNewObject();
 
-    this->_setEditMode(EditMode::Object);
+    this->setEditMode(EditMode::Object);
     setNeedToSave(false);
 }
 
@@ -1486,14 +1486,14 @@ void   Application::_drawPreferencesWindow()
     }*/
 }
 
-void Application::_setSelectMode( SelectMode m )
+void Application::setSelectMode( SelectMode m )
 {
     m_selectMode      = m;
     m_isLocalScale    = false;
     m_isLocalRotation = false;
 }
 
-void Application::_setEditMode( EditMode m )
+void Application::setEditMode( EditMode m )
 {
     auto old_mode = m_editMode;
 
@@ -2184,13 +2184,13 @@ void Application::_drawInfoWindow()
 
 void Application::_applyMatrices()
 {
-    _setEditMode(EditMode::Object);
+    setEditMode(EditMode::Object);
     m_current_scene3D->applyMatrices();
 }
 
 void Application::_resetMatrices()
 {
-    _setEditMode(EditMode::Object);
+    setEditMode(EditMode::Object);
     m_current_scene3D->resetMatrices();
 }
 

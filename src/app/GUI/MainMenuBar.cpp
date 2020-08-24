@@ -110,19 +110,19 @@ void Application::_drawMainMenuBar()
 				{
                     if(m_KrGuiSystem->addMenuItem(u"Object", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::EditModeObject), 0))
                     {
-						_setEditMode( EditMode::Object );
+						setEditMode( EditMode::Object );
                     }
 					if(m_KrGuiSystem->addMenuItem(u"Vertex", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::EditModeVertex), 0))
                     {
-						_setEditMode( EditMode::Vertex );
+						setEditMode( EditMode::Vertex );
                     }
 					if(m_KrGuiSystem->addMenuItem(u"Edge", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::EditModeEdge), 0))
                     {
-						_setEditMode( EditMode::Edge );
+						setEditMode( EditMode::Edge );
                     }
 					if(m_KrGuiSystem->addMenuItem(u"Polygon", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::EditModePolygon), 0))
                     {
-						_setEditMode( EditMode::Polygon );
+						setEditMode( EditMode::Polygon );
                     }
 					m_KrGuiSystem->endMenu();
 				}
@@ -130,19 +130,19 @@ void Application::_drawMainMenuBar()
 				{
                     if(m_KrGuiSystem->addMenuItem(u"Just select", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::SelectModeJustSelect), 0))
                     {
-						_setSelectMode( SelectMode::JustSelect );
+						setSelectMode( SelectMode::JustSelect );
                     }
 					if(m_KrGuiSystem->addMenuItem(u"Move", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::SelectModeMove), 0))
                     {
-						_setSelectMode( SelectMode::Move );
+						setSelectMode( SelectMode::Move );
                     }
 					if(m_KrGuiSystem->addMenuItem(u"Rotate", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::SelectModeRotate), 0))
                     {
-						_setSelectMode( SelectMode::Rotate );
+						setSelectMode( SelectMode::Rotate );
                     }
 					if(m_KrGuiSystem->addMenuItem(u"Scale", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::SelectModeScale), 0))
                     {
-						_setSelectMode( SelectMode::Scale );
+						setSelectMode( SelectMode::Scale );
                     }
 					m_KrGuiSystem->endMenu();
 				}
@@ -177,12 +177,12 @@ void Application::_drawMainMenuBar()
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Rotate local",0))
 				{
-					_setSelectMode( SelectMode::Rotate);
+					setSelectMode( SelectMode::Rotate);
 					m_isLocalRotation = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Scale local",0))
 				{
-					_setSelectMode( SelectMode::Scale);
+					setSelectMode( SelectMode::Scale);
 					m_isLocalScale = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);

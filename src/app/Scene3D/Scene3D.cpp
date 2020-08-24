@@ -1897,17 +1897,6 @@ void Scene3D::scaleSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool
 
 void Scene3D::moveSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool cancel,bool first )
 {
-	//switch(m_app->getEditMode())
-	//{
-	//case EditMode::Object:
-	//default:
-	////	_moveSelectedObjects_object( startStop,e, cancel, first );
-	//	break;
-	//case EditMode::Vertex:
-	////	_moveSelectedObjects_vertex( startStop,e, cancel, first );
-	//	break;
-	//}
-
 	auto em = m_app->getEditMode();
 
 	kkVector4 pivotFix;
@@ -2338,7 +2327,6 @@ void      Scene3D::updateObjectEdgeSelectList()
 // Цель - преобразовать координаты controlVertex в соответствии с матрицами, перестроить модели и сбросить матрицы
 void Scene3D::applyMatrices()
 {
-	//for( auto * o : m_objects_selected )
 	for( u64 i = 0, sz = m_objects_selected.size(); i < sz; ++i )
 	{
 		m_objects_selected[i]->applyMatrices();
