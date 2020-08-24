@@ -458,7 +458,7 @@ namespace Kr
 				float speed = 1.f, Style* style = nullptr,
 				const Vec4f& rounding = Vec4f() );
 
-			bool addTextInputPopup(const Vec2f& size, char16_t* buf, size_t buf_size, bool(*filter)(char16_t), Style* style = nullptr );
+			bool addTextInputPopup(const Vec2f& size, char16_t* buf, size_t buf_size, size_t char_limit, bool(*filter)(char16_t), Style* style = nullptr );
 
 			//bool beginGroup( Group * group );
 			bool beginGroup(const Vec2f& size, bool * expandCollapse = nullptr, Style* style = nullptr);

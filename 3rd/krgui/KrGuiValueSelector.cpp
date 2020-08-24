@@ -5,7 +5,25 @@ using namespace Kr;
 char16_t g_textBufForTextinput[32];
 bool valueSelector_inputCallback(char16_t ch)
 {
+	switch (ch)
+	{
+	case u'0':
+	case u'1':
+	case u'2':
+	case u'3':
+	case u'4':
+	case u'5':
+	case u'6':
+	case u'7':
+	case u'8':
+	case u'9':
+	case u'-':
+	case u'.':
 	return true;
+	default:
+		break;
+	}
+	return false;
 };
 
 bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
@@ -113,15 +131,18 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 	}
 	else
 	{
-		if( addTextInputPopup(size, g_textBufForTextinput, 32, valueSelector_inputCallback, 0) )
+		if( addTextInputPopup(size, g_textBufForTextinput, 32, 18, valueSelector_inputCallback, 0) )
 		{
 			input_mode = false;
 			m_lastKeyboardInputItemIdExit = m_uniqueIdCounter;
+			//printf("F=%f\n", _internal::string_to_float(g_textBufForTextinput, _internal::stl_len(g_textBufForTextinput)) );
 		}
 		else
 		{
 			m_lastKeyboardInputItemId = m_uniqueIdCounter;
 		}
+		if(m_character || m_IsEnter || m_IsDelete || m_IsBackspace)
+			*value = _internal::string_to_float(g_textBufForTextinput, _internal::stl_len(g_textBufForTextinput));
 	}
 	m_drawPointer = back_position;
 

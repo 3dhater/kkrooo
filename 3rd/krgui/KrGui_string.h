@@ -82,6 +82,61 @@ namespace Kr
 					}
 				}
 			}
+			const float string_to_float_table[17] = 
+			{
+				0.f,
+				0.1f,
+				0.01f,
+				0.001f,
+				0.0001f,
+				0.00001f,
+				0.000001f,
+				0.0000001f,
+				0.00000001f,
+				0.000000001f,
+				0.0000000001f,
+				0.00000000001f,
+				0.000000000001f,
+				0.0000000000001f,
+				0.00000000000001f,
+				0.000000000000001f,
+				0.0000000000000001f,
+			};
+			inline float string_to_float(const char16_t* str, size_t len)
+			{
+				assert(str);
+				float result = 0.f;
+				bool is_negative = *str == u'-';
+
+				if(is_negative)
+					++str;
+
+				int i = 0;
+				while(*str >= u'0' && *str <= u'9')
+				{
+					i *= 10;
+					i += *str - u'0';
+					++str;
+				}
+				result = (float)i;
+				
+				i = 0;
+
+				if(*str == u'.')
+					++str;
+
+				int part_2_count = 0;
+				while(*str >= u'0' && *str <= u'9')
+				{
+					i *= 10;
+					i += *str - u'0';
+					++str;
+					++part_2_count;
+				}
+				result += (float)i * string_to_float_table[part_2_count];
+
+				return is_negative ? -result : result;
+			}
 		}
 	}
 }

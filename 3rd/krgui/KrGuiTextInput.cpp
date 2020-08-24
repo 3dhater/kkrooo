@@ -5,7 +5,7 @@ using namespace Kr;
 // данная вещь предполагается использовать только один раз за кадр.
 // он работает как popup окно (не технически а визуально). он включается например при нажатии ПКМ на valueSelector
 // возможно нужно написать чуть по другому. чтобы было множество полей с вводом текста
-bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t buf_size, bool(*filter)(char16_t), Style* style )
+bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t buf_size, size_t char_limit, bool(*filter)(char16_t), Style* style )
 {
 	assert(value);
 
@@ -76,23 +76,30 @@ bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t
 		++cursor_position;
 		if( cursor_position > str_len )
 			cursor_position = str_len;
+		if(cursor_position == char_limit) --cursor_position;
 	}
 	else if( m_character && filter )
 	{
 		if( filter(m_character) )
 		{
+			if(str_len > char_limit) 
+				str_len = char_limit;
+			
 			size_t i = str_len;
-			if(i < buf_size-1)
+
+			while(i >= cursor_position)
 			{
-				buf[i+1] = 0;
-				while(i > cursor_position)
-				{
-					buf[i+1] = buf[i];
-					buf[i] = m_character;
-					--i;
-				}
-				++cursor_position;
+				auto next = i + 1;
+				if(next < char_limit)
+					buf[next] = buf[i];
+
+				if(i == 0)
+					break;
+				--i;
 			}
+			buf[cursor_position] = m_character;
+			++cursor_position;
+			if(cursor_position == char_limit) --cursor_position;
 		}
 	}
 	str_len = _internal::strLen(buf);
