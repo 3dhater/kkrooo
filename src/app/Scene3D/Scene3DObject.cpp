@@ -1617,31 +1617,37 @@ void Scene3DObject::SelecVertsByAdd()
 
 void Scene3DObject::SelecVertsBySub()
 {
-	m_isObjectHaveSelectedVerts = false;
 	createEdges();
-	std::vector<ControlVertex*> vertsToSelect;
+	std::vector<ControlVertex*> vertsToDeselect;
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+		if(!cv->m_isSelected)
+		{
+			for( auto c : cv->m_edges )
+			{
+				if( c->m_firstPoint->m_isSelected )
+					vertsToDeselect.emplace_back(c->m_firstPoint);
+				if( c->m_secondPoint->m_isSelected )
+					vertsToDeselect.emplace_back(c->m_secondPoint);
+			}
+		}
+	}
+	for( auto c : vertsToDeselect )
+	{
+		c->deselect();
+	}
+
+	m_isObjectHaveSelectedVerts = false;
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
 		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 		if(cv->m_isSelected)
 		{
 			m_isObjectHaveSelectedVerts = true;
-
-			for( auto c : cv->m_edges )
-			{
-				if( !c->m_firstPoint->m_isSelected )
-					vertsToSelect.emplace_back(c->m_firstPoint);
-				if( !c->m_secondPoint->m_isSelected )
-					vertsToSelect.emplace_back(c->m_secondPoint);
-			}
+			break;
 		}
 	}
-	for( auto c : vertsToSelect )
-	{
-		c->select();
-	}
-
-	if(m_isObjectHaveSelectedVerts)
-		updateModelPointsColors();
+	updateModelPointsColors();
 	deleteEdges();
 }

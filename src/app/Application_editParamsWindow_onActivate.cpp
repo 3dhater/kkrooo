@@ -308,7 +308,7 @@ void select_sub_vertex(s32 id, void* data)
     auto object = GetSelectedObject();
     if(object)
     {
-        object->SelecVertsByAdd();
+        object->SelecVertsBySub();
         object->UpdateAabb();
 	    scene->updateObjectVertexSelectList();
         scene->updateSceneAabb();
