@@ -56,14 +56,49 @@ Scene3DObject* GetSelectedObject()
 void change_pivot_position_callback(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
-    //app->setEditMode(EditMode::Object);
-    //app->setSelectMode(SelectMode::JustSelect);
     Scene3D* scene = *app->getScene3D();
     auto object = GetSelectedObject();
     if(object)
     {
         object->ChangePivotPosition(object->GetPivot());
-        
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
+void change_pivot_position_callback_toObjectCenter(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        kkVector4 center;
+        object->Aabb().center(center);
+        object->ChangePivotPosition(center);
+        object->setPosition(center);
+        object->ApplyPivot();
+        object->UpdateWorldMatrix();
+        object->UpdateAabb();
+        object->ApplyFixedMatrix();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
+void change_pivot_position_callback_toSceneCenter(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->ChangePivotPosition(kkVector4());
+        object->setPosition(kkVector4());
+        object->ApplyPivot();
+        object->UpdateWorldMatrix();
+        object->UpdateAabb();
+        object->ApplyFixedMatrix();
         scene->updateSceneAabb();
         scene->updateSelectionAabb();
     }
@@ -375,6 +410,10 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     g_EditPolyObjectsGUIElements.m_pivot_positionZ_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_pivot_position_callback, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Z", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddButton(u"To object center", v2f(120.f, 20.f), change_pivot_position_callback_toObjectCenter,0, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddButton(u"To scene center", v2f(120.f, 20.f), change_pivot_position_callback_toSceneCenter,0, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->EndGroup();
 }
