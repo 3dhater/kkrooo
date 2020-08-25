@@ -116,8 +116,8 @@ struct kkEventMouse
 
 	u32 state;
 
-	u16	x;	//< Cursor position on X
-	u16 y;	//< Cursor position on Y
+	f32	x;	//< Cursor position on X
+	f32 y;	//< Cursor position on Y
 
 	int   wheel;	//< Wheel
 

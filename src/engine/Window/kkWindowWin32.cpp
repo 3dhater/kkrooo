@@ -563,8 +563,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ev.type = kkEventType::Mouse;
 		ev.mouseEvent.state = 0u;
 
-		ev.mouseEvent.x = LOWORD(lParam);
-		ev.mouseEvent.y = HIWORD(lParam);
+		static f32 crdX = 0.f;
+		static f32 crdY = 0.f;
+		if(pD)
+		{
+			if( pD->m_focus )
+			{
+				POINT point;
+				GetCursorPos(&point);
+				ScreenToClient(hWnd,&point);
+				crdX = (float)point.x;
+				crdY = (float)point.y;
+			}
+		}
+		/*ev.mouseEvent.x = LOWORD(lParam);
+		ev.mouseEvent.y = HIWORD(lParam);*/
+		ev.mouseEvent.x = crdX;
+		ev.mouseEvent.y = crdY;
+
 		if( wParam & MK_LBUTTON )		ev.mouseEvent.state |= kkEventMouse::kkEventMouseState::MS_LMB_DOWN;
 		if( wParam & MK_RBUTTON )		ev.mouseEvent.state |= kkEventMouse::kkEventMouseState::MS_RMB_DOWN;
 		if( wParam & MK_MBUTTON )		ev.mouseEvent.state |= kkEventMouse::kkEventMouseState::MS_MMB_DOWN;

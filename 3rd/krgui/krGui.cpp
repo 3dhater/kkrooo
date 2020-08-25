@@ -251,6 +251,13 @@ void Gui::GuiSystem::switchWindow( Gui::Window * guiWindow )
 		if( GetActiveWindow() == hwnd )
 		{
 			m_doWindowInput = true;
+
+			POINT point;
+			GetCursorPos(&point);
+			ScreenToClient(hwnd,&point);
+
+			m_cursorCoords.x = (float)point.x;
+			m_cursorCoords.y = (float)point.y;
 		}
 		
 		RECT rc;
@@ -260,12 +267,7 @@ void Gui::GuiSystem::switchWindow( Gui::Window * guiWindow )
 		m_OSWindowClientRect.z = (float)rc.right;
 		m_OSWindowClientRect.w = (float)rc.bottom;
 
-		POINT point;
-		GetCursorPos(&point);
-		ScreenToClient(hwnd,&point);
-
-		m_cursorCoords.x = (float)point.x;
-		m_cursorCoords.y = (float)point.y;
+		
 		
 		if( GetAsyncKeyState(VK_LBUTTON) ) m_mouseIsLMB = true;
 		if( GetAsyncKeyState(VK_RBUTTON) ) m_mouseIsRMB = true;

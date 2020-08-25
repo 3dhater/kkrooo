@@ -1215,7 +1215,6 @@ void Viewport::updateInput()
 	if( kkrooo::pointInRect( *m_vd.m_cursor_position, m_activeViewport->m_rect_modified + v4f(0.f,menuSizeY,0.f) ) || m_activeViewport->m_is_mouse_focus )
 	{
 		inRect = true;
-		printf("asd");
 		// определяю если курсор двигается
 		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f || Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
 		{

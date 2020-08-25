@@ -9,7 +9,7 @@ class Viewport;
 
 class EventConsumer : public kkEventConsumer
 {
-	v2_s16 m_cursor_coords_old;
+	v2f m_cursor_coords_old;
 
 	bool m_lmb_down = false;
 	bool m_lmb_once = false;
