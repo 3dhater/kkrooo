@@ -490,8 +490,11 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"To scene center", v2f(120.f, 20.f), change_pivot_position_callback_toSceneCenter,0, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->EndGroup();
+
+    m_edit_params_window->BeginGroup(u"Other", false);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddButton(u"Attach", v2f(80.f, 20.f), attach_callback,0, kkPluginGUIParameterType::Object);
+    m_edit_params_window->EndGroup();
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->BeginGroup(u"Selection", true);

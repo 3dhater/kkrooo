@@ -229,10 +229,6 @@ public:
 	//void flipNormals();
 
 	// те указатели которые нужно будет потом kkDestroy
-	//kkAllocator<kkVertex*,kkDefault_allocator_CI> m_allocatorVertex_CI = kkAllocator<kkVertex*,kkDefault_allocator_CI>(kkDefault_allocator_CI(kkSingleton<PluginCommonInterface>::s_instance));
-	//kkAllocator<kkPolygon*,kkDefault_allocator_CI> m_allocatorPolygon_CI = kkAllocator<kkPolygon*,kkDefault_allocator_CI>(kkDefault_allocator_CI(kkSingleton<PluginCommonInterface>::s_instance));
-	//kkAllocator<kkControlVertex*,kkDefault_allocator_CI> m_allocatorControlVertex_CI = kkAllocator<kkControlVertex*,kkDefault_allocator_CI>(kkDefault_allocator_CI(kkSingleton<PluginCommonInterface>::s_instance));
-
 	kkArray<kkVertex*>    m_verts         = kkArray<kkVertex*>(0xffff);      // вершины со всех полигонов
 	kkArray<u32>          m_free_verts    = kkArray<u32>(0xffff); // индексы в m_verts на свободные ячейки
 
@@ -241,11 +237,8 @@ public:
 	kkArray<kkControlVertex*> m_controlPoints = kkArray<kkControlVertex*>(0xffff);
 
 	void deleteMarkedPolygons();
-
 	void createControlPoints();
-
 	
-	//kkArray<kkTriangleRayTestResult> m_trianglesForRendering = kkArray<kkTriangleRayTestResult>(0xffff);
 	std::vector<kkTriangleRayTestResult> m_trianglesForRendering;
 
 	

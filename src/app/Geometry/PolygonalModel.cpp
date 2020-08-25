@@ -942,33 +942,32 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 	TIM.invert();
 	TIM.transpose();
 
+	auto old_size = m_verts.size();
+
+	m_verts.reserve(old_size + other->m_verts.size());
+	for( u64 i = 0, sz = other->m_verts.size(); i < sz; ++i )
+	{
+		m_verts.push_back(other->m_verts[i]);
+	}
+	
 	for( auto P : other->m_polygons )
 	{
 		auto polygon = (Polygon3D*)P;
-
-		Polygon3D* newPolygon = kkCreate<Polygon3D>();
-
 		for( size_t i = 0, sz = polygon->m_vertsInds.size(); i < sz; ++i )
 		{
 			auto V = (Vertex*)other->m_verts[polygon->m_vertsInds[i]];
-			Vertex * newVertex = kkCreate<Vertex>();
+			
+			polygon->m_vertsInds[i] += old_size;
 
-			newVertex->m_Boneinds	= V->m_Boneinds;
-			newVertex->m_Color		= V->m_Color;
+			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
+			V->m_Normal_fix = V->m_Normal;
 
-			newVertex->m_Normal		= math::mul(V->m_Normal_fix, TIM);
-			newVertex->m_Normal_fix = newVertex->m_Normal;
-
-			newVertex->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
-			newVertex->m_Position	= math::mul(newVertex->m_Position, invertMatrix) ;
-			newVertex->m_Position_fix = newVertex->m_Position;
-
-			newVertex->m_UV			= V->m_UV;
-			newVertex->m_Weights	= V->m_Weights;
-			newVertex->m_weld		= true;
-
-			newPolygon->addVertex(newVertex);
+			V->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
+			V->m_Position	= math::mul(V->m_Position, invertMatrix) ;
+			V->m_Position_fix = V->m_Position;
 		}
-		this->addPolygon( newPolygon, true, false, false);
+		m_polygons.push_back(polygon);
 	}
+	other->m_verts.clear();
+	other->m_polygons.clear();
 }
