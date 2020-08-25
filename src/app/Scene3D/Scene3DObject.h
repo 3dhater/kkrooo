@@ -430,6 +430,8 @@ public:
 	void setShaderParameter_diffuseColor( const kkColor& color );
 	void setShaderParameter_diffuseTexture( kkImageContainerNode* texture );
 	void ChangePivotPosition(const kkVector4& position);
+	void SelecVertsByAdd();
+	void SelecVertsBySub();
 };
 
 

@@ -285,6 +285,37 @@ void change_position_z_callback(s32 id, void* data)
         scene->updateSelectionAabb();
     }
 }
+
+void select_add_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->SelecVertsByAdd();
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
+void select_sub_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->SelecVertsByAdd();
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
 // установка параметров окна в соответствии с параметрами текущего объекта должны быть установлены здесь
 void Application_editParamsWindow_onActivate(s32 id, void* data)
 {
@@ -343,6 +374,10 @@ void textInputResult(const char16_t* text)
         auto object = scene->getSelectedObject(0);
         kkString currentName = object->GetName();
         kkString newName = text;
+
+        if(!newName.size())
+            newName = currentName;
+
         if( currentName != newName )
         {
             scene->renameObject(scene->getSelectedObject(0), text);
@@ -361,21 +396,16 @@ void Application::_initEditParamsWindow()
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Name", 0xFFFFFFFF, 0.f, kkPluginGUIParameterType::Object);
-
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     g_EditPolyObjectsGUIElements.m_object_name_element = m_edit_params_window->AddTextInput(u"hello", v2f(130.f, 20.f), nameInputFilter, textInputResult, kkPluginGUIParameterType::Object);
-
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Position", 0xFFFFFFFF, 0.f, kkPluginGUIParameterType::Object);
- 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"X:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
     g_EditPolyObjectsGUIElements.m_object_position_x_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
- 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Y:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
     g_EditPolyObjectsGUIElements.m_object_position_y_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
-
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddText(u"Z:", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
     g_EditPolyObjectsGUIElements.m_object_position_z_element = m_edit_params_window->AddValueSelectorFloat(0, 0.01f, true, v2f(130.f, 20.f), change_position_x_callback, kkPluginGUIParameterType::Object);
@@ -440,5 +470,14 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddButton(u"To scene center", v2f(120.f, 20.f), change_pivot_position_callback_toSceneCenter,0, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->EndGroup();
+
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->BeginGroup(u"Selection", true);
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddButton(u"+", v2f(20.f, 20.f), select_add_vertex,0, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddButton(u"-", v2f(20.f, 20.f), select_sub_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->EndGroup();
 }

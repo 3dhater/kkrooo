@@ -71,7 +71,7 @@ public:
 };
 
 
-
+struct Edge;
 class ControlVertex : public kkControlVertex
 {
 public:
@@ -95,6 +95,9 @@ public:
 	// образует edge с такими-то ControlVertex
 	std::vector<ControlVertex*> m_edgeWith; // когда выделяется ребро, то обоим вершинам нужно указать друг друга
 	
+	// created in Scene3DObject::createEdges
+	std::vector<Edge*> m_edges;
+
 	// когда выбран полигон, каждой контрольной вершине нужно добавить информацию об этом полигоне
 	//std::vector<u64> m_selectedPolys;
 	u32 m_selectedPolysCounter = 0; // возможно это-же можно сделать и с рёбрами

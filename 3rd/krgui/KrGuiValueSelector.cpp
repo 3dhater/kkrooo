@@ -86,7 +86,8 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 	{
 		_updateMouseInput(mouseButton::LMB);
 
-		if( _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentClipRect ) && m_mouseIsRMB_up)
+		auto inRect = _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentClipRect );
+		if( (inRect && m_mouseIsRMB_up) || (inRect && m_IsLMBDouble) )
 		{
 			input_mode = true;
 			input_mode_elementID = m_uniqueIdCounter;

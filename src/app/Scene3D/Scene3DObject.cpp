@@ -1488,6 +1488,12 @@ void Scene3DObject::createEdges()
 {
 	if(m_isEdgesCreated)
 		return;
+
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+		cv->m_edges.clear();
+	}
 	
 	//std::unordered_map<u64, Edge> map;
 	std::unordered_map<u64, u64> map;     // 2 объединённых адреса как ключ и индекс на сам массив хранящий Edge
@@ -1517,6 +1523,9 @@ void Scene3DObject::createEdges()
 			Edge * edge = new Edge;
 			edge->m_firstPoint  = cv_first;
 			edge->m_secondPoint = cv_second;
+
+			cv_first->m_edges.emplace_back(edge);
+			cv_second->m_edges.emplace_back(edge);
 
 			// надо найти, было ли данное ребро добавлено ранее
 			// в качестве уникального ключа берутся 4 байта с одного адреса и 4 байта с другого
@@ -1575,4 +1584,64 @@ void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 	UpdateAabb();
 }
 
+void Scene3DObject::SelecVertsByAdd()
+{
+	m_isObjectHaveSelectedVerts = false;
+	createEdges();
+	std::vector<ControlVertex*> vertsToSelect;
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+		if(cv->m_isSelected)
+		{
+			m_isObjectHaveSelectedVerts = true;
 
+			for( auto c : cv->m_edges )
+			{
+				if( !c->m_firstPoint->m_isSelected )
+					vertsToSelect.emplace_back(c->m_firstPoint);
+				if( !c->m_secondPoint->m_isSelected )
+					vertsToSelect.emplace_back(c->m_secondPoint);
+			}
+		}
+	}
+	for( auto c : vertsToSelect )
+	{
+		c->select();
+	}
+
+	if(m_isObjectHaveSelectedVerts)
+		updateModelPointsColors();
+	deleteEdges();
+}
+
+void Scene3DObject::SelecVertsBySub()
+{
+	m_isObjectHaveSelectedVerts = false;
+	createEdges();
+	std::vector<ControlVertex*> vertsToSelect;
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+		if(cv->m_isSelected)
+		{
+			m_isObjectHaveSelectedVerts = true;
+
+			for( auto c : cv->m_edges )
+			{
+				if( !c->m_firstPoint->m_isSelected )
+					vertsToSelect.emplace_back(c->m_firstPoint);
+				if( !c->m_secondPoint->m_isSelected )
+					vertsToSelect.emplace_back(c->m_secondPoint);
+			}
+		}
+	}
+	for( auto c : vertsToSelect )
+	{
+		c->select();
+	}
+
+	if(m_isObjectHaveSelectedVerts)
+		updateModelPointsColors();
+	deleteEdges();
+}

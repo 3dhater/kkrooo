@@ -475,7 +475,7 @@ void boxCallback(s32 id, void * d )
 	generateLeftPlane(box_data, gc);
 
 	gc->setName(name.data());
-	auto new_object = gc->endModel(true);
+	auto new_object = gc->endModel(true, 0.00001f);
 
 	new_object->SetPluginGUIWindow(box_data->window);
 	scene->deselectAll();
