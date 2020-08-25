@@ -126,6 +126,22 @@ void reset_matrix_callback(s32 id, void* data)
     }
 }
 
+void apply_matrix_callback(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->applyMatrices();
+        object->UpdateWorldMatrix();
+        object->UpdateAabb();
+        object->ApplyFixedMatrix();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
 void change_scale_callback(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -207,9 +223,11 @@ void change_pitch_callback(s32 id, void* data)
         math::makeRotationMatrix(MR,qZ);
 
         auto W = object->GetMatrix();
-        W = MP * W;
-        W = MY * W;
-        W = MR * W;
+
+        W = W*MP;
+        W = W*MY;
+        W = W*MR;
+
         object->SetMatrix(W);
 
         object->UpdateWorldMatrix();
@@ -322,7 +340,13 @@ void textInputResult(const char16_t* text)
     Scene3D* scene = *app->getScene3D();
     if( scene->getNumOfSelectedObjects() == 1 )
     {
-        scene->renameObject(scene->getSelectedObject(0), text);
+        auto object = scene->getSelectedObject(0);
+        kkString currentName = object->GetName();
+        kkString newName = text;
+        if( currentName != newName )
+        {
+            scene->renameObject(scene->getSelectedObject(0), text);
+        }
     }
 }
 void Application::_initEditParamsWindow()
@@ -395,6 +419,7 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddText(u"Z", 0xFFFFFFFF, 3.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddButton(u"Reset", v2f(80.f, 20.f), reset_matrix_callback,0, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddButton(u"Apply", v2f(80.f, 20.f), apply_matrix_callback,0, kkPluginGUIParameterType::Object);
     m_edit_params_window->EndGroup();
 
     m_edit_params_window->BeginGroup(u"Pivot", false);

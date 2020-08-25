@@ -1278,6 +1278,10 @@ void        Scene3DObject::updateAABB_vertex()
 
 void Scene3DObject::applyMatrices()
 {
+	auto TIM = m_matrix;
+	TIM.invert();
+	TIM.transpose();
+
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
 		ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
@@ -1289,6 +1293,9 @@ void Scene3DObject::applyMatrices()
 		
 			vertex->m_Position = math::mul(vertex->m_Position_fix,m_matrix);
 			vertex->m_Position_fix = vertex->m_Position;
+
+			vertex->m_Normal = math::mul(vertex->m_Normal_fix, TIM);
+			vertex->m_Normal_fix = vertex->m_Normal;
 		}
 	}
 
