@@ -3,6 +3,7 @@
 
 #include "Common/kkInfoSharedLibrary.h"
 #include "../Application.h"
+#include "../Scene3D/Scene3D.h"
 
 #include "../Plugins/PluginObjectCategory.h"
 #include "../Functions.h"
@@ -25,6 +26,7 @@ void Application::_drawMainMenu_ObjectCreatorCategories()
                             {
                                 _setRightTabMode(RightTabMode::Edit);
                                 setEditMode(EditMode::Object);
+                                m_current_scene3D->deselectAll();
                                 item.m_callback(item.m_id,item.m_data);
                             }
                         }

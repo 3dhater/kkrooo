@@ -42,18 +42,18 @@ public:
 	// при создании software модели нужно запомнить индекс вершины (в software буфере)
 	//   чтобы потом иметь возможно быстро найти нужную вершину
 	// значение устанавливается при перестройке модели
-	//u32        m_indexForSoftware       = 0;
-	//kkArray<u32> m_vertexIndexForSoftware       = 0; // вершина полигона может создавать множество hardware точек
-	kkArray<std::pair<u32,u32>> m_vertexIndexForSoftware       = 0; // вершина полигона может создавать множество hardware точек
+	std::vector<std::pair<u32,u32>> m_vertexIndexForSoftware      ; // вершина полигона может создавать множество hardware точек
 	                                             // перед перестройкой модели нужно очищать список
 	                                             // индекс в мешбуфере, индекс софтваре модели
-	kkArray<std::pair<u32,u32>> m_vertexIndexForSoftware_lines = 0;
+	std::vector<std::pair<u32,u32>> m_vertexIndexForSoftware_lines;
 	
 	// индекс части модели, которая строит себя из этой вершины
 	//kkArray<u32> m_softwareModelIndex = 0;
 	//u32  m_SoftwareModels_lines_ID = 0;
 
 public:
+
+	//при добавлении полей нужно будет дополнить копирование внутри PolygonalModel::addModel(PolygonalModel* other)
 	kkVector4    m_Position;
 	kkVector4    m_Position_fix;
 	kkVector4    m_UV;

@@ -32,7 +32,7 @@ protected:
 	void (*f_onClose)(kkWindow*) = nullptr;
 
 
-
+	bool m_focus = true;
 	bool			m_is_fullscreen = false;
 	bool			m_is_visible = true;
 	kkGraphicsSystem * m_gs  = nullptr;
@@ -124,7 +124,7 @@ public:
 		m_id = id;
 	}
 
-	
+	bool isFocus(){return m_focus;}
 };
 
 

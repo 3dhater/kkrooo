@@ -405,10 +405,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 		}
 	break;
+	case WM_KILLFOCUS:
+	{
+		if(pD)
+		{
+			pD->m_focus = false;
+		}
+	}break;
 	case WM_SETFOCUS:
 		ev.type   = kkEventType::Window;
 		ev.windowEvent.eventID = kkEventWindowAction::FocusSet;
 		ev.windowEvent.window  = pD;
+		if(pD)
+		{
+			pD->m_focus = true;
+		}
 		break;
 	case WM_ACTIVATEAPP:
 		ev.type   = kkEventType::Window;
@@ -528,10 +539,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		kkGetMainSystem()->addEvent( ev );
 		break;
 	case WM_MOUSEWHEEL:
-		ev.type = kkEventType::MouseWheel;
-		ev.mouseEvent.state = 0u;
-		ev.mouseEvent.wheel = int( (f32)GET_WHEEL_DELTA_WPARAM(wParam) / (f32)WHEEL_DELTA );
-		kkGetMainSystem()->addEvent( ev );
+		if(pD)
+		{
+			if( pD->m_focus )
+			{
+				ev.type = kkEventType::MouseWheel;
+				ev.mouseEvent.state = 0u;
+				ev.mouseEvent.wheel = int( (f32)GET_WHEEL_DELTA_WPARAM(wParam) / (f32)WHEEL_DELTA );
+				kkGetMainSystem()->addEvent( ev );
+			}
+		}
 		return 0;
 	case WM_LBUTTONDBLCLK:
 	case WM_RBUTTONDBLCLK:

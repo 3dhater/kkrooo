@@ -49,7 +49,6 @@ public:
 	kkArray<Vertex*> m_verts = kkArray<Vertex*>(4);
 
 
-	//kkAllocator<u32,kkDefault_allocator_CI> m_allocatorVertexIndex_CI = kkAllocator<u32,kkDefault_allocator_CI>(kkDefault_allocator_CI(kkSingleton<PluginCommonInterface>::s_instance));
 	kkArray<u32> m_vertsInds  = kkArray<u32>(4);
 	kkArray<u32> m_controlVertsInds  = kkArray<u32>(4);
 

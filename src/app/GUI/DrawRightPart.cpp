@@ -111,6 +111,7 @@ void Application::_drawRightToolBar_createTab(float x, float y)
                     if( item.m_callback )
                     {
                         _setRightTabMode(RightTabMode::Edit);
+                        m_current_scene3D->deselectAll();
                         setEditMode(EditMode::Object);
                         item.m_callback(item.m_id,item.m_data);
                     }

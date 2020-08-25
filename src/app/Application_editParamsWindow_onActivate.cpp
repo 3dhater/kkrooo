@@ -53,6 +53,25 @@ Scene3DObject* GetSelectedObject()
     return nullptr;
 }
 
+void attach_pickObject_callback(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    auto pickedObject = app->getPickedObject();
+    if(object && pickedObject)
+    {
+        object->AttachObject(pickedObject);
+        scene->deleteObject(pickedObject);
+        scene->selectObject(object);
+    }
+}
+void attach_callback(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    app->setObjectPickMode(attach_pickObject_callback);
+}
+
 void change_pivot_position_callback(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -471,6 +490,8 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"To scene center", v2f(120.f, 20.f), change_pivot_position_callback_toSceneCenter,0, kkPluginGUIParameterType::Object);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
     m_edit_params_window->EndGroup();
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
+    m_edit_params_window->AddButton(u"Attach", v2f(80.f, 20.f), attach_callback,0, kkPluginGUIParameterType::Object);
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->BeginGroup(u"Selection", true);

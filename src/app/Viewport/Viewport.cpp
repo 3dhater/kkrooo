@@ -303,7 +303,6 @@ void Viewport::setActive( bool v )
 
 	m_is_active = v;
 	m_activeViewport = this;
-	updateObject2DPoints();
 }
 
 void Viewport::destroyViewport()
@@ -375,8 +374,6 @@ void Viewport::_addViewport(bool hor)
 	update();
 	
 	m_children.push_back( new_viewport );
-	
-	updateObject2DPoints();
 }
 
 void Viewport::_processCommands()
@@ -584,354 +581,8 @@ void Viewport::_drawRecursivelyBorders(Viewport* v)
 int g_m_f = 4;   
 int g_l_f = 4;
 
-//void Viewport::_drawImguiRecursively(Viewport* main, Viewport* v)
-//{
-//	/*if( ImGui::Begin("info", 0) )
-//	{
-//		ImGui::RadioButton( "1 ALWAYS", &g_m_f, 0 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 ALWAYS", &g_l_f, 0 );
-//
-//		ImGui::RadioButton( "1 EQUAL", &g_m_f, 1 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 EQUAL", &g_l_f, 1 );
-//
-//		ImGui::RadioButton( "1 GEQUAL", &g_m_f, 2 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 GEQUAL", &g_l_f, 2 );
-//
-//		ImGui::RadioButton( "1 GREATER", &g_m_f, 3 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 GREATER", &g_l_f, 3 );
-//
-//		ImGui::RadioButton( "1 LEQUAL", &g_m_f, 4 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 LEQUAL", &g_l_f, 4 );
-//
-//		ImGui::RadioButton( "1 LESS", &g_m_f, 5 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 LESS", &g_l_f, 5 );
-//
-//		ImGui::RadioButton( "1 NEVER", &g_m_f, 6 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 NEVER", &g_l_f, 6 );
-//
-//		ImGui::RadioButton( "1 NOTEQUAL", &g_m_f, 7 );
-//		ImGui::SameLine();
-//		ImGui::RadioButton( "2 NOTEQUAL", &g_l_f, 7 );
-//
-//		ImGui::End();
-//	}*/
-//
-//	if( !m_mainViewport->m_isMaximized )
-//	{
-//		for( size_t i = 0, sz = v->m_children.size(); i < sz; ++i )
-//		{
-//			v->_drawImguiRecursively(main, v->m_children[i]);
-//		}
-//	}
-//	
-//	bool pointinrect = false;
-//	if( kkrooo::pointInRect( *v->m_vd.m_cursor_position, v->m_rect_modified ) )
-//	{
-//		pointinrect = true;
-//	}
-//
-//	bool split = false;
-//	ViewportCommand cmd;
-//	cmd.m_viewport = v;
-//
-//	
-//	
-//	if( v->m_is_active || m_isNotHideViewportGUI  )
-//	{
-//		if( *m_vd.m_state_keyboard == AppState_keyboard::Ctrl || m_isNotHideViewportGUI )
-//		{
-//			m_vd.m_app->setImguiWindowRounding(0.f);
-//
-//			ImGui::SetNextWindowBgAlpha(0.0f);
-//			ImGui::SetNextWindowPos(ImVec2(
-//				f32(v->m_rect_modified.x+2),
-//				f32(v->m_rect_modified.y+2)
-//			));
-//			ImGui::SetNextWindowSize(ImVec2(
-//				v->m_viewport_to_gl_funk.z-5,
-//				v->m_viewport_to_gl_funk.w
-//			));
-//			if( ImGui::Begin(v->m_nameViewportMenuBar, 0, ImGuiWindowFlags_NoTitleBar 
-//				| ImGuiWindowFlags_NoResize   
-//				| ImGuiWindowFlags_NoMove     
-//				| ImGuiWindowFlags_NoScrollbar
-//				| ImGuiWindowFlags_NoSavedSettings 
-//				| ImGuiWindowFlags_MenuBar
-//				| ImGuiWindowFlags_NoBringToFrontOnFocus
-//			) )
-//			{
-//				if (ImGui::BeginMenuBar())
-//				{
-//					if (ImGui::BeginMenu("Viewport"))
-//					{
-//						v->m_isMainMenuActive = true;
-//
-//						if( ImGui::BeginMenu("Set Draw Mode" ) )
-//						{
-//
-//
-//							if( ImGui::MenuItem("Material", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::DrawModeMaterial) ) )
-//							{
-//								_set_draw_mode( _draw_mode::_draw_mode_material );
-//							}
-//							if( ImGui::MenuItem("Lines", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::DrawModeLines) ) )
-//							{
-//								_set_draw_mode( _draw_mode::_draw_mode_lines );
-//							}
-//							if( ImGui::MenuItem("Material+Lines", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::DrawModeMaterialAndLines) ) )
-//							{
-//								_set_draw_mode( _draw_mode::_draw_mode_lines_and_material );
-//							}
-//
-//							ImGui::EndMenu();
-//						}
-//						
-//						
-//						ImGui::Separator();
-//
-//						ImGui::MenuItem("Show grid", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::ToggleGrid) ,&v->m_isDrawGrid);
-//
-//						if( !m_mainViewport->m_isMaximized )
-//						{
-//							if(ImGui::MenuItem("Split vertically"))
-//							{
-//								split = true;
-//								cmd.m_type = ViewportCommandType::AddViewPort_Vert;
-//							}
-//							if(ImGui::MenuItem("Split horizontally"))
-//							{
-//								split = true;
-//								cmd.m_type = ViewportCommandType::AddViewPort_Hor;
-//							}
-//						}
-//
-//						ImGui::Separator();
-//						if( !m_mainViewport->m_isMaximized )
-//						{
-//							if(ImGui::MenuItem("Maximize", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::Maximize) )){main->_toggleFullscreen();}
-//						}
-//						else
-//							if(ImGui::MenuItem("Minimize", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::Maximize) )){main->_toggleFullscreen();}
-//
-//						ImGui::EndMenu();
-//					}
-//					if (ImGui::BeginMenu("Camera"))
-//					{
-//						v->m_isMainMenuActive = true;
-//
-//						if(ImGui::MenuItem("Perspective",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetPerspective),&v->m_isActivePerspective))
-//						{
-//							v->_setActiveCamera(v->m_cameraPersp);
-//						}
-//						if(ImGui::MenuItem("Front",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetFront),&v->m_isActiveFront))
-//						{
-//							v->_setActiveCamera(v->m_cameraFront);
-//						}
-//						if(ImGui::MenuItem("Back",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetBack),&v->m_isActiveBack))
-//						{
-//							v->_setActiveCamera(v->m_cameraBack);
-//						}
-//						if(ImGui::MenuItem("Left",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetLeft),&v->m_isActiveLeft))
-//						{
-//							v->_setActiveCamera(v->m_cameraLeft);
-//						}
-//						if(ImGui::MenuItem("Right",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetRight),&v->m_isActiveRight))
-//						{
-//							v->_setActiveCamera(v->m_cameraRight);
-//						}
-//						if(ImGui::MenuItem("Top",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetTop),&v->m_isActiveTop))
-//						{
-//							v->_setActiveCamera(v->m_cameraTop);
-//						}
-//						if(ImGui::MenuItem("Bottom",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Viewport::SetBottom),&v->m_isActiveBottom))
-//						{
-//							v->_setActiveCamera(v->m_cameraBottom);
-//						}
-//						ImGui::Separator();
-//						if(ImGui::MenuItem("Reset",v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Camera::Reset)))
-//						{
-//							v->resetCamera();
-//						}
-//						if(ImGui::MenuItem("To selection", v->m_vd.m_shortcutManager->getShortcutText(ShortcutCommand_Camera::ToSelection)))
-//						{
-//							v->moveToSelection();
-//						}
-//
-//						ImGui::EndMenu();
-//					}
-//					if(ImGui::BeginMenu("Options"))
-//					{
-//						v->m_isMainMenuActive = true;
-//
-//						ImGui::MenuItem("Don't hide viewport GUI",0,&m_isNotHideViewportGUI);
-//						ImGui::EndMenu();
-//					}
-//					ImGui::EndMenuBar();
-//				}
-//
-//				if( v->m_drawContextMenu )
-//					v->_drawPopupContextMenu( pointinrect );
-//			}
-//			ImGui::End();
-//		}
-//	}
-//
-//	if( v->m_is_active && !m_mainViewport->m_isMaximized )
-//	{
-//		if( v->m_drawContextMenu && !m_isNotHideViewportGUI )
-//		{
-//			v->_drawPopupContextMenu( false );
-//		}
-//
-//		if( *m_vd.m_state_keyboard == AppState_keyboard::Ctrl )
-//		{
-//			ImGui::SetNextWindowBgAlpha(0.0f);
-//			ImGui::SetNextWindowPos(ImVec2(
-//				f32(v->m_rect_modified.x-17),
-//				f32(v->m_rect_modified.w-40)
-//			));
-//			ImGui::SetNextWindowSize(ImVec2(800,60));
-//
-//			ImGui::Begin(v->m_name,0,
-//				ImGuiWindowFlags_NoTitleBar 
-//				| ImGuiWindowFlags_NoResize   
-//				| ImGuiWindowFlags_NoMove     
-//				| ImGuiWindowFlags_NoScrollbar
-//				| ImGuiWindowFlags_NoSavedSettings
-//				//| ImGuiWindowFlags_NoInputs
-//			);
-//
-//			m_vd.m_app->setImguiButtonStyle(Application::_imgui_buttonStyle_viewport);
-//		
-//
-//			ImGui::SameLine(20.f);
-//			if( m_vd.m_GUIResources->m_DIB_viewportSplitVer )
-//			{
-//				u32 id = *(u32*)m_vd.m_GUIResources->m_DIB_viewportSplitVer->getHandle();
-//				if( ImGui::ImageButton((void*)(intptr_t)id,ImVec2(16.f,16.f),ImVec2(0,0),ImVec2(1,1),0) )
-//				{
-//					split = true;
-//					cmd.m_type = ViewportCommandType::AddViewPort_Vert;
-//				}
-//			}
-//			else
-//			{
-//				if( ImGui::Button("|", m_vd.m_app->isImguiActive() ))
-//				{
-//					split = true;
-//					cmd.m_type = ViewportCommandType::AddViewPort_Vert;
-//				}
-//			}
-//
-//			ImGui::SameLine(40.f);
-//			if( m_vd.m_GUIResources->m_DIB_viewportSplitHor )
-//			{
-//				u32 id = *(u32*)m_vd.m_GUIResources->m_DIB_viewportSplitHor->getHandle();
-//				if( ImGui::ImageButton((void*)(intptr_t)id,ImVec2(16.f,16.f),ImVec2(0,0),ImVec2(1,1),0) )
-//				{
-//					split = true;
-//					cmd.m_type = ViewportCommandType::AddViewPort_Hor;
-//				}
-//			}else
-//			{
-//				if( ImGui::Button("-", m_vd.m_app->isImguiActive()) )
-//				{
-//					split = true;
-//					cmd.m_type = ViewportCommandType::AddViewPort_Hor;
-//				}
-//			}
-//			ImGui::End();
-//		}
-//	}
-//
-//	if( split )
-//	{
-//		main->m_viewport_commands.push_back(cmd);
-//	}
-//	m_vd.m_app->setImguiWindowRounding(10.f);
-//
-//	_drawViewportTypeName(v);
-//	
-//
-//	// в начале m_hoveredObjects находятся самые дальние объекты
-//	// * нужно определять когда курсор ушёл за пределы вьюпорта
-//	//    и очищать v->m_hoveredObjects
-//
-//	if( !v->m_activeViewport->m_drawContextMenu )
-//	{
-//		if( v->m_hoveredObjects.size() )
-//		{
-//			m_toolTipText.clear();
-//
-//			//printf("[%s]\n",m_hoveredObjects[m_hoveredObjects.size()-1]->m_name.to_kkStringA().data() );
-//
-//			for( size_t 
-//				i     = v->m_hoveredObjects.size() - 1, 
-//				first = i,
-//				sz    = v->m_hoveredObjects.size(); 
-//			
-//				i >= 0; )
-//			{
-//				if( i == first )
-//				{
-//					m_toolTipText += v->m_hoveredObjects[i]->m_name.to_kkStringA().data();
-//				}
-//				else
-//				{
-//					m_toolTipText += v->m_hoveredObjects[i]->m_name.to_kkStringA().data();
-//				}
-//
-//				m_toolTipText += '\n';
-//
-//				if( sz > 1 && i == first )
-//				{
-//					for( size_t i2 = 0, sz2 = m_toolTipText.size(); i2 < sz2; ++i2 )
-//					{
-//						m_toolTipText += "-";
-//					}
-//					m_toolTipText += '\n';
-//				}
-//
-//				if( i == 0 )
-//					break;
-//
-//				--i;
-//			}
-//			/*for( size_t i = 0, sz = v->m_hoveredObjects.size(); i < sz; ++i )
-//			{
-//				m_toolTipText += v->m_hoveredObjects[i]->m_name.to_kkStringA().data();
-//				m_toolTipText += '\n';
-//
-//				if( sz > 1 && i == 0 )
-//				{
-//					for( size_t i2 = 0, sz2 = m_toolTipText.size(); i2 < sz2; ++i2 )
-//					{
-//						m_toolTipText += "-";
-//					}
-//					m_toolTipText += '\n';
-//				}
-//
-//			}*/
-//			m_vd.m_app->drawToolTip(m_toolTipText.data());
-//		}
-//	}
-//
-//	if( !pointinrect )
-//	{
-//		v->m_hoveredObjects.clear();
-//	}
-//}
-
 void Viewport::_drawPopupContextMenu(bool over_window )
 {
-	
 }
 
 void Viewport::_drawBackground()
@@ -1160,9 +811,6 @@ void Viewport::_drawScene3D()
 		fff = true;
 	}
 
-	kkScene3DObjectType object_type;
-	Scene3DObject*      object;
-	
 	if( fff )
 		m_hoveredObjects.clear();
 
@@ -1171,8 +819,8 @@ void Viewport::_drawScene3D()
 	for( size_t i = 0; i < m_drawObjects.size(); ++i )
 	{
 
-		object = m_drawObjects[i];
-		object_type = object->GetType();
+		Scene3DObject*      object = m_drawObjects[i];
+		kkScene3DObjectType object_type = object->GetType();
 		auto & obb = object->Obb();
 
 		//printf("Draw num[%u] - [%s]\n", i, kkString(m_drawObjects[i]->getName()).to_kkStringA().data());
@@ -1475,7 +1123,46 @@ void Viewport::updateCursorRay()
 	
 }
 
-// вызывается активным вьюпортом
+kkScene3DObject* Viewport::pickObject()
+{
+	updateCursorRay();
+	kkScene3DObject* result = nullptr;
+	std::vector<Scene3DObject*> objects;
+	for( size_t i = 0; i < m_drawObjects.size(); ++i )
+	{
+		Scene3DObject* object = m_drawObjects[i];
+
+		if(object->isSelected())
+			continue;
+
+		auto & obb = object->Obb();
+		if( kkrooo::rayIntersection_obb(m_activeViewport->m_cursorRay->m_center, obb) )
+		{
+			kkRayTriangleIntersectionResultSimple intersectionResult;
+			if( object->IsRayIntersect(m_cursorRay->m_center, intersectionResult) )
+			{
+				auto camera_position = m_activeCamera->getPositionCamera();
+
+				object->m_distanceToCamera = camera_position.distance(intersectionResult.m_intersectionPoint);
+				objects.push_back(object);
+			}
+		}
+	}
+	if(objects.size())
+	{
+
+		std::sort(objects.begin(),objects.end(),
+			[](Scene3DObject* first, Scene3DObject* second)
+			{
+				return first->getDistanceToCamera() > second->getDistanceToCamera();
+			}
+		);
+
+		result = objects[0];
+	}
+	return result;
+}
+
 void Viewport::updateInput()
 {
 	/*auto P = kkrooo::worldToScreen(m_activeCamera->m_kk_camera->getViewProjectionMatrix(), kkVector4(), 
@@ -1489,7 +1176,6 @@ void Viewport::updateInput()
 		m_ignoreInput = false;
 		return;
 	}
-
 	f32 menuSizeY = 20.f;
 
 	if( m_isMainMenuActive )
@@ -1529,7 +1215,7 @@ void Viewport::updateInput()
 	if( kkrooo::pointInRect( *m_vd.m_cursor_position, m_activeViewport->m_rect_modified + v4f(0.f,menuSizeY,0.f) ) || m_activeViewport->m_is_mouse_focus )
 	{
 		inRect = true;
-
+		printf("asd");
 		// определяю если курсор двигается
 		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f || Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
 		{
@@ -1607,13 +1293,11 @@ void Viewport::updateInput()
 		if( *m_vd.m_mouseWheel > 0 )
 		{
 			m_activeViewport->m_activeCamera->zoomIn( *m_vd.m_state_keyboard , (s32)*m_vd.m_mouseWheel );
-			m_activeViewport->updateObject2DPoints();
 			m_activeViewport->updateCursorRay();
 		}
 		else if( *m_vd.m_mouseWheel < 0 )
 		{
 			m_activeViewport->m_activeCamera->zoomOut( *m_vd.m_state_keyboard, (s32)*m_vd.m_mouseWheel );
-			m_activeViewport->updateObject2DPoints();
 			m_activeViewport->updateCursorRay();
 		}
 		
@@ -1804,13 +1488,6 @@ const v4f& Viewport::getRect()
 	return m_rect_modified;
 }
 
-void Viewport::updateObject2DPoints()
-{
-	m_need_updateObject2DPoints = true;
-	m_need_updateObject2DPoints_timer = 0.f;
-}
-
-
 void Viewport::resetCamera()
 {
 	m_activeCamera->reset();
@@ -1820,8 +1497,6 @@ void Viewport::resetCamera()
 		m_mainViewport->update();
 
 	m_activeCamera->m_isRotated   = false;
-
-	updateObject2DPoints();
 }
 
 void Viewport::_rotate()
@@ -1839,7 +1514,6 @@ void Viewport::_rotate()
 	if( !m_isActivePerspective )
 		m_activeCamera->m_isRotated = true;
 
-	updateObject2DPoints();
 }
 
 //void Viewport::rotateActiveCameraX(float x)
@@ -1858,7 +1532,6 @@ void Viewport::_panMove()
 {
 	//printf("%f %f\n",m_imgui_io.MouseDelta.x,m_imgui_io.MouseDelta.y);
 	m_activeCamera->movePan( *m_vd.m_state_keyboard, Kr::Gui::GuiSystem::m_mouseDelta.x, Kr::Gui::GuiSystem::m_mouseDelta.y );
-	updateObject2DPoints();
 }
 
 void Viewport::_processShortcuts()
@@ -2097,39 +1770,8 @@ void Viewport::moveToSelection()
 		}
 
 		m_activeCamera->centerToAabb(aabb);
-		
-		
-		updateObject2DPoints();
 	}
 }
-
-//void Viewport::_drawDebugPoints()
-//{
-//	if( m_vd.m_app->m_debug_draw2DPoints )
-//	{
-//		m_vd.m_gs->useScissor(true);
-//		m_vd.m_gs->setViewport(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
-//		m_vd.m_gs->setScissor((s32)m_viewport_to_gl_funk.x,(s32)m_viewport_to_gl_funk.y,(s32)m_viewport_to_gl_funk.z,(s32)m_viewport_to_gl_funk.w );
-//
-//		for( auto o : m_drawObjects )
-//		{
-//			if( m_vd.m_app->m_editMode == EditMode::Vertex )
-//			{
-//				if( !o->m_isSelected )
-//					continue;
-//			}
-//
-//			for( auto p : o->m_pointsInScreen )
-//			{
-//				m_vd.m_gs->drawLine2D( v2i( p.m_2d_coords.x-3, p.m_2d_coords.y ), v2i( p.m_2d_coords.x+3, p.m_2d_coords.y ), kkColorYellow );
-//				m_vd.m_gs->drawLine2D( v2i( p.m_2d_coords.x, p.m_2d_coords.y-3 ), v2i( p.m_2d_coords.x, p.m_2d_coords.y+3 ), kkColorYellow );
-//			}
-//		}
-//
-//		m_vd.m_gs->setScissor(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
-//		m_vd.m_gs->useScissor(false);
-//	}
-//}
 
 void Viewport::_drawEditMode_hoverMark()
 {
@@ -2458,31 +2100,12 @@ void Viewport::_onDeleteObjects(Viewport* v)
 
 void Viewport::onFrame()
 {
-	if( m_need_updateObject2DPoints )
-	{
-		if( m_need_updateObject2DPoints_timer >= m_need_updateObject2DPoints_timerLimit )
-		{
-			m_need_updateObject2DPoints = false;
-			m_need_updateObject2DPoints_timer = 0.f;
-			m_vd.m_gs->setActiveCamera( m_activeCamera->getCamera() );
-
-			/*if( m_vd.m_app->m_editMode == EditMode::Object )
-				(*m_scene3D_ptr)->updateObject2DPoints( m_drawObjects );
-			else if( m_vd.m_app->m_editMode == EditMode::Vertex )
-				(*m_scene3D_ptr)->updateObject2DPoints_selected();
-			else if( m_vd.m_app->m_editMode == EditMode::Edge )
-				(*m_scene3D_ptr)->updateObject2DPoints_selected();*/
-		}
-		m_need_updateObject2DPoints_timer += *m_vd.m_deltaTime;
-	}
-
 	m_contextMenuHovered = false;
 	m_ignoreInput = false;
 }
 
 void Viewport::onNewObject()
 {
-	this->updateObject2DPoints();
 }
 
 void Viewport::_set_draw_mode( _draw_mode m )

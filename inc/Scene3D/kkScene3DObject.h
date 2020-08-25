@@ -73,6 +73,7 @@ public:
 	virtual const char16_t* GetName() = 0;
 	virtual u64 GetPolygonCount() = 0;
 	virtual kkPolygon* GetPolygon(u64) = 0;
+	virtual void AttachObject(kkScene3DObject*) = 0;
 
 	virtual kkArray<kkVertex*>&  GetVertexArray() = 0;
 	virtual kkArray<kkControlVertex*>&  GetControlVertexArray() = 0;

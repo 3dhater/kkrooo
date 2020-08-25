@@ -935,3 +935,40 @@ void PolygonalModel::rayTestGrid( std::vector<kkTriangleRayTestResult>& outTrian
 		}
 	}
 }
+
+void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
+{
+	auto TIM = matrix_other;
+	TIM.invert();
+	TIM.transpose();
+
+	for( auto P : other->m_polygons )
+	{
+		auto polygon = (Polygon3D*)P;
+
+		Polygon3D* newPolygon = kkCreate<Polygon3D>();
+
+		for( size_t i = 0, sz = polygon->m_vertsInds.size(); i < sz; ++i )
+		{
+			auto V = (Vertex*)other->m_verts[polygon->m_vertsInds[i]];
+			Vertex * newVertex = kkCreate<Vertex>();
+
+			newVertex->m_Boneinds	= V->m_Boneinds;
+			newVertex->m_Color		= V->m_Color;
+
+			newVertex->m_Normal		= math::mul(V->m_Normal_fix, TIM);
+			newVertex->m_Normal_fix = newVertex->m_Normal;
+
+			newVertex->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
+			newVertex->m_Position	= math::mul(newVertex->m_Position, invertMatrix) ;
+			newVertex->m_Position_fix = newVertex->m_Position;
+
+			newVertex->m_UV			= V->m_UV;
+			newVertex->m_Weights	= V->m_Weights;
+			newVertex->m_weld		= true;
+
+			newPolygon->addVertex(newVertex);
+		}
+		this->addPolygon( newPolygon, true, false, false);
+	}
+}

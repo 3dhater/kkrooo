@@ -753,6 +753,15 @@ AppState_keyboard Application::getStateKeyboard(){    return m_state_keyboard;}
 
 void Application::updateInput()
 {
+    if(m_objectPickMode)
+    {
+        if( m_event_consumer->isRmbDown() || m_event_consumer->isKeyDown(kkKey::K_ESCAPE))
+        {
+            m_objectPickMode = false;
+            m_globalInputBlock = false;
+        }
+    }
+
     if( m_state_app != AppState_main::MainMenu )
     {
         // ввод во вьюпорте будет отключен если показано это окно
@@ -785,6 +794,18 @@ void Application::updateInput()
         else
         {
             m_main_viewport->checkMouseEvents();
+        }
+
+        if(m_objectPickMode && m_event_consumer->isLmbDown() && !m_cursorInGUI)
+        {
+            m_objectPickMode = false;
+            m_globalInputBlock = false;
+            auto pickobject = m_main_viewport->pickObject();
+            if(pickobject && m_objectPickCallback)
+            {
+                m_objectPicked = pickobject;
+                m_objectPickCallback(0, this);
+            }
         }
 
         // обработка тех горячих клавиш, действие команд которых более шире чем у например узкоспециализированных типа вьюпорта
@@ -1369,121 +1390,23 @@ void Application::drawToolTip(const char* text)
 
 void   Application::_drawSelectByNameWindow()
 {
-    //ImGui::SetNextWindowBgAlpha(0.8f);
-    //if(ImGui::Begin("Select by name", &m_drawSelectByNameWindow, 
-    //    ImGuiWindowFlags_NoCollapse
-    //    | ImGuiWindowFlags_NoSavedSettings 
-    //    | ImGuiWindowFlags_MenuBar
-    //))
-    //{
-    //    auto windowPosition = ImGui::GetWindowPos();
-    //    auto windowSize     = ImGui::GetWindowSize();
-    //    
-    //    if( kkrooo::pointInRect( m_cursor_position, v4f(windowPosition.x,windowPosition.y,windowPosition.x+windowSize.x,windowPosition.y+windowSize.y) ) )
-    //    {
-    //        m_imguiWindowFocus = 1;
-    //    }
-
-    //    if (ImGui::BeginMenuBar())
-    //    {
-    //        if (ImGui::BeginMenu("Help"))
-    //        {
-    //            if( ImGui::MenuItem("Close") )
-    //            {
-    //                m_drawSelectByNameWindow = false;
-    //            }
-
-    //            ImGui::EndMenu();
-    //        }
-    //        ImGui::EndMenuBar();
-    //    }
-
-    //    auto & objects = m_current_scene3D->getObjects();
-    //    static kkStringA stra;
-
-    //    auto wsz = ImGui::GetWindowSize();
-    //    if(wsz.x > 250) wsz.x = wsz.x - 250 - 50;
-    //    else            wsz.x = 0;
-
-    //    if(wsz.y > 400) wsz.y = wsz.y - 400 - 50;
-    //    else            wsz.y = 0;
-
-    //    ImGui::BeginChild("left pane", ImVec2(250 + wsz.x, 400 + wsz.y ), true, ImGuiWindowFlags_HorizontalScrollbar );
-    //    for( size_t i = 0, sz = objects.size(); i < sz; ++i )
-    //    {
-    //        auto obj = objects.at(i);
-    //        stra = obj->GetName();
-    //        
-    //        bool b = obj->m_isSelected;
-
-    //        if( ImGui::Checkbox(stra.c_str(),&b) )
-    //        {
-    //            if( !b )
-    //            {
-    //                m_current_scene3D->deselectObject(obj);
-    //            }
-    //            else
-    //            {
-    //                m_current_scene3D->selectObject(obj);
-    //            }
-    //        }
-    //        /*ImGui::SameLine();
-    //        if(ImGui::SmallButton("Rename"))
-    //        {
-    //        }*/
-
-
-    //    }
-    //    ImGui::EndChild();
-
-    //    /*if (ImGui::TreeNode("Basic trees"))
-    //    {
-    //        for (int i = 0; i < 5; i++)
-    //        {
-    //            if (ImGui::TreeNode((void*)(intptr_t)i, "Child %d", i))
-    //            {
-    //                ImGui::Text("blah blah");
-    //                ImGui::SameLine();
-    //                if (ImGui::SmallButton("button")) {};
-    //                ImGui::TreePop();
-    //            }
-    //        }
-    //        ImGui::TreePop();
-    //    }*/
-
-
-
-    //    ImGui::End();
-    //}
 }
 
 void   Application::_drawPreferencesWindow()
 {
-   /* ImGui::SetNextWindowBgAlpha(0.8f);
-    if(ImGui::Begin("Preferences", &m_drawPreferencesWindow, 
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_MenuBar
-    ))
-    {
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("Close"))
-            {
-                m_drawPreferencesWindow = false;
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
+}
 
-        if( ImGui::IsWindowFocused() )
-        {
-            m_active_viewport->onLoseFocus();
-        }
+void Application::setObjectPickMode(void(*callback)(s32 id, void* data))
+{
+    m_objectPickMode = true;
+    m_objectPicked = nullptr;
+    m_globalInputBlock = true;
+    m_objectPickCallback = callback;
+}
 
-
-        ImGui::End();
-    }*/
+kkScene3DObject* Application::getPickedObject()
+{
+    return m_objectPicked;
 }
 
 void Application::setSelectMode( SelectMode m )
@@ -1554,7 +1477,6 @@ void Application::setEditMode( EditMode m )
         }
     }
 
-    m_active_viewport->updateObject2DPoints();
     m_current_scene3D->updateSelectionAabb();
 }
 

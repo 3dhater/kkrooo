@@ -258,6 +258,8 @@ public:
 	void rayTestGrid( std::vector<kkTriangleRayTestResult>& outTriangles, const v2i& point, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial );
 
 	void weldByLen(f32 len);
+
+	void addModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
 };
 
 #endif

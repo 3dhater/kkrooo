@@ -1651,3 +1651,18 @@ void Scene3DObject::SelecVertsBySub()
 	updateModelPointsColors();
 	deleteEdges();
 }
+
+void Scene3DObject::AttachObject(kkScene3DObject* object)
+{
+	if( object->GetType() == kkScene3DObjectType::PolygonObject )
+	{
+		auto MI = m_matrix;
+		MI.invert();
+
+		auto polyObject = (Scene3DObject*)object;
+		m_PolyModel->addModel(polyObject->m_PolyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
+
+		m_PolyModel->createControlPoints();
+		this->_rebuildModel();
+	}
+}

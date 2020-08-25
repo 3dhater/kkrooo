@@ -325,6 +325,10 @@ class Application
     IFileSaveDialog * m_fileSaveDialog = nullptr;
 #endif
 
+	bool m_objectPickMode = false;
+	kkScene3DObject* m_objectPicked = nullptr;
+	void (*m_objectPickCallback)(s32 id, void* data) = nullptr;
+
 public:
 
 	Application();
@@ -448,6 +452,9 @@ public:
 	void showImportExportWindow(PluginGUIWindow*, const v2i& size, const char16_t* title);
 	void convertSelectedObjectToPolygonalObject();
 	bool isSelectedObjectNeedConvert();
+
+	void setObjectPickMode(void(*)(s32 id, void* data));
+	kkScene3DObject* getPickedObject();
 };
 
 

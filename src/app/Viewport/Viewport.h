@@ -278,14 +278,6 @@ class Viewport
 	void _toggleFullscreen();
 	void _onDeleteObjects(Viewport* v);
 
-	// обновлять 2Д точки модели каждый кадр очень плохо
-	// когда камера движется, m_need_updateObject2DPoints = true, и обнуляется таймер.
-	// когда таймер достигнет m_need_updateObject2DPoints_timerLimit (предполагается что мыка больше не двигается)
-	// тогда будут пересчитаны 2д точки.
-	bool       m_need_updateObject2DPoints = false;
-	f32 m_need_updateObject2DPoints_timer = 0.f;
-	f32 m_need_updateObject2DPoints_timerLimit = 0.1f;
-
 	v4i m_selectionFrame;
 
 	// меню которое откроется правым кликом
@@ -321,8 +313,6 @@ public:
 	void updateInput();
 	void checkMouseEvents();
 	void resetCamera();
-
-	void updateObject2DPoints();
 
 	void setActive( bool );
 
@@ -366,6 +356,8 @@ public:
 	void onWindowActivate();
 
 	void updateCursorRay();
+
+	kkScene3DObject* pickObject();
 };
 
 #endif
