@@ -1666,3 +1666,24 @@ void Scene3DObject::AttachObject(kkScene3DObject* object)
 		this->_rebuildModel();
 	}
 }
+
+void Scene3DObject::BreakVerts()
+{
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+		if(cv->m_isSelected)
+		{
+			cv->m_isSelected = false;
+			for( auto v_index : cv->m_vertexIndex )
+			{
+				Vertex    * V = (Vertex*)m_PolyModel->m_verts[ v_index ];
+				V->m_weld = false;
+			}
+		}
+	}
+	m_isObjectHaveSelectedVerts = false;
+	m_PolyModel->createControlPoints();
+	this->_rebuildModel();
+	updateModelPointsColors();
+}

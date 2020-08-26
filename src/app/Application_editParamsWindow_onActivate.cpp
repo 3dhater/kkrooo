@@ -305,6 +305,21 @@ void change_position_z_callback(s32 id, void* data)
     }
 }
 
+void break_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->BreakVerts();
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
 void select_add_vertex(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -503,5 +518,10 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"+", v2f(20.f, 20.f), select_add_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddButton(u"-", v2f(20.f, 20.f), select_sub_vertex,0, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->EndGroup();
+    m_edit_params_window->BeginGroup(u"Geometry edit", true);
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddButton(u"Break", v2f(60.f, 20.f), break_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->EndGroup();
 }
