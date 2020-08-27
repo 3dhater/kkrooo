@@ -86,6 +86,7 @@ public:
 
 	std::pair<u32,u32> m_vertexIndexForSoftware_points;
 
+	bool m_onEdge = false;
 
 	u32 m_index = 0;
 

@@ -51,7 +51,6 @@ Scene3DObject::Scene3DObject(kkScene3DObjectType t, PolygonalModel * m)
 
 Scene3DObject::~Scene3DObject()
 {
-	deleteEdges();
 
 	_destroyHardwareModels();
 	_destroySoftwareModels();
@@ -1361,23 +1360,22 @@ void Scene3DObject::deleteSelectedPolys()
 void Scene3DObject::deleteSelectedEdges()
 {
 	bool need_delete = false;
-	for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+	for(u64 i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
 	{
-		auto polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
-		for( u64 o = 0, sz2 = polygon->m_controlVertsInds.size(); o < sz2; ++o )
+		auto E = m_PolyModel->m_edges[i];
+		
+		for( auto ECV : E->m_firstPoint->m_edgeWith )
 		{
-			u64 o2 = o + 1;
-			if(o2 == sz2) o2=0;
-			auto cv1 = (ControlVertex*)m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o] ];
-			auto cv2 = (ControlVertex*)m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o2] ];
-
-			if( cv1->m_isSelected_edge && cv2->m_isSelected_edge )
+			if( ECV == E->m_secondPoint )
 			{
-				polygon->MarkToDelete();
+				m_PolyModel->m_polygons[ E->m_polygonIndex[0] ]->MarkToDelete();
+				if(E->m_polygonIndex[1] != 0xffffffffffffffff)
+					m_PolyModel->m_polygons[ E->m_polygonIndex[1] ]->MarkToDelete();
 				need_delete = true;
 				break;
 			}
 		}
+		
 	}
 	
 	if( need_delete )
@@ -1385,8 +1383,6 @@ void Scene3DObject::deleteSelectedEdges()
 		m_PolyModel->deleteMarkedPolygons();
 		m_PolyModel->createControlPoints();
 		_rebuildModel();
-		deleteEdges();
-		createEdges();
 		updateEdgeModel();
 		UpdateAabb();
 	}
@@ -1402,8 +1398,6 @@ void Scene3DObject::deleteSelectedVerts()
 		{
 			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 			{
-				//auto V_id   = cv->m_vertexIndex[i2];
-				//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
 				auto vertex = (Vertex*)cv->m_verts[i2];
 
 				vertex->m_parentPolygon->MarkToDelete();
@@ -1476,107 +1470,7 @@ void Scene3DObject::setShaderParameter_diffuseTexture( kkImageContainerNode* t )
 	m_shaderParameter.m_diffuseTexture = t;
 }
 
-void Scene3DObject::deleteEdges()
-{
-	//printf("de\n");
-	if( m_isEdgesCreated )
-	{
-		m_isEdgesCreated = false;
 
-		for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
-		{
-			delete m_edges[i];
-		}
-		m_edges.clear();
-	}
-}
-
-void Scene3DObject::createEdges()
-{
-	if(m_isEdgesCreated)
-		return;
-
-	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
-		cv->m_edges.clear();
-	}
-	
-	//std::unordered_map<u64, Edge> map;
-	std::unordered_map<u64, u64> map;     // 2 объединённых адреса как ключ и индекс на сам массив хранящий Edge
-
-	for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	{
-		auto polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
-
-		// беру полигон. прохожусь по вершинам. беру контрольные точки. текущую и следующую. это должно быть ребром
-		for( u64 o = 0, sz2 = polygon->m_controlVertsInds.size(); o < sz2; ++o )
-		{
-			u64 o2 = o + 1;
-			if(o2 == sz2) o2=0;
-			auto cv1 = (ControlVertex*)m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o] ];
-			auto cv2 = (ControlVertex*)m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o2] ];
-			
-			// нужно определить контрольную вершину с адресом, значение которого меньше чем у другой вершины
-			ControlVertex* cv_first  = cv1;
-			ControlVertex* cv_second = cv2;
-			if( cv2 < cv1 )
-			{
-				cv_first   = cv2;
-				cv_second  = cv1;
-			}
-
-			// текущее ребро
-			Edge * edge = new Edge;
-			edge->m_firstPoint  = cv_first;
-			edge->m_secondPoint = cv_second;
-
-			
-
-			// надо найти, было ли данное ребро добавлено ранее
-			// в качестве уникального ключа берутся 4 байта с одного адреса и 4 байта с другого
-			u64 key_val = (u64)cv_first;
-			key_val <<= 32;
-			key_val |= ((u64)cv_second & 0x00000000FFFFFFFF);
-			
-			auto search = map.find(key_val);
-			if( search != map.end() )
-			{ // ребро было добавлено ранее
-				// значит нужно этому ребру дать индекс полигона....
-				// индекс полигона нужен чтобы потом найти нужное ребро, так как выбор основан на взятии треугольника лучем.
-				auto E = m_edges[ search->second ];
-				if( E->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
-					E->m_polygonIndex[0] = i;
-				else
-					E->m_polygonIndex[1] = i;
-
-				delete edge;
-
-				/*cv_first->m_edges.emplace_back(E);
-				cv_second->m_edges.emplace_back(E);*/
-			}
-			else
-			{ // не найдено, значит надо добавить в массив и в map
-				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
-					edge->m_polygonIndex[0] = i;
-				else
-					edge->m_polygonIndex[1] = i;
-
-				m_edges.push_back(edge);
-				map[key_val] = m_edges.size()-1;
-
-				cv_first->m_edges.emplace_back(edge);
-				cv_second->m_edges.emplace_back(edge);
-			}
-
-		}
-	}
-	
-	//printf("%llu\n", m_edges.size());
-	//printf("\n\n");
-
-	m_isEdgesCreated = true;
-}
 
 void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 {
@@ -1607,7 +1501,7 @@ void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 void Scene3DObject::SelecVertsByAdd()
 {
 	m_isObjectHaveSelectedVerts = false;
-	createEdges();
+	//createEdges();
 	std::vector<ControlVertex*> vertsToSelect;
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
@@ -1632,12 +1526,12 @@ void Scene3DObject::SelecVertsByAdd()
 
 	if(m_isObjectHaveSelectedVerts)
 		updateModelPointsColors();
-	deleteEdges();
+	//deleteEdges();
 }
 
 void Scene3DObject::SelecVertsBySub()
 {
-	createEdges();
+	//createEdges();
 	std::vector<ControlVertex*> vertsToDeselect;
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
@@ -1669,7 +1563,7 @@ void Scene3DObject::SelecVertsBySub()
 		}
 	}
 	updateModelPointsColors();
-	deleteEdges();
+	//deleteEdges();
 }
 
 void Scene3DObject::AttachObject(kkScene3DObject* object)
@@ -1714,7 +1608,6 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 {
 	ControlVertex* cv1 = (ControlVertex*)CV1;
 	ControlVertex* cv2 = (ControlVertex*)CV2;
-	createEdges();
 
 	bool is_edge = false;
 	Edge * edge = nullptr;
@@ -1752,7 +1645,8 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			vertex->m_Position_fix = targetVertex->m_Position_fix;
 			vertex->m_UV = targetVertex->m_UV;
 			vertex->m_Weights = targetVertex->m_Weights;
-			vertex->m_weld = targetVertex->m_weld;
+			vertex->m_weld = true;
+			targetVertex->m_weld = true;
 		}
 
 		Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
@@ -1776,7 +1670,6 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 					if( cv1->m_verts[ j ] == P1->m_verts[ i ] )
 					{
 						vertex_for_delete = P1->m_verts[ i ];
-					//	P1->m_verts[ i ] = nullptr;
 						goto end;
 					}
 				}
@@ -1794,7 +1687,6 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
 			{
 				auto V = P1->m_verts[i];
-				//P1->m_verts[i] = nullptr; // 
 				m_PolyModel->m_verts.erase_first(V);
 				kkDestroy(V);
 			}
@@ -1840,12 +1732,26 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			}
 		}
 	}
-	else
+	else if(cv1->m_onEdge && cv2->m_onEdge)
 	{
 		// возможно второй случай
+		Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
+		for( auto V : cv1->m_verts )
+		{
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_Boneinds = targetVertex->m_Boneinds;
+			vertex->m_Color = targetVertex->m_Color;
+			vertex->m_Normal = targetVertex->m_Normal;
+			vertex->m_Normal_fix = targetVertex->m_Normal_fix;
+			vertex->m_Position = targetVertex->m_Position;
+			vertex->m_Position_fix = targetVertex->m_Position_fix;
+			vertex->m_UV = targetVertex->m_UV;
+			vertex->m_Weights = targetVertex->m_Weights;
+			vertex->m_weld = true;
+			targetVertex->m_weld = true;
+		}
 	}
 
-	deleteEdges();
 	m_PolyModel->createControlPoints();
 	this->_rebuildModel();
 	updateModelPointsColors();

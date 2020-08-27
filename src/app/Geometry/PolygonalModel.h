@@ -214,6 +214,9 @@ class PolygonalModel
 
 	void _rayTestTriangle( std::vector<kkTriangleRayTestResult>& outTriangles, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial, kkTriangleRayTestResult* );
 
+	void _createEdges();
+	void _deleteEdges(); // лучше держать рёбра созданными
+
 public:
 	PolygonalModel();
 	virtual ~PolygonalModel();
@@ -235,6 +238,7 @@ public:
 
 	kkArray<kkPolygon*>       m_polygons      = kkArray<kkPolygon*>(0xffff);
 	kkArray<kkControlVertex*> m_controlPoints = kkArray<kkControlVertex*>(0xffff);
+	std::vector<Edge*> m_edges;
 
 	void deleteMarkedPolygons();
 	void createControlPoints();

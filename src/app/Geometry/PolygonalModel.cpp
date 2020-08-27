@@ -15,6 +15,8 @@ PolygonalModel::PolygonalModel(){}
 
 PolygonalModel::~PolygonalModel()
 {
+	_deleteEdges();
+
 	for( u64  i = 0; i < m_polygons.size(); ++i )
 	{
 		kkDestroy( m_polygons[i] );
@@ -236,8 +238,9 @@ void PolygonalModel::createControlPoints()
 			P->m_controlVertsInds.push_back(cv->m_index);
 		}
 	}
-
 	m_map.clear();
+
+	_createEdges();
 }
 
 // нужно всего лишь изменить координаты близких друг к другу вершин
@@ -934,4 +937,100 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 	}
 	other->m_verts.clear();
 	other->m_polygons.clear();
+}
+
+void PolygonalModel::_deleteEdges()
+{
+	for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
+	{
+		delete m_edges[i];
+	}
+	m_edges.clear();
+}
+
+void PolygonalModel::_createEdges()
+{
+	_deleteEdges();
+
+	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		cv->m_edges.clear();
+	}
+	
+	std::unordered_map<u64, u64> map;     // 2 объединённых адреса как ключ и индекс на сам массив хранящий Edge
+
+	for(u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
+	{
+		auto polygon = (Polygon3D *)m_polygons.at(i);
+
+		// беру полигон. прохожусь по вершинам. беру контрольные точки. текущую и следующую. это должно быть ребром
+		for( u64 o = 0, sz2 = polygon->m_controlVertsInds.size(); o < sz2; ++o )
+		{
+			u64 o2 = o + 1;
+			if(o2 == sz2) o2=0;
+			auto cv1 = (ControlVertex*)m_controlPoints[ polygon->m_controlVertsInds[o] ];
+			auto cv2 = (ControlVertex*)m_controlPoints[ polygon->m_controlVertsInds[o2] ];
+			
+			// нужно определить контрольную вершину с адресом, значение которого меньше чем у другой вершины
+			ControlVertex* cv_first  = cv1;
+			ControlVertex* cv_second = cv2;
+			if( cv2 < cv1 )
+			{
+				cv_first   = cv2;
+				cv_second  = cv1;
+			}
+
+			// текущее ребро
+			Edge * edge = new Edge;
+			edge->m_firstPoint  = cv_first;
+			edge->m_secondPoint = cv_second;
+
+			
+
+			// надо найти, было ли данное ребро добавлено ранее
+			// в качестве уникального ключа берутся 4 байта с одного адреса и 4 байта с другого
+			u64 key_val = (u64)cv_first;
+			key_val <<= 32;
+			key_val |= ((u64)cv_second & 0x00000000FFFFFFFF);
+			
+			auto search = map.find(key_val);
+			if( search != map.end() )
+			{ // ребро было добавлено ранее
+				// значит нужно этому ребру дать индекс полигона....
+				// индекс полигона нужен чтобы потом найти нужное ребро, так как выбор основан на взятии треугольника лучем.
+				auto E = m_edges[ search->second ];
+				if( E->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+					E->m_polygonIndex[0] = i;
+				else
+					E->m_polygonIndex[1] = i;
+
+				delete edge;
+			}
+			else
+			{ // не найдено, значит надо добавить в массив и в map
+				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+					edge->m_polygonIndex[0] = i;
+				else
+					edge->m_polygonIndex[1] = i;
+
+				m_edges.push_back(edge);
+				map[key_val] = m_edges.size()-1;
+
+				cv_first->m_edges.emplace_back(edge);
+				cv_second->m_edges.emplace_back(edge);
+			}
+
+		}
+	}
+
+	for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
+	{
+		auto E = m_edges[i];
+		if(E->m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF)
+		{
+			E->m_firstPoint->m_onEdge = true;
+			E->m_secondPoint->m_onEdge = true;
+		}
+	}
 }

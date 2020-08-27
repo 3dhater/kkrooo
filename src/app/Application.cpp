@@ -818,14 +818,16 @@ void Application::updateInput()
             }
         }
 
+        m_main_viewport->processShortcuts();
+
         if(m_vertexPickMode)
         {
             m_main_viewport->updateInputCamera();
         }
         if(m_vertexPickMode && m_event_consumer->isLmbDownOnce() && !m_cursorInGUI)
         {
-            m_vertexPickMode = false;
-            m_globalInputBlock = false;
+            //m_vertexPickMode = false;
+            //m_globalInputBlock = false;
 
             // данный код должен вызываться изначально с выбранной полигональной моделью
             auto pickVertex = m_main_viewport->pickVertex((Scene3DObject*)m_current_scene3D->getSelectedObject(0));
@@ -834,16 +836,15 @@ void Application::updateInput()
                 m_vertexPicked = pickVertex;
                 m_vertexPickCallback(0, this);
             }
-            else
-            {
-                setDrawPickLine(false);
-            }
-
+            //else
+            //{
+            //    setDrawPickLine(false);
+            //}
         }
 
         // обработка тех горячих клавиш, действие команд которых более шире чем у например узкоспециализированных типа вьюпорта
         // вполне возможно что для редактора текстурных координат (или чего-то ещё) придётся делать свой _processShortcuts
-        if(!this->isGlobalInputBlocked())
+        //if(!this->isGlobalInputBlocked())
         {
             _processShortcuts();
         }
@@ -869,7 +870,22 @@ void Application::_processShortcuts()
     if( m_state_app == AppState_main::Gizmo ||  m_enterTextMode )
         return;
 
+    // можно проверить те сочетания клавиш, которые не смогут изменить состояние сцены (удалить объект например)
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::ShowMaterialEditor))
+    {
+        showMaterialEditor( m_materialEditorWindow->isVisible() ? false : true );
+    }
+    if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::ShowRenderWindow))
+    {
+        showRenderWindow( m_renderWindow->isVisible() ? false : true );
+    }
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::DeselectAll)){ m_current_scene3D->deselectAll(); }
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectAll)){m_current_scene3D->selectAll();}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectInvert)){m_current_scene3D->selectInvert();}
 
+    // далее лучше игнорировать если есть блок
+    if(this->isGlobalInputBlocked())
+        return;
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::New)){}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::Open)){}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::Save))
@@ -881,18 +897,7 @@ void Application::_processShortcuts()
     {
         save();
     }
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::ShowMaterialEditor))
-    {
-        showMaterialEditor( m_materialEditorWindow->isVisible() ? false : true );
-    }
-    if( m_shortcutManager->isShortcutActive(ShortcutCommand_General::ShowRenderWindow))
-    {
-        showRenderWindow( m_renderWindow->isVisible() ? false : true );
-    }
 
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::DeselectAll)){ m_current_scene3D->deselectAll(); }
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectAll)){m_current_scene3D->selectAll();}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectInvert)){m_current_scene3D->selectInvert();}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::Redo)){}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::Undo)){}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::SelectModeJustSelect)){setSelectMode( SelectMode::JustSelect );}
@@ -905,8 +910,6 @@ void Application::_processShortcuts()
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EditModePolygon)){setEditMode( EditMode::Polygon );}
     
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Edit::EnterTransformation)){m_drawTransformWindow = true;}
-    
-    
 
     // возможно нужно будет блокировать это когда нужно вводить текст
     // да и вообще любой shortcut
@@ -1497,27 +1500,27 @@ void Application::setEditMode( EditMode m )
             switch (m_editMode)
             {
             case EditMode::Object:
-                ((Scene3DObject*)object)->deleteEdges();
+                //((Scene3DObject*)object)->deleteEdges();
                 if( old_mode == EditMode::Edge )
                     ((Scene3DObject*)object)->updateEdgeModel();
                 if( old_mode == EditMode::Polygon )
                     ((Scene3DObject*)object)->updatePolygonModel(); // возможно это не нужно
                 break;
             case EditMode::Vertex:
-                ((Scene3DObject*)object)->deleteEdges();
+               // ((Scene3DObject*)object)->deleteEdges();
                 if( old_mode == EditMode::Edge )
                     ((Scene3DObject*)object)->updateEdgeModel();
                 if( old_mode == EditMode::Polygon )
                     ((Scene3DObject*)object)->updatePolygonModel();
                 break;
             case EditMode::Edge:
-                ((Scene3DObject*)object)->createEdges();
+               // ((Scene3DObject*)object)->createEdges();
                 ((Scene3DObject*)object)->updateEdgeModel();
                 if( old_mode == EditMode::Polygon )
                     ((Scene3DObject*)object)->updatePolygonModel();
                 break;
             case EditMode::Polygon:
-                ((Scene3DObject*)object)->deleteEdges();
+               // ((Scene3DObject*)object)->deleteEdges();
                 if( old_mode == EditMode::Edge )
                     ((Scene3DObject*)object)->updateEdgeModel();
                 ((Scene3DObject*)object)->updatePolygonModel();

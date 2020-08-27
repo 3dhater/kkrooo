@@ -1564,7 +1564,7 @@ void Viewport::updateInput()
 		);
 	}
 
-	_processShortcuts();
+	//_processShortcuts();
 
 	_drawRecursivelyBorders(this);
 
@@ -1628,7 +1628,7 @@ void Viewport::_panMove()
 	m_activeCamera->movePan( *m_vd.m_state_keyboard, Kr::Gui::GuiSystem::m_mouseDelta.x, Kr::Gui::GuiSystem::m_mouseDelta.y );
 }
 
-void Viewport::_processShortcuts()
+void Viewport::processShortcuts()
 {
 	if( m_vd.m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::ToggleGrid) )
 	{

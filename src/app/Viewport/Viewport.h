@@ -271,7 +271,6 @@ class Viewport
 	
 	void _setActiveCamera(ViewportCamera*);
 
-	void _processShortcuts();
 	void _drawViewportTypeName(Viewport* v);
 	void _drawAxis(Viewport* v);
 
@@ -364,6 +363,7 @@ public:
 	kkScene3DObject* pickObject();
 	kkControlVertex* pickVertex(Scene3DObject*);
 	void setDrawPickLine(bool v);
+	void processShortcuts();
 };
 
 #endif

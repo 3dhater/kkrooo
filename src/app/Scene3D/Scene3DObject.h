@@ -269,8 +269,8 @@ class Scene3DObject : public Scene3DObjectCommon
 
 	bool m_isSelected = false;
 
-	bool m_isEdgesCreated = false;
-	std::vector<Edge*> m_edges;
+	//bool m_isEdgesCreated = false;
+	//std::vector<Edge*> m_edges;
 
 	PolygonalModel *  m_PolyModel       = nullptr;
 
@@ -391,8 +391,8 @@ public:
 	void        setPosition(const kkVector4& p);
 	void        updateAABB_vertex();
 
-	void createEdges();
-	void deleteEdges();
+	//void createEdges();
+	//void _deleteEdges(); // лучше держать рёбра созданными
 
 	void applyMatrices();
 	void resetMatrices();
