@@ -13,7 +13,8 @@ public:
 
 	// получить индексы на вершины из массива который можно получить через kkScene3DObject::getVertexArray
 	// kkControlVertex управляет этими вершинами
-	virtual kkArray<u32>& getVertInds() = 0;
+	//virtual kkArray<u32>& getVertInds() = 0;
+	virtual kkArray<kkVertex*>& getVerts() = 0;
 
 	virtual bool isSelected() = 0;
 	virtual bool isSelectedEdge() = 0;

@@ -59,10 +59,15 @@ ControlVertex::~ControlVertex()
 {
 }
 
-kkArray<u32>& ControlVertex::getVertInds()
+kkArray<kkVertex*>& ControlVertex::getVerts()
 {
-	return m_vertexIndex;
+	return m_verts;
 }
+
+//kkArray<u32>& ControlVertex::getVertInds()
+//{
+//	return m_vertexIndex;
+//}
 
 bool ControlVertex::isSelected()
 {

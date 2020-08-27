@@ -36,7 +36,7 @@ public:
 	//   стоит лишь вопрос в том, когда урезать этот массив(со всеми пересчётами), возможно при сохранении...
 	//   но пока будет так...
 	// При удалении так-же нужно будет добавить вершину в полигональную_модель->m_free_verts
-	bool m_isFree = false;
+	//bool m_isFree = false;
 
 
 	// при создании software модели нужно запомнить индекс вершины (в software буфере)
@@ -81,7 +81,8 @@ public:
 
 	// индексы тех вершин, которые будут подчинены этой контрольной вершине
 	// должна быть минимум 1 вершина
-	kkArray<u32> m_vertexIndex  = kkArray<u32>(4);
+	//kkArray<u32> m_vertexIndex  = kkArray<u32>(4);
+	kkArray<kkVertex*> m_verts = kkArray<kkVertex*>(4);
 
 	std::pair<u32,u32> m_vertexIndexForSoftware_points;
 
@@ -108,7 +109,8 @@ public:
 	// значение устанавливается как истина только в методе для удаления
 	bool m_toDelete = false;
 
-	kkArray<u32>& getVertInds();
+	//kkArray<u32>& getVertInds();
+	kkArray<kkVertex*>& getVerts();
 	bool isSelected();
 	bool isSelectedEdge();
 	bool isSelectedPoly();

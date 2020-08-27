@@ -40,7 +40,8 @@ void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool 
 	
 	for( u64 i = 0, sz = p->m_verts.size(); i < sz; ++i )
 	{
-		p->m_verts[i]->m_weld = weld;
+		V = (Vertex*)p->m_verts[i];
+		V->m_weld = weld;
 	}
 
 	if( triangulate && num_of_tris > 1 )
@@ -60,17 +61,17 @@ void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool 
 				index3 = 0;
 
 			V = kkCreate<Vertex>();
-			*V = *p->m_verts[1];
+			*V = *(Vertex*)p->m_verts[1];
 			V->m_weld = weld;
 			new_polygon->addVertex( V );
 
 			V = kkCreate<Vertex>();
-			*V = *p->m_verts[index2];
+			*V = *(Vertex*)p->m_verts[index2];
 			V->m_weld = weld;
 			new_polygon->addVertex( V );
 
 			V = kkCreate<Vertex>();
-			*V = *p->m_verts[index3];
+			*V = *(Vertex*)p->m_verts[index3];
 			V->m_weld = weld;
 			new_polygon->addVertex( V );
 
@@ -84,21 +85,21 @@ void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool 
 		p = new_polygon;
 	}
 
-	p->m_vertsInds.clear();
+	//p->m_vertsInds.clear();
 	//p->m_weld = weld;
 
 	// Полигон нужно сохранить в модели
 	m_polygons.push_back(p);
 
-	s32 free_verts_sz = (s32)m_free_verts.size();
-	s32 free_verts_i  = 0;
+	/*s32 free_verts_sz = (s32)m_free_verts.size();
+	s32 free_verts_i  = 0;*/
 
 	// передаю вершины полигона в модель
 	// и даю полигонам индексы на вершины
 	
 	for( u64 i = 0, sz = p->m_verts.size() ; i < sz; ++i )
 	{
-		V = p->m_verts[ i ];
+		V = (Vertex*)p->m_verts[ i ];
 
 		if( flip )
 		{
@@ -110,31 +111,33 @@ void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool 
 
 		V->m_parentPolygon = p;
 
-		if( free_verts_i < free_verts_sz )
-		{
-			auto ind = m_free_verts[0];
-			m_free_verts.erase(0);
-			m_verts[ ind ] = V;
-			p->m_vertsInds.push_back( ind );
-			++free_verts_i;
-		}
-		else
-		{
-			p->m_vertsInds.push_back( (u32)m_verts.size() );
-			m_verts.push_back( V );
-		}
+		//if( free_verts_i < free_verts_sz )
+		//{
+		//	auto ind = m_free_verts[0];
+		//	m_free_verts.erase(0);
+		//	m_verts[ ind ] = V;
+		//	//p->m_vertsInds.push_back( ind );
+		//	++free_verts_i;
+		//}
+		//else
+		//{
+		//	//p->m_vertsInds.push_back( (u32)m_verts.size() );
+		//	m_verts.push_back( V );
+		//}
+		m_verts.push_back( V );
+
+
 	}
-	if( flip )
+	if( flip )    //////////// ПРОВЕРИТЬ!!!!
 	{
-		for( u64 i = 0, sz = p->m_vertsInds.size(); i < sz/2; ++i )
+		for( u64 i = 0, sz = p->m_verts.size(); i < sz/2; ++i )
 		{
-			auto I = p->m_vertsInds[ i ];
+			auto v = p->m_verts[ i ];
 			auto index = sz - (1+i);
-			p->m_vertsInds[ i ] = p->m_vertsInds[ index ];
-			p->m_vertsInds[ index ] = I;
+			p->m_verts[ i ] = p->m_verts[ index ];
+			p->m_verts[ index ] = v;
 		}
 	}
-	p->m_verts.clear();
 }
 
 void PolygonalModel::calculateTriangleCount()
@@ -142,7 +145,7 @@ void PolygonalModel::calculateTriangleCount()
 	m_triangleCount = 0;
 	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
-		m_triangleCount += (u32)((Polygon3D *)m_polygons[ i ])->m_vertsInds.size() - 2;
+		m_triangleCount += (u32)((Polygon3D *)m_polygons[ i ])->m_verts.size() - 2;
 	}
 }
 
@@ -158,8 +161,10 @@ kkPolygon* PolygonalModel::getPolygon(u64 i)const
 
 bool PolygonalModel::_isNeedToWeld(ControlVertex* cv, Vertex* V, f32 len)
 {
-	auto & vertInds = cv->getVertInds(); // получу индексы на m_verts
-	auto firstV = (Vertex*)m_verts[vertInds[0]];  // должно быть достаточно первой вершины
+	//auto & vertInds = cv->getVertInds(); // получу индексы на m_verts
+	//auto firstV = (Vertex*)m_verts[vertInds[0]];  // должно быть достаточно первой вершины
+	auto & verts = cv->getVerts();
+	auto firstV = (Vertex*)verts[0];  // должно быть достаточно первой вершины
 					
 	if( V->m_Position.distance(firstV->m_Position) > len ) return false;
 
@@ -187,11 +192,9 @@ void PolygonalModel::createControlPoints()
 		// прохожусь по вершинам полигона.
 		// смотрю, нужно ли сунуть вершину в уже существующий controlVertex,
 		//  или нужно создать новый
-		for( u64 k = 0, ksz = P->m_vertsInds.size(); k < ksz; ++k )
+		for( u64 k = 0, ksz = P->m_verts.size(); k < ksz; ++k )
 		{
-			u32 index = P->m_vertsInds[ k ]; // полигон хранит индексы вершин (массив m_verts)
-
-			Vertex    * V = (Vertex*)m_verts[ index ]; // получение самой вершины
+			Vertex    * V = (Vertex*)P->m_verts[k]; // получение самой вершины
 
 			bool needBetterSolution = false;
 
@@ -205,7 +208,8 @@ void PolygonalModel::createControlPoints()
 					cv = kkCreate<ControlVertex>();
 					m_controlPoints.push_back(cv);
 					cv->m_index = (u32)m_controlPoints.size()-1;
-					cv->m_vertexIndex.push_back(index);
+					//cv->m_vertexIndex.push_back(index);
+					cv->m_verts.push_back(V);
 					m_map[ h.str ] = cv;
 
 			//		needBetterSolution = true;
@@ -213,7 +217,8 @@ void PolygonalModel::createControlPoints()
 				else
 				{
 					cv = m_map[ h.str ];
-					cv->m_vertexIndex.push_back(index);
+					//cv->m_vertexIndex.push_back(index);
+					cv->m_verts.push_back(V);
 				}
 			}
 			else
@@ -222,61 +227,12 @@ void PolygonalModel::createControlPoints()
 				cv = kkCreate<ControlVertex>();
 				m_controlPoints.push_back(cv);
 				cv->m_index = (u32)m_controlPoints.size()-1;
-				cv->m_vertexIndex.push_back(index);
+				//cv->m_vertexIndex.push_back(index);
+				cv->m_verts.push_back(V);
+
 				m_map[ h.str ] = cv;
 			}
 
-			//if( needBetterSolution )
-			//{
-			//	bool needNewCV = true;
-
-			//	if(V->m_weld)
-			//	{
-			//		/*if( cv_last )
-			//		{
-			//			if( _isNeedToWeld(cv_last, V, len) )
-			//			{
-			//				needNewCV = false;
-			//				cv = cv_last;
-			//			}
-			//		}*/
-
-			//		if(!cv)
-			//		{
-			//			// прохожусь по контрольным вершинам
-			//			for( u64 cvi = 0, cvsz = m_controlPoints.size(); cvi < cvsz; ++cvi )
-			//			{
-			//				cv = (ControlVertex*)m_controlPoints[cvi];
-			//				if( _isNeedToWeld(cv, V, len) )
-			//				{
-			//					// нашли одинаковые координаты, значит нашли нужную контрольную вершину
-			//					needNewCV = false;
-			//					//cv_last = cv;
-			//					break;
-			//				}
-			//			}
-			//		}
-
-			//		if( needNewCV )
-			//		{
-			//			cv = kkCreate<ControlVertex>();
-			//			m_controlPoints.push_back(cv);
-			//			cv->m_index = (u32)m_controlPoints.size()-1;
-			//			m_map[ h ] = cv;
-			//		}
-			//	}
-			//	else
-			//	{
-			//		cv = kkCreate<ControlVertex>();
-			//		m_controlPoints.push_back(cv);
-			//		cv->m_index = (u32)m_controlPoints.size()-1;
-			//		m_map[ h ] = cv;
-			//	}
-			//
-
-			//	cv->m_vertexIndex.push_back(index);
-
-			//}
 			P->m_controlVertsInds.push_back(cv->m_index);
 		}
 	}
@@ -325,11 +281,12 @@ void PolygonalModel::generateNormals(bool flat)
 	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
 		polygon      = (Polygon3D *)m_polygons[ i ];
-		num_of_verts = (u64)polygon->m_vertsInds.size();
+		//num_of_verts = (u64)polygon->m_vertsInds.size();
+		num_of_verts = (u64)polygon->m_verts.size();
 		
 		for( u64 i2 = 0, sz2 = num_of_verts; i2 < sz2; ++i2 )
 		{
-			((Vertex*)m_verts[ polygon->m_vertsInds[ i2 ] ])->m_Normal.set( 0.f, 0.f, 0.f );
+			((Vertex*)polygon->m_verts[ i2 ])->m_Normal.set( 0.f, 0.f, 0.f );
 		}
 
 		u64 index2, index3;
@@ -341,9 +298,9 @@ void PolygonalModel::generateNormals(bool flat)
 			if( index3 == num_of_verts )
 				index3 = 0;
 
-			vertex2 = (Vertex*)m_verts[ polygon->m_vertsInds[ 0 ] ];
-			vertex1 = (Vertex*)m_verts[ polygon->m_vertsInds[ index2 ] ];
-			vertex3 = (Vertex*)m_verts[ polygon->m_vertsInds[ index3 ] ];
+			vertex2 = (Vertex*)polygon->m_verts[ 0 ];
+			vertex1 = (Vertex*)polygon->m_verts[ index2 ];
+			vertex3 = (Vertex*)polygon->m_verts[ index3 ];
 
 			e1 = vertex2->m_Position - vertex1->m_Position;
 			e2 = vertex3->m_Position - vertex1->m_Position;
@@ -357,7 +314,7 @@ void PolygonalModel::generateNormals(bool flat)
 
 		for( u64 i2 = 0, sz2 = num_of_verts; i2 < sz2; ++i2 )
 		{
-			((Vertex*)m_verts[ polygon->m_vertsInds[ i2 ] ])->m_Normal.normalize2();
+			((Vertex*)polygon->m_verts[ i2 ])->m_Normal.normalize2();
 		}
 	}
 
@@ -372,14 +329,15 @@ void PolygonalModel::generateNormals(bool flat)
 	{
 		CV = (ControlVertex*)m_controlPoints[ i ];
 		
-		sz2 = CV->m_vertexIndex.size();
+		sz2 = CV->m_verts.size();
 
 		kkVector4 N;
 
 		for( u64 i2 = 0; i2 < sz2; ++i2 )
 		{
-			auto V_id       = CV->m_vertexIndex[i2];
-			auto vertex     = (Vertex*)m_verts[ V_id ];
+			//auto V_id       = CV->m_vertexIndex[i2];
+			//auto vertex     = (Vertex*)m_verts[ V_id ];
+			auto vertex     = (Vertex*)CV->m_verts[i2];
 		
 			N += vertex->m_Normal;
 		}
@@ -389,8 +347,9 @@ void PolygonalModel::generateNormals(bool flat)
 
 		for( u64 i2 = 0; i2 < sz2; ++i2 )
 		{
-			auto V_id       = CV->m_vertexIndex[i2];
-			auto vertex     = (Vertex*)m_verts[ V_id ];
+			/*auto V_id       = CV->m_vertexIndex[i2];
+			auto vertex     = (Vertex*)m_verts[ V_id ];*/
+			auto vertex     = (Vertex*)CV->m_verts[i2];
 		
 			vertex->m_Normal = N;
 		}
@@ -413,11 +372,16 @@ void PolygonalModel::deleteMarkedPolygons()
 		{
 			m_polygons.push_back( p3d );
 
-			for( auto index : p3d->m_vertsInds )
+			/*for( auto index : p3d->m_vertsInds )
 			{
 				((Vertex*)m_verts[ index ])->m_isFree = true;
 				m_free_verts.push_back(index);
-			}
+			}*/
+			/*for( auto vertex : p3d->m_verts )
+			{
+				((Vertex*)vertex)->m_isFree = true;
+				m_free_verts.push_back(vertex);
+			}*/
 		}
 		else
 		{
@@ -590,7 +554,7 @@ void PolygonalModel::prepareForRaytracing(const kkMatrix4& matrix, const kkVecto
 	for(u64 polygonI = 0, polygon_sz = m_polygons.size(); polygonI < polygon_sz; ++polygonI )
 	{
 		polygon = (Polygon3D *)m_polygons.at(polygonI);
-		num_of_verts = (u32)polygon->m_vertsInds.size();
+		num_of_verts = (u32)polygon->m_verts.size();
 		u32 index2, index3;
 		for( u32 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
 		{
@@ -598,9 +562,9 @@ void PolygonalModel::prepareForRaytracing(const kkMatrix4& matrix, const kkVecto
 			index3  = index2 + 1;
 			if( index3 == num_of_verts )
 				index3 = 0;
-			vertex2 = (Vertex*)m_verts[ polygon->m_vertsInds[ 0 ] ];
-			vertex1 = (Vertex*)m_verts[ polygon->m_vertsInds[ index2 ] ];
-			vertex3 = (Vertex*)m_verts[ polygon->m_vertsInds[ index3 ] ];
+			vertex2 = (Vertex*)polygon->m_verts[ 0 ];
+			vertex1 = (Vertex*)polygon->m_verts[ index2 ];
+			vertex3 = (Vertex*)polygon->m_verts[ index3 ];
 			
 			kkVector4 e1( vertex2->m_Position._f32[0] - vertex1->m_Position._f32[0],
 				vertex2->m_Position._f32[1] - vertex1->m_Position._f32[1],
@@ -953,11 +917,11 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 	for( auto P : other->m_polygons )
 	{
 		auto polygon = (Polygon3D*)P;
-		for( size_t i = 0, sz = polygon->m_vertsInds.size(); i < sz; ++i )
+		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
 		{
-			auto V = (Vertex*)other->m_verts[polygon->m_vertsInds[i]];
+			auto V = (Vertex*)polygon->m_verts[i];
 			
-			polygon->m_vertsInds[i] += old_size;
+			//polygon->m_vertsInds[i] += old_size;
 
 			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
 			V->m_Normal_fix = V->m_Normal;

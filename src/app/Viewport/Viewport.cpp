@@ -486,12 +486,25 @@ void Viewport::_drawRecursively(Viewport* v)
 	{
 		v->_drawSelectionRectangle();
 	}
+	
+	if(v->m_drawPickLine)
+	{
+		m_vd.m_gs->useScissor(true);
+		m_vd.m_gs->setViewport(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
+		m_vd.m_gs->setScissor((s32)m_viewport_to_gl_funk.x,(s32)m_viewport_to_gl_funk.y,(s32)m_viewport_to_gl_funk.z,(s32)m_viewport_to_gl_funk.w );
 
-	if( !v->m_vd.m_app->isGlobalInputBlocked() )
+		v->m_vd.m_gs->drawLine2D(v->m_drawPickLineP1, *v->m_vd.m_cursor_position, kkColorWhite);
+
+		m_vd.m_gs->setScissor(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
+		m_vd.m_gs->useScissor(false);
+	}
+
+	//if( !v->m_vd.m_app->isGlobalInputBlocked() )
 	{
 		if( v->m_drawEditMode_hoverMark && v->m_vd.m_app->m_editMode == EditMode::Vertex )
 			v->_drawEditMode_hoverMark();
 	}
+
 
     v->m_vd.m_gs->useDepth(true);
 	v->m_vd.m_gs->setViewport(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
@@ -1123,6 +1136,43 @@ void Viewport::updateCursorRay()
 	
 }
 
+kkControlVertex* Viewport::pickVertex(Scene3DObject* object)
+{
+	if( m_drawEditMode_hoverMark )
+	{
+		std::basic_string<ControlVertex*> hovered_points;
+		auto camera_position = m_activeCamera->getPositionCamera();
+
+		auto & cverts = object->GetControlVertexArray();
+		auto & verts = object->GetVertexArray();
+		for( auto CV : cverts )
+		{
+			//auto & vert_inds = CV->getVertInds();
+			auto & verts = CV->getVerts();
+			auto V = verts[0];
+			auto point3D = math::mul(V->getPosition(), object->GetMatrix()) + object->GetPivot();
+			if( g_cursorSelFrust.pointInFrust(point3D) )
+			{
+				((ControlVertex*)CV)->m_distanceToCamera = camera_position.distance(point3D);
+				hovered_points.push_back((ControlVertex*)CV);
+			}
+		}
+		if(hovered_points.size()>1)
+		{
+			std::sort(hovered_points.begin(),hovered_points.end(),
+				[](ControlVertex* first, ControlVertex* second)
+				{
+					return first->m_distanceToCamera < second->m_distanceToCamera;
+				}
+			);
+
+		}
+		return hovered_points[0];
+	}
+	
+	return nullptr;
+}
+
 kkScene3DObject* Viewport::pickObject()
 {
 	updateCursorRay();
@@ -1163,6 +1213,51 @@ kkScene3DObject* Viewport::pickObject()
 	return result;
 }
 
+void Viewport::updateInputCamera()
+{
+	bool inRect = false;
+	if( kkrooo::pointInRect( *m_vd.m_cursor_position, m_activeViewport->m_rect_modified + v4f(0.f,m_vd.m_app->m_mainMenuStyle.menuBarHeight,0.f) ) || m_activeViewport->m_is_mouse_focus )
+	{
+		inRect = true;
+	}
+
+	if( inRect || m_activeViewport->m_is_mouse_focus )
+	{
+		if( *m_vd.m_mouseWheel > 0 )
+		{
+			m_activeViewport->m_activeCamera->zoomIn( *m_vd.m_state_keyboard , (s32)*m_vd.m_mouseWheel );
+			m_activeViewport->updateCursorRay();
+		}
+		else if( *m_vd.m_mouseWheel < 0 )
+		{
+			m_activeViewport->m_activeCamera->zoomOut( *m_vd.m_state_keyboard, (s32)*m_vd.m_mouseWheel );
+			m_activeViewport->updateCursorRay();
+		}
+		
+		if( m_vd.m_event_consumer->isMmbDown() || m_vd.m_event_consumer->isKeyDown( kkKey::K_SPACE )  )
+		{
+			m_activeViewport->m_is_mouse_focus = true;
+			if( *m_vd.m_state_keyboard == AppState_keyboard::Alt )
+			{
+				m_activeViewport->_rotate();
+			}
+			else
+			{
+				m_activeViewport->_panMove();
+			}
+		}
+
+		const s32 vertex_selection_area_val = 4;
+		m_activeViewport->m_activeCamera->update();
+		g_cursorSelFrust.createWithFrame(v4i(m_vd.m_cursor_position->x - vertex_selection_area_val, m_vd.m_cursor_position->y - vertex_selection_area_val,
+			m_vd.m_cursor_position->x + vertex_selection_area_val, m_vd.m_cursor_position->y + vertex_selection_area_val), 
+			m_activeViewport->m_rect_modified, m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
+		m_drawEditMode_hoverMark = false;
+		if( (*m_activeViewport->m_scene3D_ptr)->isVertexHover(g_cursorSelFrust) )
+			m_drawEditMode_hoverMark = true;
+	}
+}
+
 void Viewport::updateInput()
 {
 	/*auto P = kkrooo::worldToScreen(m_activeCamera->m_kk_camera->getViewProjectionMatrix(), kkVector4(), 
@@ -1176,7 +1271,8 @@ void Viewport::updateInput()
 		m_ignoreInput = false;
 		return;
 	}
-	f32 menuSizeY = 20.f;
+	
+	f32 menuSizeY = m_vd.m_app->m_mainMenuStyle.menuBarHeight;
 
 	if( m_isMainMenuActive )
 		return;
@@ -1276,7 +1372,7 @@ void Viewport::updateInput()
 					m_activeViewport->m_rect_modified, m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
 			}
 
-			if( (*m_activeViewport->m_scene3D_ptr)->isVertexHover(/*m_vd.m_cursor_position*/g_cursorSelFrust) )
+			if( (*m_activeViewport->m_scene3D_ptr)->isVertexHover(g_cursorSelFrust) )
 			{
 				m_drawEditMode_hoverMark = true;
 			}
@@ -1288,8 +1384,7 @@ void Viewport::updateInput()
 
 		g_mouseState.InViewport = true;
 
-		//if( m_imgui_io.MouseWheel != 0 ) printf("MouseWheel %f\n", *m_vd.m_mouseWheel);
-		if( *m_vd.m_mouseWheel > 0 )
+		/*if( *m_vd.m_mouseWheel > 0 )
 		{
 			m_activeViewport->m_activeCamera->zoomIn( *m_vd.m_state_keyboard , (s32)*m_vd.m_mouseWheel );
 			m_activeViewport->updateCursorRay();
@@ -1298,7 +1393,7 @@ void Viewport::updateInput()
 		{
 			m_activeViewport->m_activeCamera->zoomOut( *m_vd.m_state_keyboard, (s32)*m_vd.m_mouseWheel );
 			m_activeViewport->updateCursorRay();
-		}
+		}*/
 		
 
 		if( *m_vd.m_state_app == AppState_main::Idle )
@@ -1312,7 +1407,7 @@ void Viewport::updateInput()
 			if( g_mouseState.MMB_HOLD || m_vd.m_event_consumer->isKeyDown( kkKey::K_SPACE )  )
 			{
 				ignore_disabling_mouseInFocus = true;
-				m_activeViewport->m_is_mouse_focus = true;
+				/*m_activeViewport->m_is_mouse_focus = true;
 				if( *m_vd.m_state_keyboard == AppState_keyboard::Alt )
 				{
 					m_activeViewport->_rotate();
@@ -1320,7 +1415,7 @@ void Viewport::updateInput()
 				else
 				{
 					m_activeViewport->_panMove();
-				}
+				}*/
 			}
 		}
 
@@ -2142,3 +2237,10 @@ void Viewport::_toggleDrawModeLines()
 	else if( m_activeViewport->m_draw_mode == _draw_mode::_draw_mode_lines_and_material )
 		m_activeViewport->m_draw_mode = _draw_mode::_draw_mode_material;
 }
+
+void Viewport::setDrawPickLine(bool v)
+{
+	m_drawPickLine = v;
+	m_drawPickLineP1 = *m_vd.m_cursor_position;
+}
+

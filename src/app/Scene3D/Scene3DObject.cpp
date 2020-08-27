@@ -80,9 +80,8 @@ void Scene3DObject::_countNumOfLines()
 	for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
 	{
 		Polygon3D * p = (Polygon3D *)m_PolyModel->m_polygons[i];
-		m_numOfLines += (u32)p->m_vertsInds.size();
+		m_numOfLines += (u32)p->m_verts.size();
 	}
-
 }
 
 void Scene3DObject::updatePolygonModel()
@@ -180,7 +179,7 @@ void Scene3DObject::_createSoftwareModel_polys()
 	{
 		polygon = (Polygon3D *)m_PolyModel->m_polygons[i];
 
-		num_of_verts = (u32)polygon->m_vertsInds.size();
+		num_of_verts = (u32)polygon->m_verts.size();
 
 		u32 index2, index3;
 		for( u64 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
@@ -200,9 +199,9 @@ void Scene3DObject::_createSoftwareModel_polys()
 			if( index3 == num_of_verts )
 				index3 = 0;
 
-			vertex2 = (Vertex*)m_PolyModel->m_verts[polygon->m_vertsInds[0]];
-			vertex1 = (Vertex*)m_PolyModel->m_verts[polygon->m_vertsInds[index2]];
-			vertex3 = (Vertex*)m_PolyModel->m_verts[polygon->m_vertsInds[index3]];
+			vertex2 = (Vertex*)polygon->m_verts[0];
+			vertex1 = (Vertex*)polygon->m_verts[index2];
+			vertex3 = (Vertex*)polygon->m_verts[index3];
 
 			verts_ptr->Position.x = vertex1->m_Position._f32[0];
 			verts_ptr->Position.y = vertex1->m_Position._f32[1];
@@ -348,9 +347,9 @@ void Scene3DObject::_createSoftwareModel_points()
 			index = 0;
 		}
 
-		verts_ptr->_pos.x   = ((Vertex*)m_PolyModel->m_verts[CV->m_vertexIndex[0]])->m_Position[0];
-		verts_ptr->_pos.y   = ((Vertex*)m_PolyModel->m_verts[CV->m_vertexIndex[0]])->m_Position[1];
-		verts_ptr->_pos.z   = ((Vertex*)m_PolyModel->m_verts[CV->m_vertexIndex[0]])->m_Position[2];
+		verts_ptr->_pos.x   = ((Vertex*)CV->m_verts[0])->m_Position[0];
+		verts_ptr->_pos.y   = ((Vertex*)CV->m_verts[0])->m_Position[1];
+		verts_ptr->_pos.z   = ((Vertex*)CV->m_verts[0])->m_Position[2];
 		verts_ptr->_col.x   = 0.f;
 		verts_ptr->_col.y   = 0.f;
 		verts_ptr->_col.z   = 1.f;
@@ -427,9 +426,9 @@ void Scene3DObject::_createSoftwareModel_edges()
 					index = 0;
 				}
 				
-				verts_ptr->_position.x  = ((Vertex*)m_PolyModel->m_verts[cv_first->m_vertexIndex[0]])->m_Position.KK_X;
-				verts_ptr->_position.y  = ((Vertex*)m_PolyModel->m_verts[cv_first->m_vertexIndex[0]])->m_Position.KK_Y;
-				verts_ptr->_position.z  = ((Vertex*)m_PolyModel->m_verts[cv_first->m_vertexIndex[0]])->m_Position.KK_Z;
+				verts_ptr->_position.x  = ((Vertex*)cv_first->m_verts[0])->m_Position.KK_X;
+				verts_ptr->_position.y  = ((Vertex*)cv_first->m_verts[0])->m_Position.KK_Y;
+				verts_ptr->_position.z  = ((Vertex*)cv_first->m_verts[0])->m_Position.KK_Z;
 				
 				v4f color(1.f,1.f,1.f,1.f);
 				if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Edge )
@@ -446,19 +445,19 @@ void Scene3DObject::_createSoftwareModel_edges()
 				verts_ptr->_color = color;
 				*inds_ptr = index;
 				
-				((Vertex*)m_PolyModel->m_verts[cv_first->m_vertexIndex[0]])->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+				((Vertex*)cv_first->m_verts[0])->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
 
 				++verts_ptr;
 				++inds_ptr;
 				++index;
 
-				verts_ptr->_position.x  = ((Vertex*)m_PolyModel->m_verts[cv_second->m_vertexIndex[0]])->m_Position.KK_X;
-				verts_ptr->_position.y  = ((Vertex*)m_PolyModel->m_verts[cv_second->m_vertexIndex[0]])->m_Position.KK_Y;
-				verts_ptr->_position.z  = ((Vertex*)m_PolyModel->m_verts[cv_second->m_vertexIndex[0]])->m_Position.KK_Z;
+				verts_ptr->_position.x  = ((Vertex*)cv_second->m_verts[0])->m_Position.KK_X;
+				verts_ptr->_position.y  = ((Vertex*)cv_second->m_verts[0])->m_Position.KK_Y;
+				verts_ptr->_position.z  = ((Vertex*)cv_second->m_verts[0])->m_Position.KK_Z;
 				verts_ptr->_color = color;
 				*inds_ptr = index;
 				
-				((Vertex*)m_PolyModel->m_verts[cv_second->m_vertexIndex[0]])->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+				((Vertex*)cv_second->m_verts[0])->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
 
 				++verts_ptr;
 				++inds_ptr;
@@ -642,7 +641,7 @@ void Scene3DObject_isRayIntersect(
 	{
 		polygon = (Polygon3D *)object->m_PolyModel->m_polygons.at(i);
 
-		num_of_verts = (u32)polygon->m_vertsInds.size();
+		num_of_verts = (u32)polygon->m_verts.size();
 		u32 index2, index3;
 		for( u32 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
 		{
@@ -651,9 +650,9 @@ void Scene3DObject_isRayIntersect(
 			if( index3 == num_of_verts )
 				index3 = 0;
 
-			vertex2 = (Vertex*)object->m_PolyModel->m_verts[ polygon->m_vertsInds[0] ];
-			vertex1 = (Vertex*)object->m_PolyModel->m_verts[ polygon->m_vertsInds[index2] ];
-			vertex3 = (Vertex*)object->m_PolyModel->m_verts[ polygon->m_vertsInds[index3] ];
+			vertex2 = (Vertex*)polygon->m_verts[0];
+			vertex1 = (Vertex*)polygon->m_verts[index2];
+			vertex3 = (Vertex*)polygon->m_verts[index3];
 
 			kkTriangle t;
 			t.v1 = math::mul( vertex2->m_Position, M ) + object->m_pivot;
@@ -767,7 +766,7 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 	{
 		polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
 
-		num_of_verts = (u32)polygon->m_vertsInds.size();
+		num_of_verts = (u32)polygon->m_verts.size();
 		u32 index2, index3;
 		for( u32 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
 		{
@@ -776,9 +775,9 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 			if( index3 == num_of_verts )
 				index3 = 0;
 
-			vertex2 = (Vertex*)m_PolyModel->m_verts[ polygon->m_vertsInds[0] ];
-			vertex1 = (Vertex*)m_PolyModel->m_verts[ polygon->m_vertsInds[index2] ];
-			vertex3 = (Vertex*)m_PolyModel->m_verts[ polygon->m_vertsInds[index3] ];
+			vertex2 = (Vertex*)polygon->m_verts[0];
+			vertex1 = (Vertex*)polygon->m_verts[index2];
+			vertex3 = (Vertex*)polygon->m_verts[index3];
 			vertex1->m_Position.setW(1.f);
 			vertex2->m_Position.setW(1.f);
 			vertex3->m_Position.setW(1.f);
@@ -875,10 +874,11 @@ void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVerte
 		cv = verts[ i ];
 
 		// сначала меняю координату полигональной модели
-		for( u64 i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( u64 i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id   = cv->m_vertexIndex[i2];
-			auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id   = cv->m_vertexIndex[i2];
+			//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex = (Vertex*)cv->m_verts[i2];
 
 			vertex->m_Position = vertex->m_Position_fix + V;
 
@@ -904,7 +904,7 @@ void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVerte
 			}
 		}
 
-		auto vertex  = (Vertex*)m_PolyModel->m_verts[ cv->m_vertexIndex[0] ];
+		auto vertex  = (Vertex*)cv->m_verts[0];
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ cv->m_vertexIndexForSoftware_points.second ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + cv->m_vertexIndexForSoftware_points.first;
 		verts_points_ptr->_pos.x = vertex->m_Position.KK_X;
@@ -986,10 +986,11 @@ void Scene3DObject::rotateVerts(const kkMatrix4& m, std::basic_string<ControlVer
 		cv = verts[ i ];
 
 		// сначала меняю координату полигональной модели
-		for( u64 i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( u64 i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id   = cv->m_vertexIndex[i2];
-			auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id   = cv->m_vertexIndex[i2];
+			//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex = (Vertex*)cv->m_verts[ i2 ];
 
 			auto V = vertex->m_Position_fix - C;
 			V.KK_W = 1.f;
@@ -1016,7 +1017,7 @@ void Scene3DObject::rotateVerts(const kkMatrix4& m, std::basic_string<ControlVer
 				hardware_models_for_update_lines.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ],m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]));
 			}
 		}
-		auto vertex  = (Vertex*)m_PolyModel->m_verts[ cv->m_vertexIndex[0] ];
+		auto vertex  = (Vertex*)cv->m_verts[0];
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ cv->m_vertexIndexForSoftware_points.second ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + cv->m_vertexIndexForSoftware_points.first;
 		verts_points_ptr->_pos.x = vertex->m_Position.KK_X;
@@ -1097,10 +1098,11 @@ void Scene3DObject::scaleVerts(const kkMatrix4& m, std::basic_string<ControlVert
 		cv = verts[ i ];
 
 		// сначала меняю координату полигональной модели
-		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id   = cv->m_vertexIndex[i2];
-			auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id   = cv->m_vertexIndex[i2];
+			//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex = (Vertex*)cv->m_verts[i2];
 			
 			vertex->m_Position = math::mul( vertex->m_Position_fix - C, M) + C;
 
@@ -1125,7 +1127,7 @@ void Scene3DObject::scaleVerts(const kkMatrix4& m, std::basic_string<ControlVert
 				hardware_models_for_update_lines.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ],m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]));
 			}
 		}
-		auto vertex  = (Vertex*)m_PolyModel->m_verts[ cv->m_vertexIndex[0] ];
+		auto vertex  = (Vertex*)cv->m_verts[0];
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ cv->m_vertexIndexForSoftware_points.second ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + cv->m_vertexIndexForSoftware_points.first;
 		verts_points_ptr->_pos.x = vertex->m_Position.KK_X;
@@ -1167,10 +1169,11 @@ void Scene3DObject::ApplyPosition()
 	{
 		cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 
-		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id   = cv->m_vertexIndex[i2];
-			auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id   = cv->m_vertexIndex[i2];
+			//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex = (Vertex*)cv->m_verts[i2];
 
 			vertex->m_Position_fix = vertex->m_Position;
 		}
@@ -1198,10 +1201,11 @@ void Scene3DObject::RestorePosition()
 	{
 		cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 		
-		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id    = cv->m_vertexIndex[i2];
-			auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id    = cv->m_vertexIndex[i2];
+			//auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex  = (Vertex*)cv->m_verts[i2];
 
 			vertex->m_Position = vertex->m_Position_fix;
 
@@ -1225,7 +1229,7 @@ void Scene3DObject::RestorePosition()
 			}
 		}
 
-		auto vertex  = (Vertex*)m_PolyModel->m_verts[ cv->m_vertexIndex[0] ];
+		auto vertex  = (Vertex*)cv->m_verts[0];
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ cv->m_vertexIndexForSoftware_points.second ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + cv->m_vertexIndexForSoftware_points.first;
 		verts_points_ptr->_pos.x = vertex->m_Position.KK_X;
@@ -1269,8 +1273,9 @@ void        Scene3DObject::updateAABB_vertex()
 	{
 		cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 
-		auto V_id   = cv->m_vertexIndex[0];
-		auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+		//auto V_id   = cv->m_vertexIndex[0];
+		//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+		auto vertex = (Vertex*)cv->m_verts[0];
 
 		m_aabbOriginal.add( vertex->m_Position_fix );
 	}
@@ -1286,10 +1291,11 @@ void Scene3DObject::applyMatrices()
 	{
 		ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 
-		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id    = cv->m_vertexIndex[i2];
-			auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id    = cv->m_vertexIndex[i2];
+			//auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex  = (Vertex*)cv->m_verts[i2];
 		
 			vertex->m_Position = math::mul(vertex->m_Position_fix,m_matrix);
 			vertex->m_Position_fix = vertex->m_Position;
@@ -1394,10 +1400,11 @@ void Scene3DObject::deleteSelectedVerts()
 		auto cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 		if( cv->m_isSelected )
 		{
-			for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 			{
-				auto V_id   = cv->m_vertexIndex[i2];
-				auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+				//auto V_id   = cv->m_vertexIndex[i2];
+				//auto vertex = (Vertex*)m_PolyModel->m_verts[ V_id ];
+				auto vertex = (Vertex*)cv->m_verts[i2];
 
 				vertex->m_parentPolygon->MarkToDelete();
 				need_delete = true;
@@ -1524,8 +1531,7 @@ void Scene3DObject::createEdges()
 			edge->m_firstPoint  = cv_first;
 			edge->m_secondPoint = cv_second;
 
-			cv_first->m_edges.emplace_back(edge);
-			cv_second->m_edges.emplace_back(edge);
+			
 
 			// надо найти, было ли данное ребро добавлено ранее
 			// в качестве уникального ключа берутся 4 байта с одного адреса и 4 байта с другого
@@ -1543,11 +1549,24 @@ void Scene3DObject::createEdges()
 					E->m_polygonIndex[0] = i;
 				else
 					E->m_polygonIndex[1] = i;
+
+				delete edge;
+
+				/*cv_first->m_edges.emplace_back(E);
+				cv_second->m_edges.emplace_back(E);*/
 			}
 			else
 			{ // не найдено, значит надо добавить в массив и в map
+				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+					edge->m_polygonIndex[0] = i;
+				else
+					edge->m_polygonIndex[1] = i;
+
 				m_edges.push_back(edge);
 				map[key_val] = m_edges.size()-1;
+
+				cv_first->m_edges.emplace_back(edge);
+				cv_second->m_edges.emplace_back(edge);
 			}
 
 		}
@@ -1570,10 +1589,11 @@ void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 	{
 		ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 
-		for( size_t i2 = 0, sz2 = cv->m_vertexIndex.size(); i2 < sz2; ++i2 )
+		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 		{
-			auto V_id    = cv->m_vertexIndex[i2];
-			auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			//auto V_id    = cv->m_vertexIndex[i2];
+			//auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
+			auto vertex  = (Vertex*)cv->m_verts[i2];
 			vertex->m_Position = vertex->m_Position_fix + V;
 			vertex->m_Position_fix = vertex->m_Position;
 		}
@@ -1675,14 +1695,223 @@ void Scene3DObject::BreakVerts()
 		if(cv->m_isSelected)
 		{
 			cv->m_isSelected = false;
-			for( auto v_index : cv->m_vertexIndex )
+			/*for( auto v_index : cv->m_vertexIndex )
+			{*/
+			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 			{
-				Vertex    * V = (Vertex*)m_PolyModel->m_verts[ v_index ];
-				V->m_weld = false;
+				auto vertex  = (Vertex*)cv->m_verts[i2];
+				vertex->m_weld = false;
 			}
 		}
 	}
 	m_isObjectHaveSelectedVerts = false;
+	m_PolyModel->createControlPoints();
+	this->_rebuildModel();
+	updateModelPointsColors();
+}
+
+void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
+{
+	ControlVertex* cv1 = (ControlVertex*)CV1;
+	ControlVertex* cv2 = (ControlVertex*)CV2;
+	createEdges();
+
+	bool is_edge = false;
+	Edge * edge = nullptr;
+	for( auto e : cv1->m_edges )
+	{
+		edge = e;
+		if(e->m_firstPoint == cv2 || e->m_secondPoint == cv2)
+		{
+			is_edge = true;
+			break;
+		}
+	}
+
+	// есть 2 случая, когда надо делать weld
+	// 1. когда точки образуют ребро
+	// 2. когда хоть 1 ребро у каждой точки имеет только 1 полигон на стороне (то есть точка как бы снаружи)
+
+	// сначала перемещу нужную вершину к другой вершине
+	// потом, нахожу 1 или 2 полигона
+	// из полигонов удаляю вершину, если вершины три то удаляю сам полигон. запоминаю минимальный индекс
+	// удаляю вершины из главного массива с вершинами m_verts, 
+	// и в конце перепрохожусь по всем полигонам изменяя значения индексов
+	/*u64 minimum_index = 0xFFFFFFFFFFFFFFFF;
+	u64 num_of_inds_for_shift = 0;*/
+	if(is_edge)
+	{
+		//Vertex* targetVertex = (Vertex*)m_PolyModel->m_verts[ cv2->m_vertexIndex[0] ];
+
+		//for( auto vertexIndex : cv1->m_vertexIndex )
+		//{
+		//	Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
+		//	vertex->m_Boneinds = targetVertex->m_Boneinds;
+		//	vertex->m_Color = targetVertex->m_Color;
+		//	vertex->m_Normal = targetVertex->m_Normal;
+		//	vertex->m_Normal_fix = targetVertex->m_Normal_fix;
+		//	vertex->m_Position = targetVertex->m_Position;
+		//	vertex->m_Position_fix = targetVertex->m_Position_fix;
+		//	vertex->m_UV = targetVertex->m_UV;
+		//	vertex->m_Weights = targetVertex->m_Weights;
+		//	vertex->m_weld = targetVertex->m_weld;
+		//}
+
+		//Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
+		//Polygon3D* P2 = nullptr;
+		//if(edge->m_polygonIndex[1] != (u64)-1 )
+		//{
+		//	P2 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[1]];
+		//}
+
+		//// удалить вершину из полигона и из основного массива
+		//if(P1->m_vertsInds.size() > 3)
+		//{
+		//	// вершины в полигоне это просто индексы на основной массив
+		//	// значит надо найти нужный индекс
+		//	u64 indexForDelete = 0;
+		//	bool found = false;
+		//	for( auto vertexIndex : P1->m_vertsInds )
+		//	{
+		//		// найти индекс в вершине, которую двигали
+		//		for( auto vertexIndex_CV : cv1->m_vertexIndex )
+		//		{
+		//			if( vertexIndex_CV == vertexIndex )
+		//			{
+		//				indexForDelete = vertexIndex;
+		//				found = true;
+		//				goto end;
+		//			}
+		//		}
+		//	}
+		//end:;
+		//	if(found)
+		//	{
+		//		// удалить вершину из основного массива
+		//		kkDestroy( m_PolyModel->m_verts[ indexForDelete ] );
+		//		m_PolyModel->m_verts[ indexForDelete ] = nullptr;
+		//		P1->m_vertsInds.erase_first(indexForDelete);
+		//	}
+		//}
+		//else
+		//{
+		//	for( auto vertexIndex : P1->m_vertsInds )
+		//	{
+		//		auto V = m_PolyModel->m_verts[ vertexIndex ];
+		//		if(V)
+		//		{
+		//			kkDestroy( V );
+		//			m_PolyModel->m_verts[ vertexIndex ] = nullptr;
+		//		}
+		//	}
+
+		//	m_PolyModel->m_polygons.erase_first(P1);
+		//	kkDestroy(P1);
+		//}
+
+		//u64 a_index = 0xffffffffffffffff;
+		//u64 new_size = 0;
+		//for( u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
+		//{
+		//	auto V = (Vertex*)m_PolyModel->m_verts[i];
+
+		//	if(!V)
+		//	{
+		//		if(a_index == 0xffffffffffffffff)
+		//		{
+		//			a_index = i;
+		//		}
+		//	}
+		//	else
+		//	{
+		//		++new_size;
+		//		if(a_index < 0xffffffffffffffff)
+		//		{
+		//			m_PolyModel->m_verts[a_index] = m_PolyModel->m_verts[i];
+		//			++a_index;
+		//		}
+		//	}
+		//}
+		//m_PolyModel->m_verts.setSize(new_size);
+
+
+
+		/*if(P2)
+		{
+			if(P2->m_vertsInds.size() > 3)
+			{
+				u64 indexForDelete = 0;
+				bool found = false;
+				for( auto vertexIndex : P2->m_vertsInds )
+				{
+					for( auto vertexIndex_CV : cv1->m_vertexIndex )
+					{
+						if( vertexIndex_CV == vertexIndex )
+						{
+							indexForDelete = vertexIndex;
+							found = true;
+							goto end2;
+						}
+					}
+				}
+			end2:;
+				if(found)
+				{
+					if(indexForDelete < minimum_index)
+						minimum_index = indexForDelete;
+					++num_of_inds_for_shift;
+					kkDestroy( m_PolyModel->m_verts[ indexForDelete ] );
+					m_PolyModel->m_verts[ indexForDelete ] = nullptr;
+					P2->m_vertsInds.erase_first(indexForDelete);
+				}
+			}
+			else
+			{
+				num_of_inds_for_shift += 3;
+				for( auto vertexIndex : P2->m_vertsInds )
+				{
+					if(vertexIndex < minimum_index)
+						minimum_index = vertexIndex;
+				}
+				m_PolyModel->m_polygons.erase_first(P2);
+				kkDestroy(P2);
+			}
+		}*/
+	
+		/*u64 new_m_verts_size = m_PolyModel->m_verts.size();
+		if(new_m_verts_size)
+		{
+			kkArray<kkVertex*>    new_m_verts         = kkArray<kkVertex*>(0xffff);
+			new_m_verts.reserve(new_m_verts_size);
+			for( u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
+			{
+				if( m_PolyModel->m_verts[i] )
+				{
+					new_m_verts.push_back(m_PolyModel->m_verts[i]);
+				}
+			}
+
+			m_PolyModel->m_verts.clear();
+			m_PolyModel->m_verts.setData(new_m_verts.data());
+			m_PolyModel->m_verts.setSize(new_m_verts_size);
+			new_m_verts.setData(nullptr);
+		}*/
+
+		/*for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+		{
+			auto P = (Polygon3D*)m_PolyModel->m_polygons[i];
+			for( u64 j = 0, jsz = P->m_vertsInds.size(); j < jsz; ++j )
+			{
+				if( P->m_vertsInds[j] >= minimum_index )
+				{
+					P->m_vertsInds[j] -= num_of_inds_for_shift;
+				}
+			}
+		}*/
+	}
+	deleteEdges();
+
+
 	m_PolyModel->createControlPoints();
 	this->_rebuildModel();
 	updateModelPointsColors();

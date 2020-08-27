@@ -291,8 +291,8 @@ void Scene3D::_selectObjectsByRectangle_object( std::basic_string<Scene3DObject*
 				if(o2 == sz2) o2=0;
 				auto cv1 = (ControlVertex*)obj->m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o] ];
 				auto cv2 = (ControlVertex*)obj->m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o2] ];
-				auto V1 = obj->m_PolyModel->m_verts[cv1->m_vertexIndex[0]];
-				auto V2 = obj->m_PolyModel->m_verts[cv2->m_vertexIndex[0]];
+				auto V1 = cv1->m_verts[0];
+				auto V2 = cv2->m_verts[0];
 				if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
 				{
 					found = true;
@@ -364,8 +364,8 @@ void Scene3D::_selectObjectsByRectangle_poly( const SelectionFrust& frust )
 				auto cv1 = (ControlVertex*)obj->m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o] ];
 				auto cv2 = (ControlVertex*)obj->m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o2] ];
 
-				auto V1 = obj->m_PolyModel->m_verts[cv1->m_vertexIndex[0]];
-				auto V2 = obj->m_PolyModel->m_verts[cv2->m_vertexIndex[0]];
+				auto V1 = cv1->m_verts[0];
+				auto V2 = cv2->m_verts[0];
 
 				if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
 				{
@@ -505,8 +505,8 @@ void Scene3D::_selectObjectsByRectangle_edge( const SelectionFrust& frust )
 				auto cv1 = (ControlVertex*)obj->m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o] ];
 				auto cv2 = (ControlVertex*)obj->m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o2] ];
 
-				auto V1 = obj->m_PolyModel->m_verts[cv1->m_vertexIndex[0]];
-				auto V2 = obj->m_PolyModel->m_verts[cv2->m_vertexIndex[0]];
+				auto V1 = cv1->m_verts[0];
+				auto V2 = cv2->m_verts[0];
 
 				if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
 				{
@@ -569,8 +569,10 @@ void Scene3D::_selectObjectsByRectangle_vertex( /*const v4i& r*/ const Selection
 
 		for( auto CV : cverts )
 		{
-			auto & vert_inds = CV->getVertInds();
-			auto V = verts[vert_inds[0]];
+			//auto & vert_inds = CV->getVertInds();
+			//auto V = verts[vert_inds[0]];
+			auto & verts = CV->getVerts();
+			auto V = verts[0];
 			if( frust.pointInFrust(math::mul(V->getPosition(), object->GetMatrix()) + object->GetPivot()) )
 			{
 				if( ks == AppState_keyboard::Alt )
@@ -1064,7 +1066,7 @@ void Scene3D::_updateSelectionAabb_vertex()
 			if( CV->isSelected())
 			{
 				nnn = false;
-				auto V = (Vertex*)o->m_PolyModel->m_verts[ CV->m_vertexIndex[0] ];
+				auto V = (Vertex*)CV->m_verts[0];
 				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
 			}
 		}
@@ -1105,7 +1107,7 @@ void Scene3D::_updateSelectionAabb_edge()
 			if( CV->isSelectedEdge())
 			{
 				nnn = false;
-				auto V = (Vertex*)o->m_PolyModel->m_verts[ CV->m_vertexIndex[0] ];
+				auto V = (Vertex*)CV->m_verts[0];
 				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
 			}
 		}
@@ -1153,7 +1155,7 @@ void Scene3D::_updateSelectionAabb_polygon()
 			if( CV->isSelectedPoly())
 			{
 				nnn = false;
-				auto V = (Vertex*)o->m_PolyModel->m_verts[ CV->m_vertexIndex[0] ];
+				auto V = (Vertex*)CV->m_verts[0];
 				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
 			}
 		}
@@ -2104,7 +2106,7 @@ void Scene3D::moveSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool 
 }
 
 
-bool Scene3D::isVertexHover(/*v2i* pt*/const SelectionFrust& frust)
+bool Scene3D::isVertexHover(const SelectionFrust& frust)
 {
 	for( auto * object : m_objects_selected )
 	{
@@ -2112,8 +2114,9 @@ bool Scene3D::isVertexHover(/*v2i* pt*/const SelectionFrust& frust)
 		auto & verts = object->GetVertexArray();
 		for( auto CV : cverts )
 		{
-			auto & vert_inds = CV->getVertInds();
-			auto V = verts[vert_inds[0]];
+			//auto & vert_inds = CV->getVertInds();
+			auto & verts = CV->getVerts();
+			auto V = verts[0];
 			if( frust.pointInFrust(math::mul(V->getPosition(), object->GetMatrix()) + object->GetPivot()) )
 			{
 				return true;
@@ -2135,8 +2138,9 @@ void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* ca
 		auto & verts = object->GetVertexArray();
 		for( auto CV : cverts )
 		{
-			auto & vert_inds = CV->getVertInds();
-			auto V = verts[vert_inds[0]];
+			//auto & vert_inds = CV->getVertInds();
+			auto & verts = CV->getVerts();
+			auto V = verts[0];
 			auto point3D = math::mul(V->getPosition(), object->GetMatrix()) + object->GetPivot();
 			if( frust.pointInFrust(point3D) )
 			{
@@ -2186,75 +2190,6 @@ void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* ca
 		}
 		object->updateModelPointsColors();
 	}
-//	ControlVertex* cv;
-//	int size = 4;
-//	for( auto * o : m_objects_selected )
-//	{
-//		auto M = o->m_matrix;
-//		for( size_t i2 = 0, sz2 = o->m_pointsInScreen.size(); i2 < sz2; ++i2 )
-//		{
-//			if( pt->x > (o->m_pointsInScreen[ i2 ].m_2d_coords.x - size) && pt->x < (o->m_pointsInScreen[ i2 ].m_2d_coords.x + size) )
-//			{
-//				if( pt->y > (o->m_pointsInScreen[ i2 ].m_2d_coords.y - size) && pt->y < (o->m_pointsInScreen[ i2 ].m_2d_coords.y + size) )
-//				{
-//					cv = (ControlVertex*)o->m_PolyModel->m_controlPoints[ o->m_pointsInScreen[ i2 ].m_ID ];
-//
-////					cv->m_distanceToCamera = camera_position.distance( math::mul( cv->m_vertexPtr->m_Position, M ) + o->m_pivot );
-//					auto V = (Vertex*)o->m_PolyModel->m_verts[ cv->m_vertexIndex[ 0 ] ];
-//					cv->m_distanceToCamera = camera_position.distance( math::mul( V->m_Position, M ) + o->m_pivot );
-//
-//					hovered_points.push_back( cv );
-//				}
-//			}
-//		}
-//	}
-//
-//	if( hovered_points.size() > 1 )
-//	{
-//		std::sort(hovered_points.begin(),hovered_points.end(),
-//			[](ControlVertex* first, ControlVertex* second)
-//			{
-//				return first->m_distanceToCamera < second->m_distanceToCamera;
-//			}
-//		);
-//	}
-//
-//	if( hovered_points.size() )
-//	{
-//		if( m_app->m_state_keyboard != AppState_keyboard::Ctrl && m_app->m_state_keyboard != AppState_keyboard::Alt )
-//		{
-//			deselectAll();
-//		}
-//
-//		hovered_points[ 0 ]->m_isSelected = true;
-//
-//		if( m_app->m_state_keyboard == AppState_keyboard::Alt )
-//			hovered_points[ 0 ]->m_isSelected = false;
-//	}
-//	else
-//	{
-//		if( m_app->m_state_keyboard != AppState_keyboard::Ctrl )
-//		{
-//			deselectAll();
-//		}
-//	}
-//
-//	Scene3DObject * object;
-//	for( size_t i = 0, sz = m_objects_selected.size(); i <sz; ++i )
-//	{
-//		object = m_objects_selected[ i ];
-//		object->m_isObjectHaveSelectedVerts = false;
-//
-//		for( size_t i2 = 0, sz2 = object->m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-//		{
-//			if( object->m_PolyModel->m_controlPoints[ i2 ]->isSelected() )
-//			{
-//				object->m_isObjectHaveSelectedVerts = true;
-//				break;
-//			}
-//		}
-//		object->updateModelPointsColors();
-//	}
 
 	_updateSelectionAabb_vertex();
 	updateObjectVertexSelectList();
@@ -2397,8 +2332,8 @@ bool Scene3D::selectEdges(/*CursorRay* cursorRay, */kkRay* ray/*, int depth*/)
 			auto cv1 = (ControlVertex*)cverts[ cvs[ i ] ];
 			auto cv2 = (ControlVertex*)cverts[ cvs[ i2 ] ];
 
-			auto v1 = (Vertex*)verts[ cv1->m_vertexIndex[0] ];
-			auto v2 = (Vertex*)verts[ cv2->m_vertexIndex[0] ];
+			auto v1 = (Vertex*)cv1->m_verts[0];
+			auto v2 = (Vertex*)cv2->m_verts[0];
 
 			auto d = ray->distanceToLine( math::mul( v1->m_Position, M) + pivot, math::mul( v2->m_Position, M ) + pivot );
 

@@ -32,7 +32,9 @@ public:
 	//kkVertex* getVertex( u32 );
 	//u32     getVertexCount();
 
-	kkArray<u32>& GetVertInds();
+	//kkArray<u32>& GetVertInds();
+	kkArray<kkVertex*>& GetVerts();
+
 	kkArray<u32>& GetControlVertInds();
 	void MarkToDelete();
 	void RemoveMarkToDelete();
@@ -43,13 +45,10 @@ public:
 
 public:
 
-	///// по этим указателям нужно будет освобождать память
-	// теперь этот массив нужен только лишь для создания модели
 	// необходимо передать эти вершины в модель, попутно заполняя m_verts
-	kkArray<Vertex*> m_verts = kkArray<Vertex*>(4);
+	kkArray<kkVertex*> m_verts = kkArray<kkVertex*>(4);
+	//kkArray<u32> m_vertsInds  = kkArray<u32>(4);
 
-
-	kkArray<u32> m_vertsInds  = kkArray<u32>(4);
 	kkArray<u32> m_controlVertsInds  = kkArray<u32>(4);
 
 	void      addVertex(Vertex*v);

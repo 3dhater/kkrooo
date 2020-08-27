@@ -761,6 +761,15 @@ void Application::updateInput()
             m_globalInputBlock = false;
         }
     }
+    else if(m_vertexPickMode)
+    {
+        if( m_event_consumer->isRmbDown() || m_event_consumer->isKeyDown(kkKey::K_ESCAPE))
+        {
+            m_vertexPickMode = false;
+            m_globalInputBlock = false;
+            setDrawPickLine(false);
+        }
+    }
 
     if( m_state_app != AppState_main::MainMenu )
     {
@@ -789,6 +798,7 @@ void Application::updateInput()
             if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
             {
                 m_main_viewport->updateInput();
+                m_main_viewport->updateInputCamera();
             }
         }
         else
@@ -808,6 +818,29 @@ void Application::updateInput()
             }
         }
 
+        if(m_vertexPickMode)
+        {
+            m_main_viewport->updateInputCamera();
+        }
+        if(m_vertexPickMode && m_event_consumer->isLmbDownOnce() && !m_cursorInGUI)
+        {
+            m_vertexPickMode = false;
+            m_globalInputBlock = false;
+
+            // данный код должен вызываться изначально с выбранной полигональной моделью
+            auto pickVertex = m_main_viewport->pickVertex((Scene3DObject*)m_current_scene3D->getSelectedObject(0));
+            if(pickVertex && m_vertexPickCallback)
+            {
+                m_vertexPicked = pickVertex;
+                m_vertexPickCallback(0, this);
+            }
+            else
+            {
+                setDrawPickLine(false);
+            }
+
+        }
+
         // обработка тех горячих клавиш, действие команд которых более шире чем у например узкоспециализированных типа вьюпорта
         // вполне возможно что для редактора текстурных координат (или чего-то ещё) придётся делать свой _processShortcuts
         if(!this->isGlobalInputBlocked())
@@ -815,6 +848,12 @@ void Application::updateInput()
             _processShortcuts();
         }
     }
+}
+
+void Application::setDrawPickLine(bool v)
+{
+    //m_drawPickLine = v;
+    m_active_viewport->setDrawPickLine(v);
 }
 
 void Application::_deleteSelectedObjects()
@@ -1407,6 +1446,18 @@ void Application::setObjectPickMode(void(*callback)(s32 id, void* data))
 kkScene3DObject* Application::getPickedObject()
 {
     return m_objectPicked;
+}
+
+void Application::setVertexPickMode(void(*callback)(s32 id, void* data))
+{
+    m_vertexPickMode = true;
+    m_vertexPicked = nullptr;
+    m_globalInputBlock = true;
+    m_vertexPickCallback = callback;
+}
+kkControlVertex* Application::getPickedVertex()
+{
+    return m_vertexPicked;
 }
 
 void Application::setSelectMode( SelectMode m )

@@ -280,6 +280,9 @@ class Viewport
 
 	v4i m_selectionFrame;
 
+	bool m_drawPickLine = false;
+	v2i  m_drawPickLineP1;
+
 	// меню которое откроется правым кликом
 	// сброс должен быть просто на нажатии какой либо кнопки мышки
 	bool m_drawContextMenu = false;
@@ -311,6 +314,7 @@ public:
 	//void drawImgui();
 	void update();
 	void updateInput();
+	void updateInputCamera();
 	void checkMouseEvents();
 	void resetCamera();
 
@@ -358,6 +362,8 @@ public:
 	void updateCursorRay();
 
 	kkScene3DObject* pickObject();
+	kkControlVertex* pickVertex(Scene3DObject*);
+	void setDrawPickLine(bool v);
 };
 
 #endif

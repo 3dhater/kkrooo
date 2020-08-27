@@ -7,7 +7,6 @@
 #include "Plugins/Plugin.h"
 #include "Plugins/PluginGUI.h"
 
-
 #include "Application.h"
 
 struct EditPolyObjectsGUIElements
@@ -37,6 +36,9 @@ struct EditPolyObjectsGUIElements
     
     kkPluginGUIWindowElement * m_object_name_element = nullptr;
 }g_EditPolyObjectsGUIElements;
+
+kkControlVertex* g_pickedVertex1 = nullptr;
+kkControlVertex* g_pickedVertex2 = nullptr;
 
 Scene3DObject* GetSelectedObject()
 {
@@ -305,6 +307,64 @@ void change_position_z_callback(s32 id, void* data)
     }
 }
 
+void pick_2_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+
+    g_pickedVertex2 = app->getPickedVertex();
+    app->setDrawPickLine(false);
+
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+
+    if(g_pickedVertex1 && g_pickedVertex2)
+    {
+        if(object)
+        {
+            object->Weld(g_pickedVertex1, g_pickedVertex2);
+            object->UpdateAabb();
+	        scene->updateObjectVertexSelectList();
+            scene->updateSceneAabb();
+            scene->updateSelectionAabb();
+        }
+    }
+
+}
+void pick_1_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+
+    g_pickedVertex1 = app->getPickedVertex();
+
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        app->setVertexPickMode(pick_2_vertex);
+        app->setDrawPickLine(true);
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+void target_weld_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        scene->deselectAll();
+        app->setVertexPickMode(pick_1_vertex);
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
+
 void break_vertex(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -523,5 +583,7 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddButton(u"Break", v2f(60.f, 20.f), break_vertex,0, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddButton(u"Target weld", v2f(110.f, 20.f), target_weld_vertex, 0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->EndGroup();
 }

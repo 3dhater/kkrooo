@@ -230,7 +230,7 @@ public:
 
 	// те указатели которые нужно будет потом kkDestroy
 	kkArray<kkVertex*>    m_verts         = kkArray<kkVertex*>(0xffff);      // вершины со всех полигонов
-	kkArray<u32>          m_free_verts    = kkArray<u32>(0xffff); // индексы в m_verts на свободные ячейки
+	//kkArray<u64>          m_free_verts    = kkArray<u64>(0xffff); // индексы в m_verts на свободные ячейки
 
 
 	kkArray<kkPolygon*>       m_polygons      = kkArray<kkPolygon*>(0xffff);

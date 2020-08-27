@@ -329,6 +329,12 @@ class Application
 	kkScene3DObject* m_objectPicked = nullptr;
 	void (*m_objectPickCallback)(s32 id, void* data) = nullptr;
 
+	bool m_vertexPickMode = false;
+	kkControlVertex* m_vertexPicked = nullptr;
+	void (*m_vertexPickCallback)(s32 id, void* data) = nullptr;
+
+	//bool m_drawPickLine = false;
+
 public:
 
 	Application();
@@ -455,6 +461,11 @@ public:
 
 	void setObjectPickMode(void(*)(s32 id, void* data));
 	kkScene3DObject* getPickedObject();
+	
+	void setVertexPickMode(void(*)(s32 id, void* data));
+	kkControlVertex* getPickedVertex();
+
+	void setDrawPickLine(bool);
 };
 
 

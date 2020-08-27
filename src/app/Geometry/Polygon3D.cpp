@@ -14,10 +14,15 @@ Polygon3D::~Polygon3D()
 {
 }
 
-kkArray<u32>& Polygon3D::GetVertInds()
+kkArray<kkVertex*>& Polygon3D::GetVerts()
 {
-	return m_vertsInds;
+	return m_verts;
 }
+
+//kkArray<u32>& Polygon3D::GetVertInds()
+//{
+//	return m_vertsInds;
+//}
 
 kkArray<u32>& Polygon3D::GetControlVertInds()
 {

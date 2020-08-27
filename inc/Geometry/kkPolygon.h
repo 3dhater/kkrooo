@@ -193,7 +193,9 @@ public:
 
 	// получить список индексов на массив из kkScene3DObject::getVertexArray
 	// эти вершины являются вершинами полигона
-	virtual kkArray<u32>& GetVertInds() = 0;
+	//virtual kkArray<u32>& GetVertInds() = 0;
+
+	virtual kkArray<kkVertex*>& GetVerts() = 0;
 
 	// получить список индексов для контрольных вершин
 	virtual kkArray<u32>& GetControlVertInds() = 0;

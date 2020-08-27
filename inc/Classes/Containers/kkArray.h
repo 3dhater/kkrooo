@@ -91,6 +91,7 @@ public:
 
 	~kkArray(){ clear(); }
 		
+	void setData(pointer ptr) { m_data = ptr; }
 	pointer data() const     { return m_data; }
 	void    setSize( u64 s ) { m_size = s; }
 	u64     size() const     { return m_size; }

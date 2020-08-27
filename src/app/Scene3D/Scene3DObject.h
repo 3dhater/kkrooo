@@ -435,6 +435,7 @@ public:
 
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();
+	void Weld(kkControlVertex* CV1, kkControlVertex* CV2);
 };
 
 
