@@ -307,7 +307,8 @@ void change_position_z_callback(s32 id, void* data)
     }
 }
 
-void pick_2_vertex(s32 id, void* data)
+void pick_1_vertex(s32 id, void* data);
+void pick_2_vertex_weld(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
 
@@ -322,6 +323,7 @@ void pick_2_vertex(s32 id, void* data)
         if(object)
         {
             object->Weld(g_pickedVertex1, g_pickedVertex2);
+            app->setVertexPickMode(pick_1_vertex);
             object->UpdateAabb();
 	        scene->updateObjectVertexSelectList();
             scene->updateSceneAabb();
@@ -340,7 +342,7 @@ void pick_1_vertex(s32 id, void* data)
     auto object = GetSelectedObject();
     if(object)
     {
-        app->setVertexPickMode(pick_2_vertex);
+        app->setVertexPickMode(pick_2_vertex_weld);
         app->setDrawPickLine(true);
         object->UpdateAabb();
 	    scene->updateObjectVertexSelectList();

@@ -1734,184 +1734,118 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 
 	// сначала перемещу нужную вершину к другой вершине
 	// потом, нахожу 1 или 2 полигона
-	// из полигонов удаляю вершину, если вершины три то удаляю сам полигон. запоминаю минимальный индекс
+	// из полигонов удаляю вершину, если вершины три то удаляю сам полигон
 	// удаляю вершины из главного массива с вершинами m_verts, 
-	// и в конце перепрохожусь по всем полигонам изменяя значения индексов
-	/*u64 minimum_index = 0xFFFFFFFFFFFFFFFF;
-	u64 num_of_inds_for_shift = 0;*/
 	if(is_edge)
 	{
-		//Vertex* targetVertex = (Vertex*)m_PolyModel->m_verts[ cv2->m_vertexIndex[0] ];
+		Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
 
-		//for( auto vertexIndex : cv1->m_vertexIndex )
-		//{
-		//	Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
-		//	vertex->m_Boneinds = targetVertex->m_Boneinds;
-		//	vertex->m_Color = targetVertex->m_Color;
-		//	vertex->m_Normal = targetVertex->m_Normal;
-		//	vertex->m_Normal_fix = targetVertex->m_Normal_fix;
-		//	vertex->m_Position = targetVertex->m_Position;
-		//	vertex->m_Position_fix = targetVertex->m_Position_fix;
-		//	vertex->m_UV = targetVertex->m_UV;
-		//	vertex->m_Weights = targetVertex->m_Weights;
-		//	vertex->m_weld = targetVertex->m_weld;
-		//}
-
-		//Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
-		//Polygon3D* P2 = nullptr;
-		//if(edge->m_polygonIndex[1] != (u64)-1 )
-		//{
-		//	P2 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[1]];
-		//}
-
-		//// удалить вершину из полигона и из основного массива
-		//if(P1->m_vertsInds.size() > 3)
-		//{
-		//	// вершины в полигоне это просто индексы на основной массив
-		//	// значит надо найти нужный индекс
-		//	u64 indexForDelete = 0;
-		//	bool found = false;
-		//	for( auto vertexIndex : P1->m_vertsInds )
-		//	{
-		//		// найти индекс в вершине, которую двигали
-		//		for( auto vertexIndex_CV : cv1->m_vertexIndex )
-		//		{
-		//			if( vertexIndex_CV == vertexIndex )
-		//			{
-		//				indexForDelete = vertexIndex;
-		//				found = true;
-		//				goto end;
-		//			}
-		//		}
-		//	}
-		//end:;
-		//	if(found)
-		//	{
-		//		// удалить вершину из основного массива
-		//		kkDestroy( m_PolyModel->m_verts[ indexForDelete ] );
-		//		m_PolyModel->m_verts[ indexForDelete ] = nullptr;
-		//		P1->m_vertsInds.erase_first(indexForDelete);
-		//	}
-		//}
-		//else
-		//{
-		//	for( auto vertexIndex : P1->m_vertsInds )
-		//	{
-		//		auto V = m_PolyModel->m_verts[ vertexIndex ];
-		//		if(V)
-		//		{
-		//			kkDestroy( V );
-		//			m_PolyModel->m_verts[ vertexIndex ] = nullptr;
-		//		}
-		//	}
-
-		//	m_PolyModel->m_polygons.erase_first(P1);
-		//	kkDestroy(P1);
-		//}
-
-		//u64 a_index = 0xffffffffffffffff;
-		//u64 new_size = 0;
-		//for( u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
-		//{
-		//	auto V = (Vertex*)m_PolyModel->m_verts[i];
-
-		//	if(!V)
-		//	{
-		//		if(a_index == 0xffffffffffffffff)
-		//		{
-		//			a_index = i;
-		//		}
-		//	}
-		//	else
-		//	{
-		//		++new_size;
-		//		if(a_index < 0xffffffffffffffff)
-		//		{
-		//			m_PolyModel->m_verts[a_index] = m_PolyModel->m_verts[i];
-		//			++a_index;
-		//		}
-		//	}
-		//}
-		//m_PolyModel->m_verts.setSize(new_size);
-
-
-
-		/*if(P2)
+		for( auto V : cv1->m_verts )
 		{
-			if(P2->m_vertsInds.size() > 3)
+			//Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_Boneinds = targetVertex->m_Boneinds;
+			vertex->m_Color = targetVertex->m_Color;
+			vertex->m_Normal = targetVertex->m_Normal;
+			vertex->m_Normal_fix = targetVertex->m_Normal_fix;
+			vertex->m_Position = targetVertex->m_Position;
+			vertex->m_Position_fix = targetVertex->m_Position_fix;
+			vertex->m_UV = targetVertex->m_UV;
+			vertex->m_Weights = targetVertex->m_Weights;
+			vertex->m_weld = targetVertex->m_weld;
+		}
+
+		Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
+		Polygon3D* P2 = nullptr;
+		if(edge->m_polygonIndex[1] != (u64)-1 )
+		{
+			P2 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[1]];
+		}
+
+		// удалить вершину из полигона и из основного массива
+		if(P1->m_verts.size() > 3)
+		{
+			// теперь нужно удалить вершину из полигона и из массива с вершинами
+			// нужно найти вершину внутри контрольной вершины, которая принадлежит данному полигону
+			kkVertex * vertex_for_delete = nullptr;
+			for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
 			{
-				u64 indexForDelete = 0;
-				bool found = false;
-				for( auto vertexIndex : P2->m_vertsInds )
+				//for( auto vertexIndex_CV : cv1->m_vertexIndex )
+				for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
 				{
-					for( auto vertexIndex_CV : cv1->m_vertexIndex )
+					if( cv1->m_verts[ j ] == P1->m_verts[ i ] )
 					{
-						if( vertexIndex_CV == vertexIndex )
+						vertex_for_delete = P1->m_verts[ i ];
+					//	P1->m_verts[ i ] = nullptr;
+						goto end;
+					}
+				}
+			}
+			end:;
+			if(vertex_for_delete)
+			{
+				P1->m_verts.erase_first(vertex_for_delete);
+				m_PolyModel->m_verts.erase_first(vertex_for_delete);
+				kkDestroy(vertex_for_delete);
+			}
+		}
+		else
+		{
+			for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
+			{
+				auto V = P1->m_verts[i];
+				//P1->m_verts[i] = nullptr; // 
+				m_PolyModel->m_verts.erase_first(V);
+				kkDestroy(V);
+			}
+
+			m_PolyModel->m_polygons.erase_first(P1);
+			kkDestroy(P1);
+		}
+
+		if(P2)
+		{
+			if(P2->m_verts.size() > 3)
+			{
+				kkVertex * vertex_for_delete = nullptr;
+				for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
+				{
+					for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
+					{
+						if( cv1->m_verts[ j ] == P2->m_verts[ i ] )
 						{
-							indexForDelete = vertexIndex;
-							found = true;
+							vertex_for_delete = P2->m_verts[ i ];
 							goto end2;
 						}
 					}
 				}
-			end2:;
-				if(found)
+				end2:;
+				if(vertex_for_delete)
 				{
-					if(indexForDelete < minimum_index)
-						minimum_index = indexForDelete;
-					++num_of_inds_for_shift;
-					kkDestroy( m_PolyModel->m_verts[ indexForDelete ] );
-					m_PolyModel->m_verts[ indexForDelete ] = nullptr;
-					P2->m_vertsInds.erase_first(indexForDelete);
+					P2->m_verts.erase_first(vertex_for_delete);
+					m_PolyModel->m_verts.erase_first(vertex_for_delete);
+					kkDestroy(vertex_for_delete);
 				}
 			}
 			else
 			{
-				num_of_inds_for_shift += 3;
-				for( auto vertexIndex : P2->m_vertsInds )
+				for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
 				{
-					if(vertexIndex < minimum_index)
-						minimum_index = vertexIndex;
+					auto V = P2->m_verts[i];
+					m_PolyModel->m_verts.erase_first(V);
+					kkDestroy(V);
 				}
 				m_PolyModel->m_polygons.erase_first(P2);
 				kkDestroy(P2);
 			}
-		}*/
-	
-		/*u64 new_m_verts_size = m_PolyModel->m_verts.size();
-		if(new_m_verts_size)
-		{
-			kkArray<kkVertex*>    new_m_verts         = kkArray<kkVertex*>(0xffff);
-			new_m_verts.reserve(new_m_verts_size);
-			for( u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
-			{
-				if( m_PolyModel->m_verts[i] )
-				{
-					new_m_verts.push_back(m_PolyModel->m_verts[i]);
-				}
-			}
-
-			m_PolyModel->m_verts.clear();
-			m_PolyModel->m_verts.setData(new_m_verts.data());
-			m_PolyModel->m_verts.setSize(new_m_verts_size);
-			new_m_verts.setData(nullptr);
-		}*/
-
-		/*for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-		{
-			auto P = (Polygon3D*)m_PolyModel->m_polygons[i];
-			for( u64 j = 0, jsz = P->m_vertsInds.size(); j < jsz; ++j )
-			{
-				if( P->m_vertsInds[j] >= minimum_index )
-				{
-					P->m_vertsInds[j] -= num_of_inds_for_shift;
-				}
-			}
-		}*/
+		}
 	}
+	else
+	{
+		// возможно второй случай
+	}
+
 	deleteEdges();
-
-
 	m_PolyModel->createControlPoints();
 	this->_rebuildModel();
 	updateModelPointsColors();
