@@ -354,6 +354,7 @@ void PluginGUIWindow::draw()
     PluginGUIWindowElementGroup * old_group = nullptr;
     for( auto item : m_guiElements )
     {
+        
         switch (m_app->m_editMode)
         {
         case EditMode::Object:
@@ -368,6 +369,7 @@ void PluginGUIWindow::draw()
             switch(item->m_paramType)
             {
             case kkPluginGUIParameterType::Vertex: break;
+            case kkPluginGUIParameterType::Object: break;
             default: continue;
             }
         break;
@@ -375,6 +377,7 @@ void PluginGUIWindow::draw()
             switch(item->m_paramType)
             {
             case kkPluginGUIParameterType::Edge: break;
+            case kkPluginGUIParameterType::Object: break;
             default: continue;
             }
         break;
@@ -382,6 +385,7 @@ void PluginGUIWindow::draw()
             switch(item->m_paramType)
             {
             case kkPluginGUIParameterType::Polygon: break;
+            case kkPluginGUIParameterType::Object: break;
             default: continue;
             }
         break;
