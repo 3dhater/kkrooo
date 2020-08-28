@@ -818,7 +818,6 @@ void Application::updateInput()
             }
         }
 
-        m_main_viewport->processShortcuts();
 
         if(m_vertexPickMode)
         {
@@ -846,6 +845,7 @@ void Application::updateInput()
         // вполне возможно что для редактора текстурных координат (или чего-то ещё) придётся делать свой _processShortcuts
         //if(!this->isGlobalInputBlocked())
         {
+             m_main_viewport->processShortcuts();
             _processShortcuts();
         }
     }

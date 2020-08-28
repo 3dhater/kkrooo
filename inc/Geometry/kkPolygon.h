@@ -207,6 +207,7 @@ public:
 	virtual bool IsSelected() = 0;
 	virtual void Select() = 0;
 	virtual void Deselect() = 0;
+	virtual void CalculateNormals() = 0;
 };
 
 #endif

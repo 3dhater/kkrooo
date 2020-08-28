@@ -4,9 +4,6 @@
 
 <img src="res/repository-open-graph-template.png">
 
-## DEMO
-
-Check last release.
 
 ## Goals
 

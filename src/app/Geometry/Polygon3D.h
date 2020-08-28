@@ -42,7 +42,7 @@ public:
 	bool IsSelected();
 	void Select();
 	void Deselect();
-
+	void CalculateNormals();
 public:
 
 	// необходимо передать эти вершины в модель, попутно заполняя m_verts

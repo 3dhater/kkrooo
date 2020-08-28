@@ -500,19 +500,19 @@ const char16_t* ShortcutManager::getShortcutText( ShortcutCommand_Edit c ){ retu
 
 bool ShortcutManager::isShortcutActive( ShortcutCommand_General c )
 {
-    return m_app->isGlobalInputBlocked() ? false : m_cammandNodes_General[(u32)c].isReady; 
+    return m_cammandNodes_General[(u32)c].isReady; 
 }
 bool ShortcutManager::isShortcutActive( ShortcutCommand_Viewport c )
 {
-    return m_app->isGlobalInputBlocked() ? false : m_cammandNodes_Viewport[(u32)c].isReady; 
+    return m_cammandNodes_Viewport[(u32)c].isReady; 
 }
 bool ShortcutManager::isShortcutActive( ShortcutCommand_Camera c )
 {
-    return m_app->isGlobalInputBlocked() ? false : m_cammandNodes_Camera[(u32)c].isReady; 
+    return m_cammandNodes_Camera[(u32)c].isReady; 
 }
 bool ShortcutManager::isShortcutActive( ShortcutCommand_Edit c )
 {
-    return m_app->isGlobalInputBlocked() ? false : m_cammandNodes_Edit[(u32)c].isReady; 
+    return m_cammandNodes_Edit[(u32)c].isReady; 
 }
 
 void ShortcutManager::_save()

@@ -1621,6 +1621,7 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 		}
 	}
 
+
 	// есть 2 случая, когда надо делать weld
 	// 1. когда точки образуют ребро
 	// 2. когда хоть 1 ребро у каждой точки имеет только 1 полигон на стороне (то есть точка как бы снаружи)
@@ -1629,10 +1630,10 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 	// потом, нахожу 1 или 2 полигона
 	// из полигонов удаляю вершину, если вершины три то удаляю сам полигон
 	// удаляю вершины из главного массива с вершинами m_verts, 
-	if(is_edge)
-	{
-		Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
+	Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
 
+	if(is_edge || (cv1->m_onEdge && cv2->m_onEdge))
+	{
 		for( auto V : cv1->m_verts )
 		{
 			//Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
@@ -1648,6 +1649,28 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			vertex->m_weld = true;
 			targetVertex->m_weld = true;
 		}
+
+		/*for( auto V : cv1->m_verts )
+		{
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_parentPolygon->CalculateNormals();
+		}
+		for( auto V : cv2->m_verts )
+		{
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_parentPolygon->CalculateNormals();
+		}*/
+	}
+	
+	std::unordered_set<Polygon3D*> polysForNormRecalculate;
+	for( auto V : cv1->m_verts )
+	{
+		Vertex* vertex = (Vertex*)V;
+		polysForNormRecalculate.insert(vertex->m_parentPolygon);
+	}
+
+	if(is_edge)
+	{
 
 		Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
 		Polygon3D* P2 = nullptr;
@@ -1680,6 +1703,7 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 				P1->m_verts.erase_first(vertex_for_delete);
 				m_PolyModel->m_verts.erase_first(vertex_for_delete);
 				kkDestroy(vertex_for_delete);
+				//P1->CalculateNormals();
 			}
 		}
 		else
@@ -1693,6 +1717,7 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 
 			m_PolyModel->m_polygons.erase_first(P1);
 			kkDestroy(P1);
+			polysForNormRecalculate.erase(P1);
 		}
 
 		if(P2)
@@ -1716,6 +1741,7 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 				{
 					P2->m_verts.erase_first(vertex_for_delete);
 					m_PolyModel->m_verts.erase_first(vertex_for_delete);
+					//P2->CalculateNormals();
 					kkDestroy(vertex_for_delete);
 				}
 			}
@@ -1729,30 +1755,39 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 				}
 				m_PolyModel->m_polygons.erase_first(P2);
 				kkDestroy(P2);
+				polysForNormRecalculate.erase(P2);
 			}
 		}
 	}
 	else if(cv1->m_onEdge && cv2->m_onEdge)
 	{
-		// возможно второй случай
-		Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
-		for( auto V : cv1->m_verts )
-		{
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_Boneinds = targetVertex->m_Boneinds;
-			vertex->m_Color = targetVertex->m_Color;
-			vertex->m_Normal = targetVertex->m_Normal;
-			vertex->m_Normal_fix = targetVertex->m_Normal_fix;
-			vertex->m_Position = targetVertex->m_Position;
-			vertex->m_Position_fix = targetVertex->m_Position_fix;
-			vertex->m_UV = targetVertex->m_UV;
-			vertex->m_Weights = targetVertex->m_Weights;
-			vertex->m_weld = true;
-			targetVertex->m_weld = true;
-		}
+		//// возможно второй случай
+		//Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
+		//for( auto V : cv1->m_verts )
+		//{
+		//	Vertex* vertex = (Vertex*)V;
+		//	vertex->m_Boneinds = targetVertex->m_Boneinds;
+		//	vertex->m_Color = targetVertex->m_Color;
+		//	vertex->m_Normal = targetVertex->m_Normal;
+		//	vertex->m_Normal_fix = targetVertex->m_Normal_fix;
+		//	vertex->m_Position = targetVertex->m_Position;
+		//	vertex->m_Position_fix = targetVertex->m_Position_fix;
+		//	vertex->m_UV = targetVertex->m_UV;
+		//	vertex->m_Weights = targetVertex->m_Weights;
+		//	vertex->m_weld = true;
+		//	targetVertex->m_weld = true;
+		//}
 	}
 
+
+	for(auto P : polysForNormRecalculate)
+	{
+		P->CalculateNormals();
+	}
+	
 	m_PolyModel->createControlPoints();
+
+
 	this->_rebuildModel();
 	updateModelPointsColors();
 }
