@@ -341,6 +341,8 @@ class Scene3DObject : public Scene3DObjectCommon
 	
 	bool m_isObjectHaveSelectedEdges = false;
 	bool m_isObjectHaveSelectedPolys = false;
+	
+	bool _weld(kkControlVertex* CV1, kkControlVertex* CV2, bool middle);
 
 public:
 	Scene3DObject(kkScene3DObjectType, PolygonalModel *);
@@ -436,6 +438,7 @@ public:
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();
 	void Weld(kkControlVertex* CV1, kkControlVertex* CV2);
+	void WeldSelectedVerts(f32 len);
 };
 
 

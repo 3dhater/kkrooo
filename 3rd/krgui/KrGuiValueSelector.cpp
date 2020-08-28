@@ -26,11 +26,14 @@ bool valueSelector_inputCallback(char16_t ch)
 	return false;
 };
 
-bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
-			bool isHorizontal, float speed, Gui::Style* style,
-			const Vec4f& rounding )
+bool Gui::GuiSystem::addValueSelectorLimit( float minim, float maxim, float * value, const Vec2f& _size,
+	bool isHorizontal,
+	float speed, Style* style,
+	const Vec4f& rounding )
 {
-	assert(value);
+	if(*value < minim) *value = minim;
+	if(*value > maxim) *value = maxim;
+
 	auto old_value = *value;
 
 	if( m_IsShift ) speed *= 10.f;
@@ -145,7 +148,19 @@ bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
 	}
 	m_drawPointer = back_position;
 
+	if(*value < minim) *value = minim;
+	if(*value > maxim) *value = maxim;
 
 	return old_value != *value;
+}
+
+bool Gui::GuiSystem::addValueSelector( float * value, const Vec2f& _size,
+			bool isHorizontal, float speed, Gui::Style* style,
+			const Vec4f& rounding )
+{
+	assert(value);
+	return addValueSelectorLimit(-FLT_MAX, FLT_MAX, value, _size,
+			isHorizontal, speed, style,
+			rounding);
 }
 

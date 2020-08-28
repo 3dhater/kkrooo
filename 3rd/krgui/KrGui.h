@@ -463,6 +463,10 @@ namespace Kr
 				bool isHorizontal = true,
 				float speed = 1.f, Style* style = nullptr,
 				const Vec4f& rounding = Vec4f() );
+			bool addValueSelectorLimit( float minim, float maxim, float * value, const Vec2f& size,
+				bool isHorizontal = true,
+				float speed = 1.f, Style* style = nullptr,
+				const Vec4f& rounding = Vec4f() );
 
 			// true when quit editing
 			bool addTextInput( 

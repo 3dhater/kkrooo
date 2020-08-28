@@ -1606,6 +1606,11 @@ void Scene3DObject::BreakVerts()
 
 void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 {
+	_weld(CV1, CV2, false);
+}
+
+bool Scene3DObject::_weld(kkControlVertex* CV1, kkControlVertex* CV2, bool middle)
+{
 	ControlVertex* cv1 = (ControlVertex*)CV1;
 	ControlVertex* cv2 = (ControlVertex*)CV2;
 
@@ -1631,9 +1636,11 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 	// из полигонов удаляю вершину, если вершины три то удаляю сам полигон
 	// удаляю вершины из главного массива с вершинами m_verts, 
 	Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
+	Vertex* pickVertex = (Vertex*)cv1->m_verts[0];
 
 	if(is_edge || (cv1->m_onEdge && cv2->m_onEdge))
 	{
+		auto half = (targetVertex->m_Position - pickVertex->m_Position) * 0.5f;
 		for( auto V : cv1->m_verts )
 		{
 			//Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
@@ -1642,14 +1649,32 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			vertex->m_Color = targetVertex->m_Color;
 			vertex->m_Normal = targetVertex->m_Normal;
 			vertex->m_Normal_fix = targetVertex->m_Normal_fix;
-			vertex->m_Position = targetVertex->m_Position;
-			vertex->m_Position_fix = targetVertex->m_Position_fix;
+			if(middle)
+			{
+				vertex->m_Position += half;
+				
+				vertex->m_Position_fix = vertex->m_Position;
+			}
+			else
+			{
+				vertex->m_Position = targetVertex->m_Position;
+				vertex->m_Position_fix = targetVertex->m_Position_fix;
+			}
 			vertex->m_UV = targetVertex->m_UV;
 			vertex->m_Weights = targetVertex->m_Weights;
 			vertex->m_weld = true;
 			targetVertex->m_weld = true;
 		}
 
+		if(middle)
+		{
+			for( auto V : cv2->m_verts )
+			{
+				Vertex* vertex = (Vertex*)V;
+				vertex->m_Position -= half;
+				vertex->m_Position_fix = vertex->m_Position;
+			}
+		}
 		/*for( auto V : cv1->m_verts )
 		{
 			Vertex* vertex = (Vertex*)V;
@@ -1660,6 +1685,10 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			Vertex* vertex = (Vertex*)V;
 			vertex->m_parentPolygon->CalculateNormals();
 		}*/
+	}
+	else
+	{
+		return false;
 	}
 	
 	std::unordered_set<Polygon3D*> polysForNormRecalculate;
@@ -1703,7 +1732,6 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 				P1->m_verts.erase_first(vertex_for_delete);
 				m_PolyModel->m_verts.erase_first(vertex_for_delete);
 				kkDestroy(vertex_for_delete);
-				//P1->CalculateNormals();
 			}
 		}
 		else
@@ -1741,7 +1769,6 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 				{
 					P2->m_verts.erase_first(vertex_for_delete);
 					m_PolyModel->m_verts.erase_first(vertex_for_delete);
-					//P2->CalculateNormals();
 					kkDestroy(vertex_for_delete);
 				}
 			}
@@ -1759,35 +1786,69 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			}
 		}
 	}
-	else if(cv1->m_onEdge && cv2->m_onEdge)
-	{
-		//// возможно второй случай
-		//Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
-		//for( auto V : cv1->m_verts )
-		//{
-		//	Vertex* vertex = (Vertex*)V;
-		//	vertex->m_Boneinds = targetVertex->m_Boneinds;
-		//	vertex->m_Color = targetVertex->m_Color;
-		//	vertex->m_Normal = targetVertex->m_Normal;
-		//	vertex->m_Normal_fix = targetVertex->m_Normal_fix;
-		//	vertex->m_Position = targetVertex->m_Position;
-		//	vertex->m_Position_fix = targetVertex->m_Position_fix;
-		//	vertex->m_UV = targetVertex->m_UV;
-		//	vertex->m_Weights = targetVertex->m_Weights;
-		//	vertex->m_weld = true;
-		//	targetVertex->m_weld = true;
-		//}
-	}
-
 
 	for(auto P : polysForNormRecalculate)
 	{
 		P->CalculateNormals();
 	}
-	
+
+	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* CV1 = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+
+		bool sel = CV1->isSelected();
+		for( auto V : CV1->m_verts )
+		{
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_isCVSelected = sel;
+		}
+
+	}
+
 	m_PolyModel->createControlPoints();
 
+	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* CV1 = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(((Vertex*)CV1->m_verts[0])->m_isCVSelected)
+		{
+			CV1->select();
+		}
+	}
 
 	this->_rebuildModel();
 	updateModelPointsColors();
+	return true;
+}
+
+void Scene3DObject::WeldSelectedVerts(f32 len)
+{
+begin:;
+
+	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* CV1 = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(!CV1->isSelected())
+			continue;
+
+		for( u64 o = 0, osz = m_PolyModel->m_controlPoints.size(); o < osz; ++o )
+		{
+			ControlVertex* CV2 = (ControlVertex*)m_PolyModel->m_controlPoints[o];
+			if(!CV2->isSelected())
+				continue;
+
+			if(CV1 != CV2)
+			{
+				auto V1 = CV1->m_verts[0];
+				auto V2 = CV2->m_verts[0];
+				if( V1->getPosition().distance(V2->getPosition()) <= len )
+				{
+					if( _weld(CV1, CV2, true) )
+					{
+						goto begin;
+					}
+				}
+			}
+		}
+	}
 }

@@ -301,6 +301,23 @@ kkPluginGUIWindowElement* PluginGUIWindow::AddValueSelectorFloat( f32 * ptr, f32
     return e;
 }
 
+kkPluginGUIWindowElement* PluginGUIWindow::AddValueSelectorFloatLimit( f32 minim, f32 maxim, f32 * ptr, f32 speed, bool horizontal, const v2f& size, kkPluginGUICallback cb, kkPluginGUIParameterType pt)
+{
+    PluginGUIWindowElement * e = kkCreate<PluginGUIWindowElement>();
+    e->m_type     = PluginGUIWindowElementType::ValueSelectorFloatLimit;
+    e->m_paramType = pt;
+    e->m_float_ptr  = ptr;
+    e->m_speed  = speed;
+    e->m_horizontal = horizontal;
+    e->m_callback = cb;
+    e->m_group_ptr = m_currentGroup;
+    e->m_size = size;
+    e->m_minimum = minim;
+    e->m_maximum = maxim;
+    m_guiElements.push_back( e );
+    return e;
+}
+
 kkPluginGUIWindowElement* PluginGUIWindow::AddTextInput( const char16_t* text, const v2f& size, bool(*filter)(char16_t), void(*textInputResult)(const char16_t*), kkPluginGUIParameterType pt)
 {
     PluginGUIWindowElement * e = kkCreate<PluginGUIWindowElement>();
@@ -485,6 +502,30 @@ void PluginGUIWindow::draw()
                 if(item->m_float_ptr)
                 {
                     if( m_app->m_KrGuiSystem->addValueSelector( item->m_float_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
+                        item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
+                    {
+
+                        if(item->m_callback)
+                        {
+                            item->m_callback(item->m_id, m_userData);
+                        }
+                    }
+                    
+                    if(m_app->m_KrGuiSystem->isLastItemKeyboardInput())
+                    {
+                        m_app->m_globalInputBlock = true;
+                    }
+                    if(m_app->m_KrGuiSystem->isLastItemKeyboardInputExit())
+                    {
+                        m_app->m_globalInputBlock = false;
+                    }
+                }
+            }break;
+            case PluginGUIWindowElementType::ValueSelectorFloatLimit:
+            {
+                if(item->m_float_ptr)
+                {
+                    if( m_app->m_KrGuiSystem->addValueSelectorLimit( item->m_minimum, item->m_maximum, item->m_float_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
                         item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
                     {
 
