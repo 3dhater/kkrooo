@@ -398,6 +398,21 @@ void break_vertex(s32 id, void* data)
     }
 }
 
+void connect_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->ConnectVerts();
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
 void select_add_vertex(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -608,5 +623,8 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"Weld", v2f(60.f, 20.f), weld_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
     g_EditPolyObjectsGUIElements.m_weld_len_element = m_edit_params_window->AddValueSelectorFloatLimit(0.f, 99999999.f, &g_EditPolyObjectsGUIElements.m_weld_len, 0.01f, true, v2f(110.f, 20.f), 0, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddNewLine(7.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddButton(u"Connect", v2f(60.f, 20.f), connect_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->EndGroup();
 }

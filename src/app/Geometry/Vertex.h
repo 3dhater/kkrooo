@@ -18,6 +18,8 @@ public:
 	Vertex();
 	virtual ~Vertex();
 
+	void set(Vertex*);
+
 	kkVector4    getPosition();
 	kkVector4    getUV();
 	kkVector4    getNormal();

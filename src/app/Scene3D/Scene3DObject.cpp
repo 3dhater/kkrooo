@@ -1791,13 +1791,13 @@ bool Scene3DObject::_weld(kkControlVertex* CV1, kkControlVertex* CV2, bool middl
 	{
 		P->CalculateNormals();
 	}
-
+	
 	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
-		ControlVertex* CV1 = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
 
-		bool sel = CV1->isSelected();
-		for( auto V : CV1->m_verts )
+		bool sel = CV->isSelected();
+		for( auto V : CV->m_verts )
 		{
 			Vertex* vertex = (Vertex*)V;
 			vertex->m_isCVSelected = sel;
@@ -1809,10 +1809,10 @@ bool Scene3DObject::_weld(kkControlVertex* CV1, kkControlVertex* CV2, bool middl
 
 	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
-		ControlVertex* CV1 = (ControlVertex*)m_PolyModel->m_controlPoints[i];
-		if(((Vertex*)CV1->m_verts[0])->m_isCVSelected)
+		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(((Vertex*)CV->m_verts[0])->m_isCVSelected)
 		{
-			CV1->select();
+			CV->select();
 		}
 	}
 
@@ -1849,6 +1849,177 @@ begin:;
 					}
 				}
 			}
+		}
+	}
+}
+
+void Scene3DObject::ConnectVerts()
+{
+	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		begin:;	
+		ControlVertex* CV1 = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(!CV1->isSelected())
+			continue;
+
+		for( u64 o = 0, osz = m_PolyModel->m_controlPoints.size(); o < osz; ++o )
+		{
+			ControlVertex* CV2 = (ControlVertex*)m_PolyModel->m_controlPoints[o];
+			if(!CV2->isSelected())
+				continue;
+
+			if(CV1 == CV2)
+				continue;
+
+			auto V1 = CV1->m_verts[0];
+			auto V2 = CV2->m_verts[0];
+				
+			// проверка, лежат ли вершины на одном ребре
+			bool is_edge = false;
+			for( auto e : CV1->m_edges )
+			{
+				if(e->m_firstPoint == CV2 || e->m_secondPoint == CV2)
+				{
+					// если да то дальше идти нельзя следующая
+					is_edge = true;
+				}
+			}
+			if(is_edge)
+				continue;
+
+			// если вершины находятся на едином полигоне
+			bool is_polygon = false;
+			Polygon3D* P = nullptr;
+			for( auto CV1_V : CV1->m_verts )
+			{
+				Vertex* cv1_v = (Vertex*)CV1_V;
+				for( auto CV2_V : CV2->m_verts )
+				{
+					Vertex* cv2_v = (Vertex*)CV2_V;
+					if(cv1_v->m_parentPolygon == cv2_v->m_parentPolygon)
+					{
+						P = cv2_v->m_parentPolygon;
+						is_polygon = true;
+						goto end_loop;
+					}
+				}
+			}
+		end_loop:; 
+			if(!is_polygon)
+				continue;
+
+			Polygon3D* new_p1 = kkCreate<Polygon3D>();
+			Polygon3D* new_p2 = kkCreate<Polygon3D>();
+
+			// first polygon
+			bool start = false;
+			for( u64 ki = 0, kcnt = 0, kisz = P->m_controlVertsInds.size(); kcnt < kisz; ++kcnt)
+			{
+				auto cv = (ControlVertex*)m_PolyModel->m_controlPoints[P->m_controlVertsInds[ki]];
+				if(cv == CV1)
+				{
+					start = true;
+					kcnt = 0; // найти нужную вершину может на последнем индексе, по этому нужно сбросить значение и дать больше итераций
+				}
+				
+				++ki;
+
+				if(start)
+				{
+					Vertex* new_vertex = kkCreate<Vertex>();
+					new_vertex->set((Vertex*)cv->m_verts[0]);
+					new_vertex->m_parentPolygon = new_p1;
+					new_p1->addVertex(new_vertex);
+
+					if(cv == CV2)
+					{
+						goto next_polygon;
+					}
+
+					if(ki == kisz) // индекс был последний, но не был встречен другой выбранный CV, значит надо дособиравть вершины начав с начала массива
+					{
+						ki = 0;
+					}
+				}
+			}
+
+		next_polygon:;
+			start = false;
+
+			for( u64 ki = 0, kcnt = 0, kisz = P->m_controlVertsInds.size(); kcnt < kisz; ++kcnt)
+			{
+				auto cv = (ControlVertex*)m_PolyModel->m_controlPoints[P->m_controlVertsInds[ki]];
+				if(cv == CV2)
+				{
+					start = true;
+					kcnt = 0; // найти нужную вершину может на последнем индексе, по этому нужно сбросить значение и дать больше итераций
+				}
+				++ki;
+				if(start)
+				{
+					Vertex* new_vertex = kkCreate<Vertex>();
+					new_vertex->set((Vertex*)cv->m_verts[0]);
+					new_vertex->m_parentPolygon = new_p2;
+					new_p2->addVertex(new_vertex);
+
+					if(cv == CV1)
+					{
+						goto end;
+					}
+
+					if(ki == kisz) // индекс был последний, но не был встречен другой выбранный CV, значит надо дособиравть вершины начав с начала массива
+					{
+						ki = 0;
+					}
+				}
+			}
+		end:;
+			for(auto v_for_delete : P->m_verts)
+			{
+				m_PolyModel->m_verts.erase_first(v_for_delete);
+				kkDestroy(v_for_delete);
+			}
+			m_PolyModel->m_polygons.erase_first(P);
+			kkDestroy(P);
+
+			for(auto v_for_save : new_p1->m_verts)
+			{
+				m_PolyModel->m_verts.push_back(v_for_save);
+			}
+			m_PolyModel->m_polygons.push_back(new_p1);
+
+			for(auto v_for_save : new_p2->m_verts)
+			{
+				m_PolyModel->m_verts.push_back(v_for_save);
+			}
+			m_PolyModel->m_polygons.push_back(new_p2);
+
+			new_p1->CalculateNormals();
+			new_p2->CalculateNormals();
+
+			for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+			{
+				ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+				bool sel = CV->isSelected();
+				for( auto V : CV->m_verts )
+				{
+					Vertex* vertex = (Vertex*)V;
+					vertex->m_isCVSelected = sel;
+				}
+			}
+			m_PolyModel->createControlPoints();
+			for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+			{
+				ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+				if(((Vertex*)CV->m_verts[0])->m_isCVSelected)
+				{
+					CV->select();
+				}
+			}
+			this->_rebuildModel();
+			updateModelPointsColors();
+
+			goto begin;
 		}
 	}
 }
