@@ -363,7 +363,6 @@ void PolygonalModel::deleteMarkedPolygons()
 {
 	kkArray<kkPolygon*>     old_polygons      = kkArray<kkPolygon*>(0xffff);
 	old_polygons = m_polygons;
-	//old_polygons.assign(m_polygons);
 
 	m_polygons.clear();
 
@@ -374,23 +373,45 @@ void PolygonalModel::deleteMarkedPolygons()
 		if( !p3d->m_toDelete )
 		{
 			m_polygons.push_back( p3d );
-
-			/*for( auto index : p3d->m_vertsInds )
-			{
-				((Vertex*)m_verts[ index ])->m_isFree = true;
-				m_free_verts.push_back(index);
-			}*/
-			/*for( auto vertex : p3d->m_verts )
-			{
-				((Vertex*)vertex)->m_isFree = true;
-				m_free_verts.push_back(vertex);
-			}*/
 		}
 		else
 		{
+			for( u64 i = 0, sz = p3d->m_verts.size(); i < sz; ++i )
+			{
+				((Vertex*)p3d->m_verts[i])->m_isToDelete = true;
+			}
 			kkDestroy( p );
 		}
 	}
+
+	bool start = false;
+	u64 numOfVerts = 0;
+	for( u64 i = 0, A = 0, sz = m_verts.size(); i < sz; ++i )
+	{
+		auto V = (Vertex*)m_verts[i];
+		if(V->m_isToDelete)
+		{
+			if(!start)
+			{
+				start = true;
+				A = i;
+			}
+
+			kkDestroy(V);
+		}
+		else
+		{
+			++numOfVerts;
+
+			if(start)
+			{
+				m_verts[A] = V;
+				++A;
+			}
+		}
+	}
+	m_verts.setSize(numOfVerts);
+
 	calculateTriangleCount();
 }
 

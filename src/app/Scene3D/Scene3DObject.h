@@ -342,8 +342,6 @@ class Scene3DObject : public Scene3DObjectCommon
 	bool m_isObjectHaveSelectedEdges = false;
 	bool m_isObjectHaveSelectedPolys = false;
 	
-	bool _weld(kkControlVertex* CV1, kkControlVertex* CV2, bool middle);
-
 public:
 	Scene3DObject(kkScene3DObjectType, PolygonalModel *);
 	virtual ~Scene3DObject();
