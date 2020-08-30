@@ -14,6 +14,7 @@ class ControlVertex;
 
 class Vertex : public kkVertex
 {
+
 public:
 	Vertex();
 	virtual ~Vertex();
@@ -73,6 +74,7 @@ public:
 
 	// применяется в случае когда пересоздаются CV и нужно запомнить какая CV была выделена ранее
 	bool m_isCVSelected = false;
+	bool m_isToDelete = false;
 };
 
 

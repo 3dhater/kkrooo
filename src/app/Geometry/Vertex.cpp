@@ -18,7 +18,7 @@ void Vertex::set(Vertex* other)
 	m_Color = other->m_Color;
 	m_Normal = other->m_Normal;
 	m_Normal_fix = other->m_Normal_fix;
-	//m_parentPolygon = other->m_parentPolygon;
+	m_parentPolygon = other->m_parentPolygon;
 	m_Position = other->m_Position;
 	m_Position_fix = other->m_Position_fix;
 	m_UV = other->m_UV;
