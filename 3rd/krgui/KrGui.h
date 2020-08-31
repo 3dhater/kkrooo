@@ -104,6 +104,7 @@ namespace Kr
 			bool m_current = false;
 			Style* m_style = nullptr;
 			bool m_useNewLine = true;
+			bool m_inRect = false;
 			bool m_enabled = true; // для выключения меню на совсем
 			bool m_activated = false; // когда нажали
 			bool m_insidePopupFind = false;

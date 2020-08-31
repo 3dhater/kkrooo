@@ -12,7 +12,6 @@ using namespace Kr;
 #include <cstdio>
 #include <GL/gl3w.h>
 
-//static GLuint g_defaultFontTexture = 0;
 static GLuint g_shaderProgram = 0;
 static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;                                // Uniforms location
 static int          g_AttribLocationVtxPos = 0, g_AttribLocationVtxUV = 0, g_AttribLocationVtxColor = 0; // Vertex attributes location
@@ -285,33 +284,11 @@ void Gui::GraphicsSystem_OpenGL3Draw(Gui::GuiSystem* gui)
 
 void Gui::GraphicsSystem_OpenGL3Release()
 {
-	//if( g_defaultFontTexture ) glDeleteTextures(1, &g_defaultFontTexture);
 	if (g_VboHandle)        { glDeleteBuffers(1, &g_VboHandle); g_VboHandle = 0; }
 	if( g_shaderProgram )   { glDeleteProgram(g_shaderProgram); g_shaderProgram = 0; }
 }
 
-//Gui::Texture Gui::GraphicsSystem_OpenGL3CreateDefaultFontTexture(unsigned int width, unsigned int height, const unsigned char * data)
-//{
-//
-//	glGenTextures(1, &g_defaultFontTexture);
-//    glBindTexture(GL_TEXTURE_2D, g_defaultFontTexture);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
-//	
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//	
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//
-//	Gui::Texture texture;
-//	texture.height  = height;
-//	texture.width   = width;
-//	texture.texture = (unsigned long long)&g_defaultFontTexture;
-//
-//	return texture;
-//}
 
-//Gui::Texture Gui::GraphicsSystem_OpenGL3CreateTexture(unsigned int width, unsigned int height, const unsigned char * data)
 Gui::Texture* Gui::GraphicsSystem_OpenGL3CreateTexture( Gui::Image* image )
 {
 	assert(image);
@@ -330,7 +307,6 @@ Gui::Texture* Gui::GraphicsSystem_OpenGL3CreateTexture( Gui::Image* image )
 	Gui::Texture* texture = new Gui::Texture;
 	texture->height  = image->m_height;
 	texture->width   = image->m_width;
-	//texture.texture = (unsigned long long)&gltexture;
 	texture->texture_value = gltexture;
 	texture->texture_address = (unsigned long long)&texture->texture_value;
 

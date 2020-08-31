@@ -31,11 +31,13 @@ void Application::_drawMainMenu_ObjectCreatorCategories()
                             }
                         }
                     }
-
+                    if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+						m_cursorInGUI = true;
 		        	m_KrGuiSystem->popupMenuEnd();
                 }
             }
-
+            if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+						m_cursorInGUI = true;
 			m_KrGuiSystem->popupMenuEnd();
         }
     }

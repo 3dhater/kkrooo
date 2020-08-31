@@ -1789,6 +1789,9 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 			CV->select();
 		}
 	}
+
+	this->_rebuildModel();
+	updateModelPointsColors();
 }
 
 void Scene3DObject::WeldSelectedVerts(f32 len)
@@ -2064,6 +2067,25 @@ void Scene3DObject::ConnectVerts()
 			}
 		}
 
+	}
+	this->_rebuildModel();
+	updateModelPointsColors();
+}
+
+void Scene3DObject::ChamferVerts(f32 len)
+{
+
+	m_PolyModel->createControlPoints();
+	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	{
+		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+		for(auto v : CV->m_verts)
+		{
+			if(((Vertex*)v)->m_isCVSelected)
+			{
+				CV->select();
+			}
+		}
 	}
 	this->_rebuildModel();
 	updateModelPointsColors();

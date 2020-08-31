@@ -87,10 +87,11 @@ bool Gui::GuiSystem::menuBarMenu(const char16_t* text)
 	++m_currentMenuBar.m_itemCounter; // 1 2 3 ...
 	
 	bool result = false;
-
+	m_currentMenuBar.m_inRect = false;
 	bool inRect = _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, rect );
 	if(inRect && m_currentMenuBar.m_enabled && !m_currentMenuBar.m_insidePopup)
 	{
+		m_currentMenuBar.m_inRect = true;
 		m_firstColor  = m_currentMenuBar.m_style->menuBarHoverBGColor1;
 		m_secondColor = m_currentMenuBar.m_style->menuBarHoverBGColor2;
 		m_firstColor.w  = m_currentMenuBar.m_style->menuBarHoverBGAlpha;

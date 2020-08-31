@@ -171,11 +171,6 @@ class Application
 	void _drawRightToolBar_createTab(float x, float y);
 	void _drawRightToolBar_editTab(float x, float y);
 	void _drawMainMenuBar();
-	//void _drawImguiMainToolBar();
-	//void _drawImguiLeftToolBar();
-	void _drawImguiMainMenuBar();
-	//void _drawImguiRightPart();
-	//void _drawImguiRightPart_drawParams();
 	void _updateColorTheme(); /// set colors
 
 	void _callOnActivateGUIPlugin();

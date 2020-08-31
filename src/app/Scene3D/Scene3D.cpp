@@ -2283,6 +2283,7 @@ void Scene3D::resetMatrices()
 
 void Scene3D::deleteObject( kkScene3DObject* o )
 {
+	m_app->setEditMode(EditMode::Object);
 	deselectAll();
 	selectObject((Scene3DObject*)o);
 	deleteSelectedObjects();

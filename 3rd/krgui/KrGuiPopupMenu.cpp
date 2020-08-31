@@ -129,7 +129,7 @@ void Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
 	}
 	else
 	{
-		if( m_mouseIsLMB_firstClick ) // клик вне области окна
+		if( m_mouseIsLMB_up && !m_currentMenuBar.m_inRect ) // клик вне области окна
 		{
 			m_currentMenuBar.m_activated = false;
 			m_currentMenuBar.m_activeItem = -1;
@@ -300,14 +300,14 @@ bool Gui::GuiSystem::_addMenuItem(const char16_t* text, const char16_t* shortcut
 	}
 	
 	// если клик по пункту с субменю, то реакция не нужна
-	if(m_mouseIsLMB_firstClick && isSubMenu && inRect)
+	if(m_mouseIsLMB_up && isSubMenu && inRect)
 	{
-		m_mouseIsLMB_firstClick = false;
+		m_mouseIsLMB_up = false;
 	}
 
 	if(!m_nextItemIgnoreInput && !isSubMenu)
 	{
-		if( m_mouseIsLMB_firstClick && inRect )
+		if( m_mouseIsLMB_up && inRect )
 		{
 			activePopup->m_isActive = false;
 			*activePopup->m_isActive_ptr = false;
