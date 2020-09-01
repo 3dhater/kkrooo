@@ -2074,6 +2074,79 @@ void Scene3DObject::ConnectVerts()
 
 void Scene3DObject::ChamferVerts(f32 len)
 {
+	if(len == 0.f)
+		return;
+
+	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	{
+		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+		bool sel = CV->isSelected();
+		for( auto V : CV->m_verts )
+		{
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_isCVSelected = sel;
+		}
+	}
+
+	kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
+	for( u64 i2 = 0, sz2 = m_PolyModel->m_polygons.size(); i2 < sz2; ++i2 )
+	{
+		bool withSelectedVerts = false;
+		Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i2];
+		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
+		{
+			Vertex* vertex = (Vertex*)P->m_verts[i];
+			if(vertex->m_isCVSelected)
+			{
+				withSelectedVerts = true;
+				break;
+			}
+		}
+
+		if(!withSelectedVerts)
+			continue;
+	
+		P->MarkToDelete();
+
+		Polygon3D* new_P = kkCreate<Polygon3D>();
+		new_polygons.push_back(new_P);
+
+		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
+		{
+			Vertex* vertex = (Vertex*)P->m_verts[i];
+			if(vertex->m_isCVSelected)
+			{
+				Vertex* new_vertex1 = kkCreate<Vertex>();
+				Vertex* new_vertex2 = kkCreate<Vertex>();
+				new_vertex1->set(vertex);
+				new_vertex2->set(vertex);
+				new_vertex1->m_parentPolygon = new_P;
+				new_vertex2->m_parentPolygon = new_P;
+				new_P->addVertex(new_vertex1);
+				new_P->addVertex(new_vertex2);
+
+			//	new_vertex1->m_Position._f32[0] += 0.001f;
+			//	new_vertex1->m_Position_fix = new_vertex1->m_Position;
+			}
+			else
+			{
+				Vertex* new_vertex = kkCreate<Vertex>();
+				new_vertex->set(vertex);
+				new_vertex->m_parentPolygon = new_P;
+				new_P->addVertex(new_vertex);
+			}
+		}
+
+	}
+	m_PolyModel->deleteMarkedPolygons();
+	for(auto P : new_polygons)
+	{
+		m_PolyModel->m_polygons.push_back(P);
+		for(auto V : P->m_verts)
+		{
+			m_PolyModel->m_verts.push_back(V);
+		}
+	}
 
 	m_PolyModel->createControlPoints();
 	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )

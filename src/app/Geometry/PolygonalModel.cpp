@@ -183,20 +183,17 @@ void PolygonalModel::createControlPoints()
 
 	
 	ControlVertexHash h;
-
 	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
 		Polygon3D * P = (Polygon3D *)m_polygons[ i ];
 		P->m_controlVertsInds.clear();
-
-		const f32 len = 0.0001f;
 
 		// прохожусь по вершинам полигона.
 		// смотрю, нужно ли сунуть вершину в уже существующий controlVertex,
 		//  или нужно создать новый
 		for( u64 k = 0, ksz = P->m_verts.size(); k < ksz; ++k )
 		{
-			Vertex    * V = (Vertex*)P->m_verts[k]; // получение самой вершины
+			Vertex* V = (Vertex*)P->m_verts[k]; // получение самой вершины
 
 			bool needBetterSolution = false;
 
@@ -210,17 +207,51 @@ void PolygonalModel::createControlPoints()
 					cv = kkCreate<ControlVertex>();
 					m_controlPoints.push_back(cv);
 					cv->m_index = (u32)m_controlPoints.size()-1;
-					//cv->m_vertexIndex.push_back(index);
 					cv->m_verts.push_back(V);
 					m_map[ h.str ] = cv;
-
-			//		needBetterSolution = true;
 				}
 				else
 				{
 					cv = m_map[ h.str ];
-					//cv->m_vertexIndex.push_back(index);
-					cv->m_verts.push_back(V);
+
+					bool create_new_CV = false;
+					for( u64 o = 0, osz = cv->m_verts.size(); o < osz; ++o )
+					{
+						Vertex* vertex = (Vertex*)cv->m_verts[o];
+						if( vertex->m_parentPolygon == P )
+						{
+							create_new_CV = true;
+							break;
+						}
+					}
+					if(!create_new_CV)
+					{
+						for(auto N : P->m_neighbors)
+						{
+							for( u64 o = 0, osz = cv->m_verts.size(); o < osz; ++o )
+							{
+								Vertex* vertex = (Vertex*)cv->m_verts[o];
+								if( vertex->m_parentPolygon == N )
+								{
+									create_new_CV = true;
+									goto end;
+								}
+							}
+						}
+						end:;
+					}
+
+					if(create_new_CV)
+					{
+						cv = kkCreate<ControlVertex>();
+						m_controlPoints.push_back(cv);
+						cv->m_index = (u32)m_controlPoints.size()-1;
+						cv->m_verts.push_back(V);
+					}
+					else
+					{
+						cv->m_verts.push_back(V);
+					}
 				}
 			}
 			else
@@ -229,17 +260,25 @@ void PolygonalModel::createControlPoints()
 				cv = kkCreate<ControlVertex>();
 				m_controlPoints.push_back(cv);
 				cv->m_index = (u32)m_controlPoints.size()-1;
-				//cv->m_vertexIndex.push_back(index);
 				cv->m_verts.push_back(V);
-
 				m_map[ h.str ] = cv;
 			}
-
 			P->m_controlVertsInds.push_back(cv->m_index);
 		}
+		P->m_neighbors.clear();
 	}
 	m_map.clear();
 
+
+	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
+	{
+		Polygon3D * P = (Polygon3D *)m_polygons[ i ];
+		for( u64 k = 0, ksz = P->m_verts.size(); k < ksz; ++k )
+		{
+			Vertex* V = (Vertex*)P->m_verts[k];
+			P->m_neighbors.insert(V->m_parentPolygon);
+		}
+	}
 	_createEdges();
 }
 

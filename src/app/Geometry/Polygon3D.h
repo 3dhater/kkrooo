@@ -49,7 +49,7 @@ public:
 	kkArray<kkVertex*> m_verts = kkArray<kkVertex*>(4);
 	//kkArray<u32> m_vertsInds  = kkArray<u32>(4);
 
-	kkArray<u32> m_controlVertsInds  = kkArray<u32>(4);
+	kkArray<u32> m_controlVertsInds  = kkArray<u32>(4); // возможно лучше передать не индекс а адрес
 
 	void      addVertex(Vertex*v);
 
@@ -60,6 +60,8 @@ public:
 
 	// используется при создании модели
 	//bool m_weld = false;
+
+	std::unordered_set<Polygon3D*> m_neighbors;
 
 };
 

@@ -460,6 +460,22 @@ void select_sub_vertex(s32 id, void* data)
     }
 }
 
+void select_all_vertex(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        scene->selectAll();
+        //object->SelecVertsBySub();
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
+
 // установка параметров окна в соответствии с параметрами текущего объекта должны быть установлены здесь
 void Application_editParamsWindow_onActivate(s32 id, void* data)
 {
@@ -628,6 +644,8 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"+", v2f(20.f, 20.f), select_add_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddButton(u"-", v2f(20.f, 20.f), select_sub_vertex,0, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->AddButton(u"All", v2f(20.f, 20.f), select_all_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->EndGroup();
     m_edit_params_window->BeginGroup(u"Geometry edit", true);
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Vertex);

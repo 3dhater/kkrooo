@@ -8,6 +8,7 @@
 #include <mutex>
 #include <iostream>
 #include <cassert>
+#include <unordered_set>
 
 #include "Common/kkConfig.h"
 #include "Common/kkInfo.h"
