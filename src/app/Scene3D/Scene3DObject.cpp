@@ -1583,14 +1583,22 @@ void Scene3DObject::AttachObject(kkScene3DObject* object)
 
 void Scene3DObject::BreakVerts()
 {
+	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	{
+		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+		bool sel = CV->isSelected();
+		for( auto V : CV->m_verts )
+		{
+			Vertex* vertex = (Vertex*)V;
+			vertex->m_isCVSelected = sel;
+		}
+	}
+
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
 		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
 		if(cv->m_isSelected)
 		{
-			cv->m_isSelected = false;
-			/*for( auto v_index : cv->m_vertexIndex )
-			{*/
 			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
 			{
 				auto vertex  = (Vertex*)cv->m_verts[i2];
@@ -1600,16 +1608,22 @@ void Scene3DObject::BreakVerts()
 	}
 	m_isObjectHaveSelectedVerts = false;
 	m_PolyModel->createControlPoints();
+	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	{
+		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+		for(auto v : CV->m_verts)
+		{
+			if(((Vertex*)v)->m_isCVSelected)
+			{
+				CV->select();
+				m_isObjectHaveSelectedVerts = true;
+			}
+		}
+	}
 	this->_rebuildModel();
 	updateModelPointsColors();
 }
 
-//void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
-//{
-//	//_weld(CV1, CV2, false);
-//	this->_rebuildModel();
-//	updateModelPointsColors();
-//}
 
 void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 {
@@ -1864,6 +1878,7 @@ void Scene3DObject::WeldSelectedVerts(f32 len)
 			auto V = WV->m_verts[j];
 			V->m_Position = WV->m_center;
 			V->m_Position_fix = WV->m_center;
+			V->m_weld = true;
 		}
 		delete weld_verts[i];
 	}
@@ -2072,7 +2087,7 @@ void Scene3DObject::ConnectVerts()
 	updateModelPointsColors();
 }
 
-void Scene3DObject::ChamferVerts(f32 len)
+void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 {
 	if(len == 0.f)
 		return;
@@ -2087,6 +2102,14 @@ void Scene3DObject::ChamferVerts(f32 len)
 			vertex->m_isCVSelected = sel;
 		}
 	}
+
+	struct _new_face
+	{
+		ControlVertex* m_base_cv = nullptr;
+		kkArray<Vertex*> m_verts = kkArray<Vertex*>(4); // for copy
+	};
+	kkArray<_new_face*> new_faces = kkArray<_new_face*>(0xff);
+
 
 	kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
 	for( u64 i2 = 0, sz2 = m_PolyModel->m_polygons.size(); i2 < sz2; ++i2 )
@@ -2116,6 +2139,26 @@ void Scene3DObject::ChamferVerts(f32 len)
 			Vertex* vertex = (Vertex*)P->m_verts[i];
 			if(vertex->m_isCVSelected)
 			{
+				Vertex* next_vertex = nullptr;
+				if( i + 1 == sz )
+				{
+					next_vertex = (Vertex*)P->m_verts[0];
+				}
+				else
+				{
+					next_vertex = (Vertex*)P->m_verts[i+1];
+				}
+
+				Vertex* prev_vertex = nullptr;
+				if(i == 0)
+				{
+					prev_vertex = (Vertex*)P->m_verts[sz-1];
+				}
+				else
+				{
+					prev_vertex = (Vertex*)P->m_verts[i-1];
+				}
+
 				Vertex* new_vertex1 = kkCreate<Vertex>();
 				Vertex* new_vertex2 = kkCreate<Vertex>();
 				new_vertex1->set(vertex);
@@ -2124,9 +2167,41 @@ void Scene3DObject::ChamferVerts(f32 len)
 				new_vertex2->m_parentPolygon = new_P;
 				new_P->addVertex(new_vertex1);
 				new_P->addVertex(new_vertex2);
+		 
+				// T.intersectionPoint = ray.m_origin + ray.m_direction * len;
+				// дальше нужно попробовать поставить вершины на позиции
+				auto dir = prev_vertex->m_Position - vertex->m_Position;
+				dir.normalize2();
 
-			//	new_vertex1->m_Position._f32[0] += 0.001f;
-			//	new_vertex1->m_Position_fix = new_vertex1->m_Position;
+				new_vertex1->m_Position = vertex->m_Position + dir * len;
+				new_vertex1->m_Position_fix = new_vertex1->m_Position;
+
+				dir = next_vertex->m_Position - vertex->m_Position;
+				dir.normalize2();
+				new_vertex2->m_Position = vertex->m_Position + dir * len;
+				new_vertex2->m_Position_fix = new_vertex2->m_Position;
+				
+				if(addPolygon)
+				{
+					_new_face * nf_ptr = nullptr;
+					for( u64 o = 0, osz = new_faces.size(); o < osz; ++o )
+					{
+						auto nf = new_faces[o];
+						if(nf->m_base_cv == vertex->m_controlVertex)
+						{
+							nf_ptr = nf;
+							break;
+						}
+					}
+					if(!nf_ptr)
+					{
+						_new_face * nf = new _new_face;
+						nf->m_base_cv = vertex->m_controlVertex;
+						nf_ptr = nf;
+						new_faces.push_back(nf);
+					}
+					nf_ptr->m_verts.push_back(new_vertex1);
+				}
 			}
 			else
 			{
@@ -2139,6 +2214,35 @@ void Scene3DObject::ChamferVerts(f32 len)
 
 	}
 	m_PolyModel->deleteMarkedPolygons();
+
+	if(addPolygon)
+	{
+		for( u64 i = 0, sz = new_faces.size(); i < sz; ++i )
+		{
+			auto nf = new_faces[i];
+
+			Polygon3D* new_P = kkCreate<Polygon3D>();
+			new_polygons.push_back(new_P);
+
+			for( u64 k = 0, ksz = nf->m_verts.size(); k < ksz; ++k )
+			{
+				Vertex* new_vertex = kkCreate<Vertex>();
+				new_vertex->set(nf->m_verts[k]);
+				new_vertex->m_parentPolygon = new_P;
+				new_P->addVertex(new_vertex);
+			}
+			
+			new_P->CalculateNormals();
+			/*if(  )
+			{
+				new_P->Flip();
+				new_P->CalculateNormals();
+			}*/
+			
+			delete nf;
+		}
+	}
+
 	for(auto P : new_polygons)
 	{
 		m_PolyModel->m_polygons.push_back(P);
@@ -2147,7 +2251,6 @@ void Scene3DObject::ChamferVerts(f32 len)
 			m_PolyModel->m_verts.push_back(V);
 		}
 	}
-
 	m_PolyModel->createControlPoints();
 	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
 	{

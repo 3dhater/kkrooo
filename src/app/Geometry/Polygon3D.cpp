@@ -65,6 +65,22 @@ void Polygon3D::Deselect()
 	m_isSelected = false;
 }
 
+void Polygon3D::Flip()
+{
+	for( u64 i = 0, sz = m_verts.size(); i < sz/2; ++i )
+	{
+		auto v = m_verts[ i ];
+		auto index = sz - (1+i);
+		m_verts[ i ] = m_verts[ index ];
+		m_verts[ index ] = v;
+	}
+}
+
+kkVector4& Polygon3D::GetNormal()
+{
+	return m_facenormal;
+}
+
 void Polygon3D::CalculateNormals()
 {
 	kkVector4 e1, e2, no;
@@ -98,6 +114,7 @@ void Polygon3D::CalculateNormals()
 	for( u64 i2 = 0, sz2 = num_of_verts; i2 < sz2; ++i2 )
 	{
 		((Vertex*)m_verts[ i2 ])->m_Normal.normalize2();
-		//((Vertex*)m_verts[ i2 ])->m_Normal_fix = ((Vertex*)m_verts[ i2 ])->m_Normal;
+		((Vertex*)m_verts[ i2 ])->m_Normal_fix = ((Vertex*)m_verts[ i2 ])->m_Normal;
 	}
+	m_facenormal = ((Vertex*)m_verts[ 0 ])->m_Normal;
 }

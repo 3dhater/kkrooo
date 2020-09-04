@@ -130,7 +130,7 @@ void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool 
 
 
 	}
-	if( flip )    //////////// ПРОВЕРИТЬ!!!!
+	if( flip )
 	{
 		for( u64 i = 0, sz = p->m_verts.size(); i < sz/2; ++i )
 		{
@@ -263,12 +263,21 @@ void PolygonalModel::createControlPoints()
 				cv->m_verts.push_back(V);
 				m_map[ h.str ] = cv;
 			}
+			cv->m_faceNormal += P->m_facenormal;
+			V->m_controlVertex = cv;
 			P->m_controlVertsInds.push_back(cv->m_index);
 		}
 		P->m_neighbors.clear();
 	}
 	m_map.clear();
 
+	
+	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	{
+		auto CV = (ControlVertex*)m_controlPoints[i];
+		CV->m_faceNormal /= CV->m_verts.size();
+		CV->m_faceNormal.normalize2();
+	}
 
 	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
@@ -358,6 +367,7 @@ void PolygonalModel::generateNormals(bool flat)
 		{
 			((Vertex*)polygon->m_verts[ i2 ])->m_Normal.normalize2();
 		}
+		polygon->m_facenormal = ((Vertex*)polygon->m_verts[ 0 ])->m_Normal;
 	}
 
 
@@ -1066,6 +1076,7 @@ void PolygonalModel::_createEdges()
 					E->m_polygonIndex[1] = i;
 
 				delete edge;
+				edge = E;
 			}
 			else
 			{ // не найдено, значит надо добавить в массив и в map
@@ -1080,10 +1091,22 @@ void PolygonalModel::_createEdges()
 				cv_first->m_edges.emplace_back(edge);
 				cv_second->m_edges.emplace_back(edge);
 			}
+			
+			for(u64 k = 0, ksz = cv_first->m_verts.size(); k < ksz; ++k )
+			{
+				Vertex* V = (Vertex*)cv_first->m_verts[k];
+				V->m_edge = edge;
+			}
+			for(u64 k = 0, ksz = cv_second->m_verts.size(); k < ksz; ++k )
+			{
+				Vertex* V = (Vertex*)cv_second->m_verts[k];
+				V->m_edge = edge;
+			}
 
 		}
 	}
 
+	// если ребро имеет только 1 полигон на стороне
 	for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
 	{
 		auto E = m_edges[i];

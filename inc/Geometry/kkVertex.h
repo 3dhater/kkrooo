@@ -24,6 +24,8 @@ public:
 
 	// номер €чейки (в массиве kkScene3DObject::getControlVertexArray) в которой находитс€ данна€ вершина
 	virtual u32 getIndex() = 0;
+	
+	virtual kkVector4& getAverageFaceNormal() = 0;
 };
 
 class kkVertex

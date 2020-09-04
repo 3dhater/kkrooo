@@ -407,7 +407,7 @@ void chamfer_vertex(s32 id, void* data)
     auto object = GetSelectedObject();
     if(object)
     {
-        object->ChamferVerts(g_EditPolyObjectsGUIElements.m_chamfer_vertex_len);
+        //object->ChamferVerts(g_EditPolyObjectsGUIElements.m_chamfer_vertex_len, true);
         object->UpdateAabb();
 	    scene->updateObjectVertexSelectList();
         scene->updateSceneAabb();
@@ -665,6 +665,6 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddButton(u"Chamfer", v2f(60.f, 20.f), chamfer_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
-    g_EditPolyObjectsGUIElements.m_chamfer_vertex_len_element = m_edit_params_window->AddValueSelectorFloatLimit(0.f, 99999999.f, &g_EditPolyObjectsGUIElements.m_chamfer_vertex_len, 0.01f, true, v2f(110.f, 20.f), 0, kkPluginGUIParameterType::Vertex);
+    g_EditPolyObjectsGUIElements.m_chamfer_vertex_len_element = m_edit_params_window->AddValueSelectorFloatLimit(0.0001f, 99999999.f, &g_EditPolyObjectsGUIElements.m_chamfer_vertex_len, 0.01f, true, v2f(110.f, 20.f), 0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->EndGroup();
 }

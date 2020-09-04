@@ -9,6 +9,7 @@
 #include "Geometry/kkVertex.h"
 #include "../Plugins/PluginCommonInterface.h"
 
+struct Edge;
 class Polygon3D;
 class ControlVertex;
 
@@ -30,6 +31,9 @@ public:
 	kkVector4    getWeights();
 
 	Polygon3D *     m_parentPolygon = nullptr; // для быстрого доступа к нужному полигону
+
+	ControlVertex* m_controlVertex = nullptr;
+	Edge* m_edge = nullptr;
 
 	//ControlVertex*  m_parentControlVertex = nullptr; //родительский ControlVertex
 	//bool            m_isControl = false; // если это ControlVertex то истина
@@ -120,6 +124,8 @@ public:
 	// значение устанавливается как истина только в методе для удаления
 	bool m_toDelete = false;
 
+	kkVector4 m_faceNormal;
+
 	//kkArray<u32>& getVertInds();
 	kkArray<kkVertex*>& getVerts();
 	bool isSelected();
@@ -128,6 +134,7 @@ public:
 	void select();
 	void deselect();
 	u32 getIndex();
+	kkVector4& getAverageFaceNormal();
 };
 
 

@@ -43,6 +43,8 @@ public:
 	void Select();
 	void Deselect();
 	void CalculateNormals();
+	void Flip();
+	kkVector4& GetNormal();
 public:
 
 	// необходимо передать эти вершины в модель, попутно заполняя m_verts
@@ -63,6 +65,7 @@ public:
 
 	std::unordered_set<Polygon3D*> m_neighbors;
 
+	kkVector4 m_facenormal;
 };
 
 #endif

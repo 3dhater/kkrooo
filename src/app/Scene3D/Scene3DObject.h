@@ -436,7 +436,7 @@ public:
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();
 	void ConnectVerts();
-	void ChamferVerts(f32 len);
+	void ChamferVerts(f32 len, bool addPolygon);
 	void Weld(kkControlVertex* CV1, kkControlVertex* CV2);
 	void WeldSelectedVerts(f32 len);
 };
