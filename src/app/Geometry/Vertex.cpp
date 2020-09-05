@@ -110,11 +110,6 @@ void ControlVertex::deselect()
 	m_isSelected = false;
 }
 
-u32 ControlVertex::getIndex()
-{
-	return m_index;
-}
-
 kkVector4& ControlVertex::getAverageFaceNormal()
 {
 	return m_faceNormal;

@@ -383,7 +383,9 @@ void Scene3DObject::_createSoftwareModel_edges()
 	u16     *   inds_ptr      = nullptr;
 
 	for(u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
+	{
 		((Vertex*)m_PolyModel->m_verts[ i ])->m_vertexIndexForSoftware_lines.clear();
+	}
 
 	u32 softwareModelIndex = 0;
 	std::unordered_map<u64, u64> map;     // 2 объединённых адреса как ключ и индекс на сам массив хранящий Edge
@@ -392,12 +394,12 @@ void Scene3DObject::_createSoftwareModel_edges()
 	{
 		polygon = (Polygon3D *)m_PolyModel->m_polygons[i];
 
-		for( u64 o = 0, sz2 = polygon->m_controlVertsInds.size(); o < sz2; ++o )
+		for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
 		{
 			u64 o2 = o + 1;
 			if(o2 == sz2) o2=0;
-			auto cv1 = (ControlVertex*)m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o] ];
-			auto cv2 = (ControlVertex*)m_PolyModel->m_controlPoints[ polygon->m_controlVertsInds[o2] ];
+			auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
+			auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
 			
 			// нужно определить контрольную вершину с адресом, значение которого меньше чем у другой вершины
 			ControlVertex* cv_first  = cv1;
@@ -1336,80 +1338,62 @@ void Scene3DObject::generateNormals()
 
 void Scene3DObject::deleteSelectedPolys()
 {
-	bool need_delete = false;
-	for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	{
-		auto polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
-		if(polygon->m_isSelected)
-		{
-			polygon->MarkToDelete();
-			need_delete = true;
-		}
-	}
+	//bool need_delete = false;
+	//for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+	//{
+	//	auto polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
+	//	if(polygon->m_isSelected)
+	//	{
+	//		polygon->MarkToDelete();
+	//		need_delete = true;
+	//	}
+	//}
 
-	if( need_delete )
-	{
-		m_PolyModel->deleteMarkedPolygons();
-		m_PolyModel->createControlPoints();
-		_rebuildModel();
-		updatePolygonModel();
-		UpdateAabb();
-	}
+	//if( need_delete )
+	//{
+	//	m_PolyModel->deleteMarkedPolygons();
+	//	m_PolyModel->createControlPoints();
+	//	_rebuildModel();
+	//	updatePolygonModel();
+	//	UpdateAabb();
+	//}
 }
 
 void Scene3DObject::deleteSelectedEdges()
 {
-	bool need_delete = false;
-	for(u64 i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
-	{
-		auto E = m_PolyModel->m_edges[i];
-		
-		for( auto ECV : E->m_firstPoint->m_edgeWith )
-		{
-			if( ECV == E->m_secondPoint )
-			{
-				m_PolyModel->m_polygons[ E->m_polygonIndex[0] ]->MarkToDelete();
-				if(E->m_polygonIndex[1] != 0xffffffffffffffff)
-					m_PolyModel->m_polygons[ E->m_polygonIndex[1] ]->MarkToDelete();
-				need_delete = true;
-				break;
-			}
-		}
-		
-	}
-	
-	if( need_delete )
-	{
-		m_PolyModel->deleteMarkedPolygons();
-		m_PolyModel->createControlPoints();
-		_rebuildModel();
-		updateEdgeModel();
-		UpdateAabb();
-	}
+	//bool need_delete = false;
+	//for(u64 i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
+	//{
+	//	auto E = m_PolyModel->m_edges[i];
+	//	
+	//	for( auto ECV : E->m_firstPoint->m_edgeWith )
+	//	{
+	//		if( ECV == E->m_secondPoint )
+	//		{
+	//			m_PolyModel->m_polygons[ E->m_polygonIndex[0] ]->MarkToDelete();
+	//			if(E->m_polygonIndex[1] != 0xffffffffffffffff)
+	//				m_PolyModel->m_polygons[ E->m_polygonIndex[1] ]->MarkToDelete();
+	//			need_delete = true;
+	//			break;
+	//		}
+	//	}
+	//	
+	//}
+	//
+	//if( need_delete )
+	//{
+	//	m_PolyModel->deleteMarkedPolygons();
+	//	m_PolyModel->createControlPoints();
+	//	_rebuildModel();
+	//	updateEdgeModel();
+	//	UpdateAabb();
+	//}
 }
 
 void Scene3DObject::deleteSelectedVerts()
 {
-	bool need_delete = false;
-	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	if( m_PolyModel->deleteSelectedVerts() )
 	{
-		auto cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
-		if( cv->m_isSelected )
-		{
-			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
-			{
-				auto vertex = (Vertex*)cv->m_verts[i2];
-
-				vertex->m_parentPolygon->MarkToDelete();
-				need_delete = true;
-			}
-		}
-	}
-
-	if( need_delete )
-	{
-		m_PolyModel->deleteMarkedPolygons();
-		m_PolyModel->createControlPoints();
 		_rebuildModel();
 		UpdateAabb();
 	}
@@ -1568,523 +1552,523 @@ void Scene3DObject::SelecVertsBySub()
 
 void Scene3DObject::AttachObject(kkScene3DObject* object)
 {
-	if( object->GetType() == kkScene3DObjectType::PolygonObject )
-	{
-		auto MI = m_matrix;
-		MI.invert();
-		
-		auto polyObject = (Scene3DObject*)object;
-		m_PolyModel->addModel(polyObject->m_PolyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
+	//if( object->GetType() == kkScene3DObjectType::PolygonObject )
+	//{
+	//	auto MI = m_matrix;
+	//	MI.invert();
+	//	
+	//	auto polyObject = (Scene3DObject*)object;
+	//	m_PolyModel->addModel(polyObject->m_PolyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
 
-		m_PolyModel->createControlPoints();
-		this->_rebuildModel();
-	}
+	//	m_PolyModel->createControlPoints();
+	//	this->_rebuildModel();
+	//}
 }
 
 void Scene3DObject::BreakVerts()
 {
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
-		bool sel = CV->isSelected();
-		for( auto V : CV->m_verts )
-		{
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_isCVSelected = sel;
-		}
-	}
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//	bool sel = CV->isSelected();
+	//	for( auto V : CV->m_verts )
+	//	{
+	//		Vertex* vertex = (Vertex*)V;
+	//		vertex->m_isCVSelected = sel;
+	//	}
+	//}
 
-	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
-		if(cv->m_isSelected)
-		{
-			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
-			{
-				auto vertex  = (Vertex*)cv->m_verts[i2];
-				vertex->m_weld = false;
-			}
-		}
-	}
-	m_isObjectHaveSelectedVerts = false;
-	m_PolyModel->createControlPoints();
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
-		for(auto v : CV->m_verts)
-		{
-			if(((Vertex*)v)->m_isCVSelected)
-			{
-				CV->select();
-				m_isObjectHaveSelectedVerts = true;
-			}
-		}
-	}
-	this->_rebuildModel();
-	updateModelPointsColors();
+	//for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	//{
+	//	ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlPoints[ i ];
+	//	if(cv->m_isSelected)
+	//	{
+	//		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
+	//		{
+	//			auto vertex  = (Vertex*)cv->m_verts[i2];
+	//			vertex->m_weld = false;
+	//		}
+	//	}
+	//}
+	//m_isObjectHaveSelectedVerts = false;
+	//m_PolyModel->createControlPoints();
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//	for(auto v : CV->m_verts)
+	//	{
+	//		if(((Vertex*)v)->m_isCVSelected)
+	//		{
+	//			CV->select();
+	//			m_isObjectHaveSelectedVerts = true;
+	//		}
+	//	}
+	//}
+	//this->_rebuildModel();
+	//updateModelPointsColors();
 }
 
 
 void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 {
-	ControlVertex* cv1 = (ControlVertex*)CV1;
-	ControlVertex* cv2 = (ControlVertex*)CV2;
+	//ControlVertex* cv1 = (ControlVertex*)CV1;
+	//ControlVertex* cv2 = (ControlVertex*)CV2;
 
-	bool is_edge = false;
-	Edge * edge = nullptr;
-	for( auto e : cv1->m_edges )
-	{
-		edge = e;
-		if(e->m_firstPoint == cv2 || e->m_secondPoint == cv2)
-		{
-			is_edge = true;
-			break;
-		}
-	}
+	//bool is_edge = false;
+	//Edge * edge = nullptr;
+	//for( auto e : cv1->m_edges )
+	//{
+	//	edge = e;
+	//	if(e->m_firstPoint == cv2 || e->m_secondPoint == cv2)
+	//	{
+	//		is_edge = true;
+	//		break;
+	//	}
+	//}
 
 
-	// есть 2 случая, когда надо делать weld
-	// 1. когда точки образуют ребро
-	// 2. когда хоть 1 ребро у каждой точки имеет только 1 полигон на стороне (то есть точка как бы снаружи)
+	//// есть 2 случая, когда надо делать weld
+	//// 1. когда точки образуют ребро
+	//// 2. когда хоть 1 ребро у каждой точки имеет только 1 полигон на стороне (то есть точка как бы снаружи)
 
-	// сначала перемещу нужную вершину к другой вершине
-	// потом, нахожу 1 или 2 полигона
-	// из полигонов удаляю вершину, если вершины три то удаляю сам полигон
-	// удаляю вершины из главного массива с вершинами m_verts, 
-	Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
-	Vertex* pickVertex = (Vertex*)cv1->m_verts[0];
+	//// сначала перемещу нужную вершину к другой вершине
+	//// потом, нахожу 1 или 2 полигона
+	//// из полигонов удаляю вершину, если вершины три то удаляю сам полигон
+	//// удаляю вершины из главного массива с вершинами m_verts, 
+	//Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
+	//Vertex* pickVertex = (Vertex*)cv1->m_verts[0];
 
-	if(is_edge || (cv1->m_onEdge && cv2->m_onEdge))
-	{
-		auto half = (targetVertex->m_Position - pickVertex->m_Position) * 0.5f;
-		for( auto V : cv1->m_verts )
-		{
-			//Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_Boneinds = targetVertex->m_Boneinds;
-			vertex->m_Color = targetVertex->m_Color;
-			vertex->m_Normal = targetVertex->m_Normal;
-			vertex->m_Normal_fix = targetVertex->m_Normal_fix;
-				vertex->m_Position = targetVertex->m_Position;
-				vertex->m_Position_fix = targetVertex->m_Position_fix;
-			vertex->m_UV = targetVertex->m_UV;
-			vertex->m_Weights = targetVertex->m_Weights;
-			vertex->m_weld = true;
-			targetVertex->m_weld = true;
-		}
+	//if(is_edge || (cv1->m_onEdge && cv2->m_onEdge))
+	//{
+	//	auto half = (targetVertex->m_Position - pickVertex->m_Position) * 0.5f;
+	//	for( auto V : cv1->m_verts )
+	//	{
+	//		//Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
+	//		Vertex* vertex = (Vertex*)V;
+	//		vertex->m_Boneinds = targetVertex->m_Boneinds;
+	//		vertex->m_Color = targetVertex->m_Color;
+	//		vertex->m_Normal = targetVertex->m_Normal;
+	//		vertex->m_Normal_fix = targetVertex->m_Normal_fix;
+	//			vertex->m_Position = targetVertex->m_Position;
+	//			vertex->m_Position_fix = targetVertex->m_Position_fix;
+	//		vertex->m_UV = targetVertex->m_UV;
+	//		vertex->m_Weights = targetVertex->m_Weights;
+	//		vertex->m_weld = true;
+	//		targetVertex->m_weld = true;
+	//	}
 
-	}
-	else
-	{
-		return;
-	}
-	
-	std::unordered_set<Polygon3D*> polysForNormRecalculate;
-	for( auto V : cv1->m_verts )
-	{
-		Vertex* vertex = (Vertex*)V;
-		polysForNormRecalculate.insert(vertex->m_parentPolygon);
-	}
+	//}
+	//else
+	//{
+	//	return;
+	//}
+	//
+	//std::unordered_set<Polygon3D*> polysForNormRecalculate;
+	//for( auto V : cv1->m_verts )
+	//{
+	//	Vertex* vertex = (Vertex*)V;
+	//	polysForNormRecalculate.insert(vertex->m_parentPolygon);
+	//}
 
-	if(is_edge)
-	{
+	//if(is_edge)
+	//{
 
-		Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
-		Polygon3D* P2 = nullptr;
-		if(edge->m_polygonIndex[1] != (u64)-1 )
-		{
-			P2 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[1]];
-		}
+	//	Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
+	//	Polygon3D* P2 = nullptr;
+	//	if(edge->m_polygonIndex[1] != (u64)-1 )
+	//	{
+	//		P2 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[1]];
+	//	}
 
-		// удалить вершину из полигона и из основного массива
-		if(P1->m_verts.size() > 3)
-		{
-			// теперь нужно удалить вершину из полигона и из массива с вершинами
-			// нужно найти вершину внутри контрольной вершины, которая принадлежит данному полигону
-			kkVertex * vertex_for_delete = nullptr;
-			for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
-			{
-				//for( auto vertexIndex_CV : cv1->m_vertexIndex )
-				for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
-				{
-					if( cv1->m_verts[ j ] == P1->m_verts[ i ] )
-					{
-						vertex_for_delete = P1->m_verts[ i ];
-						goto end;
-					}
-				}
-			}
-			end:;
-			if(vertex_for_delete)
-			{
-				P1->m_verts.erase_first(vertex_for_delete);
-				m_PolyModel->m_verts.erase_first(vertex_for_delete);
-				kkDestroy(vertex_for_delete);
-			}
-		}
-		else
-		{
-			for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
-			{
-				auto V = P1->m_verts[i];
-				m_PolyModel->m_verts.erase_first(V);
-				kkDestroy(V);
-			}
+	//	// удалить вершину из полигона и из основного массива
+	//	if(P1->m_verts.size() > 3)
+	//	{
+	//		// теперь нужно удалить вершину из полигона и из массива с вершинами
+	//		// нужно найти вершину внутри контрольной вершины, которая принадлежит данному полигону
+	//		kkVertex * vertex_for_delete = nullptr;
+	//		for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
+	//		{
+	//			//for( auto vertexIndex_CV : cv1->m_vertexIndex )
+	//			for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
+	//			{
+	//				if( cv1->m_verts[ j ] == P1->m_verts[ i ] )
+	//				{
+	//					vertex_for_delete = P1->m_verts[ i ];
+	//					goto end;
+	//				}
+	//			}
+	//		}
+	//		end:;
+	//		if(vertex_for_delete)
+	//		{
+	//			P1->m_verts.erase_first(vertex_for_delete);
+	//			m_PolyModel->m_verts.erase_first(vertex_for_delete);
+	//			kkDestroy(vertex_for_delete);
+	//		}
+	//	}
+	//	else
+	//	{
+	//		for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
+	//		{
+	//			auto V = P1->m_verts[i];
+	//			m_PolyModel->m_verts.erase_first(V);
+	//			kkDestroy(V);
+	//		}
 
-			m_PolyModel->m_polygons.erase_first(P1);
-			kkDestroy(P1);
-			polysForNormRecalculate.erase(P1);
-		}
+	//		m_PolyModel->m_polygons.erase_first(P1);
+	//		kkDestroy(P1);
+	//		polysForNormRecalculate.erase(P1);
+	//	}
 
-		if(P2)
-		{
-			if(P2->m_verts.size() > 3)
-			{
-				kkVertex * vertex_for_delete = nullptr;
-				for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
-				{
-					for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
-					{
-						if( cv1->m_verts[ j ] == P2->m_verts[ i ] )
-						{
-							vertex_for_delete = P2->m_verts[ i ];
-							goto end2;
-						}
-					}
-				}
-				end2:;
-				if(vertex_for_delete)
-				{
-					P2->m_verts.erase_first(vertex_for_delete);
-					m_PolyModel->m_verts.erase_first(vertex_for_delete);
-					kkDestroy(vertex_for_delete);
-				}
-			}
-			else
-			{
-				for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
-				{
-					auto V = P2->m_verts[i];
-					m_PolyModel->m_verts.erase_first(V);
-					kkDestroy(V);
-				}
-				m_PolyModel->m_polygons.erase_first(P2);
-				kkDestroy(P2);
-				polysForNormRecalculate.erase(P2);
-			}
-		}
-	}
+	//	if(P2)
+	//	{
+	//		if(P2->m_verts.size() > 3)
+	//		{
+	//			kkVertex * vertex_for_delete = nullptr;
+	//			for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
+	//			{
+	//				for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
+	//				{
+	//					if( cv1->m_verts[ j ] == P2->m_verts[ i ] )
+	//					{
+	//						vertex_for_delete = P2->m_verts[ i ];
+	//						goto end2;
+	//					}
+	//				}
+	//			}
+	//			end2:;
+	//			if(vertex_for_delete)
+	//			{
+	//				P2->m_verts.erase_first(vertex_for_delete);
+	//				m_PolyModel->m_verts.erase_first(vertex_for_delete);
+	//				kkDestroy(vertex_for_delete);
+	//			}
+	//		}
+	//		else
+	//		{
+	//			for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
+	//			{
+	//				auto V = P2->m_verts[i];
+	//				m_PolyModel->m_verts.erase_first(V);
+	//				kkDestroy(V);
+	//			}
+	//			m_PolyModel->m_polygons.erase_first(P2);
+	//			kkDestroy(P2);
+	//			polysForNormRecalculate.erase(P2);
+	//		}
+	//	}
+	//}
 
-	for(auto P : polysForNormRecalculate)
-	{
-		P->CalculateNormals();
-	}
-	
-	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+	//for(auto P : polysForNormRecalculate)
+	//{
+	//	P->CalculateNormals();
+	//}
+	//
+	//for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
 
-		bool sel = CV->isSelected();
-		for( auto V : CV->m_verts )
-		{
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_isCVSelected = sel;
-		}
+	//	bool sel = CV->isSelected();
+	//	for( auto V : CV->m_verts )
+	//	{
+	//		Vertex* vertex = (Vertex*)V;
+	//		vertex->m_isCVSelected = sel;
+	//	}
 
-	}
+	//}
 
-	m_PolyModel->createControlPoints();
+	//m_PolyModel->createControlPoints();
 
-	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
-		if(((Vertex*)CV->m_verts[0])->m_isCVSelected)
-		{
-			CV->select();
-		}
-	}
+	//for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+	//	if(((Vertex*)CV->m_verts[0])->m_isCVSelected)
+	//	{
+	//		CV->select();
+	//	}
+	//}
 
-	this->_rebuildModel();
-	updateModelPointsColors();
+	//this->_rebuildModel();
+	//updateModelPointsColors();
 }
 
 void Scene3DObject::WeldSelectedVerts(f32 len)
 {
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
-		bool sel = CV->isSelected();
-		for( auto V : CV->m_verts )
-		{
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_isCVSelected = sel;
-		}
-	}
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//	bool sel = CV->isSelected();
+	//	for( auto V : CV->m_verts )
+	//	{
+	//		Vertex* vertex = (Vertex*)V;
+	//		vertex->m_isCVSelected = sel;
+	//	}
+	//}
 
-	//беру каждую вершину, и проверяю со специальными вершинами которых нужно придумать
-	struct _weld_vertex
-	{
-		kkVector4 m_center; // единая позиция
-		std::vector<Vertex*> m_verts; // вершины которые добавляются в зависимости от расстояния
-	};
-	kkArray<_weld_vertex*> weld_verts = kkArray<_weld_vertex*>(0xffff);
+	////беру каждую вершину, и проверяю со специальными вершинами которых нужно придумать
+	//struct _weld_vertex
+	//{
+	//	kkVector4 m_center; // единая позиция
+	//	std::vector<Vertex*> m_verts; // вершины которые добавляются в зависимости от расстояния
+	//};
+	//kkArray<_weld_vertex*> weld_verts = kkArray<_weld_vertex*>(0xffff);
 
-	for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
-		if(!CV->m_isSelected)
-			continue;
+	//for( u64 i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+	//	if(!CV->m_isSelected)
+	//		continue;
 
-		Vertex* V = (Vertex*)CV->m_verts[0];
+	//	Vertex* V = (Vertex*)CV->m_verts[0];
 
-		bool vertex_found = false;
-		for( u64 k = 0, ksz = weld_verts.size(); k < ksz; ++k )
-		{
-			auto WV = weld_verts[k];
-			if( V->m_Position.distance(WV->m_center) <= len )
-			{
-				vertex_found = true;
-				k = ksz;
+	//	bool vertex_found = false;
+	//	for( u64 k = 0, ksz = weld_verts.size(); k < ksz; ++k )
+	//	{
+	//		auto WV = weld_verts[k];
+	//		if( V->m_Position.distance(WV->m_center) <= len )
+	//		{
+	//			vertex_found = true;
+	//			k = ksz;
 
-				kkVector4 vp = WV->m_center - V->m_Position;
-				vp *= 0.5f;
+	//			kkVector4 vp = WV->m_center - V->m_Position;
+	//			vp *= 0.5f;
 
-				for(auto v : CV->m_verts)
-				{
-					WV->m_verts.emplace_back((Vertex*)v);
-				}
-				WV->m_center -= vp; 
-				break;
-			}
-		}
-		if(!vertex_found)
-		{
-			_weld_vertex * WV = new _weld_vertex;
-			WV->m_center = V->m_Position;
-			for(auto v : CV->m_verts)
-			{
-				WV->m_verts.emplace_back((Vertex*)v);
-			}
-			weld_verts.push_back(WV);
-		}
-	}
+	//			for(auto v : CV->m_verts)
+	//			{
+	//				WV->m_verts.emplace_back((Vertex*)v);
+	//			}
+	//			WV->m_center -= vp; 
+	//			break;
+	//		}
+	//	}
+	//	if(!vertex_found)
+	//	{
+	//		_weld_vertex * WV = new _weld_vertex;
+	//		WV->m_center = V->m_Position;
+	//		for(auto v : CV->m_verts)
+	//		{
+	//			WV->m_verts.emplace_back((Vertex*)v);
+	//		}
+	//		weld_verts.push_back(WV);
+	//	}
+	//}
 
-	// изменяю координаты вершин
-	for( u64 i = 0, sz = weld_verts.size(); i < sz; ++i )
-	{
-		auto WV = weld_verts[i];
-		for( u64 j = 0, jsz = WV->m_verts.size(); j < jsz; ++j )
-		{
-			auto V = WV->m_verts[j];
-			V->m_Position = WV->m_center;
-			V->m_Position_fix = WV->m_center;
-			V->m_weld = true;
-		}
-		delete weld_verts[i];
-	}
+	//// изменяю координаты вершин
+	//for( u64 i = 0, sz = weld_verts.size(); i < sz; ++i )
+	//{
+	//	auto WV = weld_verts[i];
+	//	for( u64 j = 0, jsz = WV->m_verts.size(); j < jsz; ++j )
+	//	{
+	//		auto V = WV->m_verts[j];
+	//		V->m_Position = WV->m_center;
+	//		V->m_Position_fix = WV->m_center;
+	//		V->m_weld = true;
+	//	}
+	//	delete weld_verts[i];
+	//}
 
-	// проверяю полигоны. если координаты точки равны то лишнюю нужно удалить
-	// если остаётся 2 и менее вершин то надо удалить сам полигон
-	auto isPolygonDelete = [&](Polygon3D* P)->bool
-	{
-		begin:
-		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
-		{
-			Vertex* V1 = (Vertex*)P->m_verts[i];
-			for( u64 i2 = i+1, sz2 = P->m_verts.size(); i2 < sz2; ++i2 )
-			{
-				Vertex* V2 = (Vertex*)P->m_verts[i2];
-				if(V1->m_Position == V2->m_Position)
-				{
-					V2->m_isToDelete = true;
-					P->m_verts.erase_first(V2);
-					goto begin;
-				}
-			}
-		}
+	//// проверяю полигоны. если координаты точки равны то лишнюю нужно удалить
+	//// если остаётся 2 и менее вершин то надо удалить сам полигон
+	//auto isPolygonDelete = [&](Polygon3D* P)->bool
+	//{
+	//	begin:
+	//	for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
+	//	{
+	//		Vertex* V1 = (Vertex*)P->m_verts[i];
+	//		for( u64 i2 = i+1, sz2 = P->m_verts.size(); i2 < sz2; ++i2 )
+	//		{
+	//			Vertex* V2 = (Vertex*)P->m_verts[i2];
+	//			if(V1->m_Position == V2->m_Position)
+	//			{
+	//				V2->m_isToDelete = true;
+	//				P->m_verts.erase_first(V2);
+	//				goto begin;
+	//			}
+	//		}
+	//	}
 
-		return P->m_verts.size() < 3;
-	};
-	
-	for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	{
-		Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
-		if( isPolygonDelete(P) )
-		{
-			P->MarkToDelete();
-		}
-	}
+	//	return P->m_verts.size() < 3;
+	//};
+	//
+	//for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+	//{
+	//	Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
+	//	if( isPolygonDelete(P) )
+	//	{
+	//		P->MarkToDelete();
+	//	}
+	//}
 
-	// удаление.
-	m_PolyModel->deleteMarkedPolygons();
+	//// удаление.
+	//m_PolyModel->deleteMarkedPolygons();
 
-	m_PolyModel->createControlPoints();
-	this->_rebuildModel();
-	updateModelPointsColors();
+	//m_PolyModel->createControlPoints();
+	//this->_rebuildModel();
+	//updateModelPointsColors();
 }
 
 void Scene3DObject::ConnectVerts()
 {
-	// сначала надо пометить реальные вершины, какие выбраны какие нет
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
-		bool sel = CV->isSelected();
-		for( auto V : CV->m_verts )
-		{
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_isCVSelected = sel;
-		}
-	}
+	//// сначала надо пометить реальные вершины, какие выбраны какие нет
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//	bool sel = CV->isSelected();
+	//	for( auto V : CV->m_verts )
+	//	{
+	//		Vertex* vertex = (Vertex*)V;
+	//		vertex->m_isCVSelected = sel;
+	//	}
+	//}
 
-	std::basic_string<Vertex*> vertex_buffer;
-	kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
-	kkArray<Vertex*> new_verts = kkArray<Vertex*>(0xff);
+	//std::basic_string<Vertex*> vertex_buffer;
+	//kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
+	//kkArray<Vertex*> new_verts = kkArray<Vertex*>(0xff);
 
-	// прохожусь по полигонам
-	for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	{
-		vertex_buffer.clear();
+	//// прохожусь по полигонам
+	//for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+	//{
+	//	vertex_buffer.clear();
 
-		Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
+	//	Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
 
-		// прохожусь по полигону в поисках выбранной вершины.
-		// если вершина находится, но kcnt должен сброситься, чтобы пройтись по массиву в полном объёме
-		// соответственно, нужно сделать проверку на выход за пределы
-		bool start = false;
-		bool needToConnect = false;
-		for( u64 ki = 0, kcnt = 0, kisz = P->m_verts.size(); kcnt < kisz; ++kcnt)
-		{
-			Vertex* vertex = (Vertex*)P->m_verts[ki];
-			if(vertex->m_isCVSelected)
-			{
-				if(!start)
-				{
-					// нашли первую выделенную вершину
-					start = true;
-					kcnt = 0;
-				}
-				else
-				{
-					// есть вторая или более выбранных вершин
-					needToConnect = true;
-				}
-			}
-			++ki;
-			if(start)
-			{
-				vertex_buffer.push_back(vertex);
-			}
-			if(ki == kisz)
-				ki = 0;
-		}
-		if(needToConnect)
-		{
-			P->MarkToDelete();
+	//	// прохожусь по полигону в поисках выбранной вершины.
+	//	// если вершина находится, но kcnt должен сброситься, чтобы пройтись по массиву в полном объёме
+	//	// соответственно, нужно сделать проверку на выход за пределы
+	//	bool start = false;
+	//	bool needToConnect = false;
+	//	for( u64 ki = 0, kcnt = 0, kisz = P->m_verts.size(); kcnt < kisz; ++kcnt)
+	//	{
+	//		Vertex* vertex = (Vertex*)P->m_verts[ki];
+	//		if(vertex->m_isCVSelected)
+	//		{
+	//			if(!start)
+	//			{
+	//				// нашли первую выделенную вершину
+	//				start = true;
+	//				kcnt = 0;
+	//			}
+	//			else
+	//			{
+	//				// есть вторая или более выбранных вершин
+	//				needToConnect = true;
+	//			}
+	//		}
+	//		++ki;
+	//		if(start)
+	//		{
+	//			vertex_buffer.push_back(vertex);
+	//		}
+	//		if(ki == kisz)
+	//			ki = 0;
+	//	}
+	//	if(needToConnect)
+	//	{
+	//		P->MarkToDelete();
 
-			Vertex* baseVertex = vertex_buffer[0];
-			Polygon3D* newPolygon = nullptr;
-			Vertex* newVertex = nullptr;
+	//		Vertex* baseVertex = vertex_buffer[0];
+	//		Polygon3D* newPolygon = nullptr;
+	//		Vertex* newVertex = nullptr;
 
-			for( size_t j = 1, jsz = vertex_buffer.size(), vertex_counter = 0; j < jsz; ++j )
-			{
-				if(!newPolygon)
-				{
-					vertex_counter = 1;
-					newPolygon = kkCreate<Polygon3D>();
-					newVertex = kkCreate<Vertex>();
-					newVertex->set(baseVertex);
-					newVertex->m_parentPolygon = newPolygon;
-					newVertex->m_isCVSelected = baseVertex->m_isCVSelected;
-					newPolygon->addVertex(newVertex);
-					new_verts.push_back(newVertex);
-				}
+	//		for( size_t j = 1, jsz = vertex_buffer.size(), vertex_counter = 0; j < jsz; ++j )
+	//		{
+	//			if(!newPolygon)
+	//			{
+	//				vertex_counter = 1;
+	//				newPolygon = kkCreate<Polygon3D>();
+	//				newVertex = kkCreate<Vertex>();
+	//				newVertex->set(baseVertex);
+	//				newVertex->m_parentPolygon = newPolygon;
+	//				newVertex->m_isCVSelected = baseVertex->m_isCVSelected;
+	//				newPolygon->addVertex(newVertex);
+	//				new_verts.push_back(newVertex);
+	//			}
 
-				auto nextVertex = vertex_buffer[j];
+	//			auto nextVertex = vertex_buffer[j];
 
-				newVertex = kkCreate<Vertex>();
-				newVertex->set(nextVertex);
-				newVertex->m_parentPolygon = newPolygon;
-				newVertex->m_isCVSelected = nextVertex->m_isCVSelected;
-				newPolygon->addVertex(newVertex);
-				new_verts.push_back(newVertex);
-				++vertex_counter;
+	//			newVertex = kkCreate<Vertex>();
+	//			newVertex->set(nextVertex);
+	//			newVertex->m_parentPolygon = newPolygon;
+	//			newVertex->m_isCVSelected = nextVertex->m_isCVSelected;
+	//			newPolygon->addVertex(newVertex);
+	//			new_verts.push_back(newVertex);
+	//			++vertex_counter;
 
-				bool last = j == jsz - 1;
-				if((nextVertex->m_isCVSelected && vertex_counter > 2) || last )
-				{
-					if(j != 1)
-					{
-						new_polygons.push_back(newPolygon);
-						newPolygon = nullptr;
-						if(!last)
-							--j;
-					}
-				}
-			}
-		}
-	}
+	//			bool last = j == jsz - 1;
+	//			if((nextVertex->m_isCVSelected && vertex_counter > 2) || last )
+	//			{
+	//				if(j != 1)
+	//				{
+	//					new_polygons.push_back(newPolygon);
+	//					newPolygon = nullptr;
+	//					if(!last)
+	//						--j;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
-	auto newPolygonsSize = new_polygons.size();
-	u64  currentNewPolygon = 0;
-	// помечу вершины полигонов чтобы потом их удалить
-	for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i)
-	{
-		Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
-		if(P->IsToDelete())
-		{
-			for(u64 j = 0, jsz = P->m_verts.size(); j < jsz; ++j)
-			{
-				Vertex* V = (Vertex*)P->m_verts[j];
-				V->m_isToDelete = true;
-			}
-			kkDestroy(P);
-			m_PolyModel->m_polygons[i] = new_polygons[currentNewPolygon];
-			++currentNewPolygon;
-		}
-	}
-	
-	while(currentNewPolygon < newPolygonsSize)
-	{
-		m_PolyModel->m_polygons.push_back(new_polygons[currentNewPolygon]);
-		++currentNewPolygon;
-	}
+	//auto newPolygonsSize = new_polygons.size();
+	//u64  currentNewPolygon = 0;
+	//// помечу вершины полигонов чтобы потом их удалить
+	//for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i)
+	//{
+	//	Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
+	//	if(P->IsToDelete())
+	//	{
+	//		for(u64 j = 0, jsz = P->m_verts.size(); j < jsz; ++j)
+	//		{
+	//			Vertex* V = (Vertex*)P->m_verts[j];
+	//			V->m_isToDelete = true;
+	//		}
+	//		kkDestroy(P);
+	//		m_PolyModel->m_polygons[i] = new_polygons[currentNewPolygon];
+	//		++currentNewPolygon;
+	//	}
+	//}
+	//
+	//while(currentNewPolygon < newPolygonsSize)
+	//{
+	//	m_PolyModel->m_polygons.push_back(new_polygons[currentNewPolygon]);
+	//	++currentNewPolygon;
+	//}
 
-	auto newVertssSize = new_verts.size();
-	u64  currentNewVertex = 0;
-	for(u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i)
-	{
-		Vertex* V = (Vertex*)m_PolyModel->m_verts[i];
-		if(V->m_isToDelete)
-		{
-			kkDestroy(V);
+	//auto newVertssSize = new_verts.size();
+	//u64  currentNewVertex = 0;
+	//for(u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i)
+	//{
+	//	Vertex* V = (Vertex*)m_PolyModel->m_verts[i];
+	//	if(V->m_isToDelete)
+	//	{
+	//		kkDestroy(V);
 
-			m_PolyModel->m_verts[i] = new_verts[currentNewVertex];
-			++currentNewVertex;
-		}
-	}
-	while(currentNewVertex < newVertssSize)
-	{
-		m_PolyModel->m_verts.push_back(new_verts[currentNewVertex]);
-		++currentNewVertex;
-	}
+	//		m_PolyModel->m_verts[i] = new_verts[currentNewVertex];
+	//		++currentNewVertex;
+	//	}
+	//}
+	//while(currentNewVertex < newVertssSize)
+	//{
+	//	m_PolyModel->m_verts.push_back(new_verts[currentNewVertex]);
+	//	++currentNewVertex;
+	//}
 
-	m_PolyModel->createControlPoints();
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//m_PolyModel->createControlPoints();
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
 
-		for(auto v : CV->m_verts)
-		{
-			if(((Vertex*)v)->m_isCVSelected)
-			{
-				CV->select();
-			}
-		}
+	//	for(auto v : CV->m_verts)
+	//	{
+	//		if(((Vertex*)v)->m_isCVSelected)
+	//		{
+	//			CV->select();
+	//		}
+	//	}
 
-	}
-	this->_rebuildModel();
-	updateModelPointsColors();
+	//}
+	//this->_rebuildModel();
+	//updateModelPointsColors();
 }
 
 void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
@@ -2092,177 +2076,177 @@ void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 	if(len == 0.f)
 		return;
 
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
-		bool sel = CV->isSelected();
-		for( auto V : CV->m_verts )
-		{
-			Vertex* vertex = (Vertex*)V;
-			vertex->m_isCVSelected = sel;
-		}
-	}
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//	bool sel = CV->isSelected();
+	//	for( auto V : CV->m_verts )
+	//	{
+	//		Vertex* vertex = (Vertex*)V;
+	//		vertex->m_isCVSelected = sel;
+	//	}
+	//}
 
-	struct _new_face
-	{
-		ControlVertex* m_base_cv = nullptr;
-		kkArray<Vertex*> m_verts = kkArray<Vertex*>(4); // for copy
-	};
-	kkArray<_new_face*> new_faces = kkArray<_new_face*>(0xff);
+	//struct _new_face
+	//{
+	//	ControlVertex* m_base_cv = nullptr;
+	//	kkArray<Vertex*> m_verts = kkArray<Vertex*>(4); // for copy
+	//};
+	//kkArray<_new_face*> new_faces = kkArray<_new_face*>(0xff);
 
 
-	kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_polygons.size(); i2 < sz2; ++i2 )
-	{
-		bool withSelectedVerts = false;
-		Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i2];
-		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
-		{
-			Vertex* vertex = (Vertex*)P->m_verts[i];
-			if(vertex->m_isCVSelected)
-			{
-				withSelectedVerts = true;
-				break;
-			}
-		}
+	//kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_polygons.size(); i2 < sz2; ++i2 )
+	//{
+	//	bool withSelectedVerts = false;
+	//	Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i2];
+	//	for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
+	//	{
+	//		Vertex* vertex = (Vertex*)P->m_verts[i];
+	//		if(vertex->m_isCVSelected)
+	//		{
+	//			withSelectedVerts = true;
+	//			break;
+	//		}
+	//	}
 
-		if(!withSelectedVerts)
-			continue;
-	
-		P->MarkToDelete();
+	//	if(!withSelectedVerts)
+	//		continue;
+	//
+	//	P->MarkToDelete();
 
-		Polygon3D* new_P = kkCreate<Polygon3D>();
-		new_polygons.push_back(new_P);
+	//	Polygon3D* new_P = kkCreate<Polygon3D>();
+	//	new_polygons.push_back(new_P);
 
-		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
-		{
-			Vertex* vertex = (Vertex*)P->m_verts[i];
-			if(vertex->m_isCVSelected)
-			{
-				Vertex* next_vertex = nullptr;
-				if( i + 1 == sz )
-				{
-					next_vertex = (Vertex*)P->m_verts[0];
-				}
-				else
-				{
-					next_vertex = (Vertex*)P->m_verts[i+1];
-				}
+	//	for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
+	//	{
+	//		Vertex* vertex = (Vertex*)P->m_verts[i];
+	//		if(vertex->m_isCVSelected)
+	//		{
+	//			Vertex* next_vertex = nullptr;
+	//			if( i + 1 == sz )
+	//			{
+	//				next_vertex = (Vertex*)P->m_verts[0];
+	//			}
+	//			else
+	//			{
+	//				next_vertex = (Vertex*)P->m_verts[i+1];
+	//			}
 
-				Vertex* prev_vertex = nullptr;
-				if(i == 0)
-				{
-					prev_vertex = (Vertex*)P->m_verts[sz-1];
-				}
-				else
-				{
-					prev_vertex = (Vertex*)P->m_verts[i-1];
-				}
+	//			Vertex* prev_vertex = nullptr;
+	//			if(i == 0)
+	//			{
+	//				prev_vertex = (Vertex*)P->m_verts[sz-1];
+	//			}
+	//			else
+	//			{
+	//				prev_vertex = (Vertex*)P->m_verts[i-1];
+	//			}
 
-				Vertex* new_vertex1 = kkCreate<Vertex>();
-				Vertex* new_vertex2 = kkCreate<Vertex>();
-				new_vertex1->set(vertex);
-				new_vertex2->set(vertex);
-				new_vertex1->m_parentPolygon = new_P;
-				new_vertex2->m_parentPolygon = new_P;
-				new_P->addVertex(new_vertex1);
-				new_P->addVertex(new_vertex2);
-		 
-				// T.intersectionPoint = ray.m_origin + ray.m_direction * len;
-				// дальше нужно попробовать поставить вершины на позиции
-				auto dir = prev_vertex->m_Position - vertex->m_Position;
-				dir.normalize2();
+	//			Vertex* new_vertex1 = kkCreate<Vertex>();
+	//			Vertex* new_vertex2 = kkCreate<Vertex>();
+	//			new_vertex1->set(vertex);
+	//			new_vertex2->set(vertex);
+	//			new_vertex1->m_parentPolygon = new_P;
+	//			new_vertex2->m_parentPolygon = new_P;
+	//			new_P->addVertex(new_vertex1);
+	//			new_P->addVertex(new_vertex2);
+	//	 
+	//			// T.intersectionPoint = ray.m_origin + ray.m_direction * len;
+	//			// дальше нужно попробовать поставить вершины на позиции
+	//			auto dir = prev_vertex->m_Position - vertex->m_Position;
+	//			dir.normalize2();
 
-				new_vertex1->m_Position = vertex->m_Position + dir * len;
-				new_vertex1->m_Position_fix = new_vertex1->m_Position;
+	//			new_vertex1->m_Position = vertex->m_Position + dir * len;
+	//			new_vertex1->m_Position_fix = new_vertex1->m_Position;
 
-				dir = next_vertex->m_Position - vertex->m_Position;
-				dir.normalize2();
-				new_vertex2->m_Position = vertex->m_Position + dir * len;
-				new_vertex2->m_Position_fix = new_vertex2->m_Position;
-				
-				if(addPolygon)
-				{
-					_new_face * nf_ptr = nullptr;
-					for( u64 o = 0, osz = new_faces.size(); o < osz; ++o )
-					{
-						auto nf = new_faces[o];
-						if(nf->m_base_cv == vertex->m_controlVertex)
-						{
-							nf_ptr = nf;
-							break;
-						}
-					}
-					if(!nf_ptr)
-					{
-						_new_face * nf = new _new_face;
-						nf->m_base_cv = vertex->m_controlVertex;
-						nf_ptr = nf;
-						new_faces.push_back(nf);
-					}
-					nf_ptr->m_verts.push_back(new_vertex1);
-				}
-			}
-			else
-			{
-				Vertex* new_vertex = kkCreate<Vertex>();
-				new_vertex->set(vertex);
-				new_vertex->m_parentPolygon = new_P;
-				new_P->addVertex(new_vertex);
-			}
-		}
+	//			dir = next_vertex->m_Position - vertex->m_Position;
+	//			dir.normalize2();
+	//			new_vertex2->m_Position = vertex->m_Position + dir * len;
+	//			new_vertex2->m_Position_fix = new_vertex2->m_Position;
+	//			
+	//			if(addPolygon)
+	//			{
+	//				_new_face * nf_ptr = nullptr;
+	//				for( u64 o = 0, osz = new_faces.size(); o < osz; ++o )
+	//				{
+	//					auto nf = new_faces[o];
+	//					if(nf->m_base_cv == vertex->m_controlVertex)
+	//					{
+	//						nf_ptr = nf;
+	//						break;
+	//					}
+	//				}
+	//				if(!nf_ptr)
+	//				{
+	//					_new_face * nf = new _new_face;
+	//					nf->m_base_cv = vertex->m_controlVertex;
+	//					nf_ptr = nf;
+	//					new_faces.push_back(nf);
+	//				}
+	//				nf_ptr->m_verts.push_back(new_vertex1);
+	//			}
+	//		}
+	//		else
+	//		{
+	//			Vertex* new_vertex = kkCreate<Vertex>();
+	//			new_vertex->set(vertex);
+	//			new_vertex->m_parentPolygon = new_P;
+	//			new_P->addVertex(new_vertex);
+	//		}
+	//	}
 
-	}
-	m_PolyModel->deleteMarkedPolygons();
+	//}
+	//m_PolyModel->deleteMarkedPolygons();
 
-	if(addPolygon)
-	{
-		for( u64 i = 0, sz = new_faces.size(); i < sz; ++i )
-		{
-			auto nf = new_faces[i];
+	//if(addPolygon)
+	//{
+	//	for( u64 i = 0, sz = new_faces.size(); i < sz; ++i )
+	//	{
+	//		auto nf = new_faces[i];
 
-			Polygon3D* new_P = kkCreate<Polygon3D>();
-			new_polygons.push_back(new_P);
+	//		Polygon3D* new_P = kkCreate<Polygon3D>();
+	//		new_polygons.push_back(new_P);
 
-			for( u64 k = 0, ksz = nf->m_verts.size(); k < ksz; ++k )
-			{
-				Vertex* new_vertex = kkCreate<Vertex>();
-				new_vertex->set(nf->m_verts[k]);
-				new_vertex->m_parentPolygon = new_P;
-				new_P->addVertex(new_vertex);
-			}
-			
-			new_P->CalculateNormals();
-			/*if(  )
-			{
-				new_P->Flip();
-				new_P->CalculateNormals();
-			}*/
-			
-			delete nf;
-		}
-	}
+	//		for( u64 k = 0, ksz = nf->m_verts.size(); k < ksz; ++k )
+	//		{
+	//			Vertex* new_vertex = kkCreate<Vertex>();
+	//			new_vertex->set(nf->m_verts[k]);
+	//			new_vertex->m_parentPolygon = new_P;
+	//			new_P->addVertex(new_vertex);
+	//		}
+	//		
+	//		new_P->CalculateNormals();
+	//		/*if(  )
+	//		{
+	//			new_P->Flip();
+	//			new_P->CalculateNormals();
+	//		}*/
+	//		
+	//		delete nf;
+	//	}
+	//}
 
-	for(auto P : new_polygons)
-	{
-		m_PolyModel->m_polygons.push_back(P);
-		for(auto V : P->m_verts)
-		{
-			m_PolyModel->m_verts.push_back(V);
-		}
-	}
-	m_PolyModel->createControlPoints();
-	for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
-	{
-		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
-		for(auto v : CV->m_verts)
-		{
-			if(((Vertex*)v)->m_isCVSelected)
-			{
-				CV->select();
-			}
-		}
-	}
-	this->_rebuildModel();
-	updateModelPointsColors();
+	//for(auto P : new_polygons)
+	//{
+	//	m_PolyModel->m_polygons.push_back(P);
+	//	for(auto V : P->m_verts)
+	//	{
+	//		m_PolyModel->m_verts.push_back(V);
+	//	}
+	//}
+	//m_PolyModel->createControlPoints();
+	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlPoints.size(); i2 < sz2; ++i2 )
+	//{
+	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlPoints[i2];
+	//	for(auto v : CV->m_verts)
+	//	{
+	//		if(((Vertex*)v)->m_isCVSelected)
+	//		{
+	//			CV->select();
+	//		}
+	//	}
+	//}
+	//this->_rebuildModel();
+	//updateModelPointsColors();
 }

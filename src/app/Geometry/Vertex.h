@@ -99,7 +99,7 @@ public:
 
 	bool m_onEdge = false;
 
-	u32 m_index = 0;
+	//u32 m_index = 0;
 
 	// пока используется в Weld
 	//bool m_isOnDelete = false;
@@ -133,7 +133,6 @@ public:
 	bool isSelectedPoly();
 	void select();
 	void deselect();
-	u32 getIndex();
 	kkVector4& getAverageFaceNormal();
 };
 

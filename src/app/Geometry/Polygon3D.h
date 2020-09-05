@@ -35,7 +35,7 @@ public:
 	//kkArray<u32>& GetVertInds();
 	kkArray<kkVertex*>& GetVerts();
 
-	kkArray<u32>& GetControlVertInds();
+	kkArray<kkControlVertex*>& GetControlVerts();
 	void MarkToDelete();
 	void RemoveMarkToDelete();
 	bool IsToDelete();
@@ -51,7 +51,8 @@ public:
 	kkArray<kkVertex*> m_verts = kkArray<kkVertex*>(4);
 	//kkArray<u32> m_vertsInds  = kkArray<u32>(4);
 
-	kkArray<u32> m_controlVertsInds  = kkArray<u32>(4); // возможно лучше передать не индекс а адрес
+	//kkArray<u32> m_controlVertsInds  = kkArray<u32>(4); // возможно лучше передать не индекс а адрес
+	kkArray<kkControlVertex*> m_controlVerts  = kkArray<kkControlVertex*>(4); // возможно лучше передать не индекс а адрес
 
 	void      addVertex(Vertex*v);
 

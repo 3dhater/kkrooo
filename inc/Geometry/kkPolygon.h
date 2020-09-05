@@ -198,7 +198,8 @@ public:
 	virtual kkArray<kkVertex*>& GetVerts() = 0;
 
 	// получить список индексов для контрольных вершин
-	virtual kkArray<u32>& GetControlVertInds() = 0;
+	//virtual kkArray<u32>& GetControlVertInds() = 0;
+	virtual kkArray<kkControlVertex*>& GetControlVerts() = 0;
 
 	// пометить полигон на удаление
 	virtual void MarkToDelete() = 0;
