@@ -256,9 +256,13 @@ public:
 
 	void weldByLen(f32 len);
 
-	void addModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
+	//void addModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
+	void attachObject(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
 
 	bool deleteSelectedVerts();
+	bool deleteSelectedEdges();
+	bool deleteSelectedPolys();
+	void breakVerts();
 };
 
 #endif

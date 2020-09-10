@@ -195,8 +195,6 @@ void PolygonalModel::createControlPoints()
 		{
 			Vertex* V = (Vertex*)P->m_verts[k]; // получение самой вершины
 
-			bool needBetterSolution = false;
-
 			h.set(&V->m_Position);
 			ControlVertex * cv = nullptr;
 
@@ -1026,7 +1024,42 @@ void PolygonalModel::rayTestGrid( std::vector<kkTriangleRayTestResult>& outTrian
 	}
 }
 
-void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
+//void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
+//{
+//	auto TIM = matrix_other;
+//	TIM.invert();
+//	TIM.transpose();
+//
+//	auto old_size = m_verts.size();
+//
+//	m_verts.reserve(old_size + other->m_verts.size());
+//	for( u64 i = 0, sz = other->m_verts.size(); i < sz; ++i )
+//	{
+//		m_verts.push_back(other->m_verts[i]);
+//	}
+//	
+//	for( auto P : other->m_polygons )
+//	{
+//		auto polygon = (Polygon3D*)P;
+//		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
+//		{
+//			auto V = (Vertex*)polygon->m_verts[i];
+//			
+//			//polygon->m_vertsInds[i] += old_size;
+//
+//			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
+//			V->m_Normal_fix = V->m_Normal;
+//
+//			V->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
+//			V->m_Position	= math::mul(V->m_Position, invertMatrix) ;
+//			V->m_Position_fix = V->m_Position;
+//		}
+//		m_polygons.push_back(polygon);
+//	}
+//	other->m_verts.clear();
+//	other->m_polygons.clear();
+//}
+void PolygonalModel::attachObject(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
 {
 	auto TIM = matrix_other;
 	TIM.invert();
@@ -1046,8 +1079,6 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
 		{
 			auto V = (Vertex*)polygon->m_verts[i];
-			
-			//polygon->m_vertsInds[i] += old_size;
 
 			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
 			V->m_Normal_fix = V->m_Normal;
@@ -1060,6 +1091,14 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 	}
 	other->m_verts.clear();
 	other->m_polygons.clear();
+
+	for( u64 i = 0, sz = other->m_controlPoints.size(); i < sz; ++i )
+	{
+		m_controlPoints.push_back(other->m_controlPoints[i]);
+	}
+	other->m_controlPoints.clear();
+
+	_createEdges();
 }
 
 void PolygonalModel::_deleteEdges()
@@ -1194,3 +1233,102 @@ bool PolygonalModel::deleteSelectedVerts()
 	}
 	return result;
 }
+
+bool PolygonalModel::deleteSelectedEdges()
+{
+	bool result = false;
+	for(u64 i = 0, sz = m_edges.size(); i < sz; ++i )
+	{
+		auto E = m_edges[i];
+		
+		for( auto ECV : E->m_firstPoint->m_edgeWith )
+		{
+			if( ECV == E->m_secondPoint )
+			{
+				m_polygons[ E->m_polygonIndex[0] ]->MarkToDelete();
+				if(E->m_polygonIndex[1] != 0xffffffffffffffff)
+				{
+					m_polygons[ E->m_polygonIndex[1] ]->MarkToDelete();
+				}
+				result = true;
+				break;
+			}
+		}
+	}
+	if(result)
+	{
+		deleteMarkedPolygons();
+	}
+	return result;
+}
+
+bool PolygonalModel::deleteSelectedPolys()
+{
+	bool result = false;
+	for(u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
+	{
+		auto polygon = (Polygon3D *)m_polygons.at(i);
+		if(polygon->m_isSelected)
+		{
+			polygon->MarkToDelete();
+			result = true;
+		}
+	}
+	if(result)
+	{
+		deleteMarkedPolygons();
+	}
+	return result;
+}
+
+void PolygonalModel::breakVerts()
+{
+	kkArray<ControlVertex*> new_cvs = kkArray<ControlVertex*>(0xff);
+
+	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		if(cv->m_isSelected)
+		{
+			cv->m_isSelected = false;
+			auto first_vertex  = (Vertex*)cv->m_verts[0];
+
+			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
+			{
+				auto vertex  = (Vertex*)cv->m_verts[i2];
+				vertex->m_weld = false;
+
+				//если есть ещё вершины, то нужно создать новые контрольные вершины
+				// надо обратить внимание на указание родительских вершин в полигонах и т.д.
+				if(i2 > 0)
+				{
+					ControlVertex * new_cv = kkCreate<ControlVertex>();
+					new_cvs.push_back(new_cv);
+					new_cv->m_verts.push_back(vertex);
+					vertex->m_controlVertex = new_cv;
+					for(size_t i3 = 0, sz3 = vertex->m_parentPolygon->m_controlVerts.size(); i3 < sz3; ++i3)
+					{
+						auto CVinP = (ControlVertex*)vertex->m_parentPolygon->m_controlVerts[i3];
+						if(CVinP == cv)
+						{
+							vertex->m_parentPolygon->m_controlVerts[i3] = new_cv;
+							break;
+						}
+					}
+				}
+			}
+
+			// при разбиении контрольная вершина хранит только 1 реальную вершину
+			cv->m_verts.clear();
+			cv->m_verts.push_back(first_vertex);
+		}
+	}
+
+	for( size_t i = 0, sz = new_cvs.size(); i < sz; ++i )
+	{
+		m_controlPoints.push_back(new_cvs[i]);
+	}
+
+	_createEdges();
+}
+
