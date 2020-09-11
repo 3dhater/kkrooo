@@ -191,15 +191,7 @@ public:
 	kkPolygon(){}
 	virtual ~kkPolygon(){}
 
-	// получить список индексов на массив из kkScene3DObject::getVertexArray
-	// эти вершины являются вершинами полигона
-	//virtual kkArray<u32>& GetVertInds() = 0;
-
 	virtual kkArray<kkVertex*>& GetVerts() = 0;
-
-	// получить список индексов для контрольных вершин
-	//virtual kkArray<u32>& GetControlVertInds() = 0;
-	virtual kkArray<kkControlVertex*>& GetControlVerts() = 0;
 
 	// пометить полигон на удаление
 	virtual void MarkToDelete() = 0;
@@ -211,6 +203,8 @@ public:
 	virtual void CalculateNormals() = 0;
 	virtual void Flip() = 0;
 	virtual kkVector4& GetNormal() = 0;
+	// удалить из полигона но не из модели и не из памяти
+	//virtual void DeleteVertex(kkVertex*) = 0;
 };
 
 #endif

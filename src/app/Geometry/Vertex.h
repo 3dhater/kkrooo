@@ -99,7 +99,7 @@ public:
 
 	bool m_onEdge = false;
 
-	//u32 m_index = 0;
+	u32 m_index = 0;
 
 	// пока используется в Weld
 	//bool m_isOnDelete = false;
@@ -116,7 +116,7 @@ public:
 
 	// когда выбран полигон, каждой контрольной вершине нужно добавить информацию об этом полигоне
 	//std::vector<u64> m_selectedPolys;
-	u32 m_selectedPolysCounter = 0; // возможно это-же можно сделать и с рёбрами
+	//u32 m_selectedPolysCounter = 0; // возможно это-же можно сделать и с рёбрами
 	
 	f32 m_distanceToCamera = 0.f;
 
@@ -133,6 +133,7 @@ public:
 	bool isSelectedPoly();
 	void select();
 	void deselect();
+	u32 getIndex();
 	kkVector4& getAverageFaceNormal();
 };
 

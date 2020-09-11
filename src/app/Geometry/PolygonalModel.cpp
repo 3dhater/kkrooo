@@ -17,6 +17,12 @@ PolygonalModel::~PolygonalModel()
 {
 	_deleteEdges();
 
+	/*for( u64  i = 0; i < m_polygonNeighbors.size(); ++i )
+	{
+		kkDestroy( m_polygonNeighbors[i] );
+	}
+	m_polygonNeighbors.clear();*/
+
 	for( u64  i = 0; i < m_polygons.size(); ++i )
 	{
 		kkDestroy( m_polygons[i] );
@@ -34,74 +40,58 @@ PolygonalModel::~PolygonalModel()
 	}
 }
 
-void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool flip)
+void PolygonalModel::addPolygon(Polygon3D* new_polygon, bool weld, bool triangulate, bool flip)
 {
 	Vertex * V;
-
-	u64 num_of_tris = p->m_verts.size() - 2;
-	
-	for( u64 i = 0, sz = p->m_verts.size(); i < sz; ++i )
+	u64 num_of_tris = new_polygon->m_verts.size() - 2;
+	for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz; ++i )
 	{
-		V = (Vertex*)p->m_verts[i];
+		V = (Vertex*)new_polygon->m_verts[i];
 		V->m_weld = weld;
 	}
-
 	if( triangulate && num_of_tris > 1 )
 	{
-
 		u64 index2;
 		u64 index3;
-
-		Polygon3D* new_polygon = nullptr;
-		for( u64 i = 0, sz = p->m_verts.size(); i < sz; ++i )
+		Polygon3D* new_polygon2 = nullptr;
+		for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz; ++i )
 		{
-			new_polygon = kkCreate<Polygon3D>();
-
+			new_polygon2 = kkCreate<Polygon3D>();
 			index2  = i+2;
 			index3  = index2 + 1;
 			if( index3 == sz )
 				index3 = 0;
 
 			V = kkCreate<Vertex>();
-			*V = *(Vertex*)p->m_verts[1];
+			*V = *(Vertex*)new_polygon->m_verts[1];
 			V->m_weld = weld;
-			new_polygon->addVertex( V );
+			new_polygon2->addVertex( V );
 
 			V = kkCreate<Vertex>();
-			*V = *(Vertex*)p->m_verts[index2];
+			*V = *(Vertex*)new_polygon->m_verts[index2];
 			V->m_weld = weld;
-			new_polygon->addVertex( V );
+			new_polygon2->addVertex( V );
 
 			V = kkCreate<Vertex>();
-			*V = *(Vertex*)p->m_verts[index3];
+			*V = *(Vertex*)new_polygon->m_verts[index3];
 			V->m_weld = weld;
-			new_polygon->addVertex( V );
+			new_polygon2->addVertex( V );
 
 			if( index3 == 0 )
 				break;
 
-			addPolygon(new_polygon, true, false, flip);
+			addPolygon(new_polygon2, true, false, flip);
 		}
 
-		kkDestroy(p);
-		p = new_polygon;
+		kkDestroy(new_polygon);
+		new_polygon = new_polygon2;
 	}
-
-	//p->m_vertsInds.clear();
-	//p->m_weld = weld;
-
-	// Полигон нужно сохранить в модели
-	m_polygons.push_back(p);
-
-	/*s32 free_verts_sz = (s32)m_free_verts.size();
-	s32 free_verts_i  = 0;*/
+	m_polygons.push_back(new_polygon);
 
 	// передаю вершины полигона в модель
-	// и даю полигонам индексы на вершины
-	
-	for( u64 i = 0, sz = p->m_verts.size() ; i < sz; ++i )
+	for( u64 i = 0, sz = new_polygon->m_verts.size() ; i < sz; ++i )
 	{
-		V = (Vertex*)p->m_verts[ i ];
+		V = (Vertex*)new_polygon->m_verts[ i ];
 
 		if( flip )
 		{
@@ -111,33 +101,62 @@ void PolygonalModel::addPolygon(Polygon3D* p, bool weld, bool triangulate, bool 
 			V->m_Normal_fix = V->m_Normal;
 		}
 
-		V->m_parentPolygon = p;
-
-		//if( free_verts_i < free_verts_sz )
-		//{
-		//	auto ind = m_free_verts[0];
-		//	m_free_verts.erase(0);
-		//	m_verts[ ind ] = V;
-		//	//p->m_vertsInds.push_back( ind );
-		//	++free_verts_i;
-		//}
-		//else
-		//{
-		//	//p->m_vertsInds.push_back( (u32)m_verts.size() );
-		//	m_verts.push_back( V );
-		//}
+		V->m_parentPolygon = new_polygon;
 		m_verts.push_back( V );
-
-
 	}
 	if( flip )
 	{
-		for( u64 i = 0, sz = p->m_verts.size(); i < sz/2; ++i )
+		for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz/2; ++i )
 		{
-			auto v = p->m_verts[ i ];
+			auto v = new_polygon->m_verts[ i ];
 			auto index = sz - (1+i);
-			p->m_verts[ i ] = p->m_verts[ index ];
-			p->m_verts[ index ] = v;
+			new_polygon->m_verts[ i ] = new_polygon->m_verts[ index ];
+			new_polygon->m_verts[ index ] = v;
+		}
+	}
+}
+
+void PolygonalModel::_findNeighbors()
+{
+	// добавляю соседей
+	// позиция, все_полигоны_имеющие_вершину_с_данной_позицией
+	m_neighbor_map.clear();
+	ControlVertexHash h;
+	for( u64 o = 0, osz = m_polygons.size(); o < osz; ++o )
+	{
+		auto P = (Polygon3D*)m_polygons[o];
+		P->m_neighbors.clear();
+		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
+		{
+			Vertex* V = (Vertex*)P->m_verts[i];
+			if(!V->m_weld)
+			{
+				//printf("Not weld\n");
+				continue;
+			}
+
+			h.set(&V->m_Position);
+			if( m_neighbor_map.find(h.str) == m_neighbor_map.end() ) // not found
+			{
+				m_neighbor_map[ h.str ] = kkArray<Polygon3D*>(4);
+			}
+			auto & arr = m_neighbor_map[ h.str ];
+			arr.push_back(P);
+		}
+	}
+	for(auto & N : m_neighbor_map)
+	{
+		for( u64 i = 0, sz = N.second.size(); i < sz; ++i )
+		{
+			Polygon3D* current_polygon = N.second[i];
+			for( u64 i2 = 0; i2 < sz; ++i2 )
+			{
+				Polygon3D* P = N.second[i2];
+				if(P==current_polygon)
+					continue;
+
+				P->m_neighbors.insert(current_polygon);
+			}
 		}
 	}
 }
@@ -161,115 +180,68 @@ kkPolygon* PolygonalModel::getPolygon(u64 i)const
 	return m_polygons[i];
 }
 
-bool PolygonalModel::_isNeedToWeld(ControlVertex* cv, Vertex* V, f32 len)
-{
-	//auto & vertInds = cv->getVertInds(); // получу индексы на m_verts
-	//auto firstV = (Vertex*)m_verts[vertInds[0]];  // должно быть достаточно первой вершины
-	auto & verts = cv->getVerts();
-	auto firstV = (Vertex*)verts[0];  // должно быть достаточно первой вершины
-					
-	if( V->m_Position.distance(firstV->m_Position) > len ) return false;
+//bool PolygonalModel::_isNeedToWeld(ControlVertex* cv, Vertex* V, f32 len)
+//{
+//	auto & verts = cv->getVerts();
+//	auto firstV = (Vertex*)verts[0];  // должно быть достаточно первой вершины
+//					
+//	if( V->m_Position.distance(firstV->m_Position) > len ) return false;
+//
+//	return true;
+//}
 
-	return true;
-}
-// здесь будет вычисление контрольных точек.
 void PolygonalModel::createControlPoints()
 {
+	_findNeighbors();
+
+	// сначала надо удалить старые контрольные точки
 	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
 	{
 		kkDestroy( m_controlPoints[ i ] );
 	}
 	m_controlPoints.clear();
 
-	
-	ControlVertexHash h;
 	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
 		Polygon3D * P = (Polygon3D *)m_polygons[ i ];
-		P->m_controlVerts.clear();
-
-		// прохожусь по вершинам полигона.
-		// смотрю, нужно ли сунуть вершину в уже существующий controlVertex,
-		//  или нужно создать новый
 		for( u64 k = 0, ksz = P->m_verts.size(); k < ksz; ++k )
 		{
-			Vertex* V = (Vertex*)P->m_verts[k]; // получение самой вершины
-
-			h.set(&V->m_Position);
-			ControlVertex * cv = nullptr;
-
-			if( V->m_weld )
+			ControlVertex* CV = nullptr;
+			Vertex* V1 = (Vertex*)P->m_verts[k];
+			// беру вершину и делаю поиск вершины с такой же позицией в списке соседних полигонов
+			if(V1->m_weld)
 			{
-				if( m_map.find(h.str) == m_map.end() )
+				for( auto NP : P->m_neighbors )
 				{
-					cv = kkCreate<ControlVertex>();
-					m_controlPoints.push_back(cv);
-					//cv->m_index = (u32)m_controlPoints.size()-1;
-					cv->m_verts.push_back(V);
-					m_map[ h.str ] = cv;
-				}
-				else
-				{
-					cv = m_map[ h.str ];
-
-					bool create_new_CV = false;
-					for( u64 o = 0, osz = cv->m_verts.size(); o < osz; ++o )
+					for( u64 k2 = 0, ksz2 = NP->m_verts.size(); k2 < ksz2; ++k2 )
 					{
-						Vertex* vertex = (Vertex*)cv->m_verts[o];
-						if( vertex->m_parentPolygon == P )
+						Vertex* V2 = (Vertex*)NP->m_verts[k2];
+						if(V2->m_weld)
 						{
-							create_new_CV = true;
-							break;
-						}
-					}
-					if(!create_new_CV)
-					{
-						for(auto N : P->m_neighbors)
-						{
-							for( u64 o = 0, osz = cv->m_verts.size(); o < osz; ++o )
+							if(V2->m_Position == V1->m_Position)
 							{
-								Vertex* vertex = (Vertex*)cv->m_verts[o];
-								if( vertex->m_parentPolygon == N )
+								if(V2->m_controlVertex)
 								{
-									create_new_CV = true;
-									goto end;
+									CV = V2->m_controlVertex;
+									goto end_v;
 								}
 							}
 						}
-						end:;
-					}
-
-					if(create_new_CV)
-					{
-						cv = kkCreate<ControlVertex>();
-						m_controlPoints.push_back(cv);
-						//cv->m_index = (u32)m_controlPoints.size()-1;
-						cv->m_verts.push_back(V);
-					}
-					else
-					{
-						cv->m_verts.push_back(V);
 					}
 				}
 			}
-			else
+			end_v:;
+			if(!CV)
 			{
-				// если не сваривать вершины друг с другом то это значит просто создаются контрольные вершины
-				cv = kkCreate<ControlVertex>();
-				m_controlPoints.push_back(cv);
-				//cv->m_index = (u32)m_controlPoints.size()-1;
-				cv->m_verts.push_back(V);
-				m_map[ h.str ] = cv;
+				CV = kkCreate<ControlVertex>();
+				m_controlPoints.push_back(CV);
 			}
-			cv->m_faceNormal += P->m_facenormal;
-			V->m_controlVertex = cv;
-			P->m_controlVerts.push_back(cv);
+			CV->m_verts.push_back(V1);
+			V1->m_controlVertex = CV;
+			CV->m_faceNormal += P->m_facenormal;
 		}
-		P->m_neighbors.clear();
 	}
-	m_map.clear();
 
-	
 	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
 	{
 		auto CV = (ControlVertex*)m_controlPoints[i];
@@ -277,15 +249,6 @@ void PolygonalModel::createControlPoints()
 		CV->m_faceNormal.normalize2();
 	}
 
-	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
-	{
-		Polygon3D * P = (Polygon3D *)m_polygons[ i ];
-		for( u64 k = 0, ksz = P->m_verts.size(); k < ksz; ++k )
-		{
-			Vertex* V = (Vertex*)P->m_verts[k];
-			P->m_neighbors.insert(V->m_parentPolygon);
-		}
-	}
 	_createEdges();
 }
 
@@ -385,8 +348,6 @@ void PolygonalModel::generateNormals(bool flat)
 
 		for( u64 i2 = 0; i2 < sz2; ++i2 )
 		{
-			//auto V_id       = CV->m_vertexIndex[i2];
-			//auto vertex     = (Vertex*)m_verts[ V_id ];
 			auto vertex     = (Vertex*)CV->m_verts[i2];
 		
 			N += vertex->m_Normal;
@@ -398,6 +359,7 @@ void PolygonalModel::generateNormals(bool flat)
 		for( u64 i2 = 0; i2 < sz2; ++i2 )
 		{
 			auto vertex     = (Vertex*)CV->m_verts[i2];
+		
 			vertex->m_Normal = N;
 		}
 	}
@@ -405,53 +367,31 @@ void PolygonalModel::generateNormals(bool flat)
 
 void PolygonalModel::deleteMarkedPolygons()
 {
-	// удалить полигоны
-	u64 numOfPolys = 0;
-	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
+	kkArray<kkPolygon*>     old_polygons      = kkArray<kkPolygon*>(0xffff);
+	old_polygons = m_polygons;
+
+	m_polygons.clear();
+
+	for( auto p : old_polygons )
 	{
-		Polygon3D * P = (Polygon3D *)m_polygons[i];
-		if(P->IsToDelete())
+		Polygon3D * p3d = (Polygon3D *)p;
+
+		if( !p3d->m_toDelete )
 		{
-			for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
-			{
-				((Vertex*)P->m_verts[i])->m_isToDelete = true;
-			}
-			kkDestroy(P);
-			m_polygons[i] = nullptr;
+			m_polygons.push_back( p3d );
 		}
 		else
 		{
-			++numOfPolys;
+			for( u64 i = 0, sz = p3d->m_verts.size(); i < sz; ++i )
+			{
+				((Vertex*)p3d->m_verts[i])->m_isToDelete = true;
+			}
+			kkDestroy( p );
 		}
 	}
 
-	// обновить массив с полигонами
 	bool start = false;
-	for( u64 i = 0, A = 0, sz = m_polygons.size(); i < sz; ++i )
-	{
-		auto P = m_polygons[i];
-		if(!P)
-		{
-			if(!start)
-			{
-				start = true;
-				A = i;
-			}
-		}
-		else
-		{
-			if(start)
-			{
-				m_polygons[A] = P;
-				++A;
-			}
-		}
-	}
-	m_polygons.setSize(numOfPolys);
-
-	// удалить ненужные вершины и обновить массив с вершинами
 	u64 numOfVerts = 0;
-	start = false;
 	for( u64 i = 0, A = 0, sz = m_verts.size(); i < sz; ++i )
 	{
 		auto V = (Vertex*)m_verts[i];
@@ -463,18 +403,12 @@ void PolygonalModel::deleteMarkedPolygons()
 				A = i;
 			}
 
-			// обновление контрольных вершин
-			if(V->m_controlVertex->m_verts.size() == 1)
-			{
-				V->m_controlVertex->m_toDelete = true;
-			}
-			V->m_controlVertex->m_verts.erase_first(V);
-			
 			kkDestroy(V);
 		}
 		else
 		{
 			++numOfVerts;
+
 			if(start)
 			{
 				m_verts[A] = V;
@@ -484,34 +418,6 @@ void PolygonalModel::deleteMarkedPolygons()
 	}
 	m_verts.setSize(numOfVerts);
 
-	// обновление контрольных вершин
-	start = false;
-	u64 numOfCVerts = 0;
-	for( u64 i = 0, A = 0, sz = m_controlPoints.size(); i < sz; ++i )
-	{
-		auto CV = (ControlVertex*)m_controlPoints[i];
-		if(CV->m_toDelete)
-		{
-			if(!start)
-			{
-				start = true;
-				A = i;
-			}
-
-			kkDestroy(CV);
-		}
-		else
-		{
-			++numOfCVerts;
-			if(start)
-			{
-				m_controlPoints[A] = CV;
-				++A;
-			}
-		}
-	}
-	m_controlPoints.setSize(numOfCVerts);
-	this->_createEdges();
 	calculateTriangleCount();
 }
 
@@ -1024,42 +930,7 @@ void PolygonalModel::rayTestGrid( std::vector<kkTriangleRayTestResult>& outTrian
 	}
 }
 
-//void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
-//{
-//	auto TIM = matrix_other;
-//	TIM.invert();
-//	TIM.transpose();
-//
-//	auto old_size = m_verts.size();
-//
-//	m_verts.reserve(old_size + other->m_verts.size());
-//	for( u64 i = 0, sz = other->m_verts.size(); i < sz; ++i )
-//	{
-//		m_verts.push_back(other->m_verts[i]);
-//	}
-//	
-//	for( auto P : other->m_polygons )
-//	{
-//		auto polygon = (Polygon3D*)P;
-//		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
-//		{
-//			auto V = (Vertex*)polygon->m_verts[i];
-//			
-//			//polygon->m_vertsInds[i] += old_size;
-//
-//			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
-//			V->m_Normal_fix = V->m_Normal;
-//
-//			V->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
-//			V->m_Position	= math::mul(V->m_Position, invertMatrix) ;
-//			V->m_Position_fix = V->m_Position;
-//		}
-//		m_polygons.push_back(polygon);
-//	}
-//	other->m_verts.clear();
-//	other->m_polygons.clear();
-//}
-void PolygonalModel::attachObject(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
+void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
 {
 	auto TIM = matrix_other;
 	TIM.invert();
@@ -1079,6 +950,8 @@ void PolygonalModel::attachObject(PolygonalModel* other, const kkMatrix4& invert
 		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
 		{
 			auto V = (Vertex*)polygon->m_verts[i];
+			
+			//polygon->m_vertsInds[i] += old_size;
 
 			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
 			V->m_Normal_fix = V->m_Normal;
@@ -1091,14 +964,6 @@ void PolygonalModel::attachObject(PolygonalModel* other, const kkMatrix4& invert
 	}
 	other->m_verts.clear();
 	other->m_polygons.clear();
-
-	for( u64 i = 0, sz = other->m_controlPoints.size(); i < sz; ++i )
-	{
-		m_controlPoints.push_back(other->m_controlPoints[i]);
-	}
-	other->m_controlPoints.clear();
-
-	_createEdges();
 }
 
 void PolygonalModel::_deleteEdges()
@@ -1127,12 +992,12 @@ void PolygonalModel::_createEdges()
 		auto polygon = (Polygon3D *)m_polygons.at(i);
 
 		// беру полигон. прохожусь по вершинам. беру контрольные точки. текущую и следующую. это должно быть ребром
-		for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
+		for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 		{
 			u64 o2 = o + 1;
 			if(o2 == sz2) o2=0;
-			auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
-			auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
+			auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
+			auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 			
 			// нужно определить контрольную вершину с адресом, значение которого меньше чем у другой вершины
 			ControlVertex* cv_first  = cv1;
@@ -1210,125 +1075,22 @@ void PolygonalModel::_createEdges()
 	}
 }
 
-bool PolygonalModel::deleteSelectedVerts()
+void PolygonalModel::updateCVForPolygonSelect()
 {
-	bool result = false;
 	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
 	{
-		auto cv = (ControlVertex*)m_controlPoints[ i ];
-		if( cv->m_isSelected )
-		{
-			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
-			{
-				auto vertex = (Vertex*)cv->m_verts[i2];
-
-				vertex->m_parentPolygon->MarkToDelete();
-				result = true;
-			}
-		}
+		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		cv->m_isSelected_poly = false;
 	}
-	if(result)
-	{
-		deleteMarkedPolygons();
-	}
-	return result;
-}
-
-bool PolygonalModel::deleteSelectedEdges()
-{
-	bool result = false;
-	for(u64 i = 0, sz = m_edges.size(); i < sz; ++i )
-	{
-		auto E = m_edges[i];
-		
-		for( auto ECV : E->m_firstPoint->m_edgeWith )
-		{
-			if( ECV == E->m_secondPoint )
-			{
-				m_polygons[ E->m_polygonIndex[0] ]->MarkToDelete();
-				if(E->m_polygonIndex[1] != 0xffffffffffffffff)
-				{
-					m_polygons[ E->m_polygonIndex[1] ]->MarkToDelete();
-				}
-				result = true;
-				break;
-			}
-		}
-	}
-	if(result)
-	{
-		deleteMarkedPolygons();
-	}
-	return result;
-}
-
-bool PolygonalModel::deleteSelectedPolys()
-{
-	bool result = false;
 	for(u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
 		auto polygon = (Polygon3D *)m_polygons.at(i);
 		if(polygon->m_isSelected)
 		{
-			polygon->MarkToDelete();
-			result = true;
-		}
-	}
-	if(result)
-	{
-		deleteMarkedPolygons();
-	}
-	return result;
-}
-
-void PolygonalModel::breakVerts()
-{
-	kkArray<ControlVertex*> new_cvs = kkArray<ControlVertex*>(0xff);
-
-	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
-	{
-		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
-		if(cv->m_isSelected)
-		{
-			cv->m_isSelected = false;
-			auto first_vertex  = (Vertex*)cv->m_verts[0];
-
-			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
+			for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 			{
-				auto vertex  = (Vertex*)cv->m_verts[i2];
-				vertex->m_weld = false;
-
-				//если есть ещё вершины, то нужно создать новые контрольные вершины
-				// надо обратить внимание на указание родительских вершин в полигонах и т.д.
-				if(i2 > 0)
-				{
-					ControlVertex * new_cv = kkCreate<ControlVertex>();
-					new_cvs.push_back(new_cv);
-					new_cv->m_verts.push_back(vertex);
-					vertex->m_controlVertex = new_cv;
-					for(size_t i3 = 0, sz3 = vertex->m_parentPolygon->m_controlVerts.size(); i3 < sz3; ++i3)
-					{
-						auto CVinP = (ControlVertex*)vertex->m_parentPolygon->m_controlVerts[i3];
-						if(CVinP == cv)
-						{
-							vertex->m_parentPolygon->m_controlVerts[i3] = new_cv;
-							break;
-						}
-					}
-				}
+				((Vertex*)polygon->m_verts[o])->m_controlVertex->m_isSelected_poly = true;
 			}
-
-			// при разбиении контрольная вершина хранит только 1 реальную вершину
-			cv->m_verts.clear();
-			cv->m_verts.push_back(first_vertex);
 		}
 	}
-
-	for( size_t i = 0, sz = new_cvs.size(); i < sz; ++i )
-	{
-		m_controlPoints.push_back(new_cvs[i]);
-	}
-
-	_createEdges();
 }
-

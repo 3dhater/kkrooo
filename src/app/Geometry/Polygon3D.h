@@ -17,8 +17,6 @@ struct Edge
 	ControlVertex* m_secondPoint = nullptr;
 
 	// ребро может быть как на одном полигоне так и на двух
-	//u64 m_firstPolygonIndex  = 0;
-	//u64 m_secondPolygonIndex = -1;
 	u64 m_polygonIndex[2] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
 };
 //struct Edge
@@ -29,13 +27,7 @@ public:
 	Polygon3D();
 	virtual ~Polygon3D();
 
-	//kkVertex* getVertex( u32 );
-	//u32     getVertexCount();
-
-	//kkArray<u32>& GetVertInds();
 	kkArray<kkVertex*>& GetVerts();
-
-	kkArray<kkControlVertex*>& GetControlVerts();
 	void MarkToDelete();
 	void RemoveMarkToDelete();
 	bool IsToDelete();
@@ -49,10 +41,6 @@ public:
 
 	// необходимо передать эти вершины в модель, попутно заполняя m_verts
 	kkArray<kkVertex*> m_verts = kkArray<kkVertex*>(4);
-	//kkArray<u32> m_vertsInds  = kkArray<u32>(4);
-
-	//kkArray<u32> m_controlVertsInds  = kkArray<u32>(4); // возможно лучше передать не индекс а адрес
-	kkArray<kkControlVertex*> m_controlVerts  = kkArray<kkControlVertex*>(4); // возможно лучше передать не индекс а адрес
 
 	void      addVertex(Vertex*v);
 
@@ -61,9 +49,7 @@ public:
 	bool m_toDelete = false;
 	bool m_isSelected = false;
 
-	// используется при создании модели
-	//bool m_weld = false;
-
+	// при редактировании нужно следить за соседями
 	std::unordered_set<Polygon3D*> m_neighbors;
 
 	kkVector4 m_facenormal;

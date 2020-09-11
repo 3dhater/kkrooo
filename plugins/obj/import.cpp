@@ -119,7 +119,6 @@ extern "C"
 					if( importData->fix_generate_normals )
 						generate_normals = true;
 
-					std::string hash;
 					std::unordered_map<std::string,u32> map;
 					bool weld = false;
 
@@ -216,12 +215,8 @@ extern "C"
 								}
 
 								{
-									u8* i_ptr = (u8*)&pos_index;
-									hash.clear();
-									hash += *i_ptr; ++i_ptr;
-									hash += *i_ptr; ++i_ptr;
-									hash += *i_ptr; ++i_ptr;
-									hash += *i_ptr;
+									std::string hash;
+									hash += pos_index;
 
 									// это я не помню зачем сделал
 									// когда дойду до control вершин, станет ясно зачем это здесь

@@ -285,12 +285,12 @@ void Scene3D::_selectObjectsByRectangle_object( std::basic_string<Scene3DObject*
 		for(u64 i = 0, sz = obj->m_PolyModel->m_polygons.size(); i < sz; ++i )
 		{
 			auto polygon = (Polygon3D *)obj->m_PolyModel->m_polygons.at(i);
-			for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
+			for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 			{
 				u64 o2 = o + 1;
 				if(o2 == sz2) o2=0;
-				auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
-				auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
+				auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
+				auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 				auto V1 = cv1->m_verts[0];
 				auto V2 = cv2->m_verts[0];
 				if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
@@ -357,12 +357,12 @@ void Scene3D::_selectObjectsByRectangle_poly( const SelectionFrust& frust )
 		for(u64 i = 0, sz = obj->m_PolyModel->m_polygons.size(); i < sz; ++i )
 		{
 			auto polygon = (Polygon3D *)obj->m_PolyModel->m_polygons.at(i);
-			for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
+			for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 			{
 				u64 o2 = o + 1;
 				if(o2 == sz2) o2=0;
-				auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
-				auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
+				auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
+				auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 
 				auto V1 = cv1->m_verts[0];
 				auto V2 = cv2->m_verts[0];
@@ -373,26 +373,12 @@ void Scene3D::_selectObjectsByRectangle_poly( const SelectionFrust& frust )
 
 					if( ks == AppState_keyboard::Alt )
 					{
-						
 						polygon->Deselect();
-						for(auto KKCV : polygon->m_controlVerts)
-						{
-							auto CV = (ControlVertex*)KKCV;
-							--CV->m_selectedPolysCounter;
-							if( CV->m_selectedPolysCounter == 0 )
-								CV->m_isSelected_poly = false;
-						}
 					}
 					else
 					{
 						obj->m_isObjectHaveSelectedPolys = true;
 						polygon->Select();
-						for(auto KKCV : polygon->m_controlVerts)
-						{
-							auto CV = (ControlVertex*)KKCV;
-							++CV->m_selectedPolysCounter;
-							CV->m_isSelected_poly = true;
-						}
 					}
 					goto next_polygon;
 				}
@@ -447,24 +433,11 @@ void Scene3D::_selectObjectsByRectangle_poly( const SelectionFrust& frust )
 						{
 
 							polygon->Deselect();
-							for(auto KKCV : polygon->m_controlVerts)
-							{
-								auto CV = (ControlVertex*)KKCV;
-								--CV->m_selectedPolysCounter;
-								if( CV->m_selectedPolysCounter == 0 )
-									CV->m_isSelected_poly = false;
-							}
 						}
 						else
 						{
 							obj->m_isObjectHaveSelectedPolys = true;
 							polygon->Select();
-							for(auto KKCV : polygon->m_controlVerts)
-							{
-								auto CV = (ControlVertex*)KKCV;
-								++CV->m_selectedPolysCounter;
-								CV->m_isSelected_poly = true;
-							}
 						}
 					}
 
@@ -476,6 +449,7 @@ void Scene3D::_selectObjectsByRectangle_poly( const SelectionFrust& frust )
 
 		if( need_update )
 		{
+			obj->m_PolyModel->updateCVForPolygonSelect();
 			obj->updatePolygonModel();
 
 			_updateSelectionAabb_polygon();
@@ -498,12 +472,12 @@ void Scene3D::_selectObjectsByRectangle_edge( const SelectionFrust& frust )
 		{
 			auto polygon = (Polygon3D *)obj->m_PolyModel->m_polygons.at(i);
 
-			for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
+			for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 			{
 				u64 o2 = o + 1;
 				if(o2 == sz2) o2=0;
-				auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
-				auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
+				auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
+				auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 
 				auto V1 = cv1->m_verts[0];
 				auto V2 = cv2->m_verts[0];
@@ -735,12 +709,12 @@ void Scene3D::_selectAll_edge(Scene3DObject* object)
 	for(u64 i = 0, sz = object->m_PolyModel->m_polygons.size(); i < sz; ++i )
 	{
 		auto polygon = (Polygon3D *)object->m_PolyModel->m_polygons.at(i);
-		for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
+		for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 		{
 			u64 o2 = o + 1;
 			if(o2 == sz2) o2=0;
-			auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
-			auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
+			auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
+				auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 
 			cv1->m_edgeWith.push_back(cv2); 
 			cv2->m_edgeWith.push_back(cv1);
@@ -763,15 +737,9 @@ void Scene3D::_selectAll_poly(Scene3DObject* object)
 		auto P = polys[i];
 		P->Select();
 			
-		auto & cverts = P->GetControlVerts();
-		for( auto cv : cverts )
-		{
-			auto CV = (ControlVertex*)cv;
-			CV->m_isSelected_poly = true;
-			++CV->m_selectedPolysCounter;
-		}
 	}
 
+	object->m_PolyModel->updateCVForPolygonSelect();
 	object->updatePolygonModel();
 	object->m_isObjectHaveSelectedPolys = true;
 
@@ -908,15 +876,9 @@ void Scene3D::_selectInvert_poly(Scene3DObject* object)
 	{
 		object->m_isObjectHaveSelectedPolys = true;
 		P->Select();
-		auto & cverts = P->GetControlVerts();
-		for( u64 i = 0, sz = cverts.size(); i < sz; ++i )
-		{
-			auto CV = (ControlVertex*)cverts[i];
-			++CV->m_selectedPolysCounter;
-			CV->m_isSelected_poly = true;
-		}
 	}
 
+	object->m_PolyModel->updateCVForPolygonSelect();
 	object->updatePolygonModel();
 	
 
@@ -934,12 +896,12 @@ void Scene3D::_selectInvert_edge(Scene3DObject* object)
 	for(u64 i = 0, sz = object->m_PolyModel->m_polygons.size(); i < sz; ++i )
 	{
 		auto polygon = (Polygon3D *)object->m_PolyModel->m_polygons.at(i);
-		for( u64 o = 0, sz2 = polygon->m_controlVerts.size(); o < sz2; ++o )
+		for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
 		{
 			u64 o2 = o + 1;
 			if(o2 == sz2) o2=0;
-			auto cv1 = (ControlVertex*)polygon->m_controlVerts[o];
-			auto cv2 = (ControlVertex*)polygon->m_controlVerts[o2];
+			auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
+			auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 
 			if( std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2) == cv1->m_edgeWith.end() )
 				pairs.emplace_back(std::pair<ControlVertex*, ControlVertex*>(cv1, cv2));
@@ -2185,6 +2147,8 @@ void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* ca
 			if(CV->isSelected())
 			{
 				object->m_isObjectHaveSelectedVerts = true;
+				//auto vvv = (Vertex*)(((ControlVertex*)CV)->m_verts[0]);
+				//printf("%f %f %f\n", vvv->m_Position._f32[0], vvv->m_Position._f32[1], vvv->m_Position._f32[2]);
 				break;
 			}
 		}
@@ -2319,19 +2283,19 @@ bool Scene3D::selectEdges(/*CursorRay* cursorRay, */kkRay* ray/*, int depth*/)
 	{
 		auto & result = results[o];
 		auto & verts = result.m_object->GetVertexArray();
-		//auto & cverts = result.m_object->GetControlVertexArray();
+		auto & cverts = result.m_object->GetControlVertexArray();
 		auto firstPolygon = result.m_object->GetPolygon( result.m_polygonIndex );
-		auto & cvs = firstPolygon->GetControlVerts();
+		auto & Pvs = firstPolygon->GetVerts();
 		auto pivot = result.m_object->GetPivot();
 		auto & M = result.m_object->GetMatrix();
 
-		for( u64 i = 0, sz = cvs.size(); i < sz; ++i )
+		for( u64 i = 0, sz = Pvs.size(); i < sz; ++i )
 		{
 			u64 i2 = i + 1;
 			if(i2 == sz) i2=0;
 
-			auto cv1 = (ControlVertex*)cvs[ i ] ;
-			auto cv2 = (ControlVertex*)cvs[ i2 ] ;
+			auto cv1 = (ControlVertex*)((Vertex*)Pvs[i])->m_controlVertex;
+			auto cv2 = (ControlVertex*)((Vertex*)Pvs[i2])->m_controlVertex;
 
 			auto v1 = (Vertex*)cv1->m_verts[0];
 			auto v2 = (Vertex*)cv2->m_verts[0];
@@ -2395,19 +2359,12 @@ bool Scene3D::selectEdges(/*CursorRay* cursorRay, */kkRay* ray/*, int depth*/)
 void Scene3D::_deselectAll_poly(Scene3DObject* object)
 {
 	auto & cverts = object->GetControlVertexArray();
-	for( u64 i = 0, sz = cverts.size(); i < sz; ++i )
-	{
-		auto CV = (ControlVertex*)cverts[i];
-		if(CV->m_isSelected_poly)
-			CV->m_isSelected_poly = false;
-		CV->m_selectedPolysCounter = 0;
-	}
-		
 	auto & polys = object->GetPolygonArray();
 	for( u64 i = 0, sz = polys.size(); i < sz; ++i )
 	{
 		polys[i]->Deselect();
 	}
+	object->m_PolyModel->updateCVForPolygonSelect();
 
 	object->updatePolygonModel();
 	object->m_isObjectHaveSelectedPolys = false;
@@ -2465,44 +2422,28 @@ void Scene3D::selectPolygons(kkRay* ray)
 		deselectAll();
 
 	auto object = (Scene3DObject*)result[0].m_object;
-	auto firstPolygon = result[0].m_object->GetPolygon( result[0].m_polygonIndex );
-	auto & cverts = firstPolygon->GetControlVerts();
-	//auto & cverts  = result[0].m_object->GetControlVertexArray();
+	auto firstPolygon = object->GetPolygon( result[0].m_polygonIndex );
+	auto & Pvs = firstPolygon->GetVerts();
+	auto & cverts  = result[0].m_object->GetControlVertexArray();
 
-	object->m_isObjectHaveSelectedPolys = false;
 	if( ks == AppState_keyboard::Alt )
 	{
-		for( u64 i = 0, sz = cverts.size(); i < sz; ++i )
-		{
-			auto CV = ((ControlVertex*)cverts[i]);
-			
-			--CV->m_selectedPolysCounter;
-
-			// больше нет полигонов которые бы работали с этой вершиной
-			// значит можно снять выделение
-			if( CV->m_selectedPolysCounter == 0 )
-				CV->m_isSelected_poly = false;
-			//CV->m_selectedPolys.erase();
-		}
 		firstPolygon->Deselect();
 	}
 	else
 	{
-		for( u64 i = 0, sz = cverts.size(); i < sz; ++i )
-		{
-			auto CV = ((ControlVertex*)cverts[i]);
-			CV->m_isSelected_poly = true;
-
-			// когда выделяется полигон, нужно дать знать контрольной вершине что это было сделано
-			// это даст возможность трансформировать вершину(это-же сделано и с рёбрами)
-			// если выбрано 2 полигона, имеющих общую вершину, то при снятии выделения одного, приведёт к потере возможности трансформации
-			// по этому вершина должна хранить индексы полигонов. возможно проще добавить счётчик
-			//CV->m_selectedPolys.emplace_back(result[0].m_polygonIndex);
-			++CV->m_selectedPolysCounter;
-		}
 		firstPolygon->Select();
-		object->m_isObjectHaveSelectedPolys = true;
 	}
+	object->m_isObjectHaveSelectedPolys = false;
+	for(auto P : object->m_PolyModel->m_polygons)
+	{
+		if(P->IsSelected())
+		{
+			object->m_isObjectHaveSelectedPolys = true;
+			break;
+		}
+	}
+	object->m_PolyModel->updateCVForPolygonSelect();
 	((Scene3DObject*)result[0].m_object)->updatePolygonModel();
 	
 	_updateSelectionAabb_polygon();

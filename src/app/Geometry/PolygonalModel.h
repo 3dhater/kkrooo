@@ -188,10 +188,17 @@ struct GridAcceleratorRow
 	kkArray<GridAcceleratorCell*> m_cells;
 };
 
+//struct PolygonNeighbors
+//{
+//	Polygon3D * m_polygon;
+//	std::unordered_set<Polygon3D*> m_neighbors;
+//};
 
 class ControlVertex;
 class PolygonalModel
 {
+	void _findNeighbors();
+	std::unordered_map<std::string,kkArray<Polygon3D*>> m_neighbor_map;
 	std::unordered_map<std::string,ControlVertex*> m_map;
 
 	u32 m_triangleCount = 0;
@@ -201,7 +208,7 @@ class PolygonalModel
 	kkVector4 m_aabbRayTestE2[12];
 	kkVector4 m_aabbRayTestV0[12];
 
-	bool _isNeedToWeld(ControlVertex* cv, Vertex* V, f32 len);
+	//bool _isNeedToWeld(ControlVertex* cv, Vertex* V, f32 len);
 	bool _intersectBVHNode(BVH_node* node, const kkRay& ray);
 	void rayTestBVH( BVH_node* node, std::vector<kkTriangleRayTestResult>& outTriangle, const kkRay& ray, 
 	kkMaterialImplementation* renderObjectMaterial );
@@ -233,8 +240,6 @@ public:
 
 	// те указатели которые нужно будет потом kkDestroy
 	kkArray<kkVertex*>    m_verts         = kkArray<kkVertex*>(0xffff);      // вершины со всех полигонов
-	//kkArray<u64>          m_free_verts    = kkArray<u64>(0xffff); // индексы в m_verts на свободные ячейки
-
 
 	kkArray<kkPolygon*>       m_polygons      = kkArray<kkPolygon*>(0xffff);
 	kkArray<kkControlVertex*> m_controlPoints = kkArray<kkControlVertex*>(0xffff);
@@ -256,13 +261,9 @@ public:
 
 	void weldByLen(f32 len);
 
-	//void addModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
-	void attachObject(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
+	void addModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
 
-	bool deleteSelectedVerts();
-	bool deleteSelectedEdges();
-	bool deleteSelectedPolys();
-	void breakVerts();
+	void updateCVForPolygonSelect();
 };
 
 #endif

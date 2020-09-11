@@ -19,10 +19,15 @@ kkArray<kkVertex*>& Polygon3D::GetVerts()
 	return m_verts;
 }
 
-kkArray<kkControlVertex*>& Polygon3D::GetControlVerts()
-{
-	return m_controlVerts;
-}
+//kkArray<u32>& Polygon3D::GetVertInds()
+//{
+//	return m_vertsInds;
+//}
+
+//kkArray<u32>& Polygon3D::GetControlVertInds()
+//{
+//	return m_controlVertsInds;
+//}
 
 void      Polygon3D::addVertex(Vertex*v)
 {

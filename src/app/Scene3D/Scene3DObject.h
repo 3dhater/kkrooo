@@ -432,6 +432,7 @@ public:
 	void ChangePivotPosition(const kkVector4& position);
 	void SelecVertsByAdd();
 	void SelecVertsBySub();
+	void SelecPolygonsByAdd();
 
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();
