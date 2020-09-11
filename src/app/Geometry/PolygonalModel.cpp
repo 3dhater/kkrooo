@@ -197,6 +197,12 @@ void PolygonalModel::createControlPoints()
 	// сначала надо удалить старые контрольные точки
 	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
 	{
+		auto CV = (ControlVertex*)m_controlPoints[ i ];
+		for( u64 k = 0, ksz = CV->m_verts.size(); k < ksz; ++k )
+		{
+			Vertex* V = (Vertex*)CV->m_verts[k];
+			V->m_controlVertex = nullptr;
+		}
 		kkDestroy( m_controlPoints[ i ] );
 	}
 	m_controlPoints.clear();
@@ -213,6 +219,8 @@ void PolygonalModel::createControlPoints()
 			{
 				for( auto NP : P->m_neighbors )
 				{
+					if(NP==P)
+						continue;
 					for( u64 k2 = 0, ksz2 = NP->m_verts.size(); k2 < ksz2; ++k2 )
 					{
 						Vertex* V2 = (Vertex*)NP->m_verts[k2];
