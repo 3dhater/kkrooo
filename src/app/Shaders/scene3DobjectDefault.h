@@ -59,10 +59,11 @@ public:
 		"uniform vec4 sunDir;\n"
 		"void main(){\n"
 		  "float lightIntensity = clamp(dot(normal, sunDir.xyz), 0.0f, 1.0f);\n"
-		  "color = texture(diffuseTexture,texCoord);\n"
-		  "color = color * clamp((diffuseColor*lightIntensity), 0.0f, 1.0f);\n"
-		  "if(vertColor.w > 1.f )\n"
-		  "color = vertColor;//color * vertColor;\n"
+		  "vec4 textureColor = texture(diffuseTexture,texCoord);\n"
+		  "color = textureColor * clamp((diffuseColor*lightIntensity), 0.0f, 1.0f);\n"
+		  "if(vertColor.w > 1.f ){\n"
+		  "color = clamp(vertColor+(textureColor*0.2f), 0.f, 1.f);//color * vertColor;\n"
+		  "}\n"
 		"}\n";
 
 	kkColor m_diffuseColor;

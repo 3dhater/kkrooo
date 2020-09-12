@@ -429,6 +429,20 @@ void connect_vertex(s32 id, void* data)
         scene->updateSelectionAabb();
     }
 }
+void select_add_edge(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->SelecEdgesByAdd();
+        object->UpdateAabb();
+	    scene->updateObjectEdgeSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
 void select_add_polygon(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -438,7 +452,7 @@ void select_add_polygon(s32 id, void* data)
     {
         object->SelecPolygonsByAdd();
         object->UpdateAabb();
-	    scene->updateObjectVertexSelectList();
+	    scene->updateObjectPolySelectList();
         scene->updateSceneAabb();
         scene->updateSelectionAabb();
     }
@@ -679,6 +693,13 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"Chamfer", v2f(60.f, 20.f), chamfer_vertex,0, kkPluginGUIParameterType::Vertex);
     m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
     g_EditPolyObjectsGUIElements.m_chamfer_vertex_len_element = m_edit_params_window->AddValueSelectorFloatLimit(0.0001f, 99999999.f, &g_EditPolyObjectsGUIElements.m_chamfer_vertex_len, 0.01f, true, v2f(110.f, 20.f), 0, kkPluginGUIParameterType::Vertex);
+    m_edit_params_window->EndGroup();
+
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->BeginGroup(u"Selection", true);
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->AddButton(u"+", v2f(20.f, 20.f), select_add_edge,0, kkPluginGUIParameterType::Edge);
     m_edit_params_window->EndGroup();
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Polygon);

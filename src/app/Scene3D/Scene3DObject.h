@@ -433,6 +433,7 @@ public:
 	void SelecVertsByAdd();
 	void SelecVertsBySub();
 	void SelecPolygonsByAdd();
+	void SelecEdgesByAdd();
 
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();

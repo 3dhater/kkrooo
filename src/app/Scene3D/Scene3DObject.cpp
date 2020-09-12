@@ -214,7 +214,7 @@ void Scene3DObject::_createSoftwareModel_polys()
 			{
 				if( polygon->m_isSelected )
 				{
-					color.set(1.f, 0.f, 0.f, 2.f);
+					color.set(0.8f, 0.f, 0.f, 2.f);
 				}
 			}
 
@@ -1495,12 +1495,55 @@ void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 	UpdateAabb();
 }
 
+void Scene3DObject::SelecEdgesByAdd()
+{
+	m_isObjectHaveSelectedEdges = false;
+	std::unordered_set<Edge*> edgesToSelect;
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(CV->m_isSelected_edge)
+		{
+			m_isObjectHaveSelectedEdges = true;
+
+			for( size_t o = 0, osz = CV->m_edges.size(); o < osz; ++o )
+			{
+				auto E = CV->m_edges[o];
+				if((E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge)
+					|| (!E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge)
+					|| (E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge) )
+				{
+					edgesToSelect.insert(E);
+				}
+			}
+		}
+	}
+	
+	for(auto E : edgesToSelect)
+	{
+		auto cv1 = E->m_firstPoint;
+		auto cv2 = E->m_secondPoint;
+		if( std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2) == cv1->m_edgeWith.end() )
+			cv1->m_edgeWith.push_back(cv2); 
+		if( std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1) == cv2->m_edgeWith.end() )
+			cv2->m_edgeWith.push_back(cv1);
+		cv1->m_isSelected_edge = true;
+		cv2->m_isSelected_edge = true;
+	}
+
+	if(edgesToSelect.size() > 0)
+	{
+		updateEdgeModel();
+	}
+}
+
 void Scene3DObject::SelecPolygonsByAdd()
 {
 	m_isObjectHaveSelectedPolys = false;
 	for(auto P : m_PolyModel->m_polygons)
 	{
-		m_isObjectHaveSelectedPolys = true;
+		if(P->IsSelected())
+			m_isObjectHaveSelectedPolys = true;
 	}
 	std::unordered_set<Polygon3D*> polygonsToSelect;
 	for( size_t i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
