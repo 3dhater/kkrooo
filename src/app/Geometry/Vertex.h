@@ -87,7 +87,7 @@ class ControlVertex : public kkControlVertex
 {
 public:
 	ControlVertex();
-	~ControlVertex();
+	virtual ~ControlVertex();
 
 
 	// индексы тех вершин, которые будут подчинены этой контрольной вершине

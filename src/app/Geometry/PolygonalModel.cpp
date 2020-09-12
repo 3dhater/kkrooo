@@ -17,12 +17,6 @@ PolygonalModel::~PolygonalModel()
 {
 	_deleteEdges();
 
-	/*for( u64  i = 0; i < m_polygonNeighbors.size(); ++i )
-	{
-		kkDestroy( m_polygonNeighbors[i] );
-	}
-	m_polygonNeighbors.clear();*/
-
 	for( u64  i = 0; i < m_polygons.size(); ++i )
 	{
 		kkDestroy( m_polygons[i] );
@@ -194,15 +188,14 @@ void PolygonalModel::createControlPoints()
 {
 	_findNeighbors();
 
+	for( u64 i = 0, sz = m_verts.size(); i < sz; ++i )
+	{
+		Vertex* V = (Vertex*)m_verts[i];
+		V->m_controlVertex = nullptr;
+	}
 	// сначала надо удалить старые контрольные точки
 	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
 	{
-		auto CV = (ControlVertex*)m_controlPoints[ i ];
-		for( u64 k = 0, ksz = CV->m_verts.size(); k < ksz; ++k )
-		{
-			Vertex* V = (Vertex*)CV->m_verts[k];
-			V->m_controlVertex = nullptr;
-		}
 		kkDestroy( m_controlPoints[ i ] );
 	}
 	m_controlPoints.clear();
@@ -938,7 +931,7 @@ void PolygonalModel::rayTestGrid( std::vector<kkTriangleRayTestResult>& outTrian
 	}
 }
 
-void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
+void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
 {
 	auto TIM = matrix_other;
 	TIM.invert();
@@ -958,8 +951,6 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
 		{
 			auto V = (Vertex*)polygon->m_verts[i];
-			
-			//polygon->m_vertsInds[i] += old_size;
 
 			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
 			V->m_Normal_fix = V->m_Normal;
@@ -967,6 +958,7 @@ void PolygonalModel::addModel(PolygonalModel* other, const kkMatrix4& invertMatr
 			V->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
 			V->m_Position	= math::mul(V->m_Position, invertMatrix) ;
 			V->m_Position_fix = V->m_Position;
+			V->m_controlVertex = nullptr;
 		}
 		m_polygons.push_back(polygon);
 	}

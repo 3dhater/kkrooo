@@ -407,7 +407,7 @@ void chamfer_vertex(s32 id, void* data)
     auto object = GetSelectedObject();
     if(object)
     {
-        //object->ChamferVerts(g_EditPolyObjectsGUIElements.m_chamfer_vertex_len, true);
+        object->ChamferVerts(g_EditPolyObjectsGUIElements.m_chamfer_vertex_len, true);
         object->UpdateAabb();
 	    scene->updateObjectVertexSelectList();
         scene->updateSceneAabb();

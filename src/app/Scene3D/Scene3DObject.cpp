@@ -51,7 +51,6 @@ Scene3DObject::Scene3DObject(kkScene3DObjectType t, PolygonalModel * m)
 
 Scene3DObject::~Scene3DObject()
 {
-
 	_destroyHardwareModels();
 	_destroySoftwareModels();
 	if( m_PolyModel )
@@ -1600,7 +1599,7 @@ void Scene3DObject::AttachObject(kkScene3DObject* object)
 		MI.invert();
 		
 		auto polyObject = (Scene3DObject*)object;
-		m_PolyModel->addModel(polyObject->m_PolyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
+		m_PolyModel->attachModel(polyObject->m_PolyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
 
 		m_PolyModel->createControlPoints();
 		this->_rebuildModel();
@@ -2133,6 +2132,8 @@ void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 	{
 		ControlVertex* m_base_cv = nullptr;
 		kkArray<Vertex*> m_verts = kkArray<Vertex*>(4); // for copy
+		kkVector4 m_cv_normal;
+		kkVector4 m_cv_position;
 	};
 	kkArray<_new_face*> new_faces = kkArray<_new_face*>(0xff);
 
@@ -2223,6 +2224,8 @@ void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 					{
 						_new_face * nf = new _new_face;
 						nf->m_base_cv = vertex->m_controlVertex;
+						nf->m_cv_normal = vertex->m_controlVertex->m_faceNormal;
+						nf->m_cv_position = vertex->m_controlVertex->m_verts[0]->getPosition();
 						nf_ptr = nf;
 						new_faces.push_back(nf);
 					}
@@ -2250,20 +2253,33 @@ void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 			Polygon3D* new_P = kkCreate<Polygon3D>();
 			new_polygons.push_back(new_P);
 
+			kkAabb aabb;
 			for( u64 k = 0, ksz = nf->m_verts.size(); k < ksz; ++k )
 			{
 				Vertex* new_vertex = kkCreate<Vertex>();
 				new_vertex->set(nf->m_verts[k]);
 				new_vertex->m_parentPolygon = new_P;
 				new_P->addVertex(new_vertex);
+				aabb.add(new_vertex->m_Position);
 			}
 			
 			new_P->CalculateNormals();
-			/*if(  )
+
+			kkVector4 P0 = nf->m_cv_position;
+			kkVector4 P1;
+			aabb.center(P1);
+			kkVector4 N0 = nf->m_cv_normal + P0;
+			kkVector4 N1 = new_P->m_facenormal + P1;
+			kkVector4 delta = P1 - P0;
+			f32 dp0 = delta.dot(N0);
+			f32 dp1 = delta.dot(N1);
+
+			//printf("%f %f\n", dp0, dp1);
+			if( dp0 < 0.f && dp1 > 0.f )
 			{
 				new_P->Flip();
 				new_P->CalculateNormals();
-			}*/
+			}
 			
 			delete nf;
 		}
