@@ -714,13 +714,16 @@ void Scene3D::_selectAll_edge(Scene3DObject* object)
 			u64 o2 = o + 1;
 			if(o2 == sz2) o2=0;
 			auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
-				auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
+			auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
 
-			cv1->m_edgeWith.push_back(cv2); 
-			cv2->m_edgeWith.push_back(cv1);
+			if( std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2) == cv1->m_edgeWith.end() )
+				cv1->m_edgeWith.push_back(cv2); 
+			if( std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1) == cv2->m_edgeWith.end() )
+				cv2->m_edgeWith.push_back(cv1);
 			cv1->m_isSelected_edge = true;
 			cv2->m_isSelected_edge = true;
 		}
+		object->m_isObjectHaveSelectedEdges = true;
 	}
 	object->updateEdgeModel();
 	_updateSelectionAabb_edge();
