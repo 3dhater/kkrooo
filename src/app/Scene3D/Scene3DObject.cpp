@@ -1494,7 +1494,65 @@ void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 	ApplyPivot();
 	UpdateAabb();
 }
+void Scene3DObject::SelecEdgesBySub()
+{
+	m_isObjectHaveSelectedEdges = false;
+	std::unordered_set<Edge*> edgesToDeselect;
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(CV->m_isSelected_edge)
+		{
+			for( size_t o = 0, osz = CV->m_edges.size(); o < osz; ++o )
+			{
+				auto E = CV->m_edges[o];
+				if((E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge)
+					|| (!E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge)
+					|| (!E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge) )
+				{
+					//edgesToDeselect.insert(E);
+					for( auto E2 : CV->m_edges )
+					{
+						if(E2->m_firstPoint->m_isSelected_edge
+							|| E2->m_secondPoint->m_isSelected_edge)
+							edgesToDeselect.insert(E2);
+					}
+				}
+			}
+		}
+	}
+	for(auto E : edgesToDeselect)
+	{
+		auto cv1 = E->m_firstPoint;
+		auto cv2 = E->m_secondPoint;
+		auto pos = std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2);
+		if( pos != cv1->m_edgeWith.end() )
+		{
+			cv1->m_edgeWith.erase(pos);
+			if( !cv1->m_edgeWith.size() ) cv1->m_isSelected_edge = false;
+		}
 
+		pos = std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1);
+		if( pos != cv2->m_edgeWith.end() )
+		{
+			cv2->m_edgeWith.erase(pos);
+			if( !cv2->m_edgeWith.size() ) cv2->m_isSelected_edge = false;
+		}
+	}
+	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	{
+		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+		if(CV->m_isSelected_edge)
+		{
+			m_isObjectHaveSelectedEdges = true;
+			break;
+		}
+	}
+	if(edgesToDeselect.size() > 0)
+	{
+		updateEdgeModel();
+	}
+}
 void Scene3DObject::SelecEdgesByAdd()
 {
 	m_isObjectHaveSelectedEdges = false;

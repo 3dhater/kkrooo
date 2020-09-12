@@ -429,6 +429,20 @@ void connect_vertex(s32 id, void* data)
         scene->updateSelectionAabb();
     }
 }
+void select_sub_edge(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->SelecEdgesBySub();
+        object->UpdateAabb();
+	    scene->updateObjectEdgeSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
 void select_add_edge(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -700,6 +714,8 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Edge);
     m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Edge);
     m_edit_params_window->AddButton(u"+", v2f(20.f, 20.f), select_add_edge,0, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->AddButton(u"-", v2f(20.f, 20.f), select_sub_edge,0, kkPluginGUIParameterType::Edge);
     m_edit_params_window->EndGroup();
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Polygon);
