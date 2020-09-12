@@ -90,10 +90,10 @@ bool ControlVertex::isSelected()
 	return m_isSelected;
 }
 
-bool ControlVertex::isSelectedEdge()
-{
-	return m_isSelected_edge;
-}
+//bool ControlVertex::isSelectedEdge()
+//{
+//	return m_isSelected_edge;
+//}
 
 bool ControlVertex::isSelectedPoly()
 {

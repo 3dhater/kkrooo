@@ -17,7 +17,7 @@ public:
 	virtual kkArray<kkVertex*>& getVerts() = 0;
 
 	virtual bool isSelected() = 0;
-	virtual bool isSelectedEdge() = 0;
+	//virtual bool isSelectedEdge() = 0;
 	virtual bool isSelectedPoly() = 0;
 	virtual void select() = 0;
 	virtual void deselect() = 0;

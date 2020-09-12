@@ -370,9 +370,9 @@ public:
 	// ========================
 	bool init();
 	f32 getDistanceToCamera() const { return m_distanceToCamera; }
-	void moveVerts(const kkVector4&, std::basic_string<ControlVertex*>& );
-	void rotateVerts(const kkMatrix4&, std::basic_string<ControlVertex*>&, const kkVector4& selectionCenter );
-	void scaleVerts(const kkMatrix4&, std::basic_string<ControlVertex*>&, const kkVector4& selectionCenter );
+	void moveVerts(const kkVector4&, std::unordered_set<ControlVertex*>& );
+	void rotateVerts(const kkMatrix4&, std::unordered_set<ControlVertex*>&, const kkVector4& selectionCenter );
+	void scaleVerts(const kkMatrix4&, std::unordered_set<ControlVertex*>&, const kkVector4& selectionCenter );
 	void generateNormals();
 	void deleteSelectedVerts();
 	void deleteSelectedEdges();
@@ -435,6 +435,7 @@ public:
 	void SelecPolygonsByAdd();
 	void SelecEdgesByAdd();
 	void SelecEdgesBySub();
+	void SelecEdgesByRing();
 
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();

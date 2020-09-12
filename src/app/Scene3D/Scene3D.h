@@ -24,7 +24,7 @@ struct SelectionFrust;
 struct ObjectVertexSelectInfo
 {
 	Scene3DObject* m_object = nullptr;
-	std::basic_string<ControlVertex*> m_verts;
+	std::unordered_set<ControlVertex*> m_verts;
 };
 
 class Scene3D : public kkScene3D

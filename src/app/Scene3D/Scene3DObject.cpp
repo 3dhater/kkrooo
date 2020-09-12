@@ -844,7 +844,7 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 	return ret;
 }
 
-void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVertex*>& verts)
+void Scene3DObject::moveVerts(const kkVector4& v, std::unordered_set<ControlVertex*>& verts)
 {
 	struct verts_points{  v3f _pos;  v4f _col;  };
 	kkVector4 V = v;
@@ -867,9 +867,10 @@ void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVerte
 	V.KK_W = 1.f;
 	V = math::mul(V,M);
 
-	for( size_t i = 0, sz = verts.size(); i < sz; ++i )
+	for(auto & cv : verts)
+	//for( size_t i = 0, sz = verts.size(); i < sz; ++i )
 	{
-		cv = verts[ i ];
+		//cv = verts[ i ];
 
 		// сначала меняю координату полигональной модели
 		for( u64 i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
@@ -937,7 +938,7 @@ void Scene3DObject::moveVerts(const kkVector4& v, std::basic_string<ControlVerte
 	}
 }
 
-void Scene3DObject::rotateVerts(const kkMatrix4& m, std::basic_string<ControlVertex*>& verts, const kkVector4& selectionCenter)
+void Scene3DObject::rotateVerts(const kkMatrix4& m, std::unordered_set<ControlVertex*>& verts, const kkVector4& selectionCenter)
 {
 	auto M = m;
 	M[ 3u ].KK_X = 0.f;
@@ -979,9 +980,10 @@ void Scene3DObject::rotateVerts(const kkMatrix4& m, std::basic_string<ControlVer
 	hardware_models_for_update_lines.reserve(4000);
 	hardware_models_for_update_points.reserve(4000);
 
-	for( size_t i = 0, sz = verts.size(); i < sz; ++i )
+	//for( size_t i = 0, sz = verts.size(); i < sz; ++i )
+	for(auto & cv : verts)
 	{
-		cv = verts[ i ];
+		//cv = verts[ i ];
 
 		// сначала меняю координату полигональной модели
 		for( u64 i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
@@ -1050,7 +1052,7 @@ void Scene3DObject::rotateVerts(const kkMatrix4& m, std::basic_string<ControlVer
 	}
 }
 
-void Scene3DObject::scaleVerts(const kkMatrix4& m, std::basic_string<ControlVertex*>& verts, const kkVector4& selectionCenter )
+void Scene3DObject::scaleVerts(const kkMatrix4& m, std::unordered_set<ControlVertex*>& verts, const kkVector4& selectionCenter )
 {
 	auto M = m;
 	M[ 3u ].KK_X = 0.f;
@@ -1091,9 +1093,10 @@ void Scene3DObject::scaleVerts(const kkMatrix4& m, std::basic_string<ControlVert
 	hardware_models_for_update_lines.reserve(4000);
 	hardware_models_for_update_points.reserve(4000);
 
-	for( size_t i = 0, sz = verts.size(); i < sz; ++i )
+	for(auto & cv : verts)
+	//for( size_t i = 0, sz = verts.size(); i < sz; ++i )
 	{
-		cv = verts[ i ];
+		//cv = verts[ i ];
 
 		// сначала меняю координату полигональной модели
 		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
@@ -1358,7 +1361,7 @@ void Scene3DObject::deleteSelectedPolys()
 
 void Scene3DObject::deleteSelectedEdges()
 {
-	bool need_delete = false;
+	/*bool need_delete = false;
 	for(u64 i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
 	{
 		auto E = m_PolyModel->m_edges[i];
@@ -1384,7 +1387,7 @@ void Scene3DObject::deleteSelectedEdges()
 		_rebuildModel();
 		updateEdgeModel();
 		UpdateAabb();
-	}
+	}*/
 }
 
 void Scene3DObject::deleteSelectedVerts()
@@ -1496,66 +1499,67 @@ void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 }
 void Scene3DObject::SelecEdgesBySub()
 {
-	m_isObjectHaveSelectedEdges = false;
-	std::unordered_set<Edge*> edgesToDeselect;
-	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
-		if(CV->m_isSelected_edge)
-		{
-			for( size_t o = 0, osz = CV->m_edges.size(); o < osz; ++o )
-			{
-				auto E = CV->m_edges[o];
-				if((E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge)
-					|| (!E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge)
-					|| (!E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge) )
-				{
-					//edgesToDeselect.insert(E);
-					for( auto E2 : CV->m_edges )
-					{
-						if(E2->m_firstPoint->m_isSelected_edge
-							|| E2->m_secondPoint->m_isSelected_edge)
-							edgesToDeselect.insert(E2);
-					}
-				}
-			}
-		}
-	}
-	for(auto E : edgesToDeselect)
-	{
-		auto cv1 = E->m_firstPoint;
-		auto cv2 = E->m_secondPoint;
-		auto pos = std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2);
-		if( pos != cv1->m_edgeWith.end() )
-		{
-			cv1->m_edgeWith.erase(pos);
-			if( !cv1->m_edgeWith.size() ) cv1->m_isSelected_edge = false;
-		}
+	//m_isObjectHaveSelectedEdges = false;
+	//std::unordered_set<Edge*> edgesToDeselect;
+	//for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	//{
+	//	auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+	//	if(CV->m_isSelected_edge)
+	//	{
+	//		for( size_t o = 0, osz = CV->m_edges.size(); o < osz; ++o )
+	//		{
+	//			auto E = CV->m_edges[o];
+	//			if((E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge)
+	//				|| (!E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge)
+	//				|| (!E->m_firstPoint->m_isSelected_edge && !E->m_secondPoint->m_isSelected_edge) )
+	//			{
+	//				//edgesToDeselect.insert(E);
+	//				for( auto E2 : CV->m_edges )
+	//				{
+	//					if(E2->m_firstPoint->m_isSelected_edge
+	//						|| E2->m_secondPoint->m_isSelected_edge)
+	//						edgesToDeselect.insert(E2);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	//for(auto E : edgesToDeselect)
+	//{
+	//	E->m_isSelected = false;
+	//	auto cv1 = E->m_firstPoint;
+	//	auto cv2 = E->m_secondPoint;
+	//	auto pos = std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2);
+	//	if( pos != cv1->m_edgeWith.end() )
+	//	{
+	//		cv1->m_edgeWith.erase(pos);
+	//		if( !cv1->m_edgeWith.size() ) cv1->m_isSelected_edge = false;
+	//	}
 
-		pos = std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1);
-		if( pos != cv2->m_edgeWith.end() )
-		{
-			cv2->m_edgeWith.erase(pos);
-			if( !cv2->m_edgeWith.size() ) cv2->m_isSelected_edge = false;
-		}
-	}
-	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
-	{
-		auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
-		if(CV->m_isSelected_edge)
-		{
-			m_isObjectHaveSelectedEdges = true;
-			break;
-		}
-	}
-	if(edgesToDeselect.size() > 0)
-	{
-		updateEdgeModel();
-	}
+	//	pos = std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1);
+	//	if( pos != cv2->m_edgeWith.end() )
+	//	{
+	//		cv2->m_edgeWith.erase(pos);
+	//		if( !cv2->m_edgeWith.size() ) cv2->m_isSelected_edge = false;
+	//	}
+	//}
+	//for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
+	//{
+	//	auto CV = (ControlVertex*)m_PolyModel->m_controlPoints[i];
+	//	if(CV->m_isSelected_edge)
+	//	{
+	//		m_isObjectHaveSelectedEdges = true;
+	//		break;
+	//	}
+	//}
+	//if(edgesToDeselect.size() > 0)
+	//{
+	//	updateEdgeModel();
+	//}
 }
 void Scene3DObject::SelecEdgesByAdd()
 {
-	m_isObjectHaveSelectedEdges = false;
+	/*m_isObjectHaveSelectedEdges = false;
 	std::unordered_set<Edge*> edgesToSelect;
 	for( size_t i = 0, sz = m_PolyModel->m_controlPoints.size(); i < sz; ++i )
 	{
@@ -1579,6 +1583,7 @@ void Scene3DObject::SelecEdgesByAdd()
 	
 	for(auto E : edgesToSelect)
 	{
+		E->m_isSelected = true;
 		auto cv1 = E->m_firstPoint;
 		auto cv2 = E->m_secondPoint;
 		if( std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2) == cv1->m_edgeWith.end() )
@@ -1588,12 +1593,69 @@ void Scene3DObject::SelecEdgesByAdd()
 		cv1->m_isSelected_edge = true;
 		cv2->m_isSelected_edge = true;
 	}
-
 	if(edgesToSelect.size() > 0)
 	{
 		updateEdgeModel();
-	}
+	}*/
 }
+void Scene3DObject::SelecEdgesByRing()
+{
+	/*m_isObjectHaveSelectedEdges = false;
+	std::unordered_set<Edge*> edgesToSelect;
+	for( size_t i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
+	{
+		auto E = m_PolyModel->m_edges[i];
+		if(E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge)
+		{
+			m_isObjectHaveSelectedEdges = true;
+			Polygon3D * P = (Polygon3D*)m_PolyModel->m_polygons[E->m_polygonIndex[0]];
+			if(P->m_edges.size() == 4)
+			{
+				u32 edgeIndex = 0;
+				for( size_t x = 0, xsz = P->m_edges.size(); x < xsz; ++x )
+				{
+					auto polygon_edge = P->m_edges[x];
+					if(polygon_edge == E)
+					{
+						edgeIndex = x;
+						break;
+					}
+				}
+				switch (edgeIndex)
+				{
+				default:
+				case 0: edgeIndex = 2; break;
+				case 1: edgeIndex = 3; break;
+				case 2: edgeIndex = 0; break;
+				case 3: edgeIndex = 1; break;
+				}
+				auto E2 = P->m_edges[edgeIndex];
+				if(!E2->m_firstPoint->m_isSelected_edge && !E2->m_secondPoint->m_isSelected_edge)
+				{
+					edgesToSelect.insert(E2);
+				}
+			}
+		}
+	}
+
+	for(auto E : edgesToSelect)
+	{
+		E->m_isSelected = true;
+		auto cv1 = E->m_firstPoint;
+		auto cv2 = E->m_secondPoint;
+		if( std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2) == cv1->m_edgeWith.end() )
+			cv1->m_edgeWith.push_back(cv2); 
+		if( std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1) == cv2->m_edgeWith.end() )
+			cv2->m_edgeWith.push_back(cv1);
+		cv1->m_isSelected_edge = true;
+		cv2->m_isSelected_edge = true;
+	}
+	if(edgesToSelect.size() > 0)
+	{
+		updateEdgeModel();
+	}*/
+}
+
 
 void Scene3DObject::SelecPolygonsByAdd()
 {

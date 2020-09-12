@@ -264,6 +264,7 @@ public:
 	void attachModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
 
 	void updateCVForPolygonSelect();
+	void updateCVEdgeWith();
 };
 
 #endif

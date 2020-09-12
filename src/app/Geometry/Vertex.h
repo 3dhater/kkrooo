@@ -105,11 +105,13 @@ public:
 	//bool m_isOnDelete = false;
 
 	bool m_isSelected = false;
-	bool m_isSelected_edge = false;
+	//bool m_isSelected_edge = false;
 	bool m_isSelected_poly =false;
 
 	// образует edge с такими-то ControlVertex
+	// используется для рисования выбранного ребра
 	std::vector<ControlVertex*> m_edgeWith; // когда выделяется ребро, то обоим вершинам нужно указать друг друга
+											// лучше это делать отдельным методом, вызывая его каждый раз после нужной операции
 	
 	// created in Scene3DObject::createEdges
 	std::vector<Edge*> m_edges;
@@ -129,7 +131,7 @@ public:
 	//kkArray<u32>& getVertInds();
 	kkArray<kkVertex*>& getVerts();
 	bool isSelected();
-	bool isSelectedEdge();
+	//bool isSelectedEdge();
 	bool isSelectedPoly();
 	void select();
 	void deselect();

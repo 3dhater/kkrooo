@@ -1012,7 +1012,6 @@ void PolygonalModel::_createEdges()
 			Edge * edge = new Edge;
 			edge->m_firstPoint  = cv_first;
 			edge->m_secondPoint = cv_second;
-
 			
 
 			// надо найти, было ли данное ребро добавлено ранее
@@ -1028,9 +1027,15 @@ void PolygonalModel::_createEdges()
 				// индекс полигона нужен чтобы потом найти нужное ребро, так как выбор основан на взятии треугольника лучем.
 				auto E = m_edges[ search->second ];
 				if( E->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+				{
 					E->m_polygonIndex[0] = i;
+					//E->m_index[0] = o;
+				}
 				else
+				{
 					E->m_polygonIndex[1] = i;
+					//E->m_index[1] = o;
+				}
 
 				delete edge;
 				edge = E;
@@ -1038,16 +1043,23 @@ void PolygonalModel::_createEdges()
 			else
 			{ // не найдено, значит надо добавить в массив и в map
 				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+				{
 					edge->m_polygonIndex[0] = i;
+					//edge->m_index[0] = o;
+				}
 				else
+				{
 					edge->m_polygonIndex[1] = i;
-
+					//edge->m_index[1] = o;
+				}
 				m_edges.push_back(edge);
 				map[key_val] = m_edges.size()-1;
 
 				cv_first->m_edges.emplace_back(edge);
 				cv_second->m_edges.emplace_back(edge);
 			}
+			
+			polygon->m_edges.push_back(edge);
 			
 			for(u64 k = 0, ksz = cv_first->m_verts.size(); k < ksz; ++k )
 			{
@@ -1094,3 +1106,22 @@ void PolygonalModel::updateCVForPolygonSelect()
 		}
 	}
 }
+
+void PolygonalModel::updateCVEdgeWith()
+{
+	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	{
+		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		cv->m_edgeWith.clear();
+	}
+	for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
+	{
+		auto E = m_edges[i];
+		if( E->m_isSelected )
+		{
+			E->m_firstPoint->m_edgeWith.emplace_back(E->m_secondPoint);
+			E->m_secondPoint->m_edgeWith.emplace_back(E->m_firstPoint);
+		}
+	}
+}
+

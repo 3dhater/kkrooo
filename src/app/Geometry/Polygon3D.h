@@ -15,9 +15,13 @@ struct Edge
 {
 	ControlVertex* m_firstPoint  = nullptr;
 	ControlVertex* m_secondPoint = nullptr;
+	
 
 	// ребро может быть как на одном полигоне так и на двух
 	u64 m_polygonIndex[2] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
+	//u32 m_index[2] = {0,0}; // порядковый номер в полигоне. для выбора ring
+
+	bool m_isSelected = false;
 };
 //struct Edge
 
@@ -41,6 +45,7 @@ public:
 
 	// необходимо передать эти вершины в модель, попутно заполняя m_verts
 	kkArray<kkVertex*> m_verts = kkArray<kkVertex*>(4);
+	kkArray<Edge*> m_edges = kkArray<Edge*>(4);
 
 	void      addVertex(Vertex*v);
 
