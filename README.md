@@ -4,6 +4,7 @@
 
 <img src="res/repository-open-graph-template.png">
 
+## Features
 
 ## Goals
 

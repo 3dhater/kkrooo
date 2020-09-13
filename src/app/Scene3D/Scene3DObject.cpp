@@ -1566,7 +1566,7 @@ void Scene3DObject::SelecEdgesByAdd()
 	for(auto E : edgesToSelect)
 	{
 		E->m_isSelected = true;
-	}
+	}	
 	if(edgesToSelect.size() > 0)
 	{
 		m_isObjectHaveSelectedEdges = true;
@@ -1576,60 +1576,93 @@ void Scene3DObject::SelecEdgesByAdd()
 }
 void Scene3DObject::SelecEdgesByRing()
 {
-	/*m_isObjectHaveSelectedEdges = false;
-	std::unordered_set<Edge*> edgesToSelect;
-	for( size_t i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
+	bool need_update = false;
+	bool is_sel = false;
+	for( size_t i = 0, sz = m_PolyModel->m_edges.size(), last = m_PolyModel->m_edges.size()-1; i < sz;  )
 	{
+
 		auto E = m_PolyModel->m_edges[i];
-		if(E->m_firstPoint->m_isSelected_edge && E->m_secondPoint->m_isSelected_edge)
+		if(E->m_isSelected)
 		{
-			m_isObjectHaveSelectedEdges = true;
-			Polygon3D * P = (Polygon3D*)m_PolyModel->m_polygons[E->m_polygonIndex[0]];
-			if(P->m_edges.size() == 4)
+
+			Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[E->m_polygonIndex[0]];
+			// найду противоположное ребро
+			if(P1->m_edges.size() == 4)
 			{
-				u32 edgeIndex = 0;
-				for( size_t x = 0, xsz = P->m_edges.size(); x < xsz; ++x )
+				u64 edge_index = 0;
+				for( size_t i2 = 0, sz2 = P1->m_edges.size(); i2 < sz2; ++i2 )
 				{
-					auto polygon_edge = P->m_edges[x];
-					if(polygon_edge == E)
+					auto e = P1->m_edges[i2];
+					if(E == e)
 					{
-						edgeIndex = x;
+						edge_index = i2;
 						break;
 					}
 				}
-				switch (edgeIndex)
+				switch(edge_index)
 				{
 				default:
-				case 0: edgeIndex = 2; break;
-				case 1: edgeIndex = 3; break;
-				case 2: edgeIndex = 0; break;
-				case 3: edgeIndex = 1; break;
+				case 0: edge_index = 2; break;
+				case 1: edge_index = 3; break;
+				case 2: edge_index = 0; break;
+				case 3: edge_index = 1; break;
 				}
-				auto E2 = P->m_edges[edgeIndex];
-				if(!E2->m_firstPoint->m_isSelected_edge && !E2->m_secondPoint->m_isSelected_edge)
+				auto E2 = P1->m_edges[edge_index];
+				if(!E2->m_isSelected)
 				{
-					edgesToSelect.insert(E2);
+					E2->m_isSelected = true;
+					need_update = true;
+					is_sel = true;
+				}
+			}
+
+			Polygon3D* P2 = nullptr;
+			if(E->m_polygonIndex[1] != 0xffffffffffffffff)
+			{
+				P2 = (Polygon3D*)m_PolyModel->m_polygons[E->m_polygonIndex[1]];
+				if(P2->m_edges.size() == 4)
+				{
+					u64 edge_index = 0;
+					for( size_t i2 = 0, sz2 = P2->m_edges.size(); i2 < sz2; ++i2 )
+					{
+						auto e = P2->m_edges[i2];
+						if(E == e)
+						{
+							edge_index = i2;
+							break;
+						}
+					}
+					switch(edge_index)
+					{
+					default:
+					case 0: edge_index = 2; break;
+					case 1: edge_index = 3; break;
+					case 2: edge_index = 0; break;
+					case 3: edge_index = 1; break;
+					}
+					auto E2 = P2->m_edges[edge_index];
+					if(!E2->m_isSelected)
+					{
+						E2->m_isSelected = true;
+						need_update = true;
+						is_sel = true;
+					}
 				}
 			}
 		}
+		++i;
+		if(i == last && is_sel)
+		{
+			i = 0;
+			is_sel = false;
+		}
 	}
-
-	for(auto E : edgesToSelect)
+	if(need_update)
 	{
-		E->m_isSelected = true;
-		auto cv1 = E->m_firstPoint;
-		auto cv2 = E->m_secondPoint;
-		if( std::find(cv1->m_edgeWith.begin(), cv1->m_edgeWith.end(), cv2) == cv1->m_edgeWith.end() )
-			cv1->m_edgeWith.push_back(cv2); 
-		if( std::find(cv2->m_edgeWith.begin(), cv2->m_edgeWith.end(), cv1) == cv2->m_edgeWith.end() )
-			cv2->m_edgeWith.push_back(cv1);
-		cv1->m_isSelected_edge = true;
-		cv2->m_isSelected_edge = true;
-	}
-	if(edgesToSelect.size() > 0)
-	{
+		m_isObjectHaveSelectedEdges = true;
+		m_PolyModel->updateCVEdgeWith();
 		updateEdgeModel();
-	}*/
+	}
 }
 
 

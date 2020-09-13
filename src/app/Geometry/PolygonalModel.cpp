@@ -990,6 +990,7 @@ void PolygonalModel::_createEdges()
 	for(u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
 		auto polygon = (Polygon3D *)m_polygons.at(i);
+		polygon->m_edges.clear();
 
 		// беру полигон. прохожусь по вершинам. беру контрольные точки. текущую и следующую. это должно быть ребром
 		for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
@@ -1029,12 +1030,12 @@ void PolygonalModel::_createEdges()
 				if( E->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
 				{
 					E->m_polygonIndex[0] = i;
-					//E->m_index[0] = o;
+					E->m_index[0] = o;
 				}
 				else
 				{
 					E->m_polygonIndex[1] = i;
-					//E->m_index[1] = o;
+					E->m_index[1] = o;
 				}
 
 				delete edge;
@@ -1045,12 +1046,12 @@ void PolygonalModel::_createEdges()
 				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
 				{
 					edge->m_polygonIndex[0] = i;
-					//edge->m_index[0] = o;
+					edge->m_index[0] = o;
 				}
 				else
 				{
 					edge->m_polygonIndex[1] = i;
-					//edge->m_index[1] = o;
+					edge->m_index[1] = o;
 				}
 				m_edges.push_back(edge);
 				map[key_val] = m_edges.size()-1;
