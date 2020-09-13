@@ -19,9 +19,10 @@ struct Edge
 
 	// ребро может быть как на одном полигоне так и на двух
 	u64 m_polygonIndex[2] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
-	u32 m_index[2] = {0,0}; // порядковый номер в полигоне. для выбора ring
+	//u32 m_index[2] = {0,0}; // порядковый номер в полигоне. для выбора ring
 
 	bool m_isSelected = false;
+	bool isOnEdge(){return m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF;}
 };
 //struct Edge
 

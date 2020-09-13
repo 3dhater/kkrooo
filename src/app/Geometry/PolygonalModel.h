@@ -242,7 +242,7 @@ public:
 	kkArray<kkVertex*>    m_verts         = kkArray<kkVertex*>(0xffff);      // вершины со всех полигонов
 
 	kkArray<kkPolygon*>       m_polygons      = kkArray<kkPolygon*>(0xffff);
-	kkArray<kkControlVertex*> m_controlPoints = kkArray<kkControlVertex*>(0xffff);
+	kkArray<kkControlVertex*> m_controlVerts = kkArray<kkControlVertex*>(0xffff);
 	std::vector<Edge*> m_edges;
 
 	void deleteMarkedPolygons();

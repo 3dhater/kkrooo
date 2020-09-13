@@ -436,6 +436,7 @@ public:
 	void SelecEdgesByAdd();
 	void SelecEdgesBySub();
 	void SelecEdgesByRing();
+	void SelecEdgesByLoop();
 
 	void AttachObject(kkScene3DObject*);
 	void BreakVerts();

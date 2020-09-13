@@ -23,9 +23,9 @@ PolygonalModel::~PolygonalModel()
 	}
 	m_polygons.clear();
 
-	for( u64  i = 0; i < m_controlPoints.size(); ++i )
+	for( u64  i = 0; i < m_controlVerts.size(); ++i )
 	{
-		kkDestroy( m_controlPoints[i] );
+		kkDestroy( m_controlVerts[i] );
 	}
 
 	for( u64  i = 0; i < m_verts.size(); ++i )
@@ -194,11 +194,11 @@ void PolygonalModel::createControlPoints()
 		V->m_controlVertex = nullptr;
 	}
 	// сначала надо удалить старые контрольные точки
-	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	for( u64 i = 0, sz = m_controlVerts.size(); i < sz; ++i )
 	{
-		kkDestroy( m_controlPoints[ i ] );
+		kkDestroy( m_controlVerts[ i ] );
 	}
-	m_controlPoints.clear();
+	m_controlVerts.clear();
 
 	for( u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
 	{
@@ -235,7 +235,7 @@ void PolygonalModel::createControlPoints()
 			if(!CV)
 			{
 				CV = kkCreate<ControlVertex>();
-				m_controlPoints.push_back(CV);
+				m_controlVerts.push_back(CV);
 			}
 			CV->m_verts.push_back(V1);
 			V1->m_controlVertex = CV;
@@ -243,9 +243,9 @@ void PolygonalModel::createControlPoints()
 		}
 	}
 
-	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	for( u64 i = 0, sz = m_controlVerts.size(); i < sz; ++i )
 	{
-		auto CV = (ControlVertex*)m_controlPoints[i];
+		auto CV = (ControlVertex*)m_controlVerts[i];
 		CV->m_faceNormal /= CV->m_verts.size();
 		CV->m_faceNormal.normalize2();
 	}
@@ -339,9 +339,9 @@ void PolygonalModel::generateNormals(bool flat)
 	// smooth
 	ControlVertex* CV;
 	u64 sz2;
-	for( u64 i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	for( u64 i = 0, sz = m_controlVerts.size(); i < sz; ++i )
 	{
-		CV = (ControlVertex*)m_controlPoints[ i ];
+		CV = (ControlVertex*)m_controlVerts[ i ];
 		
 		sz2 = CV->m_verts.size();
 
@@ -979,9 +979,9 @@ void PolygonalModel::_createEdges()
 {
 	_deleteEdges();
 
-	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	for( size_t i = 0, sz = m_controlVerts.size(); i < sz; ++i )
 	{
-		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		ControlVertex* cv = (ControlVertex*)m_controlVerts[ i ];
 		cv->m_edges.clear();
 	}
 	
@@ -1014,7 +1014,6 @@ void PolygonalModel::_createEdges()
 			edge->m_firstPoint  = cv_first;
 			edge->m_secondPoint = cv_second;
 			
-
 			// надо найти, было ли данное ребро добавлено ранее
 			// в качестве уникального ключа берутся 4 байта с одного адреса и 4 байта с другого
 			u64 key_val = (u64)cv_first;
@@ -1030,35 +1029,34 @@ void PolygonalModel::_createEdges()
 				if( E->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
 				{
 					E->m_polygonIndex[0] = i;
-					E->m_index[0] = o;
 				}
 				else
 				{
 					E->m_polygonIndex[1] = i;
-					E->m_index[1] = o;
 				}
 
 				delete edge;
 				edge = E;
+
 			}
 			else
 			{ // не найдено, значит надо добавить в массив и в map
 				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
 				{
 					edge->m_polygonIndex[0] = i;
-					edge->m_index[0] = o;
 				}
 				else
 				{
 					edge->m_polygonIndex[1] = i;
-					edge->m_index[1] = o;
 				}
 				m_edges.push_back(edge);
 				map[key_val] = m_edges.size()-1;
 
-				cv_first->m_edges.emplace_back(edge);
-				cv_second->m_edges.emplace_back(edge);
 			}
+			if( std::find(cv_first->m_edges.begin(), cv_first->m_edges.end(), edge) == cv_first->m_edges.end())
+				cv_first->m_edges.push_back(edge);
+			if( std::find(cv_second->m_edges.begin(), cv_second->m_edges.end(), edge) == cv_second->m_edges.end())
+				cv_second->m_edges.push_back(edge);
 			
 			polygon->m_edges.push_back(edge);
 			
@@ -1072,12 +1070,53 @@ void PolygonalModel::_createEdges()
 				Vertex* V = (Vertex*)cv_second->m_verts[k];
 				V->m_edge = edge;
 			}
-
 		}
 	}
+	
+	// сортировка массива рёбер внутри контрольной вершины
+	/*for( size_t i = 0, sz = m_controlVerts.size(); i < sz; ++i )
+	{
+		auto cv = (ControlVertex*)m_controlVerts[i];
+		if(cv->m_edges.size() == 4)
+		{
+			Edge * edges[4];
+			edges[0] = cv->m_edges[0];
+			bool f = false;
+			if(cv->m_edges[1]->m_polygonIndex[0] != edges[0]->m_polygonIndex[0]
+				&& cv->m_edges[1]->m_polygonIndex[1] != edges[0]->m_polygonIndex[0])
+			{
+				edges[2] = cv->m_edges[1];
+				edges[1] = cv->m_edges[2];
+				edges[3] = cv->m_edges[3];
+				f = true;
+			}else if(cv->m_edges[2]->m_polygonIndex[0] != edges[0]->m_polygonIndex[0]
+				&& cv->m_edges[2]->m_polygonIndex[1] != edges[0]->m_polygonIndex[0])
+			{
+				edges[2] = cv->m_edges[2];
+				edges[1] = cv->m_edges[1];
+				edges[3] = cv->m_edges[3];
+				f = true;
+			}else if(cv->m_edges[3]->m_polygonIndex[0] != edges[0]->m_polygonIndex[0]
+				&& cv->m_edges[3]->m_polygonIndex[1] != edges[0]->m_polygonIndex[0])
+			{
+				edges[2] = cv->m_edges[3];
+				edges[1] = cv->m_edges[2];
+				edges[3] = cv->m_edges[1];
+				f = true;
+			}
+			if(!f && edges[0]->m_polygonIndex[1] != 0xFFFFFFFFFFFFFFFF)
+			{
+				printf("A");
+			}
+			cv->m_edges[0] = edges[0];
+			cv->m_edges[1] = edges[1];
+			cv->m_edges[2] = edges[2];
+			cv->m_edges[3] = edges[3];
+		}
+	}*/
 
 	// если ребро имеет только 1 полигон на стороне
-	for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
+	/*for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
 	{
 		auto E = m_edges[i];
 		if(E->m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF)
@@ -1085,14 +1124,14 @@ void PolygonalModel::_createEdges()
 			E->m_firstPoint->m_onEdge = true;
 			E->m_secondPoint->m_onEdge = true;
 		}
-	}
+	}*/
 }
 
 void PolygonalModel::updateCVForPolygonSelect()
 {
-	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	for( size_t i = 0, sz = m_controlVerts.size(); i < sz; ++i )
 	{
-		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		ControlVertex* cv = (ControlVertex*)m_controlVerts[ i ];
 		cv->m_isSelected_poly = false;
 	}
 	for(u64 i = 0, sz = m_polygons.size(); i < sz; ++i )
@@ -1110,9 +1149,9 @@ void PolygonalModel::updateCVForPolygonSelect()
 
 void PolygonalModel::updateCVEdgeWith()
 {
-	for( size_t i = 0, sz = m_controlPoints.size(); i < sz; ++i )
+	for( size_t i = 0, sz = m_controlVerts.size(); i < sz; ++i )
 	{
-		ControlVertex* cv = (ControlVertex*)m_controlPoints[ i ];
+		ControlVertex* cv = (ControlVertex*)m_controlVerts[ i ];
 		cv->m_edgeWith.clear();
 	}
 	for( size_t i = 0, sz = m_edges.size(); i < sz; ++i )
