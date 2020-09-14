@@ -126,6 +126,19 @@ public:
 		m_size = new_size;
 	}
 
+	void insert(u64 where, const_reference object)
+	{
+		u64 new_size = m_size + 1u;
+		if( new_size > m_allocated )
+			reallocate( new_size );
+		for(u64 i = m_size; i > where;)
+		{
+			m_data[i] = m_data[i-1];
+			--i;
+		}
+		m_allocator.construct( &m_data[where], object );
+		m_size = new_size;
+	}
 	
 	void clear()
 	{

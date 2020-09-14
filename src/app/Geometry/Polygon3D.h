@@ -9,6 +9,7 @@
 
 class Vertex;
 class ControlVertex;
+class Polygon3D;
 
 // ребро это всего лишь 2 контролирующие вершины.
 struct Edge
@@ -18,14 +19,25 @@ struct Edge
 	
 
 	// ребро может быть как на одном полигоне так и на двух
-	u64 m_polygonIndex[2] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
+	//u64 m_polygonIndex[2] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
+	Polygon3D* m_firstPolygon = nullptr;
+	Polygon3D* m_secondPolygon = nullptr;
 	//u32 m_index[2] = {0,0}; // порядковый номер в полигоне. для выбора ring
 
 	bool m_isSelected = false;
-	bool isOnEdge(){return m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF;}
+	bool isOnEdge(){return !m_secondPolygon;}
+
+	// используется при Connect
+	// если выбрано минимум 2 ребра текущего полигона, то нужно пометить true
+	// чтобы заменить полигон который с другой стороны 
+	//bool m_needConnect = false;
+
+	// если нажали Connect и была вставлена вершина в полигон, то надо пометить истина
+	// чтобы потом лишний раз не вставлять вершину в соседний полигон
+	bool m_isAlreadyConnected = false;
 };
 //struct Edge
-
+class PolygonalModel;
 class Polygon3D : public kkPolygon
 {
 public:
@@ -42,6 +54,7 @@ public:
 	void CalculateNormals();
 	void Flip();
 	kkVector4& GetNormal();
+	void InsertVertex( kkVertex* between_v1, kkVertex* between_v2);
 public:
 
 	// необходимо передать эти вершины в модель, попутно заполняя m_verts
@@ -59,6 +72,7 @@ public:
 	std::unordered_set<Polygon3D*> m_neighbors;
 
 	kkVector4 m_facenormal;
+	PolygonalModel* m_model = nullptr;
 };
 
 #endif

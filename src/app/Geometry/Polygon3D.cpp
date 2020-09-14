@@ -1,8 +1,10 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-only
 #include "kkrooo.engine.h"
 
+#include "Classes/Math/kkMatrix.h"
 #include "Polygon3D.h"
 #include "Vertex.h"
+#include "PolygonalModel.h"
 
 
 
@@ -117,4 +119,49 @@ void Polygon3D::CalculateNormals()
 		((Vertex*)m_verts[ i2 ])->m_Normal_fix = ((Vertex*)m_verts[ i2 ])->m_Normal;
 	}
 	m_facenormal = ((Vertex*)m_verts[ 0 ])->m_Normal;
+}
+
+void Polygon3D::InsertVertex( kkVertex* between_v1, kkVertex* between_v2)
+{
+	assert(between_v1);
+	assert(between_v2);
+	if(!between_v1 || !between_v2)
+		return;
+
+	for(u64 i = 0, sz = m_verts.size(); i < sz; ++i)
+	{
+		u64 i2 = i + 1;
+		if(i2 == sz)
+			i2 = 0;
+		auto v1 = m_verts[i];
+		auto v2 = m_verts[i2];
+
+		bool add = (v1 == between_v1 && v2 == between_v2)
+			|| (v2 == between_v1 && v1 == between_v2);
+
+		if(add)
+		{
+			// true = add after v1
+			// false = add before v1
+			bool add_forward = (v1 == between_v1 && v2 == between_v2);
+
+			Vertex* new_vertex = kkCreate<Vertex>();
+			m_model->m_verts.push_back(new_vertex);
+			if(add_forward)
+			{
+				m_verts.insert(i2, new_vertex);
+			}
+			else
+			{
+				m_verts.insert(i2, new_vertex);
+			}
+			new_vertex->set((Vertex*)v1);
+			new_vertex->m_Position = v1->getPosition() + v2->getPosition();
+			new_vertex->m_Position *= 0.5f;
+			new_vertex->m_Position._f32[3] = 1.f;
+			new_vertex->m_Position_fix = new_vertex->m_Position;
+
+			return;
+		}
+	}
 }

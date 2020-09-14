@@ -36,6 +36,7 @@ PolygonalModel::~PolygonalModel()
 
 void PolygonalModel::addPolygon(Polygon3D* new_polygon, bool weld, bool triangulate, bool flip)
 {
+	new_polygon->m_model = this;
 	Vertex * V;
 	u64 num_of_tris = new_polygon->m_verts.size() - 2;
 	for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz; ++i )
@@ -1026,13 +1027,13 @@ void PolygonalModel::_createEdges()
 				// значит нужно этому ребру дать индекс полигона....
 				// индекс полигона нужен чтобы потом найти нужное ребро, так как выбор основан на взятии треугольника лучем.
 				auto E = m_edges[ search->second ];
-				if( E->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+				if( !E->m_firstPolygon )
 				{
-					E->m_polygonIndex[0] = i;
+					E->m_firstPolygon = polygon;
 				}
 				else
 				{
-					E->m_polygonIndex[1] = i;
+					E->m_secondPolygon = polygon;
 				}
 
 				delete edge;
@@ -1041,13 +1042,13 @@ void PolygonalModel::_createEdges()
 			}
 			else
 			{ // не найдено, значит надо добавить в массив и в map
-				if( edge->m_polygonIndex[0] == 0xFFFFFFFFFFFFFFFF )
+				if( !edge->m_firstPolygon )
 				{
-					edge->m_polygonIndex[0] = i;
+					edge->m_firstPolygon = polygon;
 				}
 				else
 				{
-					edge->m_polygonIndex[1] = i;
+					edge->m_secondPolygon = polygon;
 				}
 				m_edges.push_back(edge);
 				map[key_val] = m_edges.size()-1;

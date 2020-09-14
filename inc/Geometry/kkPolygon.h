@@ -203,6 +203,7 @@ public:
 	virtual void CalculateNormals() = 0;
 	virtual void Flip() = 0;
 	virtual kkVector4& GetNormal() = 0;
+	virtual void InsertVertex( kkVertex* between_v1, kkVertex* between_v2) = 0;
 	// удалить из полигона но не из модели и не из памяти
 	//virtual void DeleteVertex(kkVertex*) = 0;
 };

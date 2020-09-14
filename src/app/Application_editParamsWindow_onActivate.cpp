@@ -415,7 +415,20 @@ void chamfer_vertex(s32 id, void* data)
         scene->updateSelectionAabb();
     }
 }
-
+void connect_edge(s32 id, void* data)
+{
+    auto app = kkSingleton<Application>::s_instance;
+    Scene3D* scene = *app->getScene3D();
+    auto object = GetSelectedObject();
+    if(object)
+    {
+        object->ConnectEdges();
+        object->UpdateAabb();
+	    scene->updateObjectVertexSelectList();
+        scene->updateSceneAabb();
+        scene->updateSelectionAabb();
+    }
+}
 void connect_vertex(s32 id, void* data)
 {
     auto app = kkSingleton<Application>::s_instance;
@@ -764,6 +777,11 @@ void Application::_initEditParamsWindow()
     m_edit_params_window->AddButton(u"Ring", v2f(40.f, 20.f), select_edge_ring,0, kkPluginGUIParameterType::Edge);
     /*m_edit_params_window->AddMoveLeftRight(20.f, kkPluginGUIParameterType::Edge);
     m_edit_params_window->AddButton(u"Loop", v2f(40.f, 20.f), select_edge_loop,0, kkPluginGUIParameterType::Edge);*/
+    m_edit_params_window->EndGroup();
+    m_edit_params_window->BeginGroup(u"Geometry edit", true);
+    m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Edge);
+    m_edit_params_window->AddButton(u"Connect", v2f(60.f, 20.f), connect_edge,0, kkPluginGUIParameterType::Edge);
     m_edit_params_window->EndGroup();
 
     m_edit_params_window->AddNewLine(0.f, kkPluginGUIParameterType::Polygon);

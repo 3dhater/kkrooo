@@ -193,7 +193,7 @@ struct GridAcceleratorRow
 //	Polygon3D * m_polygon;
 //	std::unordered_set<Polygon3D*> m_neighbors;
 //};
-
+struct kkRenderInfo;
 class ControlVertex;
 class PolygonalModel
 {

@@ -1370,9 +1370,9 @@ void Scene3DObject::deleteSelectedEdges()
 		{
 			if( ECV == E->m_secondPoint )
 			{
-				m_PolyModel->m_polygons[ E->m_polygonIndex[0] ]->MarkToDelete();
-				if(E->m_polygonIndex[1] != 0xffffffffffffffff)
-					m_PolyModel->m_polygons[ E->m_polygonIndex[1] ]->MarkToDelete();
+				E->m_firstPolygon->MarkToDelete();
+				if(E->m_secondPolygon)
+					E->m_secondPolygon->MarkToDelete();
 				need_delete = true;
 				break;
 			}
@@ -1663,7 +1663,7 @@ void Scene3DObject::SelecEdgesByRing()
 		auto E = m_PolyModel->m_edges[i];
 		if(E->m_isSelected)
 		{
-			Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[E->m_polygonIndex[0]];
+			Polygon3D* P1 = E->m_firstPolygon;
 			// найду противоположное ребро
 			if(P1->m_edges.size() == 4)
 			{
@@ -1695,9 +1695,9 @@ void Scene3DObject::SelecEdgesByRing()
 			}
 
 			Polygon3D* P2 = nullptr;
-			if(E->m_polygonIndex[1] != 0xffffffffffffffff)
+			if(E->m_secondPolygon)
 			{
-				P2 = (Polygon3D*)m_PolyModel->m_polygons[E->m_polygonIndex[1]];
+				P2 = E->m_secondPolygon;
 				if(P2->m_edges.size() == 4)
 				{
 					u64 edge_index = 0;
@@ -1931,7 +1931,7 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 	bool onEdge = false;
 	for(auto cvedge : cv1->m_edges)
 	{
-		if( cvedge->m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF )
+		if( cvedge->m_secondPolygon )
 		{
 			onEdge = true;
 			break;
@@ -1941,7 +1941,7 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 	{
 		for(auto cvedge : cv2->m_edges)
 		{
-			if( cvedge->m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF )
+			if( cvedge->m_secondPolygon )
 			{
 				onEdge = true;
 				break;
@@ -1984,11 +1984,11 @@ void Scene3DObject::Weld(kkControlVertex* CV1, kkControlVertex* CV2)
 	if(is_edge)
 	{
 
-		Polygon3D* P1 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[0]];
+		Polygon3D* P1 = edge->m_firstPolygon;
 		Polygon3D* P2 = nullptr;
-		if(edge->m_polygonIndex[1] != (u64)-1 )
+		if(edge->m_secondPolygon )
 		{
-			P2 = (Polygon3D*)m_PolyModel->m_polygons[edge->m_polygonIndex[1]];
+			P2 = edge->m_secondPolygon;
 		}
 
 		// удалить вершину из полигона и из основного массива
@@ -2287,6 +2287,7 @@ void Scene3DObject::ConnectVerts()
 				{
 					vertex_counter = 1;
 					newPolygon = kkCreate<Polygon3D>();
+					newPolygon->m_model = m_PolyModel;
 					newVertex = kkCreate<Vertex>();
 					newVertex->set(baseVertex);
 					newVertex->m_parentPolygon = newPolygon;
@@ -2557,6 +2558,7 @@ void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 
 	for(auto P : new_polygons)
 	{
+		P->m_model = m_PolyModel;
 		m_PolyModel->m_polygons.push_back(P);
 		for(auto V : P->m_verts)
 		{
@@ -2577,5 +2579,107 @@ void Scene3DObject::ChamferVerts(f32 len, bool addPolygon)
 	}
 	this->_rebuildModel();
 	updateModelPointsColors();
+}
 
+void Scene3DObject::ConnectEdges()
+{
+	//kkArray<Polygon3D*> new_polygons = kkArray<Polygon3D*>(0xff);
+	for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+	{
+		auto P = (Polygon3D*)m_PolyModel->m_polygons[i];
+		bool start = false;
+		for( u64 i2 = 0, sz2 = P->m_edges.size(), num = 0; i2 < sz2; ++i2 )
+		{
+			auto E = P->m_edges[i2];
+			if(E->m_isSelected && !start)
+			{
+				++num;
+			}
+			if(!start)
+			{
+				if(num==2)
+				{
+					start = true;
+					++num;
+					i2 = -1;
+				}
+			}
+			else
+			{
+				if(E->m_isSelected && !E->m_isAlreadyConnected)
+				{
+					kkVertex * V1 = nullptr, * V2  = nullptr;
+					Polygon3D* P1 = E->m_firstPolygon;
+					Polygon3D* P2 = E->m_secondPolygon;
+
+					for(auto V : E->m_firstPoint->m_verts)
+					{
+						auto v = (Vertex*)V;
+						if( v->m_parentPolygon == P1 )
+						{
+							V1 = V;
+							break;
+						}
+					}
+					for(auto V : E->m_secondPoint->m_verts)
+					{
+						auto v = (Vertex*)V;
+						if( v->m_parentPolygon == P1 )
+						{
+							V2 = V;
+							break;
+						}
+					}
+					if(V1 && V2)
+					{
+						P1->InsertVertex(V1, V2);
+						E->m_isAlreadyConnected = true;
+					}
+
+					if(P2)
+					{
+						for(auto V : E->m_firstPoint->m_verts)
+						{
+							auto v = (Vertex*)V;
+							if( v->m_parentPolygon == P2 )
+							{
+								V1 = V;
+								break;
+							}
+						}
+						for(auto V : E->m_secondPoint->m_verts)
+						{
+							auto v = (Vertex*)V;
+							if( v->m_parentPolygon == P2 )
+							{
+								V2 = V;
+								break;
+							}
+						}
+						if(V1 && V2)
+						{
+							P2->InsertVertex(V1, V2);
+							E->m_isAlreadyConnected = true;
+						}
+					}
+				}
+			}
+		}
+	}
+	/*m_PolyModel->deleteMarkedPolygons();
+	for(auto P : new_polygons)
+	{
+		m_PolyModel->m_polygons.push_back(P);
+		for(auto V : P->m_verts)
+		{
+			m_PolyModel->m_verts.push_back(V);
+		}
+	}*/
+	m_PolyModel->createControlPoints();
+	this->_rebuildModel();
+	for( u64 i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
+	{
+		auto e = m_PolyModel->m_edges[i];
+		e->m_isAlreadyConnected = false;
+	}
 }

@@ -2249,7 +2249,7 @@ bool Scene3D::selectEdges(/*CursorRay* cursorRay, */kkRay* ray/*, int depth*/)
 				{
 					find_edge->m_isSelected = true;
 					//if( find_edge->m_firstPoint->m_onEdge && find_edge->m_secondPoint->m_onEdge )
-					if(find_edge->m_polygonIndex[1] == 0xFFFFFFFFFFFFFFFF)
+					if(!find_edge->m_secondPolygon)
 						printf("E");
 					scene3dobject->m_isObjectHaveSelectedEdges = true;
 				}
