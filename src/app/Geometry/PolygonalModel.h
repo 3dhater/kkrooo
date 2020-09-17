@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __POLYGONAL_MODEL_H__
+﻿#ifndef __POLYGONAL_MODEL_H__
 #define __POLYGONAL_MODEL_H__
 
 #include "Classes/Strings/kkString.h"
@@ -10,12 +9,10 @@
 #include <unordered_map>
 
 #include "../Plugins/PluginCommonInterface.h"
-#include "Vertex.h"
-#include "Polygon3D.h"
 
-struct ControlVertexHash
+struct VertexHash
 {
-	ControlVertexHash()
+	VertexHash()
 	{
 		bytes[ 0 ] = 0;
 		bytes[ 1 ] = 0;
@@ -31,7 +28,7 @@ struct ControlVertexHash
 		bytes[ 11 ] = 0;
 	}
 
-	bool operator==(const ControlVertexHash& o)const
+	bool operator==(const VertexHash& o)const
     {
 		if( bytes[ 0 ] != o.bytes[ 0 ] ) return false;
 		if( bytes[ 1 ] != o.bytes[ 1 ] ) return false;
@@ -49,9 +46,9 @@ struct ControlVertexHash
 		return true;
     }
 
-	void set(Vertex* v)
+	void set(kkVertex* v)
 	{
-		char * ptr = (char *)v->m_Position.data();
+		char * ptr = (char *)v->m_position.data();
 		bytes[ 0 ] = ptr[ 0 ]; 
 		bytes[ 1 ] = ptr[ 1 ]; 
 		bytes[ 2 ] = ptr[ 2 ]; 
@@ -79,7 +76,36 @@ struct ControlVertexHash
 		bytes[12] = 0;
 		str = bytes;
 	}
-
+	void set(v3f* v)
+	{
+		char * ptr = (char *)v->data();
+		bytes[ 0 ] = ptr[ 0 ];
+		bytes[ 1 ] = ptr[ 1 ];
+		bytes[ 2 ] = ptr[ 2 ];
+		bytes[ 3 ] = ptr[ 3 ];
+		bytes[ 4 ] = ptr[ 4 ];
+		bytes[ 5 ] = ptr[ 5 ];
+		bytes[ 6 ] = ptr[ 6 ];
+		bytes[ 7 ] = ptr[ 7 ];
+		bytes[ 8 ] = ptr[ 8 ];
+		bytes[ 9 ] = ptr[ 9 ];
+		bytes[ 10 ] = ptr[ 10 ];
+		bytes[ 11 ] = ptr[ 11 ];
+		if( bytes[ 0 ] == 0 ) bytes[ 0 ] = 1;
+		if( bytes[ 1 ] == 0 ) bytes[ 1 ] = 1;
+		if( bytes[ 2 ] == 0 ) bytes[ 2 ] = 1;
+		if( bytes[ 3 ] == 0 ) bytes[ 3 ] = 1;
+		if( bytes[ 4 ] == 0 ) bytes[ 4 ] = 1;
+		if( bytes[ 5 ] == 0 ) bytes[ 5 ] = 1;
+		if( bytes[ 6 ] == 0 ) bytes[ 6 ] = 1;
+		if( bytes[ 7 ] == 0 ) bytes[ 7 ] = 1;
+		if( bytes[ 8 ] == 0 ) bytes[ 8 ] = 1;
+		if( bytes[ 9 ] == 0 ) bytes[ 9 ] = 1;
+		if( bytes[ 10 ] == 0 ) bytes[ 10 ] = 1;
+		if( bytes[ 11 ] == 0 ) bytes[ 11 ] = 1;
+		bytes[12] = 0;
+		str = bytes;
+	}
 	void set(kkVector4* v)
 	{
 		char * ptr = (char *)v->data();
@@ -188,68 +214,50 @@ struct GridAcceleratorRow
 	kkArray<GridAcceleratorCell*> m_cells;
 };
 
-//struct PolygonNeighbors
-//{
-//	Polygon3D * m_polygon;
-//	std::unordered_set<Polygon3D*> m_neighbors;
-//};
 struct kkRenderInfo;
-class ControlVertex;
-class PolygonalModel
+class PolygonalModel : public kkPolygonalModel
 {
-	void _findNeighbors();
-	std::unordered_map<std::string,kkArray<Polygon3D*>> m_neighbor_map;
-	std::unordered_map<std::string,ControlVertex*> m_map;
-
-	u32 m_triangleCount = 0;
+	std::size_t m_triangleCount = 0;
 
 	kkAabb    m_aabbRayTestAabb;
-	kkVector4 m_aabbRayTestE1[12];
-	kkVector4 m_aabbRayTestE2[12];
-	kkVector4 m_aabbRayTestV0[12];
 
-	//bool _isNeedToWeld(ControlVertex* cv, Vertex* V, f32 len);
 	bool _intersectBVHNode(BVH_node* node, const kkRay& ray);
 	void rayTestBVH( BVH_node* node, std::vector<kkTriangleRayTestResult>& outTriangle, const kkRay& ray, 
 	kkMaterialImplementation* renderObjectMaterial );
 
-	f32 m_gridRadius = 0.f;
-	kkArray<GridAcceleratorRow*> m_gridAccelRows;
-	void _deleteGridAccel();
-	void _createGridAccel(kkRenderInfo* ri);
-	void _addTriangleToGrid(kkRenderInfo* ri, kkTriangle*, u32 triIndex);
+	//f32 m_gridRadius = 0.f;
+	//kkArray<GridAcceleratorRow*> m_gridAccelRows;
+	//void _deleteGridAccel();
+	//void _createGridAccel(kkRenderInfo* ri);
+	//void _addTriangleToGrid(kkRenderInfo* ri, kkTriangle*, u32 triIndex);
 
 	void _rayTestTriangle( std::vector<kkTriangleRayTestResult>& outTriangles, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial, kkTriangleRayTestResult* );
 
-	void _createEdges();
-	void _deleteEdges(); // лучше держать рёбра созданными
-
+	std::unordered_map<std::string,kkVertex*> m_weldMap;
+	// 2 объединённых адреса как ключ
+	std::unordered_map<u64, kkEdge*> m_edgeMap;
+	
+	void _addVertexToList(kkVertex*);
+	void _removeVertexFromList(kkVertex*);
+	void _addPolygonToList(kkPolygon*);
+	void _removePolygonFromList(kkPolygon*);
 public:
 	PolygonalModel();
 	virtual ~PolygonalModel();
+	virtual kkPolygon* GetPolygons();
+	virtual u64 GetPolygonsCount();
+	virtual void DeletePolygon(kkPolygon*);
+	//virtual void DeleteVertex(kkVertex*);
+
+	void  AddPolygon(kkGeometryInformation* gi,bool weld, bool triangulate, bool flip);
 
 	void calculateTriangleCount();
 
-	void  addPolygon(Polygon3D* p,bool weld, bool triangulate, bool flip);
-	u64 getPolygonCount()const;
-	kkPolygon* getPolygon(u64)const;
-
 	void onEndCreation();
 	void generateNormals(bool flat);
-	//void flipNormals();
+	void generateBT();
 
-	// те указатели которые нужно будет потом kkDestroy
-	kkArray<kkVertex*>    m_verts         = kkArray<kkVertex*>(0xffff);      // вершины со всех полигонов
-
-	kkArray<kkPolygon*>       m_polygons      = kkArray<kkPolygon*>(0xffff);
-	kkArray<kkControlVertex*> m_controlVerts = kkArray<kkControlVertex*>(0xffff);
-	std::vector<Edge*> m_edges;
-
-	void deleteMarkedPolygons();
-	void createControlPoints();
-	
 	std::vector<kkTriangleRayTestResult> m_trianglesForRendering;
-
 	
 	void prepareForRaytracing(const kkMatrix4& matrix, const kkVector4& pivot, kkRenderInfo* );
 	void finishRaytracing();
@@ -257,14 +265,16 @@ public:
 
 	BVH_node m_BVH_root;
 	void rayTest( std::vector<kkTriangleRayTestResult>& outTriangles, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial );
-	void rayTestGrid( std::vector<kkTriangleRayTestResult>& outTriangles, const v2i& point, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial );
+	//void rayTestGrid( std::vector<kkTriangleRayTestResult>& outTriangles, const v2i& point, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial );
 
 	void weldByLen(f32 len);
 
 	void attachModel(PolygonalModel*, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other);
 
-	void updateCVForPolygonSelect();
-	void updateCVEdgeWith();
+	kkPolygon* m_polygons = nullptr;
+	kkVertex*  m_verts    = nullptr;
+	u64 m_polygonsCount = 0;
+	u64 m_vertsCount    = 0;
 };
 
 #endif

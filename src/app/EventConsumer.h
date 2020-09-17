@@ -1,11 +1,9 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __EVENT_CONSUMER_H__
+﻿#ifndef __EVENT_CONSUMER_H__
 #define __EVENT_CONSUMER_H__
 
 #include "Classes/Math/kkVector4.h"
 
 class Application;
-class Viewport;
 
 class EventConsumer : public kkEventConsumer
 {

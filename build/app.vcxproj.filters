@@ -45,9 +45,6 @@
     <ClCompile Include="..\src\app\Geometry\GeometryCreator.cpp">
       <Filter>src\Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\app\Geometry\Vertex.cpp">
-      <Filter>src\Geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\app\Scene3D\Scene3DObject.cpp">
       <Filter>src\Scene3D</Filter>
     </ClCompile>
@@ -64,9 +61,6 @@
       <Filter>src\Plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\src\app\Geometry\PolygonalModel.cpp">
-      <Filter>src\Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\app\Geometry\Polygon3D.cpp">
       <Filter>src\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\app\ShortcutManager.cpp">
@@ -215,9 +209,6 @@
     <ClInclude Include="..\src\app\Geometry\GeometryCreator.h">
       <Filter>src\Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\app\Geometry\Vertex.h">
-      <Filter>src\Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\app\Scene3D\Scene3D.h">
       <Filter>src\Scene3D</Filter>
     </ClInclude>
@@ -234,9 +225,6 @@
       <Filter>src\Plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\src\app\Geometry\PolygonalModel.h">
-      <Filter>src\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\app\Geometry\Polygon3D.h">
       <Filter>src\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\app\ShortcutManager.h">

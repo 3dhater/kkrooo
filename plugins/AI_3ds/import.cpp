@@ -72,10 +72,8 @@ extern "C"
 				{
 					const C_STRUCT aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-					geometry_creator->setName( kkString( mesh->mName.data ).data() );
-					
-					geometry_creator->beginModel();
-
+					geometry_creator->SetName( kkString( mesh->mName.data ).data() );
+					geometry_creator->BeginModel();
 
 					u32 pos_index = 0;
 
@@ -83,34 +81,32 @@ extern "C"
 					{
 						const C_STRUCT aiFace* face = &mesh->mFaces[t];
 
-						geometry_creator->beginPolygon();
+						geometry_creator->BeginPolygon();
 
 						for( u32 in = 0; in < face->mNumIndices; in++)
 						{
 							int index = face->mIndices[in];
 
-							geometry_creator->beginVertex( pos_index++ );
-
 							auto v = currentMatrix * mesh->mVertices[index];
-							geometry_creator->setPosition( v.x, -v.z, v.y );
+							geometry_creator->AddPosition( v.x, -v.z, v.y );
+							
+							//mesh->mTextureCoords
 
 							if(mesh->mNormals != NULL)
 							{
-								geometry_creator->setNormal( 
+								geometry_creator->AddNormal( 
 									mesh->mNormals[index].x, 
 									mesh->mNormals[index].z,
 									mesh->mNormals[index].y
 								);
 							}
-
-							geometry_creator->endVertex();
 						}
 
-						geometry_creator->endPolygon( true, false, false );
+						geometry_creator->EndPolygon( true, false, false );
 					}
 
-					geometry_creator->generateNormals(false);
-					geometry_creator->endModel();
+					geometry_creator->GenerateNormals(false);
+					geometry_creator->EndModel();
 				}
 
 				for( u32 n = 0; n < node->mNumChildren; ++n)

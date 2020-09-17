@@ -108,7 +108,7 @@ extern "C"
 					kkStringA curr_word;
 					kkStringA prev_word;
 
-					geometry_creator->beginModel();
+					geometry_creator->BeginModel();
 					
 					face f;
 					u32 i2 = 0;
@@ -201,7 +201,7 @@ extern "C"
 								}
 							}
 
-							geometry_creator->beginPolygon();
+							geometry_creator->BeginPolygon();
 							for( u32 sz2 = f.p.size(), i2 = 0; i2 < sz2; ++i2 )
 							{
 								auto index = i2;
@@ -233,8 +233,7 @@ extern "C"
 
 								auto v = position[ pos_index ];
 
-								geometry_creator->beginVertex( pos_index );
-								geometry_creator->setPosition( v.x, v.y, v.z );
+								geometry_creator->AddPosition( v.x, v.y, v.z );
 
 								if( f.ft == face_type::pu || f.ft == face_type::pun )
 								{
@@ -246,7 +245,7 @@ extern "C"
 									}
 
 									auto u = uv[ uv_index ];
-									geometry_creator->setUV( u.x, u.y );
+									geometry_creator->AddUV( u.x, u.y );
 								}
 
 								if( f.ft == face_type::pn || f.ft == face_type::pun )
@@ -259,13 +258,11 @@ extern "C"
 									}
 
 									auto n = normal[ nor_index ];
-									geometry_creator->setNormal( n.x, n.y, n.z );
+									geometry_creator->AddNormal( n.x, n.y, n.z );
 								}
-
-								geometry_creator->endVertex();
 							}						
 
-							geometry_creator->endPolygon( weld, importData->option_triangulate, importData->fix_flip_normals );
+							geometry_creator->EndPolygon( weld, importData->option_triangulate, importData->fix_flip_normals );
 							weld = false;
 						}break;
 						case 'o':
@@ -290,12 +287,12 @@ extern "C"
 							if( grpFound )
 							{
 								if( prev_word.size() )
-									geometry_creator->setName( kkString( prev_word.data() ).data() );
+									geometry_creator->SetName( kkString( prev_word.data() ).data() );
 								if( generate_normals || importData->fix_generate_flat_normals )
-									geometry_creator->generateNormals(importData->fix_generate_flat_normals);
-								geometry_creator->generateBT();
-								geometry_creator->endModel();
-								geometry_creator->beginModel();
+									geometry_creator->GenerateNormals(importData->fix_generate_flat_normals);
+								geometry_creator->GenerateBT();
+								geometry_creator->EndModel();
+								geometry_creator->BeginModel();
 							}
 							grpFound = true;
 							break;
@@ -307,12 +304,12 @@ extern "C"
 					}
 
 					if( curr_word.size() )
-						geometry_creator->setName( kkString( curr_word.data() ).data() );
+						geometry_creator->SetName( kkString( curr_word.data() ).data() );
 
 					if( generate_normals || importData->fix_generate_flat_normals )
-						geometry_creator->generateNormals(importData->fix_generate_flat_normals);
+						geometry_creator->GenerateNormals(importData->fix_generate_flat_normals);
 
-					geometry_creator->endModel();
+					geometry_creator->EndModel();
 				}
 
 				cInterface->FSCloseFile(file);

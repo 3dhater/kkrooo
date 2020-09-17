@@ -11,11 +11,10 @@
 #include <math.h>
 
 
-
-void kkSetActiveViewport(Viewport* v)
-{
-    kkSingleton<Application>::s_instance->setActiveViewport(v);
-}
+//void kkSetActiveViewport(Viewport* v)
+//{
+//    kkSingleton<Application>::s_instance->setActiveViewport(v);
+//}
 
 Scene3D** kkGetScene3D()
 {

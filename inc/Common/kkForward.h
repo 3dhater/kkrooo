@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __KKROO_FORWARD_H__
+﻿#ifndef __KKROO_FORWARD_H__
 #define __KKROO_FORWARD_H__
 
 class kkMainSystem;
@@ -11,15 +10,16 @@ class kkCamera;
 class kkDummy;
 
 struct kkImage;
-
+struct kkGeometryInformation;
 struct kkSMesh;
 
+class kkRay;
+class kkPolygonalModel;
 class  kkMesh;
 class  kkTexture;
 class  kkShader;
-class  kkVertex;
-class  kkControlVertex;
-class  kkPolygon;
+struct  kkVertex;
+struct  kkPolygon;
 
 class kkGeometryCreator;
 class kkPluginGUI;

@@ -95,6 +95,7 @@ struct ImageContainer
 };
 
 class PolygonalModel;
+class Scene3DObject;
 class MaterialEditor
 {
 	float m_redrawOutputTimer = 0.f;

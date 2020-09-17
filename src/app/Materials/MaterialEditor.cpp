@@ -1,8 +1,8 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
 
 #include "Classes/Math/kkMath.h"
 #include "KrGui.h"
+#include "Geometry/kkPolygonalModel.h"
 
 #include "Common/kkInfoSharedLibrary.h"
 #include "../Plugins/Plugin.h"
@@ -10,18 +10,14 @@
 #include "MaterialEditor.h"
 #include "../Scene3D/Scene3D.h"
 #include "../Scene3D/Scene3DObject.h"
+#include "../Geometry/GeometryCreator.h"
 #include "../Geometry/PolygonalModel.h"
-#include "../Geometry/Polygon3D.h"
-#include "../Geometry/Vertex.h"
 #include "../Functions.h" 
 #include "Material/kkMaterial.h"
 #include "kkMaterialTypeImpl.h"
 #include "Renderer/kkRenderer.h"
 
-//#include <algorithm>
-
 using namespace Kr;
-
 constexpr float g_nodeRounding = 10.f;
 
 class kkMaterialEditorNodeEditorNodeImpl : public kkMaterialEditorNodeEditorNode

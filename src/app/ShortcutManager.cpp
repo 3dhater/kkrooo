@@ -182,9 +182,7 @@ bool ShortcutManager::init()
 
 void ShortcutManager::_load(const char16_t* fn)
 {
-
     kkString filename(fn);
-
     if( !kkFileSystem::existFile(fn) )
     {
         fprintf(stderr,"Warning! %s not found!\n",filename.to_kkStringA().data());
@@ -197,7 +195,6 @@ void ShortcutManager::_load(const char16_t* fn)
         fprintf(stderr,"Warning! Failed to read %s\n",filename.to_kkStringA().data());
         return;
     }
-
     _readXMLNodes(xml->selectNodes( u"/kkrooo_shortcuts/general" ), m_cammandNodes_General);
     _readXMLNodes(xml->selectNodes( u"/kkrooo_shortcuts/viewport" ), m_cammandNodes_Viewport);
     _readXMLNodes(xml->selectNodes( u"/kkrooo_shortcuts/camera" ), m_cammandNodes_Camera);
@@ -584,7 +581,7 @@ void ShortcutManager::_setUpXMLNode(kkArray<ShortcutCommandNode>& command_nodes,
     }
 }
 
-void ShortcutManager::_readXMLNodes(const std::vector<kkXMLNode*>& xmlnodes, kkArray<ShortcutCommandNode>& command_nodes)
+void ShortcutManager::_readXMLNodes(const kkArray<kkXMLNode*>& xmlnodes, kkArray<ShortcutCommandNode>& command_nodes)
 {
     kkString attribute_command_id        = "command_id";
     kkString attribute_keyaboard_state   = "keyaboard_state";

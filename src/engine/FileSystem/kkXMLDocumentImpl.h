@@ -70,7 +70,7 @@ class kkXMLDocumentImpl : public kkXMLDocument
 	bool XPathIsName( char16_t * ptr );
 
 	char16_t* XPathGetName( char16_t*ptr, kkString * name );
-	void XPathGetNodes( u32 level, u32 maxLevel, std::vector<kkString*> elements, kkXMLNode* node, std::vector<kkXMLNode*>* outArr );
+	void XPathGetNodes( u32 level, u32 maxLevel, std::vector<kkString*> elements, kkXMLNode* node, kkArray<kkXMLNode*>* outArr );
 public:
 
 	kkXMLDocumentImpl( const kkString& fileName );
@@ -81,7 +81,7 @@ public:
 	kkXMLNode* getRootNode();
 	void print();
 	const kkString& getText();
-	std::vector<kkXMLNode*> selectNodes( const kkString& XPath_expression );
+	kkArray<kkXMLNode*> selectNodes( const kkString& XPath_expression );
 };
 
 #endif

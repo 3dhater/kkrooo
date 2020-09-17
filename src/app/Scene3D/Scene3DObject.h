@@ -44,7 +44,6 @@ class kkMesh;
 class PolygonalModel;
 class Scene3D;
 class kkGraphicsSystem;
-class ControlVertex;
 class PluginGUIWindow;
 
 class Scene3DObjectCommon : public kkScene3DObject
@@ -272,7 +271,7 @@ class Scene3DObject : public Scene3DObjectCommon
 	//bool m_isEdgesCreated = false;
 	//std::vector<Edge*> m_edges;
 
-	PolygonalModel *  m_PolyModel       = nullptr;
+	PolygonalModel*  m_polyModel       = nullptr;
 
 	// в будущем нужно умень разбить model на множество m_HardwareModel m_SoftwareModel
 	// текущий вариант только для демонстрации
@@ -347,11 +346,7 @@ public:
 	virtual ~Scene3DObject();
 
 	void SetName( const char16_t * );
-	u64       GetPolygonCount();
-	kkPolygon * GetPolygon(u64);
-	kkArray<kkVertex*>&         GetVertexArray();
-	kkArray<kkControlVertex*>&  GetControlVertexArray();
-	kkArray<kkPolygon*>&        GetPolygonArray();
+	kkPolygonalModel* GetModel();
 
 	bool IsRayIntersect( const kkRay& ray, kkRayTriangleIntersectionResultSimple& result, kkRayTriangleIntersectionAlgorithm alg = kkRayTriangleIntersectionAlgorithm::MollerTrumbore );
 	bool IsRayIntersectMany( const kkRay& ray, std::vector<kkRayTriangleIntersectionResultSimple>& result, kkRayTriangleIntersectionAlgorithm alg = kkRayTriangleIntersectionAlgorithm::MollerTrumbore );
@@ -370,9 +365,9 @@ public:
 	// ========================
 	bool init();
 	f32 getDistanceToCamera() const { return m_distanceToCamera; }
-	void moveVerts(const kkVector4&, std::unordered_set<ControlVertex*>& );
-	void rotateVerts(const kkMatrix4&, std::unordered_set<ControlVertex*>&, const kkVector4& selectionCenter );
-	void scaleVerts(const kkMatrix4&, std::unordered_set<ControlVertex*>&, const kkVector4& selectionCenter );
+	void moveVerts(const kkVector4&, std::unordered_set<kkVertex*>& );
+	void rotateVerts(const kkMatrix4&, std::unordered_set<kkVertex*>&, const kkVector4& selectionCenter );
+	void scaleVerts(const kkMatrix4&, std::unordered_set<kkVertex*>&, const kkVector4& selectionCenter );
 	void generateNormals();
 	void deleteSelectedVerts();
 	void deleteSelectedEdges();
@@ -442,7 +437,7 @@ public:
 	void BreakVerts();
 	void ConnectVerts();
 	void ChamferVerts(f32 len, bool addPolygon);
-	void Weld(kkControlVertex* CV1, kkControlVertex* CV2);
+	void Weld(kkVertex* CV1, kkVertex* CV2);
 	void WeldSelectedVerts(f32 len);
 	void ConnectEdges();
 };

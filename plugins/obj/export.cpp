@@ -92,7 +92,7 @@ extern "C"
 
 	struct my_hash_cv
 	{
-		std::size_t operator () (kkControlVertex* const &v) const
+		std::size_t operator () (kkVertex* const &v) const
 		{
 			return (std::size_t)v;
 		}

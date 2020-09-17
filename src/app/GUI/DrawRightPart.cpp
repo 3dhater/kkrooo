@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
 
 //#include "Common/kkInfoSharedLibrary.h"
 #include "../Application.h"
@@ -161,7 +160,7 @@ void Application::_drawRightToolBar()
 	auto oldFont = m_KrGuiSystem->getCurrentFont();
 	m_KrGuiSystem->setCurrentFont(m_iconsFont);
 
-    float X = m_window_client_size.x-20;
+    float X = f32(m_window_client_size.x-20);
     m_KrGuiSystem->setDrawPointPosition(X, m_mainMenuHeight + m_mainToolBarHeight);
 	auto oldDrawPosition = m_KrGuiSystem->getDrawPointPosition();
 

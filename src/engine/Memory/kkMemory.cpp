@@ -33,27 +33,3 @@ void   kkMemory::freeAligned( void * ptr )
 	kkSingleton<kkMemorySystemImpl>::s_instance->freeAligned( ptr );
 }
 
-u64  kkMemory::getUsedMemory()
-{
-	return kkSingleton<kkMemorySystemImpl>::s_instance->getUsedMemory();
-}
-
-void  kkMemory::addUsedMemory( u64 v )
-{
-	kkSingleton<kkMemorySystemImpl>::s_instance->addUsedMemory(v);
-}
-
-void  kkMemory::subUsedMemory( u64 v )
-{
-	kkSingleton<kkMemorySystemImpl>::s_instance->subUsedMemory(v);
-}
-
-void  kkMemory::stopMemoryCounting()
-{
-	kkSingleton<kkMemorySystemImpl>::s_instance->stopMemoryCounting();
-}
-
-void  kkMemory::startMemoryCounting()
-{
-	kkSingleton<kkMemorySystemImpl>::s_instance->startMemoryCounting();
-}

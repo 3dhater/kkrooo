@@ -16,8 +16,7 @@
 #include "SceneSystem/kkSceneSystem.h"
 #include "MainSystem/kkMainSystem.h"
 #include "Geometry/kkGeometryCreator.h"
-#include "Geometry/kkVertex.h"
-#include "Geometry/kkPolygon.h"
+#include "Geometry/kkPolygonalModel.h"
 #include "GraphicsSystem/kkTexture.h"
 
 

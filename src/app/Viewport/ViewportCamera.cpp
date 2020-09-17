@@ -179,7 +179,7 @@ void ViewportCamera::reset()
         m_cameraPos_ort.set(0.f,0.f,0.f);
 	    m_zoomOrt = 1.f;
         m_kk_camera->setCameraType(kkCameraType::Custom);
-        m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
+ //       m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
         m_kk_camera->setNear(0.001f);
         
         break;
@@ -233,7 +233,7 @@ void ViewportCamera::setOwner( Viewport* v )
     case ViewportCameraType::Top:
     case ViewportCameraType::Bottom:
     default:
-        m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
+  //      m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
         break;
     }
 }
@@ -252,10 +252,6 @@ void ViewportCamera::update()
 
     m_kk_axisCamera->setPosition(m_camera_parts[_Camera::CamPos_Ax]->getPositionInSpace() - m_camera_parts[_Camera::Base_]->getPositionInSpace());
     m_kk_axisCamera->update();
-
-  //  if( m_type != ViewportCameraType::Perspective )
- //   {
-  //  }
 }
 
 kkCamera * ViewportCamera::getCamera()

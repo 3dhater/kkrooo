@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __GUIResources_H__
+﻿#ifndef __GUIResources_H__
 #define __GUIResources_H__
 
 class kkTexture;

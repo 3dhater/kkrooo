@@ -1,10 +1,10 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __GIZMO_H__
+﻿#ifndef __GIZMO_H__
 #define __GIZMO_H__
 
 #include "GraphicsSystem/kkGraphicsSystem.h"
 #include "Scene3D/kkScene3DObject.h"
 
+class Scene3DObject;
 class Gizmo
 {
 	kkGraphicsSystem * m_gs  = nullptr;

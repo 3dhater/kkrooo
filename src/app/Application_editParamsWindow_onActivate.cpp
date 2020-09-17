@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
 #include "Scene3D/Scene3D.h"
 #include "Scene3D/Scene3DObject.h"
 #include "Common/kkInfoSharedLibrary.h"
@@ -42,8 +41,8 @@ struct EditPolyObjectsGUIElements
     kkPluginGUIWindowElement * m_object_name_element = nullptr;
 }g_EditPolyObjectsGUIElements;
 
-kkControlVertex* g_pickedVertex1 = nullptr;
-kkControlVertex* g_pickedVertex2 = nullptr;
+kkVertex* g_pickedVertex1 = nullptr;
+kkVertex* g_pickedVertex2 = nullptr;
 
 Scene3DObject* GetSelectedObject()
 {

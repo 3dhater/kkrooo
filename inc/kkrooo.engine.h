@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __KKROO_H__
+﻿#ifndef __KKROO_H__
 #define __KKROO_H__
 
 #include <exception>
@@ -9,17 +8,24 @@
 #include <iostream>
 #include <cassert>
 #include <unordered_set>
+#include <list>
 
 #include "Common/kkConfig.h"
 #include "Common/kkInfo.h"
 #include "Common/kkTypes.h"
 #include "Common/kkError.h"
 #include "Memory/kkMemory.h"
+#include "Classes/Common/kkAllocator.h"
+#include "Classes/Containers/kkList.h"
+#include "Classes/Containers/kkArray.h"
 #include "Classes/Patterns/kkSingleton.h"
 #include "Classes/Common/kkBaseObject.h"
 #include "Classes/Common/kkRefObject.h"
 #include "Classes/Common/kkPtr.h"
 #include "Classes/kkColor.h"
+#include "Classes/Math/kkVector4.h"
+#include "Classes/Math/kkMatrix.h"
+#include "Classes/Math/kkRay.h"
 #include "Events/kkEvent.h"
 
 #include "MainSystem/kkMainSystem.h"

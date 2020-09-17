@@ -95,8 +95,6 @@ bool Gui::GuiSystem::addTextInput(
 // возможно нужно написать чуть по другому. чтобы было множество полей с вводом текста
 bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t buf_size, size_t char_limit, bool(*filter)(char16_t), Style* style )
 {
-	assert(value);
-
 	static size_t cursor_position = 0; // text cursor
 	static bool is_selected = false;
 	static size_t select_begin = 0; // if(select_begin==select_end)then no selection

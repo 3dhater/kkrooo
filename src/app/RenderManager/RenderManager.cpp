@@ -189,31 +189,27 @@ void RenderManager::_startRender()
 	m_buttonStop   = true;
 
 	m_currentScene = *m_app->getScene3D();
-	m_activeViewport = m_app->getActiveViewport();
+	//m_activeViewport = m_app->getActiveViewport();
 	m_activeRenderer = m_app->getActiveRenderer();
 
-	auto kkcamera = m_activeViewport->getCamera();
-	auto camera_position = kkcamera->getPositionInSpace();
-	auto frust = kkcamera->getFrustum();
+	//auto kkcamera = m_activeViewport->getCamera();
+	//auto camera_position = kkcamera->getPositionInSpace();
+	//auto frust = kkcamera->getFrustum();
 
 	kkVector4 center;
 
 	m_renderInfo.image   = m_image;
 
-	auto oldAspectRation = kkcamera->getAspect();
+	//auto oldAspectRation = kkcamera->getAspect();
 
-	kkcamera->setAspect(m_outSize.x / m_outSize.y);
-	kkcamera->update();
-	/*auto V = kkcamera->getViewMatrix();
-	auto P = kkcamera->getProjectionMatrix();
-	m_renderInfo.VPInvert = P*V;
-	m_renderInfo.VPInvert.invert();*/
-	m_renderInfo.VPInvert = kkcamera->getViewProjectionInvertMatrix();
-	m_renderInfo.VP       = kkcamera->getViewProjectionMatrix();
-	m_renderInfo.V        = kkcamera->getViewMatrix();
-	m_renderInfo.P        = kkcamera->getProjectionMatrix();
+	//kkcamera->setAspect(m_outSize.x / m_outSize.y);
+	//kkcamera->update();
+	//m_renderInfo.VPInvert = kkcamera->getViewProjectionInvertMatrix();
+	//m_renderInfo.VP       = kkcamera->getViewProjectionMatrix();
+	//m_renderInfo.V        = kkcamera->getViewMatrix();
+	//m_renderInfo.P        = kkcamera->getProjectionMatrix();
 
-	kkcamera->setAspect(oldAspectRation);
+	//kkcamera->setAspect(oldAspectRation);
 
 	m_objectsForRender.clear();
 

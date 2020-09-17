@@ -17,10 +17,6 @@
 #include "Plugins/kkPluginCommonInterface.h"
 
 struct kkTriangleRayTestResult;
-class kkPolygon;
-class kkRay;
-
-
 KK_FORCE_INLINE u64 hash_value( const v2i& v )
 {
 	union
@@ -71,13 +67,9 @@ public:
 
 	virtual void  SetName( const char16_t * ) = 0;
 	virtual const char16_t* GetName() = 0;
-	virtual u64 GetPolygonCount() = 0;
-	virtual kkPolygon* GetPolygon(u64) = 0;
 	virtual void AttachObject(kkScene3DObject*) = 0;
 
-	virtual kkArray<kkVertex*>&  GetVertexArray() = 0;
-	virtual kkArray<kkControlVertex*>&  GetControlVertexArray() = 0;
-	virtual kkArray<kkPolygon*>&  GetPolygonArray() = 0;
+	virtual kkPolygonalModel* GetModel() = 0;
 
 	// for 1 intersection
 	virtual bool IsRayIntersect( const kkRay& ray, kkRayTriangleIntersectionResultSimple& result, kkRayTriangleIntersectionAlgorithm alg = kkRayTriangleIntersectionAlgorithm::MollerTrumbore ) = 0;

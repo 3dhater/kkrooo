@@ -48,13 +48,12 @@ void Application::_processMainMenuCommand()
 void Application::_processMainMenuCommand_exportModel()
 {
 	exportModel(m_mainMenuCommand.plugin);
-	m_current_scene3D->test();
 }
 
 void Application::_processMainMenuCommand_importModel()
 {
 	importModel(m_mainMenuCommand.plugin);
-	m_geomCreator->reset();
+	m_geomCreator->Reset();
 }
 
 void Application::_processMainMenuCommand_newScene()
@@ -64,19 +63,16 @@ void Application::_processMainMenuCommand_newScene()
 
 void Application::_processMainMenuCommand_importModelWithFileName()
 {
-	//m_state_app = AppState_main::PluginGUI;
 	_openImportWindowWithAllTypes();
-	//importModel(m_mainMenuCommand.plugin);
     m_state_app = AppState_main::Idle;
-    m_active_viewport->onNewObject();
-	m_geomCreator->reset();
+ //   m_active_viewport->onNewObject();
+	m_geomCreator->Reset();
 }
 
 void              Application::_processMainMenuCommand_importModelDirectly()
 {
     m_mainMenuCommand.plugin->call_onActivate(m_plugin_interface,kkPluginGUIWindowType::Import, (const char16_t*)m_lastFilePath.data());
-
     m_state_app = AppState_main::Idle;
-    m_active_viewport->onNewObject();
-	m_geomCreator->reset();
+ //   m_active_viewport->onNewObject();
+	m_geomCreator->Reset();
 }

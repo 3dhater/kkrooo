@@ -185,7 +185,7 @@ public:
 	virtual              kkXMLNode* getRootNode() = 0;
 	virtual                    void print() = 0;
 	virtual         const kkString& getText() = 0;
-	virtual std::vector<kkXMLNode*> selectNodes( const kkString& XPath_expression ) = 0;
+	virtual kkArray<kkXMLNode*> selectNodes( const kkString& XPath_expression ) = 0;
 };
 
 #endif

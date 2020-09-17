@@ -34,8 +34,7 @@
 
 PluginCommonInterface::PluginCommonInterface(){}
 PluginCommonInterface::~PluginCommonInterface()
-{
-	
+{	
 }
 
 kkScene3D* PluginCommonInterface::GetScene()                  { return m_scene3D;         }

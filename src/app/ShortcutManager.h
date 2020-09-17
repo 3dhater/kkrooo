@@ -135,7 +135,7 @@ class ShortcutManager
 	void _load();
 
 	void _setUpXMLNode(kkArray<ShortcutCommandNode>& , const char16_t* , kkXMLNode*);
-	void _readXMLNodes(const std::vector<kkXMLNode*>& xmlnodes, kkArray<ShortcutCommandNode>& );
+	void _readXMLNodes(const kkArray<kkXMLNode*>& xmlnodes, kkArray<ShortcutCommandNode>& );
 
 
 public:

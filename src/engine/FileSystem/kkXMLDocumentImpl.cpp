@@ -938,9 +938,9 @@ char16_t* kkXMLDocumentImpl::XPathGetName( char16_t*ptr, kkString * name )
 	return ptr;
 }
 
-std::vector<kkXMLNode*> kkXMLDocumentImpl::selectNodes( const kkString& XPath_expression )
+kkArray<kkXMLNode*> kkXMLDocumentImpl::selectNodes( const kkString& XPath_expression )
 {
-	std::vector<kkXMLNode*> a;
+	kkArray<kkXMLNode*> a = kkArray<kkXMLNode*>(0xff);
 
 	if( !m_isInit )
 	{
@@ -1061,7 +1061,8 @@ void kkXMLDocumentImpl::XPathGetNodes(
 	u32 maxLevel, 
 	std::vector<kkString*> elements, 
 	kkXMLNode* node, 
-	std::vector<kkXMLNode*>* outArr ){
+	kkArray<kkXMLNode*>* outArr )
+{
 //_______________________________
 	if( node->name == *elements[ level ] )
 	{	

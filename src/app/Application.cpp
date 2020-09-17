@@ -38,7 +38,6 @@
 #include "Shaders/ShaderScene3DObjectDefault_polymodeforlinerender.h"
 
 #include "Materials/MaterialEditor.h"
-#include "GUI/GUIResources.h"
 
 #include <chrono>
 #include <sstream>
@@ -61,7 +60,7 @@ using namespace Kr;
 template<>
 Application* kkSingleton<Application>::s_instance = nullptr;
 
-extern ViewportMouseState g_mouseState;
+//extern ViewportMouseState g_mouseState;
 
 template<>
 PluginCommonInterface* kkSingleton<PluginCommonInterface>::s_instance = nullptr;
@@ -135,12 +134,10 @@ Application::~Application()
     if( m_geomCreator )
         kkDestroy(m_geomCreator);
 
-    if( m_main_viewport )
+    /*if( m_main_viewport )
     {
         kkDestroy(m_main_viewport);
-    }
-
-    
+    }*/
 }
 
 void Application::_init_OS_Windows()
@@ -328,8 +325,8 @@ void Application::init()
 #endif
 
     _init_events();
-    _init_scene();
     _init_shortcuts();
+    _init_scene();
     _init_mainWindow();
     _init_gs();
     _init_materialEditor(true);
@@ -348,59 +345,48 @@ void Application::init()
     _init_plugins();
    // _init_materialEditorWindow();
     _init_krgui();
-
     _init_input();
 
     m_commonGUIStyle.groupBackgroundAlpha = 0.f;
     m_commonGUIStyle.buttonBackgroundAlpha = 0.f;
     m_commonGUIStyle.buttonIdleColor1 = 0xffFFFFFF;
     m_commonGUIStyle.buttonIdleColor2 = 0xffFFFFFF;
-
     updateBuffers();
     _updateColorTheme();
     
     _init_renderManager();
     
 
+
     // гизмо создаётся перед передачей указателя на него во вьюпорт
     // потом нужно создать сцену, и уже потом инициализировать
-	m_gizmo = kkCreate<Gizmo>();
-
-    
+    m_gizmo = kkCreate<Gizmo>();    
+    m_gizmo->setGraphicsSystem( m_gs.ptr() );
     m_geomCreator = kkCreate<GeometryCreator>();
     m_plugin_interface->m_geomCreator = m_geomCreator;
-
-    _init_GUIResources();
-    
-    _resetViewports();
-    resetScene3D();
-    
-    m_gizmo->setGraphicsSystem( m_gs.ptr() );
+    _init_GUIResources();    
+    resetScene3D();    
+    //_resetViewports();
     m_gizmo->init();
 
-    updateViewports();
+   /* updateViewports();
     
     _initEditParamsWindow();
 
-    _init_materialEditor(false);
+    _init_materialEditor(false);*/
     
 
     m_guiMainWindow.OSWindow = m_mainWindow->getHandle();
-    m_guiMaterialEditorWindow.OSWindow = m_materialEditorWindow->getHandle();
-    m_guiRenderWindow.OSWindow = m_renderWindow->getHandle();
-    m_guiImportExportWindow.OSWindow = m_importExportWindow->getHandle();
+ //   m_guiMaterialEditorWindow.OSWindow = m_materialEditorWindow->getHandle();
+ //   m_guiRenderWindow.OSWindow = m_renderWindow->getHandle();
+ //   m_guiImportExportWindow.OSWindow = m_importExportWindow->getHandle();
 
-    setActiveRenderer(m_renderers[0]);
+ //   setActiveRenderer(m_renderers[0]);
 
     ShowWindow((HWND)m_mainWindow->getHandle(), SW_MAXIMIZE);
 
-    m_gs->useBackFaceCulling(true);
+ //   m_gs->useBackFaceCulling(true);
     setNeedToSave(false);
-
-    //SetParent((HWND)m_materialEditorNewMaterialWindow->getHandle(),(HWND)m_mainWindow->getHandle());
-    //EnableWindow((HWND)m_mainWindow->getHandle(), FALSE);
-    //m_materialEditorNewMaterialWindow->show();
-
 }
 
 bool Application::isSelectedObjectNeedConvert()
@@ -441,19 +427,19 @@ void Application::setActiveRenderer(kkRenderer* renderer)
     m_activeRenderer = renderer;
 }
 
-void Application::setActiveViewport(Viewport* v)
-{
-    if( m_active_viewport )
-    {
-        m_active_viewport->setActive(false);
-    }
-
-    if( v )
-    {
-        v->setActive( true );
-        m_active_viewport = v;
-    }
-}
+//void Application::setActiveViewport(Viewport* v)
+//{
+//    if( m_active_viewport )
+//    {
+//        m_active_viewport->setActive(false);
+//    }
+//
+//    if( v )
+//    {
+//        v->setActive( true );
+//        m_active_viewport = v;
+//    }
+//}
 
 
 void Application::run()
@@ -474,7 +460,7 @@ void Application::run()
 
             if( m_cursor_position.x < -4000 ) m_cursor_position.x = 0;
             if( m_cursor_position.y < -4000 ) m_cursor_position.y = 0;
-            m_mouseWheel = Kr::Gui::GuiSystem::m_wheel_delta;
+            m_mouseWheel = (f32)Kr::Gui::GuiSystem::m_wheel_delta;
         }
 
         
@@ -505,26 +491,39 @@ void Application::run()
         if( !m_minimized )
         {
             
-            m_shortcutManager->onFrame();
+            if(m_shortcutManager.ptr())
+            {
+                m_shortcutManager->onFrame();
+            }
             
             m_cursorInGUI = false;
 
-		    drawAll();
-
-            if( m_event_consumer->m_input_update )
+            if(m_gs.ptr())
             {
-                this->updateInput();
+		        drawAll();
             }
 
-            _updateKeyboard();
+            if(m_event_consumer)
+            {
+                if( m_event_consumer->m_input_update )
+                {
+                    this->updateInput();
+                }
+                _updateKeyboard();
+            }
 
-            m_active_viewport->onFrame();
+            /*if(m_active_viewport)
+            {
+                m_active_viewport->onFrame();
+            }*/
 
-            _onEndFrame();
+            if(m_event_consumer)
+                _onEndFrame();
         }
         //kkColor
         //kkString
         //printf("Time: %f \n", (work_time + sleep_time).count());
+        if(m_mouseWheel) this->quit();
 	}
 }
 
@@ -569,7 +568,7 @@ void Application::onWindowActivate()
     m_cursor_position.set(0,0);
     m_currentGizmoEvent.reset();
     _clearAppEvents();
-    m_active_viewport->onWindowActivate();
+    //m_active_viewport->onWindowActivate();
 }
 
 void Application::_updateKeyboard()
@@ -616,7 +615,10 @@ void Application::drawEnd()
 
 void Application::drawViewport()
 {
-    m_main_viewport->draw();
+    /*if(m_main_viewport)
+    {
+        m_main_viewport->draw();
+    }*/
 }
 
 void Application::onWindowSize()
@@ -633,59 +635,80 @@ void Application::drawAll()
         drawBegin();
         drawViewport();
 
-        m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
-        // тут рисование в главное окно
-        _drawMainMenuBar();
-        _drawMainToolBar();
-        _drawLeftToolBar();
-        _drawRightToolBar();
-       /* if( m_KrGuiSystem->addButton() ) printf("Simple button\n");
-		if( m_KrGuiSystem->addButton(0,0,Gui::Vec2f(20,10)) ) printf("With size\n");
-		if( m_KrGuiSystem->addButton(u"Button") ) printf("With text\n");
-		if( m_KrGuiSystem->addButton(u"B",0,Gui::Vec2f(30,20)) ) printf("Wider than text\n");*/
-        m_KrGuiSystem->render();
+        if(m_KrGuiSystem)
+        {
+            m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
+            // тут рисование в главное окно
+            _drawMainMenuBar();
+            _drawMainToolBar();
+            _drawLeftToolBar();
+            _drawRightToolBar();
+           /* if( m_KrGuiSystem->addButton() ) printf("Simple button\n");
+		    if( m_KrGuiSystem->addButton(0,0,Gui::Vec2f(20,10)) ) printf("With size\n");
+		    if( m_KrGuiSystem->addButton(u"Button") ) printf("With text\n");
+		    if( m_KrGuiSystem->addButton(u"B",0,Gui::Vec2f(30,20)) ) printf("Wider than text\n");*/
+            m_KrGuiSystem->render();
+        }
 
         drawEnd();
     
         _processMainMenuCommand();
     }
    
-    if( m_materialEditorWindow->isVisible() )
+    if(m_materialEditorWindow.ptr())
     {
-        m_gs->setActive(m_materialEditorWindow.ptr());
-        m_gs->update();
-	    m_gs->beginDraw(m_isClearCanvas);
-        m_KrGuiSystem->switchWindow(&m_guiMaterialEditorWindow);
-        m_materialEditor->drawWindow();
-        m_KrGuiSystem->render();
-        m_gs->endDraw();
+        if( m_materialEditorWindow->isVisible() )
+        {
+            m_gs->setActive(m_materialEditorWindow.ptr());
+            m_gs->update();
+	        m_gs->beginDraw(m_isClearCanvas);
+            if(m_KrGuiSystem)
+            {
+                m_KrGuiSystem->switchWindow(&m_guiMaterialEditorWindow);
+                m_materialEditor->drawWindow();
+                m_KrGuiSystem->render();
+            }
+            m_gs->endDraw();
+        }
     }
 
-    if( m_renderWindow->isVisible() )
+    if(m_renderWindow.ptr())
     {
-        m_gs->setActive(m_renderWindow.ptr());
-        m_gs->update();
-	    m_gs->beginDraw(m_isClearCanvas);
-        m_KrGuiSystem->switchWindow(&m_guiRenderWindow);
-        m_renderManager->drawWindow();
-        m_KrGuiSystem->render();
-        m_gs->endDraw();
+        if( m_renderWindow->isVisible() )
+        {
+            m_gs->setActive(m_renderWindow.ptr());
+            m_gs->update();
+	        m_gs->beginDraw(m_isClearCanvas);
+            if(m_KrGuiSystem)
+            {
+                m_KrGuiSystem->switchWindow(&m_guiRenderWindow);
+                m_renderManager->drawWindow();
+                m_KrGuiSystem->render();
+            }
+            m_gs->endDraw();
+        }
     }
 
-    if( m_importExportWindow->isVisible() )
+    if(m_importExportWindow.ptr())
     {
-        m_gs->setActive(m_importExportWindow.ptr());
-        m_gs->update();
-	    m_gs->beginDraw(m_isClearCanvas);
-        m_KrGuiSystem->switchWindow(&m_guiImportExportWindow);
-        m_importExportGUIWindow->draw();
-        //m_renderManager->drawWindow();
-        m_KrGuiSystem->render();
-        m_gs->endDraw();
+        if( m_importExportWindow->isVisible() )
+        {
+            m_gs->setActive(m_importExportWindow.ptr());
+            m_gs->update();
+	        m_gs->beginDraw(m_isClearCanvas);
+            if(m_KrGuiSystem)
+            {
+                m_KrGuiSystem->switchWindow(&m_guiImportExportWindow);
+                m_importExportGUIWindow->draw();
+                //m_renderManager->drawWindow();
+                m_KrGuiSystem->render();
+            }
+            m_gs->endDraw();
+        }
     }
 
-
-	m_KrGuiSystem->endFrame();
+    if(m_KrGuiSystem)
+	    m_KrGuiSystem->endFrame();
 }
 
 void Application::clearColor(bool v)
@@ -695,7 +718,10 @@ void Application::clearColor(bool v)
 
 void Application::quit()
 {
-    m_renderManager->stopRender();
+    if(m_renderManager.ptr())
+    {
+        m_renderManager->stopRender();
+    }
     // Спросить о сохранении если нужно
     if( m_need_to_save )
     {
@@ -733,14 +759,19 @@ void Application::updateBuffers()
 
     //m_gs->get_active_camera()->set_aspect((f32)m_window_client_size.x/(f32)m_window_client_size.y);
     //m_gs->get_active_camera()->update();
-
-    m_gs->update();
+    if(m_gs.ptr())
+    {
+        m_gs->update();
+    }
 }
 
 void Application::updateViewports()
 {
     /// m_main_viewport обновит всех дочерних
-    m_main_viewport->update();
+    /*if(m_main_viewport)
+    {
+        m_main_viewport->update();
+    }*/
 }
 
 void Application::setStateKeyboard(AppState_keyboard s)
@@ -797,55 +828,48 @@ void Application::updateInput()
         {
             if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
             {
-                m_main_viewport->updateInput();
-                m_main_viewport->updateInputCamera();
+                //m_main_viewport->updateInput();
+                //m_main_viewport->updateInputCamera();
             }
         }
         else
         {
-            m_main_viewport->checkMouseEvents();
+           //m_main_viewport->checkMouseEvents();
         }
 
         if(m_objectPickMode && m_event_consumer->isLmbDown() && !m_cursorInGUI)
         {
             m_objectPickMode = false;
             m_globalInputBlock = false;
-            auto pickobject = m_main_viewport->pickObject();
+            /*auto pickobject = m_main_viewport->pickObject();
             if(pickobject && m_objectPickCallback)
             {
                 m_objectPicked = pickobject;
                 m_objectPickCallback(0, this);
-            }
+            }*/
         }
 
 
         if(m_vertexPickMode)
         {
-            m_main_viewport->updateInputCamera();
+            //m_main_viewport->updateInputCamera();
         }
         if(m_vertexPickMode && m_event_consumer->isLmbDownOnce() && !m_cursorInGUI)
         {
-            //m_vertexPickMode = false;
-            //m_globalInputBlock = false;
-
             // данный код должен вызываться изначально с выбранной полигональной моделью
-            auto pickVertex = m_main_viewport->pickVertex((Scene3DObject*)m_current_scene3D->getSelectedObject(0));
+            /*auto pickVertex = m_main_viewport->pickVertex((Scene3DObject*)m_current_scene3D->getSelectedObject(0));
             if(pickVertex && m_vertexPickCallback)
             {
                 m_vertexPicked = pickVertex;
                 m_vertexPickCallback(0, this);
-            }
-            //else
-            //{
-            //    setDrawPickLine(false);
-            //}
+            }*/
         }
 
         // обработка тех горячих клавиш, действие команд которых более шире чем у например узкоспециализированных типа вьюпорта
         // вполне возможно что для редактора текстурных координат (или чего-то ещё) придётся делать свой _processShortcuts
         //if(!this->isGlobalInputBlocked())
         {
-             m_main_viewport->processShortcuts();
+//             m_main_viewport->processShortcuts();
             _processShortcuts();
         }
     }
@@ -854,13 +878,13 @@ void Application::updateInput()
 void Application::setDrawPickLine(bool v)
 {
     //m_drawPickLine = v;
-    m_active_viewport->setDrawPickLine(v);
+   // m_active_viewport->setDrawPickLine(v);
 }
 
 void Application::_deleteSelectedObjects()
 {
     m_current_scene3D->deleteSelectedObjects();
-    m_active_viewport->onDeleteObjects();
+    //m_active_viewport->onDeleteObjects();
 }
 
 
@@ -967,10 +991,7 @@ void Application::resetScene3D()
 
 
     m_sceneName = u"untitled";
-
-    m_main_viewport->onDeleteObjects();
-
-
+    //m_main_viewport->onDeleteObjects();
     if( m_current_scene3D )
     {
         kkDestroy(m_current_scene3D);
@@ -980,8 +1001,7 @@ void Application::resetScene3D()
     m_plugin_interface->m_scene3D = m_current_scene3D;
     m_geomCreator->m_scene3D     = m_current_scene3D;
 
-    m_active_viewport->onNewObject();
-
+    //m_active_viewport->onNewObject();
     this->setEditMode(EditMode::Object);
     setNeedToSave(false);
 }
@@ -1041,7 +1061,7 @@ bool Application::importModel(Plugin* pl)
     }
 
     m_state_app = AppState_main::Idle;
-    m_active_viewport->onNewObject();
+    //m_active_viewport->onNewObject();
 
     return true;
 }
@@ -1110,7 +1130,7 @@ bool Application::exportModel(Plugin* pl)
 
     m_state_app = AppState_main::Idle;
     
-    m_active_viewport->onNewObject();
+    //m_active_viewport->onNewObject();
 
     return true;
 }
@@ -1393,37 +1413,37 @@ kkString Application::getOpenFileName(const char16_t* file_desc, const char16_t*
     return result;
 }
 
-void Application::_resetViewports()
-{
-    if( m_main_viewport )
-    {
-        m_main_viewport->m_mainViewport = nullptr;
-        kkDestroy(m_main_viewport);
-    }
-
-    ViewportData vd;
-    vd.m_current_color_theme = &m_current_color_theme;
-    vd.m_gs                  = m_gs.ptr();
-    vd.m_window_client_size  = &m_window_client_size;
-    vd.m_state_app           = &m_state_app;
-    vd.m_state_keyboard      = &m_state_keyboard;
-    vd.m_cursor_position     = &m_cursor_position;
-    vd.m_mouseWheel          = &m_mouseWheel;
-    vd.m_event_consumer      = m_event_consumer.get();
-    vd.m_app                 = this;
-    vd.m_GUIResources        = m_guiResources.ptr();
-    vd.m_shortcutManager     = m_shortcutManager.ptr();
-    vd.m_deltaTime           = m_main_system->getDeltaTime();
-    vd.m_gizmo               = m_gizmo.ptr();
-    
-    m_main_viewport          = kkCreate<Viewport>(vd);
-    m_main_viewport->initMaximizedViewport();
-
-    setActiveViewport(m_main_viewport);
-    m_main_viewport->m_mainViewport = m_main_viewport;
-
-    m_main_viewport->update();
-}
+//void Application::_resetViewports()
+//{
+//    if( m_main_viewport )
+//    {
+//        m_main_viewport->m_mainViewport = nullptr;
+//        kkDestroy(m_main_viewport);
+//    }
+//
+//    ViewportData vd;
+//    vd.m_current_color_theme = &m_current_color_theme;
+//    vd.m_gs                  = m_gs.ptr();
+//    vd.m_window_client_size  = &m_window_client_size;
+//    vd.m_state_app           = &m_state_app;
+//    vd.m_state_keyboard      = &m_state_keyboard;
+//    vd.m_cursor_position     = &m_cursor_position;
+//    vd.m_mouseWheel          = &m_mouseWheel;
+//    vd.m_event_consumer      = m_event_consumer.get();
+//    vd.m_app                 = this;
+//    vd.m_GUIResources        = m_guiResources.ptr();
+//    vd.m_shortcutManager     = m_shortcutManager.ptr();
+//    vd.m_deltaTime           = m_main_system->getDeltaTime();
+//    vd.m_gizmo               = m_gizmo.ptr();
+//    
+//    m_main_viewport          = kkCreate<Viewport>(vd);
+//    m_main_viewport->initMaximizedViewport();
+//
+//    setActiveViewport(m_main_viewport);
+//    m_main_viewport->m_mainViewport = m_main_viewport;
+//
+//    m_main_viewport->update();
+//}
 
 
 void Application::drawToolTip(const char* text)
@@ -1458,7 +1478,7 @@ void Application::setVertexPickMode(void(*callback)(s32 id, void* data))
     m_globalInputBlock = true;
     m_vertexPickCallback = callback;
 }
-kkControlVertex* Application::getPickedVertex()
+kkVertex* Application::getPickedVertex()
 {
     return m_vertexPicked;
 }
@@ -2125,7 +2145,7 @@ void Application::_onEndFrame()
         //   убираю видимость активной части гизмо
     }
     
-    m_active_viewport->updateCursorRay();
+    //m_active_viewport->updateCursorRay();
 
     // попробую здесь настроить перемещение объектов...
     if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)

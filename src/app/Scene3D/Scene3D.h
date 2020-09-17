@@ -17,14 +17,13 @@ class PolygonalModel;
 class Application ;
 class Gizmo;
 class ViewportCamera;
-class ControlVertex;
 struct CursorRay;
 struct SelectionFrust;
 
 struct ObjectVertexSelectInfo
 {
 	Scene3DObject* m_object = nullptr;
-	std::unordered_set<ControlVertex*> m_verts;
+	//std::unordered_set<ControlVertex*> m_verts;
 };
 
 class Scene3D : public kkScene3D
@@ -103,7 +102,6 @@ public:
 
 
 	// ========================
-	void test();
 	void ignoreDeselect(){ m_ignoreDeselect = true; }
 
 	void      updateObjectVertexSelectList();

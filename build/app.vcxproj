@@ -58,9 +58,7 @@
     <ClCompile Include="..\src\app\Fonts.cpp" />
     <ClCompile Include="..\src\app\Functions.cpp" />
     <ClCompile Include="..\src\app\Geometry\GeometryCreator.cpp" />
-    <ClCompile Include="..\src\app\Geometry\Polygon3D.cpp" />
     <ClCompile Include="..\src\app\Geometry\PolygonalModel.cpp" />
-    <ClCompile Include="..\src\app\Geometry\Vertex.cpp" />
     <ClCompile Include="..\src\app\Gizmo.cpp" />
     <ClCompile Include="..\src\app\GUI\DrawRightPart.cpp" />
     <ClCompile Include="..\src\app\GUI\GUIResources.cpp" />
@@ -98,9 +96,7 @@
     <ClInclude Include="..\src\app\EventConsumer.h" />
     <ClInclude Include="..\src\app\Functions.h" />
     <ClInclude Include="..\src\app\Geometry\GeometryCreator.h" />
-    <ClInclude Include="..\src\app\Geometry\Polygon3D.h" />
     <ClInclude Include="..\src\app\Geometry\PolygonalModel.h" />
-    <ClInclude Include="..\src\app\Geometry\Vertex.h" />
     <ClInclude Include="..\src\app\Gizmo.h" />
     <ClInclude Include="..\src\app\GUI\GUIResources.h" />
     <ClInclude Include="..\src\app\Materials\kkMaterialTypeImpl.h" />
@@ -306,7 +302,7 @@
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
-      <AdditionalDependencies>kkrooo.engine_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kkrooo.engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

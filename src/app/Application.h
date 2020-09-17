@@ -23,8 +23,8 @@
 #include "Window/kkWindow.h"
 #include "GraphicsSystem/kkGraphicsSystem.h"
 #include "GUI/ColorTheme.h"
-#include "Viewport/Viewport.h"
-//#include "GUI/GUIResources.h"
+//#include "Viewport/Viewport.h"
+#include "GUI/GUIResources.h"
 
 
 #define KKROOO kkSingleton<Application>::s_instance
@@ -185,8 +185,8 @@ class Application
 	v2i m_window_size;
 
 
-	Viewport * m_main_viewport      = nullptr;
-	Viewport * m_active_viewport    = nullptr;
+	//Viewport * m_main_viewport      = nullptr;
+	//Viewport * m_active_viewport    = nullptr;
 
 	AppState_main       m_state_app       = AppState_main::Idle;
 	AppState_keyboard   m_state_keyboard  = AppState_keyboard::None;
@@ -257,7 +257,7 @@ class Application
 	bool   m_drawPivotToolWindow = false;
     void   _drawPivotToolWindow();
 
-	void _resetViewports();
+	//void _resetViewports();
 	void _processShortcuts();
 
 	bool m_minimized = false;
@@ -325,7 +325,7 @@ class Application
 	void (*m_objectPickCallback)(s32 id, void* data) = nullptr;
 
 	bool m_vertexPickMode = false;
-	kkControlVertex* m_vertexPicked = nullptr;
+	kkVertex* m_vertexPicked = nullptr;
 	void (*m_vertexPickCallback)(s32 id, void* data) = nullptr;
 
 	//bool m_drawPickLine = false;
@@ -372,18 +372,14 @@ public:
 	void onWindowRestore();
 	void onWindowMaximize();
 
-	Viewport * getActiveViewport()
+	/*Viewport * getActiveViewport()
 	{
 		return m_active_viewport;
-	}
+	}*/
 
 	void drawAll();
-
 	void onWindowSize();
-
-	
 	void drawToolTip(const char*);
-
 	void setSelectMode( SelectMode );
 	void setEditMode( EditMode );
 	EditMode getEditMode(){ return m_editMode; }
@@ -458,7 +454,7 @@ public:
 	kkScene3DObject* getPickedObject();
 	
 	void setVertexPickMode(void(*)(s32 id, void* data));
-	kkControlVertex* getPickedVertex();
+	kkVertex* getPickedVertex();
 
 	void setDrawPickLine(bool);
 };

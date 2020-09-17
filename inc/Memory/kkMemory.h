@@ -14,13 +14,6 @@ public:
 
 	KK_API static void* allocateAligned( u64 size, u64 align );
 	KK_API static void  freeAligned( void * ptr );
-
-	KK_API static u64 getUsedMemory();
-	KK_API static void  addUsedMemory( u64 );
-	KK_API static void  subUsedMemory( u64 );
-	KK_API static void  stopMemoryCounting();
-	KK_API static void  startMemoryCounting();
-
 };
 
 template<typename _type>

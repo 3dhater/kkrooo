@@ -1,9 +1,54 @@
-п»ї// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __KKPOLYGON_H__
-#define __KKPOLYGON_H__
+#ifndef __KKVERTEX_H__
+#define __KKVERTEX_H__
 
-#include "Classes/Math/kkRay.h"
-#include "Plugins/kkPluginCommonInterface.h"
+#include "Classes/Math/kkVector4.h"
+#include "Classes/Containers/kkList.h"
+
+//void kkVertex_addPolygon(kkVertex*, kkPolygon*);
+
+template<typename T>
+struct kkLoopNode
+{
+	kkLoopNode<T> * m_left  = nullptr;
+	kkLoopNode<T> * m_right = nullptr;
+
+	T * m_element = nullptr;
+};
+
+struct kkEdge
+{
+	// вершины образующие ребро
+	// вершины должны принадлежать одному полигону
+	kkVertex * m_v1 = nullptr;
+	kkVertex * m_v2 = nullptr;
+
+	// у ребра может быть 1 или 2 полигона
+	kkPolygon* m_p1 = nullptr;
+	kkPolygon* m_p2 = nullptr;
+};
+
+struct kkPolygon
+{
+	// предидущий\следующий в главном списке
+	kkPolygon* m_mainPrev = nullptr;
+	kkPolygon* m_mainNext = nullptr;
+
+	kkLoopNode<kkVertex> * m_verts = nullptr;
+	u64        m_vertexCount = 0;
+};
+
+struct kkVertex
+{
+	kkVector4 m_position;
+	kkVector4 m_normal;
+
+	// предидущий\следующий в главном списке
+	kkVertex* m_mainPrev = nullptr;
+	kkVertex* m_mainNext = nullptr;
+	
+	kkLoopNode<kkPolygon> * m_polygons = nullptr;
+	u64 m_polygonCount = 0;
+};
 
 struct kkTriangle
 {
@@ -42,7 +87,6 @@ struct kkTriangle
 	{
 		kkVector4  pvec = ray.m_direction.cross_return(e2);
 		f32 det  = e1.dot(pvec);
-		//printf("det %f\n",det);
 		
 		if( withBackFace )
 		{
@@ -60,8 +104,6 @@ struct kkTriangle
 			ray.m_origin._f32[1] - v1._f32[1],
 			ray.m_origin._f32[2] - v1._f32[2],
 			0.f);
-
-		//tvec.setW(1.f);//...
 
 		f32 inv_det = 1.f / det;
 		U = tvec.dot(pvec) * inv_det;
@@ -164,48 +206,34 @@ struct kkTriangle
 	}
 };
 
-// РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё РЅРѕРІС‹С… СЌР»РµРјРµРЅС‚РѕРІ РЅСѓР¶РЅРѕ СЃРґРµР»Р°С‚СЊ РѕР±РЅРѕРІР»РµРЅРёРµ РІ РєРѕРїРёСЂРѕРІР°РЅРёРё РІРЅСѓС‚СЂРё РјРµС‚РѕРґР° _rayTestTriangle
+// при добавлении новых элементов нужно сделать обновление в копировании внутри метода _rayTestTriangle
 struct kkTriangleRayTestResult
 {
 	kkTriangle triangle;
 
 	// read only
-	// Р·Р°РїРѕР»РЅСЏСЋС‚СЃСЏ РїСЂРё rayTest
-	// РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїСЂРё СѓР¶Рµ СЃР°РјРѕРј СЂРµРЅРґРµСЂРёРЅРіРµ
+	// заполняются при rayTest
+	// используется при уже самом рендеринге
 	float length = 0.f;
 	kkVector4 intersectionPoint;
 	kkVector4 pointNormal;
 	kkVector4 pointTcoord;
 	kkMaterialImplementation* material = nullptr;
-	/*kkScene3DObject * object = nullptr;*/
 
-	u32 index = 0; // РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ
+	u32 index = 0; // порядковый номер
 };
 
-
-
-class kkVertex;
-class kkPolygon
+class kkPolygonalModel
 {
 public:
-	kkPolygon(){}
-	virtual ~kkPolygon(){}
+	kkPolygonalModel(){}
+	virtual ~kkPolygonalModel(){}
 
-	virtual kkArray<kkVertex*>& GetVerts() = 0;
-
-	// РїРѕРјРµС‚РёС‚СЊ РїРѕР»РёРіРѕРЅ РЅР° СѓРґР°Р»РµРЅРёРµ
-	virtual void MarkToDelete() = 0;
-	virtual void RemoveMarkToDelete() = 0;
-	virtual bool IsToDelete() = 0;
-	virtual bool IsSelected() = 0;
-	virtual void Select() = 0;
-	virtual void Deselect() = 0;
-	virtual void CalculateNormals() = 0;
-	virtual void Flip() = 0;
-	virtual kkVector4& GetNormal() = 0;
-	virtual void InsertVertex( kkVertex* between_v1, kkVertex* between_v2) = 0;
-	// СѓРґР°Р»РёС‚СЊ РёР· РїРѕР»РёРіРѕРЅР° РЅРѕ РЅРµ РёР· РјРѕРґРµР»Рё Рё РЅРµ РёР· РїР°РјСЏС‚Рё
+	virtual kkPolygon* GetPolygons() = 0;
+	virtual u64 GetPolygonsCount() = 0;
+	virtual void DeletePolygon(kkPolygon*) = 0;
 	//virtual void DeleteVertex(kkVertex*) = 0;
+	virtual void AddPolygon(kkGeometryInformation* p,bool weld, bool triangulate, bool flip) = 0;
 };
 
 #endif

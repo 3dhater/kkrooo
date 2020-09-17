@@ -172,11 +172,11 @@ bool Gui::GuiSystem::addRangeSliderInt( int minimum, int maximum, int * value, c
 	{
 		if( isHorizontal )
 		{
-			*value += (int)(m_mouseDelta.x * rangeStepX * speed);
+			*value += (int)ceil(m_mouseDelta.x * rangeStepX * speed);
 		}
 		else
 		{
-			*value -= (int)(m_mouseDelta.y * rangeStepY * speed);
+			*value -= (int)ceil(m_mouseDelta.y * rangeStepY * speed);
 		}
 		if( *value > maximum ) *value = maximum;
 		if( *value < minimum ) *value = minimum;

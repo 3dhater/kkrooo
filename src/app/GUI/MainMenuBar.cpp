@@ -260,7 +260,7 @@ void Application::_drawMainMenuBar()
 					m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
                     if( m_KrGuiSystem->addMenuItem(u"Reset", 0, 0 ))
 					{
-						_resetViewports();
+//						_resetViewports();
 					}
 					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
 						m_cursorInGUI = true;

@@ -77,7 +77,7 @@ void planeCallback(s32 id, void * d )
 	float uv_segment_size_h = 1.f / (float)plane_data->height_segments;
 	float uv_segment_size_w = 1.f / (float)plane_data->width_segments;
 
-	gc->beginModel(v4f(pivot[0],pivot[1],pivot[2]));
+	gc->BeginModel(v4f(pivot[0],pivot[1],pivot[2]));
 
 	float begin_x = 0.f;
 	float begin_z = 0.f;
@@ -89,28 +89,25 @@ void planeCallback(s32 id, void * d )
 	{
 		for( u32 w_i = 0; w_i < plane_data->width_segments; ++w_i )
 		{
-			gc->beginPolygon();
-				gc->beginVertex(0);
-					gc->setPosition(begin_x-half_width,   0,   begin_z-half_height);
-					gc->setNormal(0.,1.,0.);
-					gc->setUV(uv_begin_x, uv_begin_y);
-				gc->endVertex();
-				gc->beginVertex(1);
-					gc->setPosition(begin_x-half_width,  0,   begin_z+segment_size_h-half_height);
-					gc->setNormal(0.,1.,0.);
-					gc->setUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
-				gc->endVertex();
-				gc->beginVertex(2);
-					gc->setPosition(begin_x+segment_size_w-half_width,  0,   begin_z+segment_size_h-half_height);
-					gc->setNormal(0.,1.,0.);
-					gc->setUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
-				gc->endVertex();
-				gc->beginVertex(3);
-					gc->setPosition(begin_x+segment_size_w-half_width,  0,   begin_z-half_height);
-					gc->setNormal(0.,1.,0.);
-					gc->setUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
-				gc->endVertex();
-			gc->endPolygon(1,0,0);
+			gc->BeginPolygon();
+			
+			gc->AddPosition(begin_x-half_width,   0,   begin_z-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x, uv_begin_y);
+			
+			gc->AddPosition(begin_x-half_width,  0,   begin_z+segment_size_h-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(begin_x+segment_size_w-half_width,  0,   begin_z+segment_size_h-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(begin_x+segment_size_w-half_width,  0,   begin_z-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
+			
+			gc->EndPolygon(1,0,0);
 
 			begin_x += segment_size_w;
 			uv_begin_x += uv_segment_size_w;
@@ -130,8 +127,8 @@ void planeCallback(s32 id, void * d )
 	}
 
 
-	gc->setName(name.data());
-	auto new_object = gc->endModel();
+	gc->SetName(name.data());
+	auto new_object = gc->EndModel();
 
 	new_object->SetPluginGUIWindow(plane_data->window);
 	scene->deselectAll();
