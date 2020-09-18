@@ -1,6 +1,6 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#define KRGUI_DEFAULT_FONT_FILE_PATH "../res/gui/defaultFont.data"
+﻿#define KRGUI_DEFAULT_FONT_FILE_PATH "../res/gui/defaultFont.data"
 #include "kkrooo.engine.h"
+#include "Common.h"
 
 #include "FileSystem/kkFileSystem.h"
 #include "Common/kkUtil.h"
@@ -29,6 +29,7 @@
 #include "Input/kkInputSystem.h"
 
 
+#include "Viewport/Viewport.h"
 #include "Gizmo.h"
 
 #include "Shaders/simple.h"
@@ -80,11 +81,6 @@ struct PluginCommonInterface_t
     }
     PluginCommonInterface * m_plugin_interface = nullptr;
 }g_PluginCommonInterface;
-
-
-
-
-//kkTexture * g_testTexture =nullptr;
 
 Application::Application()
 {
@@ -312,6 +308,18 @@ void Application::_init_renderManager()
     m_renderManager->init(m_gs.ptr(), m_KrGuiSystem, m_renderWindow.ptr());
 }
 
+void Application::_init_viewports()
+{
+    v4f indent;
+    indent.x = m_leftToolBarWidth;
+    indent.y = m_mainMenuHeight + m_mainToolBarHeight;
+    indent.z = m_leftToolBarWidth;
+    indent.w = m_bottomAreaHeight;
+    m_mainViewport = kkCreate<Viewport>();
+    m_mainViewport->init(ViewportType::Main, ViewportLayoutType::ParallelHor, indent);
+    m_mainViewport->update(m_window_client_size);
+}
+
 void Application::init()
 {
 	m_main_system  = kkGetMainSystem();
@@ -365,7 +373,10 @@ void Application::init()
     m_geomCreator = kkCreate<GeometryCreator>();
     m_plugin_interface->m_geomCreator = m_geomCreator;
     _init_GUIResources();    
-    resetScene3D();    
+    resetScene3D();
+    ShowWindow((HWND)m_mainWindow->getHandle(), SW_MAXIMIZE);
+    updateBuffers();
+    _init_viewports();
     //_resetViewports();
     m_gizmo->init();
 
@@ -375,6 +386,7 @@ void Application::init()
 
     _init_materialEditor(false);*/
     
+    m_isClearCanvas = true;
 
     m_guiMainWindow.OSWindow = m_mainWindow->getHandle();
  //   m_guiMaterialEditorWindow.OSWindow = m_materialEditorWindow->getHandle();
@@ -383,7 +395,6 @@ void Application::init()
 
  //   setActiveRenderer(m_renderers[0]);
 
-    ShowWindow((HWND)m_mainWindow->getHandle(), SW_MAXIMIZE);
 
  //   m_gs->useBackFaceCulling(true);
     setNeedToSave(false);
@@ -463,7 +474,13 @@ void Application::run()
             m_mouseWheel = (f32)Kr::Gui::GuiSystem::m_wheel_delta;
         }
 
-        
+        if(m_KrGuiSystem->isRMBReleased())
+        {
+            kkEvent e;
+            e.type = kkEventType::Mouse;
+            e.mouseEvent.state |= kkEventMouse::MS_RMB_UP;
+            m_main_system->addEvent(e);
+        }
 
         //printf("m_mouseWheel %f\n",m_mouseWheel);
 
@@ -615,10 +632,10 @@ void Application::drawEnd()
 
 void Application::drawViewport()
 {
-    /*if(m_main_viewport)
+    if(m_mainViewport.ptr())
     {
-        m_main_viewport->draw();
-    }*/
+        m_mainViewport->draw(m_window_client_size, &m_current_color_theme);
+    }
 }
 
 void Application::onWindowSize()
@@ -638,15 +655,10 @@ void Application::drawAll()
         if(m_KrGuiSystem)
         {
             m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
-            // тут рисование в главное окно
             _drawMainMenuBar();
             _drawMainToolBar();
             _drawLeftToolBar();
             _drawRightToolBar();
-           /* if( m_KrGuiSystem->addButton() ) printf("Simple button\n");
-		    if( m_KrGuiSystem->addButton(0,0,Gui::Vec2f(20,10)) ) printf("With size\n");
-		    if( m_KrGuiSystem->addButton(u"Button") ) printf("With text\n");
-		    if( m_KrGuiSystem->addButton(u"B",0,Gui::Vec2f(30,20)) ) printf("Wider than text\n");*/
             m_KrGuiSystem->render();
         }
 
@@ -767,11 +779,10 @@ void Application::updateBuffers()
 
 void Application::updateViewports()
 {
-    /// m_main_viewport обновит всех дочерних
-    /*if(m_main_viewport)
+    if(m_mainViewport.ptr())
     {
-        m_main_viewport->update();
-    }*/
+        m_mainViewport->update(m_window_client_size);
+    }
 }
 
 void Application::setStateKeyboard(AppState_keyboard s)
@@ -828,7 +839,8 @@ void Application::updateInput()
         {
             if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
             {
-                //m_main_viewport->updateInput();
+                auto md = Kr::Gui::GuiSystem::m_mouseDelta;
+                m_mainViewport->updateInput(m_window_client_size, v2f(md.x,md.y));
                 //m_main_viewport->updateInputCamera();
             }
         }
@@ -2410,3 +2422,21 @@ void Application::showImportExportWindow(PluginGUIWindow* w, const v2i& size, co
     m_importExportWindow->show();
     m_importExportGUIWindow = w;
 }
+void Application::GSSetDepth(bool v)
+{
+    m_gs->useDepth(v);
+}
+
+void Application::GSSetViewport(s32 x, s32 y, s32 z, s32 w)
+{
+    m_gs->setViewport((s32)x,(s32)y,(s32)z,(s32)w);
+}
+bool Application::IsLmbDownOnce(){return m_event_consumer->isLmbDownOnce();}
+bool Application::IsLmbDown(){return m_event_consumer->isLmbDown();}
+bool Application::IsLmbUp(){return m_event_consumer->isLmbUp();}
+bool Application::IsRmbDownOnce(){return m_event_consumer->isRmbDownOnce();}
+bool Application::IsRmbDown(){return m_event_consumer->isRmbDown();}
+bool Application::IsRmbUp(){return m_event_consumer->isRmbUp();}
+bool Application::IsMmbDownOnce(){return m_event_consumer->isMmbDownOnce();}
+bool Application::IsMmbDown(){return m_event_consumer->isMmbDown();}
+bool Application::IsMmbUp(){return m_event_consumer->isMmbUp();}

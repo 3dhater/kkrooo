@@ -1,6 +1,6 @@
 ﻿#include "kkrooo.engine.h"
+#include "../Common.h"
 
-//#include "Common/kkInfoSharedLibrary.h"
 #include "../Application.h"
 #include "../Functions.h" 
 
@@ -10,7 +10,6 @@
 #include "../Plugins/PluginCommonInterface.h"
 #include "../Plugins/PluginObjectCategory.h"
 
-//#include "imgui.h"
 using namespace Kr;
 
 void Application::_callOnActivateGUIPlugin()

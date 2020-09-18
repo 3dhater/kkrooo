@@ -593,13 +593,6 @@ public:
 	{
 	}
 
-	kkv2( kkv2&& o ) noexcept
-		:
-		x(std::move(o.x)),
-		y(std::move(o.y))
-	{
-	}
-
 	~kkv2()
 	{
 	}
@@ -647,6 +640,13 @@ public:
 		kkv2 r;
 		r.x = x - v.x;
 		r.y = y - v.y;
+		return r;
+	}
+	kkv2 operator*( const kkv2& v ) const
+	{
+		kkv2 r;
+		r.x = x * v.x;
+		r.y = y * v.y;
 		return r;
 	}
 
@@ -856,6 +856,15 @@ public:
 		w(v.KK_W)
 	{
 	}
+	
+	kkv4( _type _v )
+		:
+		x(_v),
+		y(_v),
+		z(_v),
+		w(_v)
+	{
+	}
 
 	kkv4( _type _x, _type _y, _type _z, _type _w )
 		:
@@ -914,6 +923,16 @@ public:
 		r.y = y - v.y;
 		r.z = z - v.z;
 		r.w = w - v.w;
+		return r;
+	}
+
+	kkv4<_type> operator*( const kkv4<_type>& v ) const
+	{
+		kkv4<_type> r;
+		r.x = x * v.x;
+		r.y = y * v.y;
+		r.z = z * v.z;
+		r.w = w * v.w;
 		return r;
 	}
 

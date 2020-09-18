@@ -1,4 +1,5 @@
 ﻿#include "kkrooo.engine.h"
+#include "../Common.h"
 
 #include "Scene3D/kkScene3DObject.h"
 #include "Geometry/kkPolygonalModel.h"

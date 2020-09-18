@@ -15,8 +15,6 @@ enum class ViewportCameraType
 	Bottom
 };
 
-class kkAabb;
-class Viewport;
 class ViewportCamera
 {
 	friend class Viewport;
@@ -94,8 +92,8 @@ public:
 	void zoomIn( AppState_keyboard key, s32 wheel_delta );
 	void zoomOut( AppState_keyboard key, s32 wheel_delta );
 
-	void setOwner( Viewport* );
-	Viewport* getOwner();
+	void setOwner( ViewportObject* );
+	ViewportObject* getOwner();
 
 	void setObjectRotationAngle(f32);
 	kkMatrix4 getObjectRotationMatrix();

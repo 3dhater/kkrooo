@@ -1,7 +1,155 @@
-﻿//// SPDX-License-Identifier: GPL-3.0-only
-//#ifndef __VIEWPORT_H__
-//#define __VIEWPORT_H__
-//
+﻿#ifndef __VIEWPORT_H__
+#define __VIEWPORT_H__
+
+struct ViewportMouseState
+{
+	bool LMB_UP   = false;
+	bool LMB_DOWN = false;
+	bool LMB_HOLD = false;
+
+	bool RMB_UP   = false;
+	bool RMB_DOWN = false;
+	bool RMB_HOLD = false;
+
+	bool MMB_UP   = false;
+	bool MMB_DOWN = false;
+	bool MMB_HOLD = false;
+
+	bool InViewport = false;
+	bool IsMove = false;
+	bool IsSelectByRect = false;
+	bool IsFirstClick = false;
+
+	void reset()
+	{
+		if( IsSelectByRect && LMB_HOLD )
+		{
+		}
+		else
+		{
+			IsSelectByRect = false;
+		}
+
+		if( InViewport && LMB_HOLD )
+		{
+		}
+		else
+		{
+			IsFirstClick = false;
+		}
+		IsMove = false;
+		InViewport = false;
+		LMB_UP   = false;
+		LMB_DOWN = false;
+		LMB_HOLD = false;
+		RMB_UP   = false;
+		RMB_DOWN = false;
+		RMB_HOLD = false;
+		MMB_UP   = false;
+		MMB_DOWN = false;
+		MMB_HOLD = false;
+	}
+};
+
+enum class ViewportLayoutType
+{
+	Single,
+	ParallelHor
+};
+
+enum class ViewportType
+{
+	Main
+};
+
+// не хочу изобретать велосипеды, по этому всё будет просто
+enum class ViewportUID
+{
+	Single,
+	ParallelHorUp,
+	ParallelHorDown,
+};
+
+class ViewportObject
+{
+	void _update_frame(const v2f& mouseDelta);
+	void _drawGrid_persp(ColorTheme* colorTheme);
+	void _drawGridXZ(f32 limits, f32 step, ColorTheme* colorTheme);
+	void _drawGridXY(f32 limits, f32 step, ColorTheme* colorTheme);
+	void _drawGridZY(f32 limits, f32 step, ColorTheme* colorTheme);
+public:
+	ViewportObject();
+	~ViewportObject();
+	
+	void init(const v4f& indent, ViewportLayoutType lt);
+	void update(const v2i& windowSize);
+	void updateInput(const v2i& windowSize, const v2f& mouseDelta);
+
+	ViewportCamera* m_activeCamera = nullptr;
+	kkPtr<ViewportCamera> m_cameraPersp ;
+	kkPtr<ViewportCamera> m_cameraFront ;
+	kkPtr<ViewportCamera> m_cameraBack  ;
+	kkPtr<ViewportCamera> m_cameraTop   ;
+	kkPtr<ViewportCamera> m_cameraBottom;
+	kkPtr<ViewportCamera> m_cameraLeft  ;
+	kkPtr<ViewportCamera> m_cameraRight ;
+
+	ViewportLayoutType m_layoutType = ViewportLayoutType::Single;
+
+	ViewportObject* m_left  = nullptr;
+	ViewportObject* m_right = nullptr;
+	
+	v4f m_viewport_area;
+	f32 m_gridStep = 0.f;
+	bool m_isDrawGrid = true;
+
+	// изменение положения рамки
+	// не всё так просто, нужно полностью изменять прямоугольные области каждого ViewportObject
+	// универсально делать лень, по этому для каждого ViewportLayoutType нужно делать по своему
+	// по сути m_framePosition это отступ
+	v4f m_framePosition;
+
+	// вычисляется и используется для рисования. реагирует на изменение размера окна
+	v4f m_rect_modified;
+	v4f m_gs_viewport;
+
+	// origin означает что значения не изменятся при изменении размеров окна. они изменяются только при создании\уничтожении вьюпорта
+	v4f m_rect_origin; /// left top right bottom /// 0;0 - левый ВЕРХНИЙ угол
+	v2f m_window_size_origin;
+	v4f m_orig_indent; // начальный отступ
+	v2f m_resize_window_coef; // для увеличения или уменьшения нужно умножать значения
+	v4f m_viewport_area_origin; /// зона вьюпорта. меньше чем окно. используется для вычисления m_resize_window_coef
+
+	ViewportUID m_uid = ViewportUID::Single;
+
+	void beginDraw();
+	void drawBG(const v2i& windowSize, ColorTheme* colorTheme);
+	void drawGrid(ColorTheme* colorTheme);
+	ViewportCamera * getActiveViewportCamera()
+	{
+		return m_activeCamera;
+	}
+};
+
+class Viewport
+{
+	ViewportLayoutType m_layoutType = ViewportLayoutType::Single;
+	ViewportType m_type = ViewportType::Main;
+
+	ViewportObject* m_viewports = nullptr;
+	void _init_single(const v4f& indent, ViewportLayoutType lt);
+	void _init_parallel_h(const v4f& indent, ViewportLayoutType lt);
+public:
+	Viewport();
+	~Viewport();
+
+	void draw(const v2i& windowSize, ColorTheme* colorTheme);
+	void update(const v2i& windowSize);
+	void updateInput(const v2i& windowSize, const v2f& mouseDelta);
+
+	void init(ViewportType, ViewportLayoutType, const v4f& indent);
+};
+
 //#include <string>
 //#include "Classes/Strings/kkString.h"
 //
@@ -16,75 +164,8 @@
 //struct GUIResources;
 //class ShortcutManager;
 //class Viewport;
-//class Gizmo;
-//struct ViewportData
-//{
-//	kkGraphicsSystem   * m_gs = nullptr;
-//	ColorTheme         * m_current_color_theme = nullptr;
-//	v2i                * m_window_client_size = nullptr;
 //
-//	EventConsumer      * m_event_consumer  = nullptr;
-//	AppState_main      * m_state_app       = nullptr;
-//	AppState_keyboard  * m_state_keyboard  = nullptr;
-//	v2i                * m_cursor_position = nullptr;
-//	float              * m_mouseWheel      = nullptr;
-//	Application        * m_app             = nullptr;
-//	GUIResources       * m_GUIResources    = nullptr;
-//	ShortcutManager    * m_shortcutManager = nullptr;
-//
-//	f32         * m_deltaTime = nullptr;
-//	Gizmo              * m_gizmo     = nullptr;
-//};
-//
-//struct ViewportMouseState
-//{
-//	bool LMB_UP   = false;
-//	bool LMB_DOWN = false;
-//	bool LMB_HOLD = false;
-//
-//	bool RMB_UP   = false;
-//	bool RMB_DOWN = false;
-//	bool RMB_HOLD = false;
-//
-//	bool MMB_UP   = false;
-//	bool MMB_DOWN = false;
-//	bool MMB_HOLD = false;
-//
-//	bool InViewport = false;
-//	bool IsMove = false;
-//	bool IsSelectByRect = false;
-//	bool IsFirstClick = false;
-//
-//	void reset()
-//	{
-//		if( IsSelectByRect && LMB_HOLD )
-//		{
-//		}
-//		else
-//		{
-//			IsSelectByRect = false;
-//		}
-//
-//		if( InViewport && LMB_HOLD )
-//		{
-//		}
-//		else
-//		{
-//			IsFirstClick = false;
-//		}
-//		IsMove = false;
-//		InViewport = false;
-//		LMB_UP   = false;
-//		LMB_DOWN = false;
-//		LMB_HOLD = false;
-//		RMB_UP   = false;
-//		RMB_DOWN = false;
-//		RMB_HOLD = false;
-//		MMB_UP   = false;
-//		MMB_DOWN = false;
-//		MMB_HOLD = false;
-//	}
-//};
+
 //
 //enum class ViewportCommandType : u32
 //{
@@ -365,5 +446,5 @@
 //	void setDrawPickLine(bool v);
 //	void processShortcuts();
 //};
-//
-//#endif
+
+#endif

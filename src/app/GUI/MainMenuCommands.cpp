@@ -1,5 +1,5 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
+#include "../Common.h"
 
 #include "Common/kkInfoSharedLibrary.h"
 #include "MainMenuCommands.h"

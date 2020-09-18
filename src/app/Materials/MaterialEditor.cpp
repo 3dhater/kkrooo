@@ -1,4 +1,5 @@
 ﻿#include "kkrooo.engine.h"
+#include "../Common.h"
 
 #include "Classes/Math/kkMath.h"
 #include "KrGui.h"

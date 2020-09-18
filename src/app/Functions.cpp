@@ -1,5 +1,5 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
+#include "Common.h"
 
 #include "Classes/Math/kkVector4.h"
 #include "Classes/Math/kkRay.h"
@@ -10,12 +10,6 @@
 
 #include <math.h>
 
-
-//void kkSetActiveViewport(Viewport* v)
-//{
-//    kkSingleton<Application>::s_instance->setActiveViewport(v);
-//}
-
 Scene3D** kkGetScene3D()
 {
     return kkSingleton<Application>::s_instance->getScene3D();
@@ -25,6 +19,31 @@ kkGraphicsSystem* kkGetGS()
 {
     return kkSingleton<Application>::s_instance->getGS();
 }
+
+void kkGSSetDepth(bool v)
+{
+	kkSingleton<Application>::s_instance->GSSetDepth(v);
+}
+
+void kkGSSetViewport(s32 x, s32 y, s32 z, s32 w)
+{
+	kkSingleton<Application>::s_instance->GSSetViewport(x,y,z,w);
+}
+
+v2i  kkGetWindowClientSize()
+{
+	return kkSingleton<Application>::s_instance->getWindowClientSize();
+}
+
+bool kkIsLmbDownOnce(){return kkSingleton<Application>::s_instance->IsLmbDownOnce();}
+bool kkIsLmbDown(){return kkSingleton<Application>::s_instance->IsLmbDown();}
+bool kkIsLmbUp(){return kkSingleton<Application>::s_instance->IsLmbUp();}
+bool kkIsRmbDownOnce(){return kkSingleton<Application>::s_instance->IsRmbDownOnce();}
+bool kkIsRmbDown(){return kkSingleton<Application>::s_instance->IsRmbDown();}
+bool kkIsRmbUp(){return kkSingleton<Application>::s_instance->IsRmbUp();}
+bool kkIsMmbDownOnce(){return kkSingleton<Application>::s_instance->IsMmbDownOnce();}
+bool kkIsMmbDown(){return kkSingleton<Application>::s_instance->IsMmbDown();}
+bool kkIsMmbUp(){return kkSingleton<Application>::s_instance->IsMmbUp();}
 
 namespace kkrooo
 {

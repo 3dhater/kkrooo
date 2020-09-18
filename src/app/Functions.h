@@ -1,16 +1,20 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __FUNCTIONS_H__
+﻿#ifndef __FUNCTIONS_H__
 #define __FUNCTIONS_H__
-
-class Scene3D;
-class kkGraphicsSystem;
-class kkObb;
-class kkMatrix4;
 
 Scene3D** kkGetScene3D();
 kkGraphicsSystem* kkGetGS();
-
-class kkRay;
+void kkGSSetDepth(bool);
+void kkGSSetViewport(s32 x, s32 y, s32 z, s32 w);
+v2i  kkGetWindowClientSize();
+bool kkIsLmbDownOnce();
+bool kkIsLmbDown();
+bool kkIsLmbUp();
+bool kkIsRmbDownOnce();
+bool kkIsRmbDown();
+bool kkIsRmbUp();
+bool kkIsMmbDownOnce();
+bool kkIsMmbDown();
+bool kkIsMmbUp();
 
 enum class IconFontSymbol
 {

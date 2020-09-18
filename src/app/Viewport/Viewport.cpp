@@ -1,17 +1,458 @@
-﻿//// SPDX-License-Identifier: GPL-3.0-only
-//#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-//#define _CRT_SECURE_NO_WARNINGS
-//#endif
-//
-//#include "kkrooo.engine.h"
-//
+﻿#include "kkrooo.engine.h"
+#include "../Common.h"
+#include "Viewport.h"
+#include "ViewportCamera.h"
+#include "GraphicsSystem/kkGraphicsSystem.h"
+#include "../GUI/ColorTheme.h"
+
+ViewportMouseState g_mouseState;
+kkGraphicsSystem* g_GS = nullptr;
+
+ViewportObject::ViewportObject(){}
+ViewportObject::~ViewportObject(){}
+void ViewportObject::init(const v4f& indent, ViewportLayoutType lt)
+{
+	m_layoutType = lt;
+	m_cameraPersp   = kkCreate<ViewportCamera>(ViewportCameraType::Perspective,this);    
+	m_cameraBack    = kkCreate<ViewportCamera>(ViewportCameraType::Back,this);
+	m_cameraFront   = kkCreate<ViewportCamera>(ViewportCameraType::Front,this);
+	m_cameraTop     = kkCreate<ViewportCamera>(ViewportCameraType::Top,this);
+	m_cameraBottom  = kkCreate<ViewportCamera>(ViewportCameraType::Bottom,this);
+	m_cameraLeft    = kkCreate<ViewportCamera>(ViewportCameraType::Left,this);
+	m_cameraRight   = kkCreate<ViewportCamera>(ViewportCameraType::Right,this);
+	m_cameraPersp->init();
+	m_cameraBack->init();
+	m_cameraFront->init();
+	m_cameraTop->init();
+	m_cameraBottom->init();
+	m_cameraLeft->init();
+	m_cameraRight->init();
+
+	m_orig_indent.x = indent.x;
+	m_orig_indent.y = indent.y;
+	m_orig_indent.z = indent.z;
+	m_orig_indent.w = indent.w;
+
+	auto m_window_client_size = kkGetWindowClientSize();
+	/// 0;0 - left top
+	m_rect_origin.x = m_orig_indent.x;
+	m_rect_origin.y = m_orig_indent.y;
+	m_rect_origin.z = (f32)m_window_client_size.x-m_orig_indent.z;
+	m_rect_origin.w = (f32)m_window_client_size.y-m_orig_indent.w;
+
+	m_rect_modified = m_rect_origin;
+
+	m_window_size_origin.x = (float)m_window_client_size.x;
+	m_window_size_origin.y = (float)m_window_client_size.y;
+
+	m_viewport_area_origin.x = m_orig_indent.x;
+	m_viewport_area_origin.y = m_orig_indent.y;
+	m_viewport_area_origin.z = m_window_size_origin.x - m_orig_indent.z;
+	m_viewport_area_origin.w = m_window_size_origin.y - m_orig_indent.w;
+
+}
+void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta)
+{
+	_update_frame(mouseDelta);
+	update(windowSize);
+}
+void ViewportObject::update(const v2i& windowSize)
+{
+	/// чтобы вычислить m_resize_window_coef нужно взять текущий размер окна, вычислить область вьюпорта,
+	m_viewport_area.x = m_orig_indent.x;
+	m_viewport_area.y = m_orig_indent.y;
+	m_viewport_area.z = windowSize.x - m_orig_indent.z;
+	m_viewport_area.w = windowSize.y - m_orig_indent.w;
+
+	auto viewport_area_sz = m_viewport_area.getWidthAndHeight();
+	auto viewport_area_origin_sz = m_viewport_area_origin.getWidthAndHeight();
+
+	m_resize_window_coef.x = viewport_area_sz.x / viewport_area_origin_sz.x;
+	m_resize_window_coef.y = viewport_area_sz.y / viewport_area_origin_sz.y;
+	/// обновляем основную рамку
+	m_rect_modified.x = m_rect_origin.x - m_orig_indent.x;
+	m_rect_modified.z = m_rect_origin.z - m_orig_indent.x;
+	m_rect_modified.x *= m_resize_window_coef.x;
+	m_rect_modified.z *= m_resize_window_coef.x;
+	m_rect_modified.x += m_orig_indent.x;
+	m_rect_modified.z += m_orig_indent.x;
+
+	m_rect_modified.y = m_rect_origin.y - m_orig_indent.y;
+	m_rect_modified.w = m_rect_origin.w - m_orig_indent.y;
+	m_rect_modified.y *= m_resize_window_coef.y;
+	m_rect_modified.w *= m_resize_window_coef.y;
+	m_rect_modified.y += m_orig_indent.y;
+	m_rect_modified.w += m_orig_indent.y;
+
+	m_rect_modified.x += m_framePosition.x;
+	m_rect_modified.y += m_framePosition.y;
+	m_rect_modified.z += m_framePosition.z;
+	m_rect_modified.w += m_framePosition.w;
+
+	/// теперь можно легко настроить m_viewport_to_gl_funk - xy=левая нижняя точка для вьюпорта  zw=ширина и высота
+	m_gs_viewport.x = m_rect_modified.x;
+	/// если в m_rect_modified.y указано малое значение (верх экрана), то в OGL он переместится вниз. надо исправлять
+	m_gs_viewport.y = windowSize.y - m_rect_modified.y; 
+	/// ширина и высота
+	m_gs_viewport.z = m_rect_modified.z - m_rect_modified.x;
+	m_gs_viewport.w = m_rect_modified.w - m_rect_modified.y;
+	m_gs_viewport.y -= m_gs_viewport.w;
+
+}
+void ViewportObject::beginDraw()
+{
+	// почему-то этот код не работает внутри update когда много вьюпортов
+	// соотношение сторон устанавливается только для последнего вьюпорта
+	// не понятно, ведь эти 2 строки только лишь установят значение m_aspect = aspect;
+	// эту непонятную ситуацию нужно решить
+	//printf("%f\n",(f32)m_gs_viewport.z/(f32)m_gs_viewport.w);
+	m_activeCamera->getCamera()->setAspect((f32)m_gs_viewport.z/(f32)m_gs_viewport.w);
+	m_activeCamera->getAxisCamera()->setAspect((f32)m_gs_viewport.z/(f32)m_gs_viewport.w);
+
+	g_GS->setActiveCamera(m_activeCamera->getCamera());
+	m_activeCamera->update();
+}
+void ViewportObject::_update_frame(const v2f& mouseDelta)
+{
+	auto viewport_area_sz = m_viewport_area.getWidthAndHeight();
+	auto half_size = viewport_area_sz * 0.5f;
+	switch(m_layoutType)
+	{
+	default:
+		break;
+	case ViewportLayoutType::ParallelHor:
+	{
+		switch(m_uid)
+		{
+		case ViewportUID::ParallelHorUp:
+		{
+			if(g_mouseState.RMB_HOLD)
+			{
+				m_framePosition.w += mouseDelta.y;
+				if(m_framePosition.w + half_size.y <= 30.f)
+					m_framePosition.w -= mouseDelta.y;
+				if(m_framePosition.w + half_size.y >= viewport_area_sz.y - 30.f)
+					m_framePosition.w -= mouseDelta.y;
+				//printf("%f [%f]\n",m_framePosition.w + half_size.y, viewport_area_sz.y);
+			}
+			if(m_framePosition.w + half_size.y < 0.f || m_framePosition.w + half_size.y > viewport_area_sz.y)
+				m_framePosition.w = 0.f;
+		}break;
+		case ViewportUID::ParallelHorDown:
+		{
+			if(g_mouseState.RMB_HOLD)
+			{
+				m_framePosition.y += mouseDelta.y;
+				if(m_framePosition.y + half_size.y <= 30.f)
+					m_framePosition.y -= mouseDelta.y;
+				if(m_framePosition.y + half_size.y >= viewport_area_sz.y - 30.f)
+					m_framePosition.y -= mouseDelta.y;
+			}
+			if(m_framePosition.y + half_size.y < 0.f || m_framePosition.y + half_size.y > viewport_area_sz.y)
+				m_framePosition.y = 0.f;
+		}break;
+		}
+	}break;
+	}
+}
+
+void ViewportObject::drawBG(const v2i& windowSize, ColorTheme* colorTheme)
+{
+	colorTheme->viewport_backgroung_color1.set(1.f,0.f,0.f,1.f);
+    g_GS->drawRectangle(
+		v2i(0,0),
+		v2i(windowSize.x,windowSize.y),
+		colorTheme->viewport_backgroung_color1,
+		colorTheme->viewport_backgroung_color2 );
+}
+void ViewportObject::_drawGridXZ(f32 limits, f32 step, ColorTheme* colorTheme)
+{
+	for( f32 i = step; i < limits; i += step )
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f+i,1.f),kkVector4(limits,0.f,0.f+i,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f-i,1.f),kkVector4(limits,0.f,0.f-i,1.f),colorTheme->viewport_grid_color4);
+        
+		g_GS->drawLine3D(kkVector4(0.f+i,0.f,-limits,1.f),kkVector4(0.f+i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
+		g_GS->drawLine3D(kkVector4(0.f-i,0.f,-limits,1.f),kkVector4(0.f-i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
+	}
+
+	if( m_activeCamera == m_cameraBottom.ptr() )
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color4);
+	}
+	else
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color1);
+		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color2);
+	}
+}
+void ViewportObject::_drawGridXY(f32 limits, f32 step, ColorTheme* colorTheme)
+{
+	for( f32 i = step; i < limits; i += step )
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f+i,0.f,1.f),kkVector4(limits,0.f+i,0.f,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(-limits,0.f-i,0.f,1.f),kkVector4(limits,0.f-i,0.f,1.f),colorTheme->viewport_grid_color4);
+        
+		g_GS->drawLine3D(kkVector4(0.f+i,-limits,0.f,1.f),kkVector4(0.f+i,limits,0.f,1.f),colorTheme->viewport_grid_color3);
+		g_GS->drawLine3D(kkVector4(0.f-i,-limits,0.f,1.f),kkVector4(0.f-i,limits,0.f,1.f),colorTheme->viewport_grid_color3);
+	}
+
+	if( m_activeCamera == m_cameraBottom.ptr() )
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),colorTheme->viewport_grid_color4);
+	}
+	else
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color1);
+		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),colorTheme->viewport_grid_color5);
+	}
+}
+void ViewportObject::_drawGridZY(f32 limits, f32 step, ColorTheme* colorTheme)
+{
+	for( f32 i = step; i < limits; i += step )
+	{
+		g_GS->drawLine3D(kkVector4(0.f,0.f+i,-limits,1.f),kkVector4(0.f,0.f+i,limits,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(0.f,0.f-i,-limits,1.f),kkVector4(0.f,0.f-i,limits,1.f),colorTheme->viewport_grid_color4);
+        
+		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f+i,1.f),kkVector4(0.f,limits,0.f+i,1.f),colorTheme->viewport_grid_color3);
+		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f-i,1.f),kkVector4(0.f,limits,0.f-i,1.f),colorTheme->viewport_grid_color3);
+	}
+
+	if( m_activeCamera == m_cameraBottom.ptr() )
+	{
+		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),colorTheme->viewport_grid_color4);
+	}
+	else
+	{
+		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color2);
+		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),colorTheme->viewport_grid_color5);
+	}
+}
+void ViewportObject::_drawGrid_persp(ColorTheme* colorTheme)
+{
+	f32 limits = 7.f;
+	for( s32 i = 1; i < 8; ++i )
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f+i,1.f),kkVector4(limits,0.f,0.f+i,1.f),colorTheme->viewport_grid_color3);
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f-i,1.f),kkVector4(limits,0.f,0.f-i,1.f),colorTheme->viewport_grid_color3);
+        
+		g_GS->drawLine3D(kkVector4(0.f+i,0.f,-limits,1.f),kkVector4(0.f+i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
+		g_GS->drawLine3D(kkVector4(0.f-i,0.f,-limits,1.f),kkVector4(0.f-i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
+	}
+
+	if(m_activeCamera->getPositionCamera()._f32[1]<0.f)
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color4);
+		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color4);
+	}else
+	{
+		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color1);
+		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color2);
+	}
+}
+void ViewportObject::drawGrid(ColorTheme* colorTheme)
+{
+	if(!m_isDrawGrid)
+		return;
+	auto cameraType = m_activeCamera->getType();
+	switch (cameraType)
+	{
+	case ViewportCameraType::Perspective:
+		_drawGrid_persp(colorTheme);
+		break;
+	case ViewportCameraType::Front:
+	case ViewportCameraType::Back:
+	case ViewportCameraType::Left:
+	case ViewportCameraType::Right:
+	case ViewportCameraType::Top:
+	case ViewportCameraType::Bottom:
+	{
+		f32 limit = 500.f;
+		f32 step  = 1.f;
+
+		auto zoomOrt = m_activeCamera->getZoomOrt();
+
+		if( zoomOrt < 0.15f )    { step = 10.f;    limit = 5000.f;   }
+		if( zoomOrt < 0.0125f )  { step = 100.f;   limit = 50000.f;  }
+		if( zoomOrt < 0.001125f ){ step = 1000.f;  limit = 500000.f; }
+		if( zoomOrt < 0.000075f ){ step = 10000.f; limit = 5000000.f; }
+
+		m_gridStep = step;
+
+		if( m_activeCamera == m_cameraTop.ptr() || m_activeCamera == m_cameraBottom.ptr() )
+		{
+			_drawGridXZ(limit, step, colorTheme);
+		}
+		else if( m_activeCamera == m_cameraLeft.ptr() || m_activeCamera == m_cameraRight.ptr() )
+		{
+			_drawGridZY(limit, step, colorTheme);
+		}
+		else if( m_activeCamera == m_cameraFront.ptr() || m_activeCamera == m_cameraBack.ptr() )
+		{
+			_drawGridXY(limit, step, colorTheme);
+		}
+	}break;
+	}
+}
+
+Viewport::Viewport()
+{
+	g_GS = kkGetGS();
+}
+
+Viewport::~Viewport()
+{
+	if(m_viewports)
+	{
+		auto end = m_viewports->m_left;
+		auto vp = m_viewports;
+		while(true)
+		{
+			auto next = vp->m_right;
+			kkDestroy(vp);
+			if(vp == end)
+				break;
+			vp = next;
+		}
+	}
+}
+
+void Viewport::_init_parallel_h(const v4f& indent, ViewportLayoutType lt)
+{
+	ViewportObject * VO1 = kkCreate<ViewportObject>();
+	VO1->init(indent,lt);
+	VO1->m_uid = ViewportUID::ParallelHorUp;
+	ViewportObject * VO2 = kkCreate<ViewportObject>();
+	VO2->init(indent,lt);
+	VO2->m_uid = ViewportUID::ParallelHorDown;
+	m_viewports = VO1;
+	m_viewports->m_right = VO2;
+	m_viewports->m_left  = VO2;
+	VO2->m_right = m_viewports;
+	VO2->m_left  = m_viewports;
+
+	auto half = (VO1->m_rect_origin.w - VO1->m_rect_origin.y) / 2;
+	VO1->m_rect_origin.w = VO1->m_rect_origin.w - half; /// теперь ГУИ кнопки родителя встанут на место
+
+	/// Далее изменяется m_rect нового вьюпорта
+	/// нужно менять значение w, точку нужно поднимать
+	/// вообще-то, эта точка должна вставать туда-же куда встала отодвинутая точка родителя
+	VO2->m_rect_origin.y = VO1->m_rect_origin.w;
+
+	VO1->m_rect_modified = VO1->m_rect_origin;
+	VO2->m_rect_modified = VO2->m_rect_origin;
+
+	VO1->m_activeCamera = VO1->m_cameraTop.ptr();
+	VO2->m_activeCamera = VO1->m_cameraPersp.ptr();
+}
+void Viewport::_init_single(const v4f& indent, ViewportLayoutType lt)
+{
+	ViewportObject * VO = kkCreate<ViewportObject>();
+	VO->init(indent,lt);
+	m_viewports = VO;
+	VO->m_left  = VO;
+	VO->m_right = VO;
+	VO->m_activeCamera = VO->m_cameraPersp.ptr();
+}
+void Viewport::init(ViewportType type, ViewportLayoutType l_type, const v4f& indent)
+{
+	m_type = type;
+	m_layoutType = l_type;
+	switch(m_layoutType)
+	{
+	default:
+	case ViewportLayoutType::Single:
+		_init_single(indent, l_type);
+		break;
+	case ViewportLayoutType::ParallelHor:
+		_init_parallel_h(indent, l_type);
+		break;
+	}
+}
+
+void Viewport::updateInput(const v2i& windowSize, const v2f& mouseDelta)
+{
+	g_mouseState.reset();
+	g_mouseState.LMB_DOWN = kkIsLmbDownOnce();
+	g_mouseState.LMB_HOLD = kkIsLmbDown();
+	g_mouseState.LMB_UP   = kkIsLmbUp();
+	g_mouseState.RMB_DOWN = kkIsRmbDownOnce();
+	g_mouseState.RMB_HOLD = kkIsRmbDown();
+	g_mouseState.RMB_UP   = kkIsRmbUp();
+	g_mouseState.MMB_DOWN = kkIsMmbDownOnce();
+	g_mouseState.MMB_HOLD = kkIsMmbDown();
+	g_mouseState.MMB_UP   = kkIsMmbUp();
+	if(m_viewports)
+	{
+		auto end = m_viewports->m_left;
+		auto vp = m_viewports;
+		while(true)
+		{
+			auto next = vp->m_right;
+			vp->updateInput(windowSize, mouseDelta);
+			if(vp == end)
+				break;
+			vp = next;
+		}
+	}
+}
+
+void Viewport::update(const v2i& windowSize )
+{
+	if(m_viewports)
+	{
+		auto end = m_viewports->m_left;
+		auto vp = m_viewports;
+		while(true)
+		{
+			auto next = vp->m_right;
+			vp->update(windowSize);
+			if(vp == end)
+				break;
+			vp = next;
+		}
+	}
+}
+
+void Viewport::draw(const v2i& windowSize, ColorTheme* colorTheme)
+{
+	if(m_viewports)
+	{
+		auto end = m_viewports->m_left;
+		auto vp = m_viewports;
+		while(true)
+		{
+			auto next = vp->m_right;
+			kkGSSetDepth(false);
+			kkGSSetViewport((s32)vp->m_gs_viewport.x, (s32)vp->m_gs_viewport.y, (s32)vp->m_gs_viewport.z, (s32)vp->m_gs_viewport.w);
+			vp->drawBG(windowSize, colorTheme);
+			kkGSSetDepth(true);
+
+			// draw 3d
+			vp->beginDraw();
+			vp->drawGrid(colorTheme);
+
+			// draw 2d top layer
+			kkGSSetDepth(false);
+			kkGSSetViewport(0,0, windowSize.x, windowSize.y);
+			kkGSSetDepth(true);
+
+			if(vp == end)
+				break;
+			vp = next;
+		}
+	}
+}
+
 //#include "Geometry/kkPolygonalModel.h"
 //#include "../EventConsumer.h"
 //
 //#include "../CursorRay.h"
 //#include "../SelectionFrust.h"
 //
-//#include "GraphicsSystem/kkGraphicsSystem.h"
 //#include "GraphicsSystem/kkTexture.h"
 //#include "../Application.h"
 //#include "../GUI/ColorTheme.h"
@@ -57,8 +498,6 @@
 ////};
 ////#endif
 //
-//extern void kkSetActiveViewport(Viewport*);
-//
 //bool Viewport::m_isNotHideViewportGUI = true;
 //bool Viewport::m_isMainMenuActive = false;
 //Viewport* Viewport::m_mainViewport      = nullptr;
@@ -66,68 +505,8 @@
 //	
 //Viewport::Viewport(ViewportData vd)
 //{
-//	m_vd = vd;
-//
 //	m_cursorRay = new  CursorRay;
 //
-//#ifdef KK_DEBUG
-//	m_debug_color_id = g_vp_count;
-//#endif
-//
-//	sprintf(m_name,"w%i",g_vp_count++);
-//	sprintf(m_nameViewportMenuBar,"vpmb%i",g_vp_count++);
-//	sprintf(m_nameViewportTypeText,"vptn%i",g_vp_count++);
-//
-//	sprintf(m_typeName[0],"Perspective");
-//	sprintf(m_typeName[1],"Top");
-//	sprintf(m_typeName[2],"Bottom");
-//	sprintf(m_typeName[3],"Left");
-//	sprintf(m_typeName[4],"Right");
-//	sprintf(m_typeName[5],"Front");
-//	sprintf(m_typeName[6],"Back");
-//
-//	m_cameraPersp   = kkCreate<ViewportCamera>(ViewportCameraType::Perspective,this);    
-//	m_cameraBack    = kkCreate<ViewportCamera>(ViewportCameraType::Back,this);
-//	m_cameraFront   = kkCreate<ViewportCamera>(ViewportCameraType::Front,this);
-//	m_cameraTop     = kkCreate<ViewportCamera>(ViewportCameraType::Top,this);
-//	m_cameraBottom  = kkCreate<ViewportCamera>(ViewportCameraType::Bottom,this);
-//	m_cameraLeft    = kkCreate<ViewportCamera>(ViewportCameraType::Left,this);
-//	m_cameraRight   = kkCreate<ViewportCamera>(ViewportCameraType::Right,this);
-//
-//
-//	m_cameraPersp->init();
-//	m_cameraBack->init();
-//	m_cameraFront->init();
-//	m_cameraTop->init();
-//	m_cameraBottom->init();
-//	m_cameraLeft->init();
-//	m_cameraRight->init();
-//
-//	
-//
-//	m_orig_indent.x = m_vd.m_app->m_leftToolBarWidth;
-//	m_orig_indent.y = m_vd.m_app->m_mainMenuHeight + m_vd.m_app->m_mainToolBarHeight;
-//	m_orig_indent.z = 23;
-//	m_orig_indent.w = m_vd.m_app->m_bottomAreaHeight;
-//
-//	/// 0;0 - left top
-//	m_rect_origin.x = m_orig_indent.x;
-//	m_rect_origin.y = m_orig_indent.y;
-//	m_rect_origin.z = m_vd.m_window_client_size->x-m_orig_indent.z;
-//	m_rect_origin.w = m_vd.m_window_client_size->y-m_orig_indent.w;
-//
-//	m_rect_modified = m_rect_origin;
-//	
-//	m_window_size_origin.x = (float)m_vd.m_window_client_size->x;
-//	m_window_size_origin.y = (float)m_vd.m_window_client_size->y;
-//
-//	m_viewport_area_origin.x = m_orig_indent.x;
-//	m_viewport_area_origin.y = m_orig_indent.y;
-//	m_viewport_area_origin.z = m_window_size_origin.x - m_orig_indent.z;
-//	m_viewport_area_origin.w = m_window_size_origin.y - m_orig_indent.w;
-//
-//
-//    m_scene3D_ptr  = kkGetScene3D();
 //	_setActiveCamera(m_cameraPersp);
 //}
 //
@@ -142,14 +521,6 @@
 //		kkDestroy(m_maximizedViewport);
 //		m_maximizedViewport = nullptr;
 //	}
-//
-//	if( m_cameraPersp )  kkDestroy(m_cameraPersp);
-//    if( m_cameraBack )   kkDestroy(m_cameraBack);
-//    if( m_cameraFront )  kkDestroy(m_cameraFront);
-//    if( m_cameraTop )    kkDestroy(m_cameraTop);
-//    if( m_cameraBottom ) kkDestroy(m_cameraBottom);
-//    if( m_cameraLeft )   kkDestroy(m_cameraLeft);
-//    if( m_cameraRight )  kkDestroy(m_cameraRight);
 //
 //	destroyViewport();
 //}
@@ -368,85 +739,12 @@
 //
 //	m_rect_modified = m_rect_origin;
 //	new_viewport->m_rect_modified = new_viewport->m_rect_origin;
-//
 //	new_viewport->m_is_horizontal = hor;
 //
 //	update();
 //	
 //	m_children.push_back( new_viewport );
 //}
-//
-//void Viewport::_processCommands()
-//{
-//	/// рисование идёт от листьев,  значит и в массиве вначале находятся команды дальних листьев
-//
-//	bool need_update = false;
-//	for( auto o : m_viewport_commands )
-//	{
-//		switch( o.m_type )
-//		{
-//		case ViewportCommandType::AddViewPort_Hor:
-//			need_update = true;
-//			o.m_viewport->_addViewport(true);
-//			break;
-//		case ViewportCommandType::AddViewPort_Vert:
-//			need_update = true;
-//			o.m_viewport->_addViewport(false);
-//			break;
-//		case ViewportCommandType::RemoveViewPort_Hor:
-//			need_update = true;
-//			break;
-//		case ViewportCommandType::RemoveViewPort_Vert:
-//			need_update = true;
-//			break;
-//		}
-//	}
-//
-//	m_viewport_commands.clear();
-//
-//	if( need_update )
-//	{
-//		update();
-//	}
-//}
-//
-//
-//void Viewport::draw()
-//{
-//	if( m_mainViewport->m_isMaximized )
-//	{
-//		_drawRecursively(m_maximizedViewport);
-//	}
-//	else
-//	{
-//		_drawRecursively(this);
-//	}
-//
-//}
-//
-///// Этот метод вызывается главным вьюпортом, корневым узлом
-////void Viewport::drawImgui()
-////{
-////	m_isMainMenuActive = false; // нужно сбросить это так как нет простого варианта проверить активно ли меню во всех вьюпортах
-////
-////	if( m_mainViewport->m_isMaximized )
-////	{
-////		_drawImguiRecursively(this, m_maximizedViewport);
-////	}
-////	else
-////	{
-////		_drawImguiRecursively(this, this);
-////	}
-////
-////	_processCommands();
-////
-////	m_vd.m_gs->useDepth(false);
-////
-////	if( m_mainViewport->m_isMaximized )
-////		_drawRecursivelyBorders(m_maximizedViewport);
-////	else
-////		_drawRecursivelyBorders(this);
-////}
 //
 //void Viewport::_setGLViewport()
 //{
@@ -591,178 +889,7 @@
 //		}
 //	}
 //}
-//int g_m_f = 4;   
-//int g_l_f = 4;
-//
-//void Viewport::_drawPopupContextMenu(bool over_window )
-//{
-//}
-//
-//void Viewport::_drawBackground()
-//{
-//   m_vd.m_gs->drawRectangle(
-//		v2i(0,0),
-//		v2i(m_vd.m_window_client_size->x,m_vd.m_window_client_size->y),
-//		m_vd.m_current_color_theme->viewport_backgroung_color1,
-//		m_vd.m_current_color_theme->viewport_backgroung_color2 );
-//}
-//
-//void Viewport::_drawGridPerspective()
-//{
-//	f32 limits = 7.f;
-//	for( s32 i = 1; i < 8; ++i )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f+i,1.f),kkVector4(limits,0.f,0.f+i,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f-i,1.f),kkVector4(limits,0.f,0.f-i,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//        
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f+i,0.f,-limits,1.f),kkVector4(0.f+i,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f-i,0.f,-limits,1.f),kkVector4(0.f-i,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//	}
-//
-//	if(m_activeCamera->getPositionCamera()._f32[1]<0.f)
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//	}else
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color1);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color2);
-//	}
-//	
-//
-//	//auto V = m_vd.m_app->m_cursorRayCurrent.m_begin.normalize();
-//	//m_vd.m_gs->drawLine3D(kkVector4(),V,kkColorWhite);
-//	//m_vd.m_gs->drawLine3D(kkVector4(),kkVector4(V.KK_X,V.KK_Y,0.f),kkColorRed);
-//}
-//
-//void Viewport::_drawGridXZ(f32 limits, f32 step)
-//{
-//	for( f32 i = step; i < limits; i += step )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f+i,1.f),kkVector4(limits,0.f,0.f+i,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f-i,1.f),kkVector4(limits,0.f,0.f-i,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//        
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f+i,0.f,-limits,1.f),kkVector4(0.f+i,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f-i,0.f,-limits,1.f),kkVector4(0.f-i,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//	}
-//
-//	if( m_isActiveBottom )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//	}
-//	else
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color1);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color2);
-//	}
-//}
-//
-//void Viewport::_drawGridXY(f32 limits, f32 step)
-//{
-//	for( f32 i = step; i < limits; i += step )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f+i,0.f,1.f),kkVector4(limits,0.f+i,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f-i,0.f,1.f),kkVector4(limits,0.f-i,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//        
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f+i,-limits,0.f,1.f),kkVector4(0.f+i,limits,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f-i,-limits,0.f,1.f),kkVector4(0.f-i,limits,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//	}
-//
-//	if( m_isActiveBottom )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//	}
-//	else
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color1);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color5);
-//	}
-//}
-//
-//void Viewport::_drawGridZY(f32 limits, f32 step)
-//{
-//	for( f32 i = step; i < limits; i += step )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f+i,-limits,1.f),kkVector4(0.f,0.f+i,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f-i,-limits,1.f),kkVector4(0.f,0.f-i,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//        
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,-limits,0.f+i,1.f),kkVector4(0.f,limits,0.f+i,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,-limits,0.f-i,1.f),kkVector4(0.f,limits,0.f-i,1.f),m_vd.m_current_color_theme->viewport_grid_color3);
-//	}
-//
-//	if( m_isActiveBottom )
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color4);
-//	}
-//	else
-//	{
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),m_vd.m_current_color_theme->viewport_grid_color2);
-//		m_vd.m_gs->drawLine3D(kkVector4(0.f,-limits,0.f,1.f),kkVector4(0.f,limits,0.f,1.f),m_vd.m_current_color_theme->viewport_grid_color5);
-//	}
-//}
-//
-//void Viewport::_drawGrid()
-//{
-//
-//	if( m_isActivePerspective )
-//	{
-//		_drawGridPerspective();
-//	}
-//	else
-//	{
-//		/*if( m_isOrthoUserview )
-//		{
-//			_drawGridXZ();
-//			_drawGridXY();
-//			_drawGridZY();
-//		}
-//		else*/
-//		{
-//			f32 limit = 500.f;
-//			f32 step  = 1.f;
-//
-//			auto zoomOrt = m_activeCamera->getZoomOrt();
-//
-//			if( zoomOrt < 0.15f )    { step = 10.f;    limit = 5000.f;   }
-//			if( zoomOrt < 0.0125f )  { step = 100.f;   limit = 50000.f;  }
-//			if( zoomOrt < 0.001125f ){ step = 1000.f;  limit = 500000.f; }
-//			if( zoomOrt < 0.000075f ){ step = 10000.f; limit = 5000000.f; }
-//
-//			m_gridStep = step;
-//
-//			if( m_isActiveTop || m_isActiveBottom )
-//			{
-//				_drawGridXZ(limit, step);
-//			}
-//			else if( m_isActiveLeft || m_isActiveRight )
-//			{
-//				_drawGridZY(limit, step);
-//			}
-//			else if( m_isActiveFront || m_isActiveBack )
-//			{
-//				_drawGridXY(limit, step);
-//			}
-//		}
-//	}
-//
-//	//m_vd.m_gs->drawLine3D(g_ray.m_origin,g_ray.m_end,kkColorWhite);
-//	//m_vd.m_gs->drawLine3D(g_ip - kkVector4(1.f, 1.f, 1.f, 1.f),g_ip + kkVector4(1.f, 1.f, 1.f, 1.f), kkColorWhite);
-//	//m_vd.m_gs->drawLine3D(g_ip - kkVector4(-1.f, 1.f, -1.f, 1.f),g_ip + kkVector4(-1.f, 1.f, -1.f, 1.f), kkColorWhite);
-//	
-//	/*if( g_points.size() > 1 )
-//	{
-//		for( int i = 0; i < g_points.size(); )
-//		{
-//			m_vd.m_gs->drawLine3D(g_points[i],g_points[i+1],kkColorWhite);
-//
-//			i+=2;
-//		}
-//	}*/
-//	
-//}
+
 //
 //void Viewport::_drawObb( const kkObb& obb, const kkColor& color)
 //{				

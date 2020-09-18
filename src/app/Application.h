@@ -99,6 +99,8 @@ class Application
 
 	kkPtr<GUIResources>     m_guiResources ; // это стоит ниже m_gs значит уничтожится первее чем m_gs
 
+	kkPtr<Viewport> m_mainViewport;
+
 	void _init_OS_Windows();
 	void _init_events();
 	void _init_scene();
@@ -113,6 +115,7 @@ class Application
 	void _init_GUIResources();
 	void _init_krgui();
 	void _init_renderManager();
+	void _init_viewports();
 
 
 	Kr::Gui::GuiSystem * m_KrGuiSystem = nullptr;
@@ -197,6 +200,7 @@ class Application
 	v2i m_cursor_position;
 	v2i m_cursor_position_firstClick; // сохраняется при LMB down once
 	
+
 	void _updateKeyboard();
 
 	GeometryCreator*      m_geomCreator = nullptr;
@@ -226,7 +230,7 @@ class Application
 	void                  _processMainMenuCommand_newScene();
 	
 
-	bool      m_isClearCanvas = true;
+	bool      m_isClearCanvas = false;
 
 	bool   m_debug_drawSelectedObjectsAabb  = false;
 	bool   m_debug_drawSceneAabb  = false;
@@ -457,6 +461,17 @@ public:
 	kkVertex* getPickedVertex();
 
 	void setDrawPickLine(bool);
+	void GSSetDepth(bool v);
+	void GSSetViewport(s32 x, s32 y, s32 z, s32 w);
+	bool IsLmbDownOnce();
+	bool IsLmbDown();
+	bool IsLmbUp();
+	bool IsRmbDownOnce();
+	bool IsRmbDown();
+	bool IsRmbUp();
+	bool IsMmbDownOnce();
+	bool IsMmbDown();
+	bool IsMmbUp();
 };
 
 

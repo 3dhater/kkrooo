@@ -1,5 +1,5 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
+#include "../Common.h"
 
 #include "FileSystem/kkFileSystem.h"
 
@@ -11,8 +11,6 @@
 #include "../EventConsumer.h"
 #include "../ShortcutManager.h"
 #include "../Functions.h"
-
-//#include "imgui.h"
 
 using namespace Kr;
 

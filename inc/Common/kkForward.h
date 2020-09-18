@@ -13,6 +13,10 @@ struct kkImage;
 struct kkGeometryInformation;
 struct kkSMesh;
 
+class kkGraphicsSystem;
+class kkObb;
+class kkMatrix4;
+class kkAabb;
 class kkRay;
 class kkPolygonalModel;
 class  kkMesh;

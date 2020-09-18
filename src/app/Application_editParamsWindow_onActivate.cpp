@@ -1,4 +1,5 @@
 ﻿#include "kkrooo.engine.h"
+#include "Common.h"
 #include "Scene3D/Scene3D.h"
 #include "Scene3D/Scene3DObject.h"
 #include "Common/kkInfoSharedLibrary.h"

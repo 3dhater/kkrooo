@@ -1,9 +1,9 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+﻿#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include "kkrooo.engine.h"
+#include "../Common.h"
 #include "Classes/Math/kkVector4.h"
 #include "Classes/Math/kkMath.h"
 #include "Classes/kkAABB.h"
@@ -18,11 +18,14 @@
 
 void ViewportCameraUpdateCallback( kkCamera* c, void* viewport);
 
-
 ViewportCamera::ViewportCamera(ViewportCameraType type,void * owner)
 {
     m_type = type;
     m_owner = owner;
+    for( s32 i = 0; i < _Camera::_number; ++i )
+    {
+        m_camera_parts[i] = nullptr;
+    }
 }
 
 ViewportCamera::~ViewportCamera()
@@ -32,11 +35,6 @@ ViewportCamera::~ViewportCamera()
 
 void ViewportCamera::init()
 {
-    for( s32 i = 0; i < _Camera::_number; ++i )
-    {
-        m_camera_parts[i] = nullptr;
-    }
-
     switch (m_type)
     {
     case ViewportCameraType::Perspective:
@@ -52,11 +50,8 @@ void ViewportCamera::init()
         m_fov = 0.1f;
         break;
     }
-
     reset();
 }
-
-
 
 void ViewportCamera::_destroy()
 {
@@ -179,7 +174,7 @@ void ViewportCamera::reset()
         m_cameraPos_ort.set(0.f,0.f,0.f);
 	    m_zoomOrt = 1.f;
         m_kk_camera->setCameraType(kkCameraType::Custom);
- //       m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
+        m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
         m_kk_camera->setNear(0.001f);
         
         break;
@@ -218,7 +213,7 @@ void ViewportCamera::reset()
     _updatePanMoveSpeed(AppState_keyboard::None);
 }
 
-void ViewportCamera::setOwner( Viewport* v )
+void ViewportCamera::setOwner( ViewportObject* v )
 {
     m_owner = v;
 
@@ -233,14 +228,14 @@ void ViewportCamera::setOwner( Viewport* v )
     case ViewportCameraType::Top:
     case ViewportCameraType::Bottom:
     default:
-  //      m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
+        m_kk_camera->setUpdateCallback(ViewportCameraUpdateCallback, m_owner);
         break;
     }
 }
 
-Viewport* ViewportCamera::getOwner()
+ViewportObject* ViewportCamera::getOwner()
 {
-    return (Viewport*)m_owner;
+    return (ViewportObject*)m_owner;
 }
 
 
