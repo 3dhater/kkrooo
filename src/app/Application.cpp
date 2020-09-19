@@ -495,22 +495,12 @@ void Application::run()
         if( !m_minimized )
         {
             
-		    kkCursorInViewport(false);
-            m_cursorInGUI = false;
             if(m_shortcutManager.ptr())
             {
                 m_shortcutManager->onFrame();
             }
             
-            if(m_gs.ptr())
-            {
-		        drawAll(false);
-            }
-            if(!kkIsCursorInViewport())
-            {
-                m_cursorInGUI = true;
-            }
-            
+		    kkCursorInViewport(false);
             if(m_event_consumer)
             {
                 if( m_event_consumer->m_input_update )
@@ -518,6 +508,15 @@ void Application::run()
                     this->updateInput();
                 }
                 _updateKeyboard();
+            }
+            m_cursorInGUI = false;
+            if(m_gs.ptr())
+            {
+		        drawAll(false);
+            }
+            if(!kkIsCursorInViewport())
+            {
+                m_cursorInGUI = true;
             }
             /*if(m_active_viewport)
             {
@@ -634,9 +633,10 @@ void Application::drawAll(bool force)
     {
         m_gs->setActive(m_mainWindow.ptr());
         m_gs->update();
-
         m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
-        if(force || m_KrGuiSystem->m_mouseDelta.x != 0.f
+        if(force 
+            || m_KrGuiSystem->m_isEnterTextMode
+            || m_KrGuiSystem->m_mouseDelta.x != 0.f
             || m_KrGuiSystem->m_mouseDelta.y != 0.f
             || m_KrGuiSystem->m_mouseIsLMB || m_KrGuiSystem->m_mouseIsLMB_up
             || m_KrGuiSystem->m_mouseIsRMB || m_KrGuiSystem->m_mouseIsRMB_up
@@ -1489,6 +1489,7 @@ void Application::setSelectMode( SelectMode m )
     m_selectMode      = m;
     m_isLocalScale    = false;
     m_isLocalRotation = false;
+	kkDrawAll();
 }
 
 void Application::setEditMode( EditMode m )
@@ -1553,6 +1554,7 @@ void Application::setEditMode( EditMode m )
     }
 
     m_current_scene3D->updateSelectionAabb();
+	kkDrawAll();
 }
 
 
@@ -2252,6 +2254,7 @@ void Application::_setRightTabMode(RightTabMode m)
     default:
         break;
     }
+	kkDrawAll();
 }
 
 void Application::openImageFilePathDialog(kkString* outFilePath)

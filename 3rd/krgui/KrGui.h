@@ -559,7 +559,7 @@ namespace Kr
 			static bool   m_IsV   ;
 			static char16_t  m_character;
 			static bool  m_IsLMBDouble;
-
+			bool   m_isEnterTextMode = false;
 			bool   m_mouseIsLMB_up = false;
 			bool   m_mouseIsLMB    = false;
 			bool   m_mouseIsLMB_old= false;

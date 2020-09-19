@@ -16,13 +16,13 @@ void Application::_drawMainToolBar()
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::Undo), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
 		printf("Undo\n");
+		kkDrawAll();
 	}
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::Redo), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
 		printf("Redo\n");
+		kkDrawAll();
 	}
-
-
 	m_KrGuiSystem->setCurrentFont(oldFont);
 }
 

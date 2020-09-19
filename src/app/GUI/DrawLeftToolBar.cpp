@@ -15,6 +15,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPosition(0.f, m_mainMenuHeight + m_mainToolBarHeight);
 	if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::SelectByName), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
+		kkDrawAll();
 		if( !m_drawSelectByNameWindow ) m_drawSelectByNameWindow = true;
         else                            m_drawSelectByNameWindow = false;
 	}
@@ -110,7 +111,6 @@ void Application::_drawLeftToolBar()
 		setEditMode( EditMode::Polygon );
 	}
 	m_KrGuiSystem->newLine();
-
 
 	m_KrGuiSystem->setCurrentFont(oldFont);
 }

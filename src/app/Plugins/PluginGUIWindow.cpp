@@ -342,6 +342,7 @@ void PluginGUIWindow::draw()
             {
                 if( m_app->m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::CollapseCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
                 {
+	                kkDrawAll();
                     current_group->m_expanded = false;
                 }
             }
@@ -349,6 +350,7 @@ void PluginGUIWindow::draw()
             {
                 if( m_app->m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::ExpandCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
                 {
+	                kkDrawAll();
                     current_group->m_expanded = true;
                 }
             }
@@ -356,6 +358,7 @@ void PluginGUIWindow::draw()
             m_app->m_KrGuiSystem->addText(current_group->m_text.data());
             if(m_app->m_KrGuiSystem->isLastItemPressedOnce())
             {
+	            kkDrawAll();
                 current_group->m_expanded = current_group->m_expanded ? false : true;
             }
             m_app->m_KrGuiSystem->newLine(3.f);
@@ -378,6 +381,7 @@ void PluginGUIWindow::draw()
                 {
                     if(item->m_callback)
                     {
+	                    kkDrawAll();
                         item->m_callback(item->m_id, m_userData);
                     }
                 }
@@ -406,6 +410,7 @@ void PluginGUIWindow::draw()
                     {
                         if(item->m_callback)
                         {
+	                        kkDrawAll();
                             item->m_callback(item->m_id, m_userData);
                         }
                     }
@@ -420,6 +425,7 @@ void PluginGUIWindow::draw()
                     {
                         if(item->m_callback)
                         {
+	                        kkDrawAll();
                             item->m_callback(item->m_id, m_userData);
                         }
                     }
@@ -435,7 +441,10 @@ void PluginGUIWindow::draw()
                     checkBoxStyle.checkboxUncheckSymbol = kkrooo::getIconFontChar(IconFontSymbol::CheckBoxUncheck);
                     checkBoxStyle.buttonTextIdleColor = Gui::ColorWhite;
                     checkBoxStyle.buttonTextPositionAdd.y += 3.f;
-                    m_app->m_KrGuiSystem->addCheckBox( item->m_checkbox_ptr, &checkBoxStyle, item->m_text.data() );
+                    if( m_app->m_KrGuiSystem->addCheckBox( item->m_checkbox_ptr, &checkBoxStyle, item->m_text.data() ) )
+                    {
+	                    kkDrawAll();
+                    }
                 }
             }break;
             case PluginGUIWindowElementType::ValueSelectorFloat:
@@ -448,6 +457,7 @@ void PluginGUIWindow::draw()
 
                         if(item->m_callback)
                         {
+	                         kkDrawAll();
                             item->m_callback(item->m_id, m_userData);
                         }
                     }
@@ -472,6 +482,7 @@ void PluginGUIWindow::draw()
 
                         if(item->m_callback)
                         {
+	                        kkDrawAll();
                             item->m_callback(item->m_id, m_userData);
                         }
                     }
@@ -494,6 +505,7 @@ void PluginGUIWindow::draw()
                         item->m_text.data(),
                         Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), item->m_textInputFilter, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ))
                     {
+	                    kkDrawAll();
                         item->m_textInputResult(m_app->m_KrGuiSystem->getTextInputResult());
                     }
                     if(m_app->m_KrGuiSystem->isLastItemKeyboardInput())
@@ -522,6 +534,7 @@ void PluginGUIWindow::draw()
         {
             if(m_onOK)
             {
+	            kkDrawAll();
                 m_onOK(-1, m_userData);
                 m_isActive = false;
                 m_app->m_importExportWindow->hide();
@@ -534,6 +547,7 @@ void PluginGUIWindow::draw()
         m_app->m_KrGuiSystem->newLine(10.f);
         if( m_app->m_KrGuiSystem->addButton( u"Apply", 0, Gui::Vec2f(50.f, 20.f), true, true, Gui::Vec4f(2.f,2.f,2.f,2.f) ) )
         {
+	        kkDrawAll();
             m_app->convertSelectedObjectToPolygonalObject();
         }
     }

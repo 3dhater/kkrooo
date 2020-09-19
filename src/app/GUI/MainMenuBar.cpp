@@ -17,6 +17,7 @@ using namespace Kr;
 
 void Application::_drawMainMenuBar()
 {
+	bool redraw = false;
     if( m_KrGuiSystem->menuBarBegin() )
 	{
 		if(m_KrGuiSystem->menuBarMenu(u"File"))
@@ -26,19 +27,23 @@ void Application::_drawMainMenuBar()
 			{
 				if(m_KrGuiSystem->addMenuItem(u"New scene", m_shortcutManager->getShortcutText(ShortcutCommand_General::New), 0 ))
 				{
+					redraw = true;
                     m_mainMenuCommand.type   = MainMenuCommandType::NewScene;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Open", m_shortcutManager->getShortcutText(ShortcutCommand_General::Open), 0 ))
 				{
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Test image import", 0, 0 ))
 				{
+					redraw = true;
 					auto i = loadImageFromDialog();
                     if( i )
                         kkDestroy(i);
 				}
 				if(m_KrGuiSystem->beginMenu(u"Open Recent", 0, kkrooo::getIconFontChar(IconFontSymbol::NextMenu) ))
 				{
+					redraw = true;
 					/*if(m_KrGuiSystem->addMenuItem(u"Project/Solution…", u"Ctrl+Shift+O", 0 )){ printf("Open Project\n"); }
 					if(m_KrGuiSystem->addMenuItem(u"Folder…", 0, 0 )){ printf("Open Folder\n"); }
 					if(m_KrGuiSystem->addMenuItem(u"File…", 0, 0 )){ printf("Open File\n"); }*/
@@ -48,12 +53,15 @@ void Application::_drawMainMenuBar()
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Save", m_shortcutManager->getShortcutText(ShortcutCommand_General::Save), 0 ))
 				{ 
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Save As..", m_shortcutManager->getShortcutText(ShortcutCommand_General::SaveAs), 0 ))
 				{ 
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"File Properties", 0, 0 ))
 				{ 
+					redraw = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 
@@ -61,6 +69,7 @@ void Application::_drawMainMenuBar()
 				{
 					if(m_KrGuiSystem->addMenuItem(u"Import...", 0, 0 ))
 					{
+						redraw = true;
                         m_mainMenuCommand.type   = MainMenuCommandType::ImportWithFileName;
 					}
 					m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
@@ -70,6 +79,7 @@ void Application::_drawMainMenuBar()
                         auto info = arr[i]->getInfo();
                         if(m_KrGuiSystem->addMenuItem(info.m_extension_description.data(), 0, 0))
                         {
+							redraw = true;
                             m_mainMenuCommand.type   = MainMenuCommandType::Import;
                             m_mainMenuCommand.plugin = arr[i];
                             break;
@@ -86,6 +96,7 @@ void Application::_drawMainMenuBar()
                         auto info = arr[i]->getInfo();
                         if(m_KrGuiSystem->addMenuItem(info.m_extension_description.data(), 0, 0))
                         {
+							redraw = true;
                             m_mainMenuCommand.type   = MainMenuCommandType::Export;
                             m_mainMenuCommand.plugin = arr[i];
                             break;
@@ -157,30 +168,37 @@ void Application::_drawMainMenuBar()
 
 				if(m_KrGuiSystem->addMenuItem(u"Select by name",0))
 				{
+					redraw = true;
 					this->m_drawSelectByNameWindow = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Enter transformation",m_shortcutManager->getShortcutText(ShortcutCommand_Edit::EnterTransformation)))
 				{
+					redraw = true;
 					m_drawTransformWindow = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Pivot tool",0))
 				{
+					redraw = true;
 					m_drawPivotToolWindow = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Undo",m_shortcutManager->getShortcutText(ShortcutCommand_Edit::Undo)))
 				{
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Redo",m_shortcutManager->getShortcutText(ShortcutCommand_Edit::Redo)))
 				{
+					redraw = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Delete",u"Delete"))
 				{
 					_deleteSelectedObjects();
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Clone",0))
 				{
+					redraw = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Rotate local",0))
@@ -196,24 +214,29 @@ void Application::_drawMainMenuBar()
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Apply matrices",0))
 				{
+					redraw = true;
 					m_mainMenuCommand.type   = MainMenuCommandType::ApplyMatrices;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Reset matrices",0))
 				{
 					_resetMatrices();
+					redraw = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Select all", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::SelectAll)))
 				{
 					m_current_scene3D->selectAll();
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Deselect all", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::DeselectAll)))
 				{
 					m_current_scene3D->deselectAll();
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Select invert", m_shortcutManager->getShortcutText(ShortcutCommand_Edit::SelectInvert)))
 				{
 					m_current_scene3D->selectInvert();
+					redraw = true;
 				}
 				if( m_KrGuiSystem->popupMenuEnd() )
 					m_cursorInGUI = true;
@@ -226,15 +249,18 @@ void Application::_drawMainMenuBar()
 			{
 				if(m_KrGuiSystem->addMenuItem(u"Array",0))
 				{
+					redraw = true;
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Shortcut Manager",0))
 				{
 					m_drawShortcutManager = true;
+					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Preferences",0))
 				{
 					m_drawPreferencesWindow = true;
+					redraw = true;
 				}
 				if( m_KrGuiSystem->popupMenuEnd() )
 					m_cursorInGUI = true;
@@ -252,6 +278,7 @@ void Application::_drawMainMenuBar()
                     if( m_KrGuiSystem->addMenuItem(u"Reset", 0, 0 ))
 					{
 //						_resetViewports();
+					redraw = true;
 					}
 					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
@@ -259,6 +286,7 @@ void Application::_drawMainMenuBar()
                 if( m_KrGuiSystem->addMenuItem(u"Cull back faces", 0, 0 /*,&m_backfaceCull*/ ))
 				{
 					m_backfaceCull = m_backfaceCull ? false : true;
+					redraw = true;
 				}
 				if( m_KrGuiSystem->popupMenuEnd() )
 					m_cursorInGUI = true;
@@ -282,10 +310,12 @@ void Application::_drawMainMenuBar()
                 if( m_KrGuiSystem->addMenuItem(u"Material editor", 0, 0 ))
 				{
 					m_mainMenuCommand.type   = MainMenuCommandType::ShowMaterialEditor;
+					redraw = true;
 				}
 				if( m_KrGuiSystem->addMenuItem(u"UV editor", 0, 0 ))
 				{
 					//m_mainMenuCommand.type   = MainMenuCommandType::ShowMaterialEditor;
+					redraw = true;
 				}
 				if( m_KrGuiSystem->popupMenuEnd() )
 					m_cursorInGUI = true;
@@ -299,6 +329,7 @@ void Application::_drawMainMenuBar()
                 if( m_KrGuiSystem->addMenuItem(u"Render", 0, 0 ))
 				{
 					m_mainMenuCommand.type   = MainMenuCommandType::ShowRenderWindow;
+					redraw = true;
 				}
 				if( m_KrGuiSystem->popupMenuEnd() )
 					m_cursorInGUI = true;
@@ -321,5 +352,7 @@ void Application::_drawMainMenuBar()
 			m_cursorInGUI = true;
 		}
 	}
+	if(redraw)
+		kkDrawAll();
 }
 

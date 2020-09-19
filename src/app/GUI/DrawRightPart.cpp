@@ -57,6 +57,7 @@ void Application::_drawRightToolBar_createTab(float x, float y)
             if( m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::CollapseCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
             {
                 cat->m_expanded = false;
+	            kkDrawAll();
             }
         }
         else
@@ -64,6 +65,7 @@ void Application::_drawRightToolBar_createTab(float x, float y)
             if( m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::ExpandCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
             {
                 cat->m_expanded = true;
+	            kkDrawAll();
             }
         }
         m_KrGuiSystem->setCurrentFont(textFont);
@@ -83,6 +85,7 @@ void Application::_drawRightToolBar_createTab(float x, float y)
                 if( m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::CollapseCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
                 {
                     subcat->m_expanded = false;
+	                kkDrawAll();
                 }
             }
             else
@@ -90,6 +93,7 @@ void Application::_drawRightToolBar_createTab(float x, float y)
                 if( m_KrGuiSystem->addButtonSymbol(kkrooo::getIconFontChar(IconFontSymbol::ExpandCategory), &expandCollapseButtonStyle, Gui::Vec2f(10.f,10.f)) )
                 {
                     subcat->m_expanded = true;
+	                kkDrawAll();
                 }
             }
             m_KrGuiSystem->setCurrentFont(textFont);

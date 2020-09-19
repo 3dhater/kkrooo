@@ -408,6 +408,7 @@ bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t
 		//printf("%zu %zu\n", select_begin, select_end);
 	}
 
+	m_isEnterTextMode = true;
 	_checkStyle(&style);
 	_newId();
 	
@@ -587,6 +588,7 @@ bool Gui::GuiSystem::addTextInputPopup(const Vec2f& _size, char16_t* buf, size_t
 			select_end = 0;
 		}
 	}
+	m_isEnterTextMode = result ? false : true;
 	return result;
 }
 
