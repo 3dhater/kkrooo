@@ -42,10 +42,8 @@ void Application::_drawMainMenuBar()
 					/*if(m_KrGuiSystem->addMenuItem(u"Project/Solution…", u"Ctrl+Shift+O", 0 )){ printf("Open Project\n"); }
 					if(m_KrGuiSystem->addMenuItem(u"Folder…", 0, 0 )){ printf("Open Folder\n"); }
 					if(m_KrGuiSystem->addMenuItem(u"File…", 0, 0 )){ printf("Open File\n"); }*/
-					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
-
-					m_KrGuiSystem->endMenu();
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Save", m_shortcutManager->getShortcutText(ShortcutCommand_General::Save), 0 ))
@@ -77,9 +75,8 @@ void Application::_drawMainMenuBar()
                             break;
                         }
                     }
-					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
-					m_KrGuiSystem->endMenu();
 				}
 				if(m_KrGuiSystem->beginMenu(u"Export", 0, kkrooo::getIconFontChar(IconFontSymbol::NextMenu)))
 				{
@@ -94,9 +91,8 @@ void Application::_drawMainMenuBar()
                             break;
                         }
                     }
-					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
-					m_KrGuiSystem->endMenu();
 				}
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Exit", u"Alt+F4", 0 ))
@@ -107,7 +103,8 @@ void Application::_drawMainMenuBar()
 				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
 					m_cursorInGUI = true;
 
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}
 		if(m_KrGuiSystem->menuBarMenu(u"Edit"))
@@ -133,9 +130,8 @@ void Application::_drawMainMenuBar()
                     {
 						setEditMode( EditMode::Polygon );
                     }
-					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
-					m_KrGuiSystem->endMenu();
 				}
 				if(m_KrGuiSystem->beginMenu(u"Select mode...", 0, kkrooo::getIconFontChar(IconFontSymbol::NextMenu)))
 				{
@@ -155,9 +151,8 @@ void Application::_drawMainMenuBar()
                     {
 						setSelectMode( SelectMode::Scale );
                     }
-					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
-					m_KrGuiSystem->endMenu();
 				}
 
 				if(m_KrGuiSystem->addMenuItem(u"Select by name",0))
@@ -220,9 +215,8 @@ void Application::_drawMainMenuBar()
 				{
 					m_current_scene3D->selectInvert();
 				}
-				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
-						m_cursorInGUI = true;
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}
 		if(m_KrGuiSystem->menuBarMenu(u"Tools"))
@@ -242,9 +236,8 @@ void Application::_drawMainMenuBar()
 				{
 					m_drawPreferencesWindow = true;
 				}
-				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
-						m_cursorInGUI = true;
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}
 		if(m_KrGuiSystem->menuBarMenu(u"View"))
@@ -260,17 +253,15 @@ void Application::_drawMainMenuBar()
 					{
 //						_resetViewports();
 					}
-					if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
+					if( m_KrGuiSystem->endMenu() )
 						m_cursorInGUI = true;
-					m_KrGuiSystem->endMenu();
 				}
                 if( m_KrGuiSystem->addMenuItem(u"Cull back faces", 0, 0 /*,&m_backfaceCull*/ ))
 				{
 					m_backfaceCull = m_backfaceCull ? false : true;
 				}
-				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
-						m_cursorInGUI = true;
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}
 		if(m_KrGuiSystem->menuBarMenu(u"Create"))
@@ -279,9 +270,8 @@ void Application::_drawMainMenuBar()
 			if(m_KrGuiSystem->popupMenuBegin( &showMenu, &m_mainMenuStyle ))
 			{
 				_drawMainMenu_ObjectCreatorCategories();
-				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
-						m_cursorInGUI = true;
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}	
 		if(m_KrGuiSystem->menuBarMenu(u"Materials"))
@@ -297,9 +287,8 @@ void Application::_drawMainMenuBar()
 				{
 					//m_mainMenuCommand.type   = MainMenuCommandType::ShowMaterialEditor;
 				}
-				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
-						m_cursorInGUI = true;
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}
 		if(m_KrGuiSystem->menuBarMenu(u"Rendering"))
@@ -311,9 +300,8 @@ void Application::_drawMainMenuBar()
 				{
 					m_mainMenuCommand.type   = MainMenuCommandType::ShowRenderWindow;
 				}
-				if( m_KrGuiSystem->isLastItemCursorHover() || m_KrGuiSystem->isLastItemCursorMove() )
-						m_cursorInGUI = true;
-				m_KrGuiSystem->popupMenuEnd();
+				if( m_KrGuiSystem->popupMenuEnd() )
+					m_cursorInGUI = true;
 			}
 		}
 		/*if(m_KrGuiSystem->menuBarMenu(u"Debug"))
@@ -328,9 +316,10 @@ void Application::_drawMainMenuBar()
 				m_KrGuiSystem->popupMenuEnd();
 			}
 		}*/
-		m_KrGuiSystem->menuBarEnd(&m_mainMenuHeight);
-
-		//m_mainToolBarHeight = m_mainMenuHeight;
+		if( m_KrGuiSystem->menuBarEnd(&m_mainMenuHeight) )
+		{
+			m_cursorInGUI = true;
+		}
 	}
 }
 

@@ -363,8 +363,6 @@ void Application::init()
     _updateColorTheme();
     
     _init_renderManager();
-    
-
 
     // гизмо создаётся перед передачей указателя на него во вьюпорт
     // потом нужно создать сцену, и уже потом инициализировать
@@ -377,28 +375,20 @@ void Application::init()
     ShowWindow((HWND)m_mainWindow->getHandle(), SW_MAXIMIZE);
     updateBuffers();
     _init_viewports();
-    //_resetViewports();
     m_gizmo->init();
 
-   /* updateViewports();
-    
     _initEditParamsWindow();
-
-    _init_materialEditor(false);*/
-    
+    _init_materialEditor(false);
     m_isClearCanvas = true;
 
     m_guiMainWindow.OSWindow = m_mainWindow->getHandle();
- //   m_guiMaterialEditorWindow.OSWindow = m_materialEditorWindow->getHandle();
- //   m_guiRenderWindow.OSWindow = m_renderWindow->getHandle();
- //   m_guiImportExportWindow.OSWindow = m_importExportWindow->getHandle();
+    m_guiMaterialEditorWindow.OSWindow = m_materialEditorWindow->getHandle();
+    m_guiRenderWindow.OSWindow = m_renderWindow->getHandle();
+    m_guiImportExportWindow.OSWindow = m_importExportWindow->getHandle();
+    setActiveRenderer(m_renderers[0]);
 
- //   setActiveRenderer(m_renderers[0]);
-
-
- //   m_gs->useBackFaceCulling(true);
+    m_gs->useBackFaceCulling(true);
     setNeedToSave(false);
-    
 }
 
 bool Application::isSelectedObjectNeedConvert()
@@ -427,9 +417,6 @@ void Application::convertSelectedObjectToPolygonalObject()
         }
     }
 }
-
-
-
 const v2i& Application::getWindowClientSize(){	return m_window_client_size;}
 const v2i& Application::getWindowSize()      {  return m_window_size;}
 kkGraphicsSystem* Application::getGS()       {  return m_gs.ptr();}
@@ -438,21 +425,6 @@ void Application::setActiveRenderer(kkRenderer* renderer)
 {
     m_activeRenderer = renderer;
 }
-
-//void Application::setActiveViewport(Viewport* v)
-//{
-//    if( m_active_viewport )
-//    {
-//        m_active_viewport->setActive(false);
-//    }
-//
-//    if( v )
-//    {
-//        v->setActive( true );
-//        m_active_viewport = v;
-//    }
-//}
-
 
 void Application::run()
 {
@@ -475,11 +447,25 @@ void Application::run()
             m_mouseWheel = (f32)Kr::Gui::GuiSystem::m_wheel_delta;
         }
 
-        if(m_KrGuiSystem->isRMBReleased())
+        if(m_KrGuiSystem->m_mouseIsRMB_up)
         {
             kkEvent e;
             e.type = kkEventType::Mouse;
-            e.mouseEvent.state |= kkEventMouse::MS_RMB_UP;
+            e.mouseEvent.state = kkEventMouse::MS_RMB_UP;
+            m_main_system->addEvent(e);
+        }
+        if(m_KrGuiSystem->m_mouseIsLMB_up)
+        {
+            kkEvent e;
+            e.type = kkEventType::Mouse;
+            e.mouseEvent.state = kkEventMouse::MS_LMB_UP;
+            m_main_system->addEvent(e);
+        }
+        if(m_KrGuiSystem->m_mouseIsMMB_up)
+        {
+            kkEvent e;
+            e.type = kkEventType::Mouse;
+            e.mouseEvent.state = kkEventMouse::MS_MMB_UP;
             m_main_system->addEvent(e);
         }
 
@@ -509,13 +495,22 @@ void Application::run()
         if( !m_minimized )
         {
             
+		    kkCursorInViewport(false);
+            m_cursorInGUI = false;
             if(m_shortcutManager.ptr())
             {
                 m_shortcutManager->onFrame();
             }
             
-           
-
+            if(m_gs.ptr())
+            {
+		        drawAll(false);
+            }
+            if(!kkIsCursorInViewport())
+            {
+                m_cursorInGUI = true;
+            }
+            
             if(m_event_consumer)
             {
                 if( m_event_consumer->m_input_update )
@@ -524,13 +519,6 @@ void Application::run()
                 }
                 _updateKeyboard();
             }
-            m_cursorInGUI = false;
-        
-            if(m_gs.ptr())
-            {
-		        drawAll(false);
-            }
-
             /*if(m_active_viewport)
             {
                 m_active_viewport->onFrame();
@@ -539,8 +527,6 @@ void Application::run()
             if(m_event_consumer)
                 _onEndFrame();
         }
-        //kkColor
-        //kkString
         //printf("Time: %f \n", (work_time + sleep_time).count());
 	}
 }
@@ -553,14 +539,10 @@ void Application::onWindowMinimize()
 void Application::onWindowRestore()
 {
     m_minimized = false;
-    /*if( m_current_scene3D )
-        m_current_scene3D->updateObject2DPoints(m_current_scene3D->getObjects());*/
 }
 
 void Application::onWindowMaximize()
 {
-    /*if( m_current_scene3D )
-        m_current_scene3D->updateObject2DPoints(m_current_scene3D->getObjects());*/
 }
 
 void Application::onWindowActivate()
@@ -720,7 +702,6 @@ void Application::drawAll(bool force)
             {
                 m_KrGuiSystem->switchWindow(&m_guiImportExportWindow);
                 m_importExportGUIWindow->draw();
-                //m_renderManager->drawWindow();
                 m_KrGuiSystem->render();
             }
             m_gs->endDraw();

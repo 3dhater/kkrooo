@@ -30,13 +30,10 @@ struct ViewportMouseState
 			IsSelectByRect = false;
 		}
 
-		if( InViewport && LMB_HOLD )
+		if( LMB_HOLD || RMB_HOLD || MMB_HOLD )
 		{
-		}
-		else
-		{
+		}else
 			IsFirstClick = false;
-		}
 		IsMove = false;
 		InViewport = false;
 		LMB_UP   = false;
@@ -134,9 +131,7 @@ public:
 	v2i* m_cursor_position = nullptr;
 	AppState_keyboard* m_appState_key = nullptr;
 
-	// когда нажали на активный вьюпорт (и удерживаем кнопку) то должно быть true
-	bool m_is_mouse_focus = false;
-
+	v2i  m_mouse_first_click_coords;
 	// изменение положения рамки
 	// не всё так просто, нужно полностью изменять прямоугольные области каждого ViewportObject
 	// универсально делать лень, по этому для каждого ViewportLayoutType нужно делать по своему

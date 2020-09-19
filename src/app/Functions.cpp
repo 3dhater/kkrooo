@@ -10,6 +10,15 @@
 
 #include <math.h>
 
+bool g_cursorInViewport = false;
+void kkCursorInViewport(bool v)
+{
+	g_cursorInViewport = v;
+}
+bool kkIsCursorInViewport()
+{
+	return g_cursorInViewport;
+}
 bool * kkGetGlobalInputBlock()
 {
     return kkSingleton<Application>::s_instance->GetGlobalInputBlock();

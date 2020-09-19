@@ -32,6 +32,7 @@ void ViewportObject::setActiveCamera(ViewportCamera* c)
 	{
 		resetCamera();
 	}
+	this->update(*m_windowSize);
 	kkDrawAll();
 }
 void ViewportObject::drawName(bool isActive)
@@ -248,8 +249,9 @@ void ViewportObject::_rotate()
 }
 void ViewportObject::updateInputCamera(const v2f& mouseDelta, bool inFocus)
 {
-	if( kkrooo::pointInRect( *m_cursor_position, m_rect_modified + v4f(0.f,0.f,0.f) ) )
+	if( kkrooo::pointInRect( *m_cursor_position, m_rect_modified  ) )
 	{
+		g_mouseState.InViewport = true;
 		//printf("%i\n",Kr::Gui::GuiSystem::m_wheel_delta);
 		if( Kr::Gui::GuiSystem::m_wheel_delta > 0 )
 		{
@@ -266,7 +268,7 @@ void ViewportObject::updateInputCamera(const v2f& mouseDelta, bool inFocus)
 	}
 	if(inFocus)
 	{
-		if( g_mouseState.MMB_HOLD || kkIsKeyDown( kkKey::K_SPACE )  )
+		if( (g_mouseState.MMB_HOLD && g_mouseState.IsFirstClick) || kkIsKeyDown( kkKey::K_SPACE )  )
 		{
 			if( *m_appState_key == AppState_keyboard::Alt )
 			{
@@ -286,8 +288,9 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	update(windowSize);
 
 	bool inRect = false;
-	if( kkrooo::pointInRect( *m_cursor_position, m_rect_modified ) || m_is_mouse_focus )
+	if( kkrooo::pointInRect( *m_cursor_position, m_rect_modified ) )
 	{
+		kkCursorInViewport(true);
 		inRect = true;
 		// определяю если курсор двигается
 		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f || Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
@@ -298,6 +301,14 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 		if(g_mouseState.LMB_DOWN || g_mouseState.MMB_DOWN)
 		{
 			res = true;
+		}
+	}
+	if( (g_mouseState.LMB_DOWN || g_mouseState.RMB_DOWN || g_mouseState.MMB_DOWN) && inRect )
+	{
+		if( !g_mouseState.IsFirstClick )
+		{
+			g_mouseState.IsFirstClick = true;
+			m_mouse_first_click_coords = *m_cursor_position;
 		}
 	}
 	if(inFocus)
@@ -370,7 +381,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		{
 		case ViewportUID::ParallelHorUp:
 		{
-			if(g_mouseState.RMB_HOLD)
+			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.w += mouseDelta.y;
 				if(m_framePosition.w + half_size.y <= 30.f)
@@ -384,7 +395,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		}break;
 		case ViewportUID::ParallelHorDown:
 		{
-			if(g_mouseState.RMB_HOLD)
+			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.y += mouseDelta.y;
 				if(m_framePosition.y + half_size.y <= 30.f)
@@ -403,7 +414,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		{
 		case ViewportUID::ParallelVerLeft:
 		{
-			if(g_mouseState.RMB_HOLD)
+			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.z += mouseDelta.x;
 				if(m_framePosition.z + half_size.x <= 30.f)
@@ -417,7 +428,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		}break;
 		case ViewportUID::ParallelVerRight:
 		{
-			if(g_mouseState.RMB_HOLD)
+			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.x += mouseDelta.x;
 				if(m_framePosition.x + half_size.x <= 30.f)
@@ -598,7 +609,6 @@ Viewport::~Viewport()
 		}
 	}
 }
-
 void Viewport::_init_parallel_v(const v4f& indent, ViewportLayoutType lt)
 {
 	ViewportObject * VO1 = kkCreate<ViewportObject>();
@@ -763,6 +773,11 @@ void Viewport::draw(ColorTheme* colorTheme)
 		auto vp = m_viewports;
 		while(true)
 		{
+			if( kkrooo::pointInRect( *vp->m_cursor_position, vp->m_rect_modified ))
+			{
+				kkCursorInViewport(true);
+			}
+
 			auto next = vp->m_right;
 			kkGSSetDepth(false);
 			kkGSSetViewport((s32)vp->m_gs_viewport.x, (s32)vp->m_gs_viewport.y, (s32)vp->m_gs_viewport.z, (s32)vp->m_gs_viewport.w);

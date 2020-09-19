@@ -523,14 +523,11 @@ namespace Kr
 			void saveImageToFile(Image*, const char* fileName, const char* extesionName );
 			bool loadImageFromFile(Image*, const char* fileName );
 
-			bool isRMBPressed();
-			bool isRMBHold();
-			bool isRMBReleased();
-
 			// If you need main menu bar, draw it first
 			// You can draw menu bar in other places, set customPosition
 			bool menuBarBegin( bool enabled = true, Style* style = nullptr, bool useNewLine = true);
-			void menuBarEnd(float * out_menuHeight = nullptr);
+			// return true if in rect
+			bool menuBarEnd(float * out_menuHeight = nullptr);
 			bool menuBarMenu(const char16_t* text);
 			//void menuBarEndMenu();
 
@@ -539,11 +536,11 @@ namespace Kr
 			void addSeparator(Style* style = nullptr);
 
 			bool popupMenuBegin( bool * active, Style* style = nullptr );
-			void popupMenuEnd(const Vec4f& rounding = Vec4f());
+			bool popupMenuEnd(const Vec4f& rounding = Vec4f());
 			bool addMenuItem(const char16_t* text, const char16_t* shortcutText, char16_t iconFontSymbol = 0, char16_t iconFontSubmenuSymbol = 0 );
 			bool addMenuItemCheck(const char16_t* text, const char16_t* shortcutText, bool* check, char16_t iconFontSymbol = 0, char16_t iconFontCheckSymbol = 0, char16_t iconFontUncheckSymbol = 0 );
 			bool beginMenu(const char16_t* text, char16_t iconFontSymbol = 0, char16_t iconFontSubmenuSymbol = 0);
-			void endMenu();
+			bool endMenu();
 
 			const Vec4f& getLastClipRect();
 

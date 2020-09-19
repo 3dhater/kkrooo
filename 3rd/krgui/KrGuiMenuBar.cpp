@@ -30,7 +30,7 @@ bool Gui::GuiSystem::menuBarBegin(  bool enabled, Style* style, bool useNewLine 
 }
 
 
-void Gui::GuiSystem::menuBarEnd(float * out_menuHeight)
+bool Gui::GuiSystem::menuBarEnd(float * out_menuHeight)
 {
 	m_currentMenuBar.m_insidePopup = m_currentMenuBar.m_insidePopupFind;
 
@@ -53,6 +53,7 @@ void Gui::GuiSystem::menuBarEnd(float * out_menuHeight)
 	{
 		*out_menuHeight = m_currentMenuBar.m_rect.w - m_currentMenuBar.m_rect.y;
 	}
+	return _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentMenuBar.m_rect );
 }
 
 bool Gui::GuiSystem::menuBarMenu(const char16_t* text)

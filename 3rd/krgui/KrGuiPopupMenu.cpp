@@ -79,7 +79,7 @@ bool Gui::GuiSystem::popupMenuBegin(bool * active, Style* style)
 	return _popupMenuBegin(active, style, m_popupMenuPosition);
 }
 
-void Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
+bool Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
 {
 	--m_popupMenuActiveCount;
 	PopupMenuInformation * activePopup = m_popupMenuActive[m_popupMenuActiveCount];
@@ -142,6 +142,7 @@ void Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
 	}
 
 	this->setDrawPosition(g_oldDrawPoint.x, g_oldDrawPoint.y, true);
+	return activePopup->m_inRect;
 }
 
 bool Gui::GuiSystem::_addMenuItem(const char16_t* text, const char16_t* shortcutText, char16_t iconFontSymbolLeft, char16_t iconFontSymbolRight1, char16_t iconFontSymbolRight2, bool * check, bool isSubMenu )
@@ -451,9 +452,9 @@ bool Gui::GuiSystem::beginMenu(const char16_t* text, char16_t iconFontSymbol, ch
 	return true;
 }
 
-void Gui::GuiSystem::endMenu()
+bool Gui::GuiSystem::endMenu()
 {
-	popupMenuEnd();
+	return popupMenuEnd();
 }
 
 void Gui::GuiSystem::_resetAllPopupMenu()

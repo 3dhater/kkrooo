@@ -478,28 +478,6 @@ int Gui::GuiSystem::getTextLen( const char16_t * text, Vec2f * out_size, float s
 	out_size->y = max_h * m_guiZoom;
 	return len;
 }
-//float Gui::GuiSystem::getTextLen( const char16_t * text, int * out_strlen, float * out_height, float spacing, float spaceAdd )
-//{
-//	float result = 0;
-//
-//	*out_strlen = _internal::strLen(text);
-//
-//	float max_h  = 0;
-//	
-//	for( int i = 0; i < *out_strlen; ++i )
-//	{
-//		auto * g = &m_currentFont->m_glyphs[ text[i] ];
-//		result += (float)g->width + spacing/*  - g->underhang*/;
-//		if(g->symbol == u' ')
-//			result += spaceAdd;
-//
-//		if( g->height > max_h ) max_h = g->height;
-//	}
-//
-//	*out_height = max_h;
-//
-//	return result;
-//}
 
 float Gui::GuiSystem::getTextMaxCharHeight( const char16_t * text )
 {
@@ -625,20 +603,6 @@ bool Gui::GuiSystem::addSensorArea( const Vec2f& _size )
 	return _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, sensorRect );
 }
 
-bool Gui::GuiSystem::isRMBPressed()
-{
-	return m_mouseIsRMB_firstClick;
-}
-
-bool Gui::GuiSystem::isRMBReleased()
-{
-	return m_mouseIsRMB_up;
-}
-
-bool Gui::GuiSystem::isRMBHold()
-{
-	return m_mouseIsRMB;
-}
 
 void Gui::GuiSystem::_checkStyle(Gui::Style** style)
 {
