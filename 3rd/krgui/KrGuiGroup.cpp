@@ -152,7 +152,7 @@ void Gui::GuiSystem::endGroup()
 			}
 		}
 	}
-	setDrawPointPosition(currentGroup->m_clipRect.z, currentGroup->m_clipRect.y);
+	setDrawPosition(currentGroup->m_clipRect.z, currentGroup->m_clipRect.y);
 
 	//auto size_y = currentGroup->m_clipRect.w - currentGroup->m_clipRect.y;
 	auto size_y = currentGroup->m_contentHeight;

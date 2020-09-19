@@ -513,14 +513,14 @@ float Gui::GuiSystem::getTextMaxCharHeight( const char16_t * text )
 	return result;
 }
 
-void Gui::GuiSystem::setDrawPointPosition( float x, float y, bool zeroHeight )
+void Gui::GuiSystem::setDrawPosition( float x, float y, bool zeroHeight )
 {
 	m_drawPointer.x = x;
 	m_drawPointer.y = y;
 	if(zeroHeight) m_maxItemHeightOnCurrentRow[m_maxItemHeightOnCurrentRowCount] = 0.f;
 }
 
-const Gui::Vec2f& Gui::GuiSystem::getDrawPointPosition()
+const Gui::Vec2f& Gui::GuiSystem::getDrawPosition()
 {
 	return m_drawPointer;
 }

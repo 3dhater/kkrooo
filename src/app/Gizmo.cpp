@@ -162,8 +162,8 @@ void Gizmo::drawMove(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		doMouseInput = true;
 
 	AppEvent e;
-	e.type       = AppEventType::_gizmo;
-	e.gizmo.type = AppEvent_gizmo::_type::_move;
+	e.type       = AppEventType::Gizmo;
+	e.gizmo.type = AppEvent_gizmo::_type::Move;
 
 	m_matrix[ 0 ].KK_X = size;
 	m_matrix[ 1 ].KK_Y = size;
@@ -193,80 +193,80 @@ void Gizmo::drawMove(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		if( m_gizmoMoveObjects_col[ 0 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 0;
-			e.gizmo.part = AppEvent_gizmo::_part::_x;
+			e.gizmo.part = AppEvent_gizmo::_part::X;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoMoveObjects_col[ 1 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 1;
-			e.gizmo.part = AppEvent_gizmo::_part::_y;
+			e.gizmo.part = AppEvent_gizmo::_part::Y;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 
 		}else if( m_gizmoMoveObjects_col[ 2 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 2;
-			e.gizmo.part = AppEvent_gizmo::_part::_z;
+			e.gizmo.part = AppEvent_gizmo::_part::Z;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 
 		}else if( m_gizmoMoveObjects_col[ 3 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 3;
-			e.gizmo.part = AppEvent_gizmo::_part::_xy_plane;
+			e.gizmo.part = AppEvent_gizmo::_part::XY_plane;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 
 		}else if( m_gizmoMoveObjects_col[ 4 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 4;
-			e.gizmo.part = AppEvent_gizmo::_part::_zy_plane;
+			e.gizmo.part = AppEvent_gizmo::_part::ZY_plane;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoMoveObjects_col[ 5 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 5;
-			e.gizmo.part = AppEvent_gizmo::_part::_xz_plane;
+			e.gizmo.part = AppEvent_gizmo::_part::XZ_plane;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}
 	}
 
-	if( hoverid == 0 || hoverid == 3 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_x
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xy_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xz_plane )
+	if( hoverid == 0 || hoverid == 3 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::X
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XY_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XZ_plane )
 		m_app->m_shaderSimple->m_color.set(1.f,0.f,0.f,1.f);
 	else
 		m_app->m_shaderSimple->m_color.set(1.f,0.8f,0.8f,1.f);
 	m_gs->drawMesh(m_gizmoMoveObjects[ 0 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 
-	if( hoverid == 1 || hoverid == 3 || hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_y
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xy_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_zy_plane) 
+	if( hoverid == 1 || hoverid == 3 || hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Y
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XY_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::ZY_plane) 
 		m_app->m_shaderSimple->m_color.set(0.f,0.f,1.f,1.f);
 	else
 		m_app->m_shaderSimple->m_color.set(0.8f,0.8f,1.f,1.f);
 	m_gs->drawMesh(m_gizmoMoveObjects[ 1 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 
-	if( hoverid == 2 || hoverid == 4 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_z 
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_zy_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xz_plane ) 
+	if( hoverid == 2 || hoverid == 4 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Z 
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::ZY_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XZ_plane ) 
 		m_app->m_shaderSimple->m_color.set(0.f,1.f,0.f,1.f);
 	else
 		m_app->m_shaderSimple->m_color.set(0.8f,1.f,0.8f,1.f);
 	m_gs->drawMesh(m_gizmoMoveObjects[ 2 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 
 	m_app->m_shaderSimple->m_color.set(0.5f,1.f,1.0f,1.f);
-	if( hoverid == 3 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xy_plane )
+	if( hoverid == 3 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XY_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoMoveObjects[ 3 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
@@ -275,7 +275,7 @@ void Gizmo::drawMove(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		m_gs->drawMesh(m_gizmoMoveObjects[ 3 ]->getHardwareModel_lines(0),m_matrix,m_app->m_shaderSimple.ptr());
 
 	m_app->m_shaderSimple->m_color.set(0.5f,1.f,1.0f,1.f);
-	if( hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_zy_plane )
+	if( hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::ZY_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoMoveObjects[ 4 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
@@ -285,7 +285,7 @@ void Gizmo::drawMove(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 
 
 	m_app->m_shaderSimple->m_color.set(0.5f,1.f,1.0f,1.f);
-	if( hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xz_plane )
+	if( hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XZ_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoMoveObjects[ 5 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
@@ -302,16 +302,16 @@ void Gizmo::drawMove2D(v2i * cp, const v2i& point2d)
 	int size = 10;
 
 	if( kkrooo::pointInRect(*cp, v4i(point2d.x-size,point2d.y-size,point2d.x+size,point2d.y+size)) 
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_screen_plane )
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Screen_plane )
 	{
 		color = kkColorYellow;
 
 		AppEvent e;
-		e.type     = AppEventType::_gizmo;
-		e.gizmo.type = AppEvent_gizmo::_type::_move;
-		e.gizmo.part = AppEvent_gizmo::_part::_screen_plane;
+		e.type     = AppEventType::Gizmo;
+		e.gizmo.type = AppEvent_gizmo::_type::Move;
+		e.gizmo.part = AppEvent_gizmo::_part::Screen_plane;
 
-		m_app->addAppEvent( e, AppEventPriority::_high );
+		m_app->addAppEvent( e, AppEventPriority::High );
 	}
 
 	m_gs->drawLine2D( v2i( point2d.x-size, point2d.y-size ), v2i( point2d.x+size, point2d.y-size ), color );
@@ -331,8 +331,8 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		doMouseInput = true;
 
 	AppEvent e;
-	e.type       = AppEventType::_gizmo;
-	e.gizmo.type = AppEvent_gizmo::_type::_scale;
+	e.type       = AppEventType::Gizmo;
+	e.gizmo.type = AppEvent_gizmo::_type::Scale;
 
 
 	mat_for_active = m_matrix;
@@ -369,57 +369,57 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		if( m_gizmoScaleObjects[ 0 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 0;
-			e.gizmo.part = AppEvent_gizmo::_part::_x;
+			e.gizmo.part = AppEvent_gizmo::_part::X;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoScaleObjects[ 1 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 1;
-			e.gizmo.part = AppEvent_gizmo::_part::_y;
+			e.gizmo.part = AppEvent_gizmo::_part::Y;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoScaleObjects[ 2 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 2;
-			e.gizmo.part = AppEvent_gizmo::_part::_z;
+			e.gizmo.part = AppEvent_gizmo::_part::Z;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoScaleObjects[ 3 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 3;
-			e.gizmo.part = AppEvent_gizmo::_part::_xy_plane;
+			e.gizmo.part = AppEvent_gizmo::_part::XY_plane;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoScaleObjects[ 4 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 4;
 
-			e.gizmo.part = AppEvent_gizmo::_part::_zy_plane;
+			e.gizmo.part = AppEvent_gizmo::_part::ZY_plane;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoScaleObjects[ 5 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 5;
 
-			e.gizmo.part = AppEvent_gizmo::_part::_xz_plane;
+			e.gizmo.part = AppEvent_gizmo::_part::XZ_plane;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 		}
 	}
 
-	if( hoverid == 0 || hoverid == 3 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_x
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xy_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xz_plane )
+	if( hoverid == 0 || hoverid == 3 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::X
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XY_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XZ_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,0.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoScaleObjects[ 0 ]->getHardwareModel(0),mat_for_active,m_app->m_shaderSimple.ptr());
@@ -430,8 +430,8 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		m_gs->drawMesh(m_gizmoScaleObjects[ 0 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 	}
 
-	if( hoverid == 1 || hoverid == 3 || hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_y
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xy_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_zy_plane) 
+	if( hoverid == 1 || hoverid == 3 || hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Y
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XY_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::ZY_plane) 
 	{
 		m_app->m_shaderSimple->m_color.set(0.f,0.f,1.f,1.f);
 		m_gs->drawMesh(m_gizmoScaleObjects[ 1 ]->getHardwareModel(0),mat_for_active,m_app->m_shaderSimple.ptr());
@@ -442,8 +442,8 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 		m_gs->drawMesh(m_gizmoScaleObjects[ 1 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 	}
 
-	if( hoverid == 2 || hoverid == 4 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_z 
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_zy_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xz_plane)
+	if( hoverid == 2 || hoverid == 4 || hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Z 
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::ZY_plane || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XZ_plane)
 	{
 		m_app->m_shaderSimple->m_color.set(0.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoScaleObjects[ 2 ]->getHardwareModel(0),mat_for_active,m_app->m_shaderSimple.ptr());
@@ -455,7 +455,7 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 	}
 
 	m_app->m_shaderSimple->m_color.set(0.5f,1.f,1.0f,1.f);
-	if( hoverid == 3 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xy_plane )
+	if( hoverid == 3 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XY_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoScaleObjects[ 3 ]->getHardwareModel(0),mat_for_active,m_app->m_shaderSimple.ptr());
@@ -466,7 +466,7 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 	}
 
 	m_app->m_shaderSimple->m_color.set(0.5f,1.f,1.0f,1.f);
-	if( hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_zy_plane )
+	if( hoverid == 4 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::ZY_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoScaleObjects[ 4 ]->getHardwareModel(0),mat_for_active,m_app->m_shaderSimple.ptr());
@@ -476,7 +476,7 @@ void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 
 
 	m_app->m_shaderSimple->m_color.set(0.5f,1.f,1.0f,1.f);
-	if( hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_xz_plane )
+	if( hoverid == 5 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::XZ_plane )
 	{
 		m_app->m_shaderSimple->m_color.set(1.f,1.f,0.f,1.f);
 		m_gs->drawMesh(m_gizmoScaleObjects[ 5 ]->getHardwareModel(0),mat_for_active,m_app->m_shaderSimple.ptr());
@@ -493,16 +493,16 @@ void Gizmo::drawScale2D(v2i * cp, const v2i& point2d)
 	int size = 10;
 
 	if( kkrooo::pointInRect(*cp, v4i(point2d.x-size,point2d.y-size,point2d.x+size,point2d.y+size)) 
-		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_screen_plane )
+		|| m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Screen_plane )
 	{
 		color = kkColorYellow;
 
 		AppEvent e;
-		e.type     = AppEventType::_gizmo;
-		e.gizmo.type = AppEvent_gizmo::_type::_scale;
-		e.gizmo.part = AppEvent_gizmo::_part::_screen_plane;
+		e.type     = AppEventType::Gizmo;
+		e.gizmo.type = AppEvent_gizmo::_type::Scale;
+		e.gizmo.part = AppEvent_gizmo::_part::Screen_plane;
 
-		m_app->addAppEvent( e, AppEventPriority::_high );
+		m_app->addAppEvent( e, AppEventPriority::High );
 	}
 
 	m_gs->drawLine2D( v2i( point2d.x-size, point2d.y-size ), v2i( point2d.x+size, point2d.y-size ), color );
@@ -521,8 +521,8 @@ void Gizmo::drawRotation(const kkVector4& pivot, f32 size, const kkRay& cursorRa
 		doMouseInput = true;
 
 	AppEvent e;
-	e.type       = AppEventType::_gizmo;
-	e.gizmo.type = AppEvent_gizmo::_type::_rotate;
+	e.type       = AppEventType::Gizmo;
+	e.gizmo.type = AppEvent_gizmo::_type::Rotate;
 
 	m_matrix[ 0 ].KK_X = size;
 	m_matrix[ 1 ].KK_Y = size;
@@ -551,52 +551,52 @@ void Gizmo::drawRotation(const kkVector4& pivot, f32 size, const kkRay& cursorRa
 		if( m_gizmoRotationObjects_col[ 0 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 0;
-			e.gizmo.part = AppEvent_gizmo::_part::_y;
+			e.gizmo.part = AppEvent_gizmo::_part::Y;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoRotationObjects_col[ 1 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 1;
-			e.gizmo.part = AppEvent_gizmo::_part::_z;
+			e.gizmo.part = AppEvent_gizmo::_part::Z;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 
 		}else if( m_gizmoRotationObjects_col[ 2 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 		{
 			hoverid = 2;
-			e.gizmo.part = AppEvent_gizmo::_part::_x;
+			e.gizmo.part = AppEvent_gizmo::_part::X;
 
 			if( m_app->m_state_app == AppState_main::Idle )
-				m_app->addAppEvent( e, AppEventPriority::_medium );
+				m_app->addAppEvent( e, AppEventPriority::Medium );
 		}
 	}
 
 
 	// BLUE
-	if( hoverid == 0 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_y)
+	if( hoverid == 0 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Y)
 		m_app->m_shaderSimple->m_color.set(0.f,0.f,1.f,1.f);
 	else
 		m_app->m_shaderSimple->m_color.set(0.8f,0.8f,1.0f,1.f);
-	if( m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::_x && m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::_z )
+	if( m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::X && m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::Z )
 		m_gs->drawMesh(m_gizmoRotationObjects[ 0 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 
 	// GREEN
-	if( hoverid == 1 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_z) 
+	if( hoverid == 1 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Z) 
 		m_app->m_shaderSimple->m_color.set(0.f,1.f,0.f,1.f);
 	else
 		m_app->m_shaderSimple->m_color.set(0.8f,1.0f,0.8f,1.f);
-	if( m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::_x && m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::_y )
+	if( m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::X && m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::Y )
 		m_gs->drawMesh(m_gizmoRotationObjects[ 1 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 
 	// RED
-	if( hoverid == 2 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_x) 
+	if( hoverid == 2 || m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::X) 
 		m_app->m_shaderSimple->m_color.set(1.f,0.f,0.f,1.f);
 	else
 		m_app->m_shaderSimple->m_color.set(1.0f,0.8f,0.8f,1.f);
-	if( m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::_y && m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::_z )
+	if( m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::Y && m_app->m_currentGizmoEvent.part != AppEvent_gizmo::_part::Z )
 		m_gs->drawMesh(m_gizmoRotationObjects[ 2 ]->getHardwareModel(0),m_matrix,m_app->m_shaderSimple.ptr());
 }
 
@@ -630,15 +630,15 @@ void Gizmo::drawRotation2D(v2i * cp, const v2f& vp_sz, const v4f& rect)
 	{
 		color = kkColorYellow;
 		AppEvent e;
-		e.type       = AppEventType::_gizmo;
-		e.gizmo.type = AppEvent_gizmo::_type::_rotate;
-		e.gizmo.part = AppEvent_gizmo::_part::_screen_plane;
+		e.type       = AppEventType::Gizmo;
+		e.gizmo.type = AppEvent_gizmo::_type::Rotate;
+		e.gizmo.part = AppEvent_gizmo::_part::Screen_plane;
 
 		if( m_app->m_state_app == AppState_main::Idle )
-			m_app->addAppEvent( e, AppEventPriority::_high );
+			m_app->addAppEvent( e, AppEventPriority::High );
 	}
 
-	if( m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::_screen_plane )
+	if( m_app->m_currentGizmoEvent.part == AppEvent_gizmo::_part::Screen_plane )
 		color = kkColorYellow;
 
 	m_gs->drawCircle2D( v2i((int)viewport_center.x,(int)viewport_center.y),

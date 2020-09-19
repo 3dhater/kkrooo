@@ -54,7 +54,8 @@ struct ViewportMouseState
 enum class ViewportLayoutType
 {
 	Single,
-	ParallelHor
+	ParallelHor,
+	ParallelVer,
 };
 
 enum class ViewportType
@@ -68,10 +69,14 @@ enum class ViewportUID
 	Single,
 	ParallelHorUp,
 	ParallelHorDown,
+	ParallelVerLeft,
+	ParallelVerRight,
 };
 
 class ViewportObject
 {
+	void _panMove();
+	void _rotate();
 	void _update_frame(const v2f& mouseDelta);
 	void _drawGrid_persp(ColorTheme* colorTheme);
 	void _drawGridXZ(f32 limits, f32 step, ColorTheme* colorTheme);
@@ -83,7 +88,18 @@ public:
 	
 	void init(const v4f& indent, ViewportLayoutType lt);
 	void update(const v2i& windowSize);
-	void updateInput(const v2i& windowSize, const v2f& mouseDelta);
+	bool updateInput(const v2i& windowSize, const v2f& mouseDelta, bool inFocus);
+	void updateInputCamera(const v2f& mouseDelta, bool inFocus);
+	void updateCursorRay();
+	void resetCamera();
+	void processShortcuts();
+	void setActiveCamera(ViewportCamera* c);
+
+	ShortcutManager* m_shortcutManager = nullptr;
+
+	bool * m_inputBlock = nullptr;
+	CursorRay* m_cursorRay = nullptr;
+	v2i* m_windowSize = nullptr;
 
 	ViewportCamera* m_activeCamera = nullptr;
 	kkPtr<ViewportCamera> m_cameraPersp ;
@@ -102,6 +118,24 @@ public:
 	v4f m_viewport_area;
 	f32 m_gridStep = 0.f;
 	bool m_isDrawGrid = true;
+	enum _draw_mode
+	{
+		_draw_mode_lines,
+		_draw_mode_material,
+		_draw_mode_lines_and_material
+	};
+	_draw_mode m_draw_mode = _draw_mode::_draw_mode_material; // так-же нужно передавать во m_maximizedViewport
+	void setDrawMode( _draw_mode );
+	void toggleDrawModeMaterial();
+	void toggleDrawModeLines();
+	void moveToSelection();
+
+
+	v2i* m_cursor_position = nullptr;
+	AppState_keyboard* m_appState_key = nullptr;
+
+	// когда нажали на активный вьюпорт (и удерживаем кнопку) то должно быть true
+	bool m_is_mouse_focus = false;
 
 	// изменение положения рамки
 	// не всё так просто, нужно полностью изменять прямоугольные области каждого ViewportObject
@@ -125,6 +159,7 @@ public:
 	void beginDraw();
 	void drawBG(const v2i& windowSize, ColorTheme* colorTheme);
 	void drawGrid(ColorTheme* colorTheme);
+	void drawName(bool isActive);
 	ViewportCamera * getActiveViewportCamera()
 	{
 		return m_activeCamera;
@@ -137,15 +172,21 @@ class Viewport
 	ViewportType m_type = ViewportType::Main;
 
 	ViewportObject* m_viewports = nullptr;
+	ViewportObject* m_viewportInFocus = nullptr;
 	void _init_single(const v4f& indent, ViewportLayoutType lt);
 	void _init_parallel_h(const v4f& indent, ViewportLayoutType lt);
+	void _init_parallel_v(const v4f& indent, ViewportLayoutType lt);
+
+	kkWindow* m_window = nullptr;
+	v2i m_windowSize;
 public:
-	Viewport();
+	Viewport(kkWindow*);
 	~Viewport();
 
-	void draw(const v2i& windowSize, ColorTheme* colorTheme);
-	void update(const v2i& windowSize);
-	void updateInput(const v2i& windowSize, const v2f& mouseDelta);
+	void draw(ColorTheme* colorTheme);
+	void update();
+	void updateInput(const v2f& mouseDelta);
+	void updateInputCamera(const v2f& mouseDelta);
 
 	void init(ViewportType, ViewportLayoutType, const v4f& indent);
 };

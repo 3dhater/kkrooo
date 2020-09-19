@@ -138,7 +138,7 @@ void Gui::GuiSystem::endNodeEditor()
 		}
 	}
 
-	setDrawPointPosition(m_currentNodeEditor->m_clipRect.z, m_currentNodeEditor->m_clipRect.y);
+	setDrawPosition(m_currentNodeEditor->m_clipRect.z, m_currentNodeEditor->m_clipRect.y);
 	
 	//m_maxItemHeightOnCurrentRow = m_currentNodeEditor->m_clipRect.w - m_currentNodeEditor->m_clipRect.y;
 	_checkItemHeight(m_currentNodeEditor->m_size.y);

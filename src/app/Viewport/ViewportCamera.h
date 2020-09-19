@@ -17,7 +17,7 @@ enum class ViewportCameraType
 
 class ViewportCamera
 {
-	friend class Viewport;
+	friend class ViewportObject;
 
 	bool   m_active = false;
 	void * m_owner = nullptr;

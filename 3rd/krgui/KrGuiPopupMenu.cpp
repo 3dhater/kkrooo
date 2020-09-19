@@ -86,17 +86,17 @@ void Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
 
 	activePopup->m_sizeEnd = activePopup->m_size;
 
-	auto oldDrawPoint = this->getDrawPointPosition();
+	auto oldDrawPoint = this->getDrawPosition();
 	// активна группа для items
 	_setPrevDrawGroup(); // переход на предидущую группу
-	this->setDrawPointPosition(activePopup->m_position.x - activePopup->m_style_ptr->popupBorderIndent.x, 
+	this->setDrawPosition(activePopup->m_position.x - activePopup->m_style_ptr->popupBorderIndent.x, 
 		activePopup->m_position.y - activePopup->m_style_ptr->popupBorderIndent.y, false); // установка на нужную позицию
 	addRectangle(activePopup->m_style_ptr, Vec2f(activePopup->m_size.x + activePopup->m_style_ptr->popupBorderIndent.z, 
 		activePopup->m_size.y + activePopup->m_style_ptr->popupBorderIndent.w), 
 		activePopup->m_style_ptr->popupAlpha, rounding ); // можно рисовать фон
 	_setPrevDrawGroup(); // переход на предидущую группу
 	
-	this->setDrawPointPosition(oldDrawPoint.x, oldDrawPoint.y, false);
+	this->setDrawPosition(oldDrawPoint.x, oldDrawPoint.y, false);
 	
 	--m_parentClipRectCount;
 
@@ -141,7 +141,7 @@ void Gui::GuiSystem::popupMenuEnd(const Vec4f& rounding)
 		}
 	}
 
-	this->setDrawPointPosition(g_oldDrawPoint.x, g_oldDrawPoint.y, true);
+	this->setDrawPosition(g_oldDrawPoint.x, g_oldDrawPoint.y, true);
 }
 
 bool Gui::GuiSystem::_addMenuItem(const char16_t* text, const char16_t* shortcutText, char16_t iconFontSymbolLeft, char16_t iconFontSymbolRight1, char16_t iconFontSymbolRight2, bool * check, bool isSubMenu )

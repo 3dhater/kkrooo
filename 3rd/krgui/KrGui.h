@@ -196,21 +196,6 @@ namespace Kr
 			
 			
 
-			bool   m_mouseIsLMB_up = false;
-			bool   m_mouseIsLMB    = false;
-			bool   m_mouseIsLMB_old= false;
-			bool   m_mouseIsLMB_firstClick = false;
-
-			bool   m_mouseIsMMB_up = false;
-			bool   m_mouseIsMMB    = false;
-			bool   m_mouseIsMMB_old= false;
-			bool   m_mouseIsMMB_firstClick = false;
-
-			bool   m_mouseIsRMB_up = false;
-			bool   m_mouseIsRMB    = false;
-			bool   m_mouseIsRMB_old= false;
-			bool   m_mouseIsRMB_firstClick = false;
-		
 			bool   m_pauseMove = false;
 
 			int m_drawGroupPriorityCounter = 0;
@@ -444,6 +429,7 @@ namespace Kr
 			// return true wher curser in area
 			bool addSensorArea( const Vec2f& size );
 
+			void addText(Style* style, const char16_t* fmt, ...);
 			void addText(const char16_t* text, Style* style = nullptr);
 			void addText(const char* text, Style* style = nullptr);
 
@@ -522,8 +508,8 @@ namespace Kr
 			void movePause(bool);
 			void moveLeftRight(float offset);
 
-			void setDrawPointPosition( float x, float y, bool zeroHeight = true ); // directly set where to start to draw next item
-			const Vec2f& getDrawPointPosition();
+			void setDrawPosition( float x, float y, bool zeroHeight = true ); // directly set where to start to draw next item
+			const Vec2f& getDrawPosition();
 
 			GraphicsSystemType getGSType(){return m_gsType;}
 
@@ -576,6 +562,21 @@ namespace Kr
 			static bool   m_IsV   ;
 			static char16_t  m_character;
 			static bool  m_IsLMBDouble;
+
+			bool   m_mouseIsLMB_up = false;
+			bool   m_mouseIsLMB    = false;
+			bool   m_mouseIsLMB_old= false;
+			bool   m_mouseIsLMB_firstClick = false;
+
+			bool   m_mouseIsMMB_up = false;
+			bool   m_mouseIsMMB    = false;
+			bool   m_mouseIsMMB_old= false;
+			bool   m_mouseIsMMB_firstClick = false;
+
+			bool   m_mouseIsRMB_up = false;
+			bool   m_mouseIsRMB    = false;
+			bool   m_mouseIsRMB_old= false;
+			bool   m_mouseIsRMB_firstClick = false;
 
 			float getZoom(){return m_guiZoom;}
 			void setZoom(float v){m_guiZoom = v;}

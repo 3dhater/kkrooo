@@ -104,24 +104,24 @@ void RenderManager::drawWindow()
 
 	auto oldFont = m_gui->getCurrentFont();
 	m_gui->setCurrentFont(m_app->m_iconsFont);
-	m_gui->setDrawPointPosition(0,windowSize.y - 25.f);
+	m_gui->setDrawPosition(0,windowSize.y - 25.f);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::Save), &m_guiStyle_iconButtons, Gui::Vec2f(21.f,21.f), m_app->isGlobalInputBlocked() ? false : true) )
 	{
 		_saveOutputImage();
 	}
-	m_gui->setDrawPointPosition(23.f,windowSize.y - 25.f);
+	m_gui->setDrawPosition(23.f,windowSize.y - 25.f);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::ClearOutputImage), &m_guiStyle_iconButtons, Gui::Vec2f(21.f,21.f), m_app->isGlobalInputBlocked() ? false : true) )
 	{
 		_clearOutputImage();
 	}
 	m_gui->setCurrentFont(oldFont);
 
-	m_gui->setDrawPointPosition( m_nodeEditor.m_size.x+5, windowSize.y - 25.f );
+	m_gui->setDrawPosition( m_nodeEditor.m_size.x+5, windowSize.y - 25.f );
 	if( m_gui->addButton(u"Render", 0, Gui::Vec2f(80, 20),m_buttonRender,true,Gui::Vec4f(4.f,4.f,4.f,4.f)) )
 	{
 		_startRender();
 	}
-	m_gui->setDrawPointPosition( windowSize.x - 85.f, windowSize.y - 25.f );
+	m_gui->setDrawPosition( windowSize.x - 85.f, windowSize.y - 25.f );
 	if( m_gui->addButton(u"Stop", 0, Gui::Vec2f(80, 20),m_buttonStop,true,Gui::Vec4f(4.f,4.f,4.f,4.f)) )
 	{
 		_stopRender();

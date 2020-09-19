@@ -6,80 +6,17 @@
 #include "PluginGUIWindow.h"
 #include "../Functions.h"
 
-#include <sstream>
 
 using namespace Kr;
 
 int PluginGUIWindow::s_windowCounter = 0;
-
-void deformat( const char16_t* fmt,	va_list& args, kkString& message )
-{
-	u32 len = 0U;
-	const char16_t* p = fmt;
-	do	{		++len;	} while(*p++);
-	--len;
-
-	va_list list = (va_list)args;
-
-	bool S = false;
-	for( u32 i(0); i < len; ++i )
-    {
-		std::wostringstream ss;
-		if( S )
-        {
-			if( fmt[ i ] == u'f' )
-            {
-				ss << va_arg( list, f64 );
-				message += (char16_t*)ss.str().c_str();
-				continue;
-			}
-            else if( fmt[ i ] == u'i' )
-            {
-				ss << va_arg( list, s32 );
-				message += (char16_t*)ss.str().c_str();
-				continue;
-			}
-            else if( fmt[ i ] == u'u' )
-            {
-				ss << va_arg( list, u32 );
-				message += (char16_t*)ss.str().c_str();
-				continue;
-			}
-            else if( fmt[ i ] == u'c' )
-            {
-				message += va_arg( list, /*char16_t*/int );
-				continue;
-			}
-            else if( fmt[ i ] == u's' )
-            {
-				char16_t * p2 = va_arg( list, char16_t* );
-				u32 len2( 0U );
-				do{ ++len2; } while(*p2++);
-				p2 -= len2;
-				for( u32 o(0U); o < len2-1; ++o )
-					message += p2[ o ];
-				continue;
-			}
-		}
-
-		if( fmt[ i ] == u'%' )
-        {
-			if( !S ) S = true;
-			else S = false;
-		}
-        else S = false;
-
-		if( !S )
-			message += fmt[ i ];
-	}
-}
 
 void PluginGUIWindowElement::SetText( const char16_t* fmt, ... )
 {
     m_text.clear();
     va_list args;
     va_start(args, fmt);
-    deformat(fmt, args, m_text);
+    util::deformat(fmt, args, m_text);
     va_end(args);
 }
 
@@ -576,7 +513,7 @@ void PluginGUIWindow::draw()
     {
         m_app->m_KrGuiSystem->endGroup();
         auto size = m_app->m_importExportWindow->getClientRect().getWidthAndHeight();
-        m_app->m_KrGuiSystem->setDrawPointPosition(10.f, size.y - 30.f);
+        m_app->m_KrGuiSystem->setDrawPosition(10.f, size.y - 30.f);
 
         const char16_t * buttontext = u"Import";
         if(m_type == kkPluginGUIWindowType::Export)

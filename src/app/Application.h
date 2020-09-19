@@ -52,25 +52,6 @@ enum class RightTabMode
 	UVEdit
 };
 
-class Gizmo;
-class GeometryCreator;
-class Scene3D;
-class EventConsumer;
-class ShortcutManager;
-class ShaderSimple;
-class ShaderPoint;
-class ShaderLineModel;
-class ShaderScene3DObjectDefault;
-class ShaderScene3DObjectDefault_polymodeforlinerender;
-class Cursor;
-class kkPluginGUIWindow;
-class PluginGUIWindow;
-class kkRendererImpl;
-class RenderManager;
-#ifdef KK_PLATFORM_WINDOWS
-    struct IFileSaveDialog;
-#endif
-
 class Application
 {
 	kkCreator               m_engine_creator; // инициализирует kkrooo.engine.dll
@@ -187,10 +168,6 @@ class Application
 	v2i m_window_client_size;
 	v2i m_window_size;
 
-
-	//Viewport * m_main_viewport      = nullptr;
-	//Viewport * m_active_viewport    = nullptr;
-
 	AppState_main       m_state_app       = AppState_main::Idle;
 	AppState_keyboard   m_state_keyboard  = AppState_keyboard::None;
 	EditMode            m_editMode        = EditMode::Object;
@@ -211,12 +188,7 @@ class Application
 
 	PluginCommonInterface * m_plugin_interface = nullptr;
 
-	std::vector<AppEvent> m_appEvents[3] = 
-	{ 
-		std::vector<AppEvent>(10),
-		std::vector<AppEvent>(10),
-		std::vector<AppEvent>(10)
-	};
+	kkList<AppEvent> m_appEvents[3];
 
 	// Для того чтобы рисовать ГУИ из плагинов нужно выйти из рисования менюшки.
 	// Главное меню активно в момент рисования, диалог импорта\экспорта работает тоже в этот момент
@@ -272,11 +244,6 @@ class Application
 	kkStringW m_lastFilePath;
 
 	void _onEndFrame();
-
-	// каждый lmbdownonce нужно устанавливать луч от курсора, в текущем вьюпорте
-	kkRay m_cursorRayFirstClick;
-	// луч над текущей позицией курсора
-	kkRay m_cursorRayCurrent;
 
 	// когда берётся элемент гизмо, состояние сохраняется сюда
 	// используется в трансформациях
@@ -359,18 +326,6 @@ public:
 		return m_rightPartSize;
 	}
 	
-	void setCursorRayFirstClick( const kkRay& r )
-	{
-		m_cursorRayFirstClick = r;
-
-		m_cursor_position_firstClick = m_cursor_position;
-	}
-
-	void setCursorRayCurrent( const kkRay& r )
-	{
-		m_cursorRayCurrent = r;
-	}
-
 	void onWindowActivate();
 	void onWindowMinimize();
 	void onWindowRestore();
@@ -381,7 +336,7 @@ public:
 		return m_active_viewport;
 	}*/
 
-	void drawAll();
+	void drawAll(bool force);
 	void onWindowSize();
 	void drawToolTip(const char*);
 	void setSelectMode( SelectMode );
@@ -472,6 +427,13 @@ public:
 	bool IsMmbDownOnce();
 	bool IsMmbDown();
 	bool IsMmbUp();
+	void DrawAllEvent();
+	v2i* GetCursorPosition();
+	AppState_keyboard* GetAppState_keyboard();
+	bool * GetGlobalInputBlock();
+	void* GetGUI();
+	bool IsKeyDown(kkKey k);
+	ShortcutManager* GetShortcutManager();
 };
 
 

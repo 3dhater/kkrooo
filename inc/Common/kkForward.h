@@ -12,7 +12,7 @@ class kkDummy;
 struct kkImage;
 struct kkGeometryInformation;
 struct kkSMesh;
-
+struct kkXMLNode;
 class kkGraphicsSystem;
 class kkObb;
 class kkMatrix4;

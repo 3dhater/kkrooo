@@ -105,6 +105,16 @@ void Gui::GuiSystem::addText(const char* text, Gui::Style* style)
 	addText(buffer, style);
 }
 
+void Gui::GuiSystem::addText(Style* style, const char16_t* fmt, ...)
+{
+	std::u16string text;
+	va_list args;
+    va_start(args, fmt);
+	_internal::deformat(fmt, args, text);
+    va_end(args);
+	addText(text.data(), style);
+}
+
 void Gui::GuiSystem::addText(const char16_t* text, Gui::Style* style)
 {
 	if(!text) return;

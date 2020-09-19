@@ -59,6 +59,7 @@ void ViewportCamera::_destroy()
     {
         if( m_camera_parts[i] )
         {
+            m_camera_parts[i]->removeAll();
             kkDestroy(m_camera_parts[i]);
             m_camera_parts[i] = nullptr;
         }
@@ -82,6 +83,10 @@ void ViewportCamera::_destroy()
 void ViewportCamera::reset()
 {
     _destroy();
+    for( s32 i = 0; i < _Camera::_number; ++i )
+    {
+        m_camera_parts[i] = kkCreateDummy();
+    }
 
     m_all_rotation.set(0.f,0.f,0.f,0.f);
 
@@ -101,55 +106,23 @@ void ViewportCamera::reset()
     m_kk_axisCamera->setFOV((math::degToRad(50.f)));
 
     m_kk_camera->setRotation(kkVector4(math::degToRad(-90),0.f,0.f));
-    //m_kk_camera->setRotation(kkVector4(math::degToRad(-90),0.f,math::degToRad(20)));
     m_kk_axisCamera->setRotation(kkVector4(math::degToRad(-90),0.f,0.f));
 
-    /// Основа. Платформа, которая только перемещается по x,z
-    /// Если нужно установить позицию камеры (например центрировать на сцену или объект)
-    /// то нужно менять позицию этой ноды
-    /// Эта нода - самый древний предок.
-    /// Вращение камеры происходит вокруг _Camera::Base_
-    m_camera_parts[_Camera::Base_] = kkCreateDummy();
 
-    /// Эта нода крутится по оси Y
-    /// Она дочка _Camera::_Base
-    /// Позиция - она должна быть там-же где и родитель
-    m_camera_parts[_Camera::RotY_] = kkCreateDummy();
     m_camera_parts[_Camera::RotY_]->setParent( m_camera_parts[_Camera::Base_] );
-
-    /// Эта нода крутится по оси X
-    /// Она дочка _Camera::_RotY
-    /// Позиция - она должна быть там-же где и родитель
-    m_camera_parts[_Camera::RotX_] = kkCreateDummy();
     m_camera_parts[_Camera::RotX_]->setParent( m_camera_parts[_Camera::RotY_] );
-
-    /// Объект который должен всегда смотреть в камеру.
-    /// Используется для вращения выбранного объекта в плоскости экрана
-    m_camera_parts[_Camera::ObjectRotation] = kkCreateDummy();
     m_camera_parts[_Camera::ObjectRotation]->setParent( m_camera_parts[_Camera::RotX_] );
-
-    m_camera_parts[_Camera::BaseMoveYP] = kkCreateDummy();
-    m_camera_parts[_Camera::BaseMoveYN] = kkCreateDummy();
-    m_camera_parts[_Camera::BaseMoveXP] = kkCreateDummy();
-    m_camera_parts[_Camera::BaseMoveXN] = kkCreateDummy();
     m_camera_parts[_Camera::BaseMoveYP]->setParent( m_camera_parts[_Camera::RotX_] );
     m_camera_parts[_Camera::BaseMoveYN]->setParent( m_camera_parts[_Camera::RotX_] );
     m_camera_parts[_Camera::BaseMoveXP]->setParent( m_camera_parts[_Camera::RotX_] );
     m_camera_parts[_Camera::BaseMoveXN]->setParent( m_camera_parts[_Camera::RotX_] );
+
     m_camera_parts[_Camera::BaseMoveYP]->setPosition(kkVector4(0.f,0.f,m_panMoveSpeed_base));
     m_camera_parts[_Camera::BaseMoveYN]->setPosition(kkVector4(0.f,0.f,-m_panMoveSpeed_base));
     m_camera_parts[_Camera::BaseMoveXP]->setPosition(kkVector4(m_panMoveSpeed_base,0.f,0.0f));
     m_camera_parts[_Camera::BaseMoveXN]->setPosition(kkVector4(-m_panMoveSpeed_base,0.f,0.0f));
-
-    /// Она дочка _Camera::_RotX
-    /// Позиция - она должна быть строго наверху.
-    /// В дальнейшем, при вращении колеса мышки, нужно будет просто двагать эту ноду
-    ///   вверх или вниз. Матрицы сами будут делать магию.
-    m_camera_parts[_Camera::CamPos_] = kkCreateDummy();
     m_camera_parts[_Camera::CamPos_]->setParent( m_camera_parts[_Camera::RotX_] );
     m_camera_parts[_Camera::CamPos_]->setPosition(kkVector4(0.f,start_camera_h,0.f));
-
-    m_camera_parts[_Camera::CamPos_Ax] = kkCreateDummy();
     m_camera_parts[_Camera::CamPos_Ax]->setParent( m_camera_parts[_Camera::RotX_] );
     m_camera_parts[_Camera::CamPos_Ax]->setPosition(kkVector4(0.f,3.f,0.f));
     
@@ -253,7 +226,6 @@ kkCamera * ViewportCamera::getCamera()
 {
     return m_kk_camera;
 }
-
 const kkVector4& ViewportCamera::getPositionBase()
 {
     return m_camera_parts[_Camera::Base_]->getPositionInSpace();
@@ -261,7 +233,7 @@ const kkVector4& ViewportCamera::getPositionBase()
 
 const kkVector4& ViewportCamera::getPositionCamera()
 {
-    return m_camera_parts[_Camera::CamPos_]->getPositionInSpace();
+   return m_camera_parts[_Camera::CamPos_]->getPositionInSpace();
 }
 
 f32 ViewportCamera::getCameraHeight()
@@ -293,10 +265,6 @@ void ViewportCamera::rotateX( f32 x )
 
     m_kk_camera->setRotation(m_kk_camera->getRotation() - kkVector4(math::degToRad(x),0.f,0.f));
     m_kk_axisCamera->setRotation(m_kk_axisCamera->getRotation() - kkVector4(math::degToRad(x),0.f,0.f));
-
-   /* if( m_type != ViewportCameraType::Perspective )
-    {
-    }*/
 }
 
 void ViewportCamera::rotateY( f32 y )
@@ -315,10 +283,6 @@ void ViewportCamera::rotateY( f32 y )
 
     m_kk_camera->setRotation( m_kk_camera->getRotation() + kkVector4(0.f,math::degToRad(y),0.f));
     m_kk_axisCamera->setRotation( m_kk_axisCamera->getRotation() + kkVector4(0.f,math::degToRad(y),0.f));
-
-   /* if( m_type != ViewportCameraType::Perspective )
-    {
-    }*/
 }
 
 void ViewportCamera::zoomIn( AppState_keyboard key, s32 wheel_delta )
@@ -502,7 +466,6 @@ void ViewportCamera::setObjectRotationAngle( f32 v )
 {
     m_camera_parts[_Camera::ObjectRotation]->setRotation(kkVector4(0.f,v,0.f,1.f));
 }
-
 kkMatrix4 ViewportCamera::getObjectRotationMatrix()
 {
     kkMatrix4 m1 = m_camera_parts[_Camera::ObjectRotation]->getWorldMatrix();
@@ -516,7 +479,5 @@ kkMatrix4 ViewportCamera::getObjectRotationMatrix()
 	m2[ 3u ].KK_Z = 0.f;
 
     m2.invert();
-
-
     return m1*m2;
 }

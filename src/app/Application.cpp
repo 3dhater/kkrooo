@@ -315,9 +315,9 @@ void Application::_init_viewports()
     indent.y = m_mainMenuHeight + m_mainToolBarHeight;
     indent.z = m_leftToolBarWidth;
     indent.w = m_bottomAreaHeight;
-    m_mainViewport = kkCreate<Viewport>();
-    m_mainViewport->init(ViewportType::Main, ViewportLayoutType::ParallelHor, indent);
-    m_mainViewport->update(m_window_client_size);
+    m_mainViewport = kkCreate<Viewport>(m_mainWindow.ptr());
+    m_mainViewport->init(ViewportType::Main, ViewportLayoutType::ParallelVer, indent);
+    m_mainViewport->update();
 }
 
 void Application::init()
@@ -398,6 +398,7 @@ void Application::init()
 
  //   m_gs->useBackFaceCulling(true);
     setNeedToSave(false);
+    
 }
 
 bool Application::isSelectedObjectNeedConvert()
@@ -513,12 +514,7 @@ void Application::run()
                 m_shortcutManager->onFrame();
             }
             
-            m_cursorInGUI = false;
-
-            if(m_gs.ptr())
-            {
-		        drawAll();
-            }
+           
 
             if(m_event_consumer)
             {
@@ -527,6 +523,12 @@ void Application::run()
                     this->updateInput();
                 }
                 _updateKeyboard();
+            }
+            m_cursorInGUI = false;
+        
+            if(m_gs.ptr())
+            {
+		        drawAll(false);
             }
 
             /*if(m_active_viewport)
@@ -540,7 +542,6 @@ void Application::run()
         //kkColor
         //kkString
         //printf("Time: %f \n", (work_time + sleep_time).count());
-        if(m_mouseWheel) this->quit();
 	}
 }
 
@@ -585,6 +586,9 @@ void Application::onWindowActivate()
     m_cursor_position.set(0,0);
     m_currentGizmoEvent.reset();
     _clearAppEvents();
+    DrawAllEvent();
+    
+
     //m_active_viewport->onWindowActivate();
 }
 
@@ -634,7 +638,7 @@ void Application::drawViewport()
 {
     if(m_mainViewport.ptr())
     {
-        m_mainViewport->draw(m_window_client_size, &m_current_color_theme);
+        m_mainViewport->draw(&m_current_color_theme);
     }
 }
 
@@ -642,27 +646,31 @@ void Application::onWindowSize()
 {
 }
 
-void Application::drawAll()
+void Application::drawAll(bool force)
 {
    // if( m_activeOSWindow == E_WINDOW_ID::EWID_MAIN_WINDOW )
     {
         m_gs->setActive(m_mainWindow.ptr());
         m_gs->update();
 
-        drawBegin();
-        drawViewport();
-
-        if(m_KrGuiSystem)
+        m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
+        if(force || m_KrGuiSystem->m_mouseDelta.x != 0.f
+            || m_KrGuiSystem->m_mouseDelta.y != 0.f
+            || m_KrGuiSystem->m_mouseIsLMB || m_KrGuiSystem->m_mouseIsLMB_up
+            || m_KrGuiSystem->m_mouseIsRMB || m_KrGuiSystem->m_mouseIsRMB_up
+            || m_KrGuiSystem->m_mouseIsMMB || m_KrGuiSystem->m_mouseIsMMB_up )
         {
-            m_KrGuiSystem->newFrame(&m_guiMainWindow, *m_deltaTime );
+            drawBegin();
+            drawViewport();
+
             _drawMainMenuBar();
             _drawMainToolBar();
             _drawLeftToolBar();
             _drawRightToolBar();
             m_KrGuiSystem->render();
-        }
 
-        drawEnd();
+            drawEnd();
+        }
     
         _processMainMenuCommand();
     }
@@ -781,7 +789,7 @@ void Application::updateViewports()
 {
     if(m_mainViewport.ptr())
     {
-        m_mainViewport->update(m_window_client_size);
+        m_mainViewport->update();
     }
 }
 
@@ -840,8 +848,8 @@ void Application::updateInput()
             if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
             {
                 auto md = Kr::Gui::GuiSystem::m_mouseDelta;
-                m_mainViewport->updateInput(m_window_client_size, v2f(md.x,md.y));
-                //m_main_viewport->updateInputCamera();
+                m_mainViewport->updateInput(v2f(md.x,md.y));
+                m_mainViewport->updateInputCamera(v2f(md.x,md.y));
             }
         }
         else
@@ -2063,13 +2071,13 @@ void Application::addAppEvent( const AppEvent& e, AppEventPriority p )
 {
     switch(p)
     {
-    case AppEventPriority::_high:
+    case AppEventPriority::High:
         m_appEvents[0].push_back( e );
         break;
-    case AppEventPriority::_medium:
+    case AppEventPriority::Medium:
         m_appEvents[1].push_back( e );
         break;
-    case AppEventPriority::_low:
+    case AppEventPriority::Low:
         m_appEvents[2].push_back( e );
         break;
     }
@@ -2093,7 +2101,7 @@ void Application::_onEndFrame()
     {
         auto & e = m_appEvents[0].front();
 
-        if( e.type == AppEventType::_gizmo && m_state_app != AppState_main::Gizmo )
+        if( e.type == AppEventType::Gizmo && m_state_app != AppState_main::Gizmo )
         {
             // Более приоритетная часть гизмо
             // устанавливается новый аппстейн, дальнейшие изменения m_currentGizmoEvent запрещены
@@ -2106,8 +2114,8 @@ void Application::_onEndFrame()
         }
 
         //printf("   %u\n",m_appEvents[0].front().uinteger);
-        //m_appEvents[0].pop_front();
-        m_appEvents[0].clear();
+        m_appEvents[0].pop_front();
+       // m_appEvents[0].clear();
     }
 
     while( m_appEvents[1].size() )
@@ -2115,7 +2123,7 @@ void Application::_onEndFrame()
         auto & e = m_appEvents[1].front();
 
         // если тип события = гизмо, и небыло события гизмо в более высоком приоритете
-        if( e.type == AppEventType::_gizmo && m_state_app != AppState_main::Gizmo )
+        if( e.type == AppEventType::Gizmo && m_state_app != AppState_main::Gizmo )
         {
             if( m_event_consumer->isLmbDownOnce() )
             {
@@ -2126,8 +2134,9 @@ void Application::_onEndFrame()
             }
         }
 
+        m_appEvents[1].pop_front();
        // printf("   %u\n",m_appEvents[1].front().uinteger);
-        m_appEvents[1].clear();
+       // m_appEvents[1].clear();
     }
 
 
@@ -2135,15 +2144,15 @@ void Application::_onEndFrame()
     {
         //printf("up\n");
         // если перемещали объект то этот вызов должен применить изменения
-        if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move )
+        if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Move )
         {
             m_current_scene3D->moveSelectedObjects( false, m_currentGizmoEvent, m_event_consumer->isRmbUp(), false );
 
-        }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale )
+        }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Scale )
         {
             m_current_scene3D->scaleSelectedObjects( false, m_currentGizmoEvent, m_event_consumer->isRmbUp(), false );
 
-        }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate )
+        }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Rotate )
         {
             m_current_scene3D->rotateSelectedObjects( false, m_currentGizmoEvent, m_event_consumer->isRmbUp(), false );
         }
@@ -2160,16 +2169,16 @@ void Application::_onEndFrame()
     //m_active_viewport->updateCursorRay();
 
     // попробую здесь настроить перемещение объектов...
-    if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)
+    if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Move)
     {
         m_current_scene3D->moveSelectedObjects(true,m_currentGizmoEvent,false,m_event_consumer->isLmbDownOnce());
         setNeedToSave(true);
-    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale)
+    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Scale)
     {
         m_current_scene3D->scaleSelectedObjects(true,m_currentGizmoEvent,false,m_event_consumer->isLmbDownOnce());
         setNeedToSave(true);
     
-    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate)
+    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Rotate)
     {
         m_current_scene3D->rotateSelectedObjects(true,m_currentGizmoEvent,false,m_event_consumer->isLmbDownOnce());
         setNeedToSave(true);
@@ -2177,9 +2186,24 @@ void Application::_onEndFrame()
 
     while( m_appEvents[2].size() )
     {
-      //  printf("   %u\n",m_appEvents[2].front().uinteger);
-      
-        m_appEvents[2].clear();
+        auto & e = m_appEvents[2].front();
+        switch (e.type)
+        {
+        case AppEventType::GS:
+        {
+            switch (e.GS.type)
+            {
+            case AppEvent_GS::_type::DrawAll:
+                drawAll(true);
+                break;
+            default:
+                break;
+            }
+        }break;
+        default:
+            break;
+        }
+        m_appEvents[2].pop_front();
     }
 
     m_enterTextMode = false;
@@ -2440,3 +2464,34 @@ bool Application::IsRmbUp(){return m_event_consumer->isRmbUp();}
 bool Application::IsMmbDownOnce(){return m_event_consumer->isMmbDownOnce();}
 bool Application::IsMmbDown(){return m_event_consumer->isMmbDown();}
 bool Application::IsMmbUp(){return m_event_consumer->isMmbUp();}
+void Application::DrawAllEvent()
+{
+    AppEvent e;
+    e.type = AppEventType::GS;
+    e.GS.type = AppEvent_GS::_type::DrawAll;
+    addAppEvent(e,AppEventPriority::Low);
+}
+v2i* Application::GetCursorPosition()
+{
+    return &m_cursor_position;
+}
+AppState_keyboard* Application::GetAppState_keyboard()
+{
+    return &m_state_keyboard;
+}
+bool * Application::GetGlobalInputBlock()
+{
+    return &m_globalInputBlock;
+}
+void* Application::GetGUI()
+{
+    return (void*)m_KrGuiSystem;
+}
+bool Application::IsKeyDown(kkKey k)
+{
+    return m_event_consumer->isKeyDown(k);
+}
+ShortcutManager* Application::GetShortcutManager()
+{
+    return m_shortcutManager.ptr();
+}

@@ -11,54 +11,61 @@
 
 enum class AppEventPriority : u32
 {
-	_high,
-	_medium,
-	_low
+	High,
+	Medium,
+	Low
 };
 
 enum class AppEventType : u32
 {
-	_default,
-	_gizmo,
+	Default,
+	Gizmo,
+	GS,
 };
 
 
 struct AppEvent_gizmo
 {
-
 	enum class _type : u32
 	{
-		_default,
-		_move,
-		_rotate,
-		_scale
+		Default,
+		Move,
+		Rotate,
+		Scale
 	};
 
 	enum class _part : u32
 	{
-		_default,
-		_x,
-		_y,
-		_z,
-		_xz_plane,
-		_xy_plane,
-		_zy_plane,
-		_screen_plane
+		Default,
+		X,
+		Y,
+		Z,
+		XZ_plane,
+		XY_plane,
+		ZY_plane,
+		Screen_plane
 	};
 
-	_type type = _type::_default;
-	_part part = _part::_default;
+	_type type = _type::Default;
+	_part part = _part::Default;
 
 	v2i point2D; // должна вычисляться 2д точка 
 	//kkVector4 point3D;
 
 	void reset()
 	{
-		type = _type::_default;
-		part = _part::_default;
+		type = _type::Default;
+		part = _part::Default;
 	}
 };
-
+struct AppEvent_GS
+{
+	enum class _type : u32
+	{
+		DrawAll
+	};
+	_type type = _type::DrawAll;
+};
 struct AppEvent
 {
 	AppEvent(){}
@@ -68,10 +75,13 @@ struct AppEvent
 
 		switch(type)
 		{
-		case AppEventType::_default:
+		case AppEventType::Default:
 			break;
-		case AppEventType::_gizmo:
+		case AppEventType::Gizmo:
 			gizmo = e.gizmo;
+			break;
+		case AppEventType::GS:
+			GS = e.GS;
 			break;
 		default:
 			break;
@@ -83,9 +93,10 @@ struct AppEvent
 	union
 	{
 		AppEvent_gizmo gizmo;
+		AppEvent_GS GS;
 	};
 
-	AppEventType type = AppEventType::_default;
+	AppEventType type = AppEventType::Default;
 
 	AppEvent& operator=(const AppEvent & e )
 	{
@@ -93,9 +104,12 @@ struct AppEvent
 
 		switch(type)
 		{
-		case AppEventType::_default:
+		case AppEventType::Default:
 			break;
-		case AppEventType::_gizmo:
+		case AppEventType::GS:
+			GS = e.GS;
+			break;
+		case AppEventType::Gizmo:
 			gizmo = e.gizmo;
 			break;
 		default:

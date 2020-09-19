@@ -10,6 +10,34 @@
 
 #include <math.h>
 
+bool * kkGetGlobalInputBlock()
+{
+    return kkSingleton<Application>::s_instance->GetGlobalInputBlock();
+}
+AppState_keyboard* kkGetAppState_keyboard()
+{
+    return kkSingleton<Application>::s_instance->GetAppState_keyboard();
+}
+v2i* kkGetCursorPosition()
+{
+    return kkSingleton<Application>::s_instance->GetCursorPosition();
+}
+ShortcutManager* kkGetShortcutManager()
+{
+    return kkSingleton<Application>::s_instance->GetShortcutManager();
+}
+bool kkIsKeyDown(kkKey k)
+{
+    return kkSingleton<Application>::s_instance->IsKeyDown(k);
+}
+void* kkGetGUI()
+{
+    return kkSingleton<Application>::s_instance->GetGUI();
+}
+void kkDrawAll()
+{
+    return kkSingleton<Application>::s_instance->DrawAllEvent();
+}
 Scene3D** kkGetScene3D()
 {
     return kkSingleton<Application>::s_instance->getScene3D();

@@ -160,14 +160,14 @@ void Application::_drawRightToolBar()
 	m_KrGuiSystem->setCurrentFont(m_iconsFont);
 
     float X = f32(m_window_client_size.x-20);
-    m_KrGuiSystem->setDrawPointPosition(X, m_mainMenuHeight + m_mainToolBarHeight);
-	auto oldDrawPosition = m_KrGuiSystem->getDrawPointPosition();
+    m_KrGuiSystem->setDrawPosition(X, m_mainMenuHeight + m_mainToolBarHeight);
+	auto oldDrawPosition = m_KrGuiSystem->getDrawPosition();
 
     if( m_rightTabMode == RightTabMode::Create )
 	{
 		m_KrGuiSystem->setNextItemIgnoreInput();
 		m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ActiveButtonLTB), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f));
-	    m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
+	    m_KrGuiSystem->setDrawPosition(oldDrawPosition.x, oldDrawPosition.y);
 	}
     if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::NewObject), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true))
     {
@@ -176,12 +176,12 @@ void Application::_drawRightToolBar()
 	m_KrGuiSystem->newLine();
     m_KrGuiSystem->moveLeftRight(X);
 
-	oldDrawPosition = m_KrGuiSystem->getDrawPointPosition();
+	oldDrawPosition = m_KrGuiSystem->getDrawPosition();
     if( m_rightTabMode == RightTabMode::Edit )
 	{
 		m_KrGuiSystem->setNextItemIgnoreInput();
 		m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ActiveButtonLTB), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f));
-	    m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
+	    m_KrGuiSystem->setDrawPosition(oldDrawPosition.x, oldDrawPosition.y);
 	}
     if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::EditObject), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true))
     {
@@ -190,12 +190,12 @@ void Application::_drawRightToolBar()
     m_KrGuiSystem->newLine();
     m_KrGuiSystem->moveLeftRight(X);
 
-	oldDrawPosition = m_KrGuiSystem->getDrawPointPosition();
+	oldDrawPosition = m_KrGuiSystem->getDrawPosition();
     if( m_rightTabMode == RightTabMode::UVEdit )
 	{
 		m_KrGuiSystem->setNextItemIgnoreInput();
 		m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ActiveButtonLTB), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f));
-	    m_KrGuiSystem->setDrawPointPosition(oldDrawPosition.x, oldDrawPosition.y);
+	    m_KrGuiSystem->setDrawPosition(oldDrawPosition.x, oldDrawPosition.y);
 	}
     if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::EditUV), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true))
     {
@@ -207,7 +207,7 @@ void Application::_drawRightToolBar()
     if(m_showRightTab)
     {
         const f32 W = 200.f;
-        m_KrGuiSystem->setDrawPointPosition(X - W, Y);
+        m_KrGuiSystem->setDrawPosition(X - W, Y);
         Gui::Style style;
         style.rectangleIdleColor1  = 0xFF555555;
         style.rectangleIdleColor2  = style.rectangleIdleColor1;
@@ -217,7 +217,7 @@ void Application::_drawRightToolBar()
         m_KrGuiSystem->addRectangle(&style, tabSize, 0.8f, Gui::Vec4f(5.f, 5.f, 0.f, 0.f));
 
 
-        m_KrGuiSystem->setDrawPointPosition(X - W, Y);
+        m_KrGuiSystem->setDrawPosition(X - W, Y);
         Gui::Style groupStyle;
         //groupStyle.groupColor1 = 0xffff0000;
         groupStyle.groupBackgroundAlpha = 0.f;

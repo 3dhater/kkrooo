@@ -44,7 +44,7 @@ protected:
 	kkBoundingVolumeType m_BVType     = kkBoundingVolumeType::Sphere;
 	kkSceneObjectType    m_objectType = kkSceneObjectType::None;
 
-	std::list<kkSceneObject*> m_childs;
+	std::list<kkSceneObject*> m_children;
 
 	kkMatrix4		m_worldMatrix, m_worldMatrixAbsolute;
 	kkMatrix4		m_rotationMatrix;
@@ -115,41 +115,52 @@ public:
 	s32				getID()const{return m_id;}
 	void			setID( s32 i ){m_id=i;}
 
-	void	            setParent( kkSceneObject * parent = nullptr )
+	void	        setParent( kkSceneObject * parent )
 	{
 		if( m_parent )
 			m_parent->removeChild( this );
 
+		m_parent = parent;
+
 		if( parent )
 		{
 			parent->addChild( this );
-			m_parent = parent;
 		}
 	}
 
 	kkSceneObject *     getParent()const{return m_parent;}
-	std::list<kkSceneObject*>&	getChildList(){return m_childs;}
+	std::list<kkSceneObject*>&	getChildList(){return m_children;}
 	void	            addChild( kkSceneObject * child )
 	{
-		if( child && (child->getParent() != this) )
+		if( child && (child != this) )
 		{
-			m_childs.push_back( child );
+			m_children.push_back( child );
 			child->m_parent = this;
 		}
 	}
 	void	            removeChild( kkSceneObject * child )
 	{
-		auto it = m_childs.begin();
-		auto it_end = m_childs.end();
+		auto it = m_children.begin();
+		auto it_end = m_children.end();
 		for(; it != it_end; ++it )
 		{
 			if( (*it) == child )
 			{
 				(*it)->m_parent = nullptr;
-				m_childs.erase( it );
+				m_children.erase( it );
 				return;
 			}
 		}
+	}
+	void removeAll()
+	{
+		auto it = m_children.begin();
+		auto it_end = m_children.end();
+		for(; it != it_end; ++it )
+		{
+			(*it)->m_parent = nullptr;
+		}
+		m_children.clear();
 	}
 
 	bool                isVisible(){return m_isVisible;}

@@ -350,9 +350,9 @@ void MaterialEditor::drawWindow()
 			m_gui->setNextItemIgnoreInput();
 			m_gui->addPictureBox(Gui::Vec2f(32,32), (unsigned long long)M->previewTexture_ptr->getHandle());
 
-			auto oldDrawPoint = m_gui->getDrawPointPosition();
+			auto oldDrawPoint = m_gui->getDrawPosition();
 			m_gui->addRectangle( &m_materialEditorListGroupStyle ,Gui::Vec2f(168,32), 1.f, Gui::Vec4f() );
-			m_gui->setDrawPointPosition(oldDrawPoint.x,oldDrawPoint.y);
+			m_gui->setDrawPosition(oldDrawPoint.x,oldDrawPoint.y);
 			if( m_gui->addButton(0, 0, Gui::Vec2f(167,15), true, true, Gui::Vec4f(4.f,4.f,4.f,4.f) ) )
 			{
 				m_selectedMaterialIndex = (s32)i;
@@ -361,14 +361,14 @@ void MaterialEditor::drawWindow()
 			
 			auto oldFont = m_gui->getCurrentFont();
 			m_gui->setCurrentFont(m_app->m_iconsFont);
-			m_gui->setDrawPointPosition(oldDrawPoint.x+154,oldDrawPoint.y+17);
+			m_gui->setDrawPosition(oldDrawPoint.x+154,oldDrawPoint.y+17);
 			if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::Cross1), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(12,12), true,  true, Gui::Vec4f(4.f,4.f,4.f,4.f) ) )
 			{
 				deleteMaterialId = (s32)i;
 			}
 			if( selectedMaterial == M )
 			{
-				m_gui->setDrawPointPosition(oldDrawPoint.x,oldDrawPoint.y+14);
+				m_gui->setDrawPosition(oldDrawPoint.x,oldDrawPoint.y+14);
 				if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::AssignMaterial), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(18,15),  true, true, Gui::Vec4f(4.f,4.f,4.f,4.f) ) )
 				{
 					_assignCurrentMaterialToSelectedObjects();
@@ -378,9 +378,9 @@ void MaterialEditor::drawWindow()
 
 			m_gui->newLine(3);
 
-			auto endDrawPoint = m_gui->getDrawPointPosition();
+			auto endDrawPoint = m_gui->getDrawPosition();
 
-			m_gui->setDrawPointPosition(oldDrawPoint.x,oldDrawPoint.y);
+			m_gui->setDrawPosition(oldDrawPoint.x,oldDrawPoint.y);
 
 			m_gui->setCurrentFont(m_app->m_smallFont);
 			static Gui::Style nameStyle;
@@ -394,7 +394,7 @@ void MaterialEditor::drawWindow()
 			m_gui->addText(M->m_name.data(),&nameStyle);
 			m_gui->setCurrentFont(nullptr);
 
-			m_gui->setDrawPointPosition(endDrawPoint.x,endDrawPoint.y);
+			m_gui->setDrawPosition(endDrawPoint.x,endDrawPoint.y);
 			m_gui->newLine();
 
 			contentHeight += 32.f;
@@ -404,14 +404,14 @@ void MaterialEditor::drawWindow()
     }
 	/*m_gui->newLine(5.f);
 	m_gui->moveLeftRight(15.f);*/
-	m_gui->setDrawPointPosition(windowClientRect.x + 15.f, windowClientRect.w - 25.f);
+	m_gui->setDrawPosition(windowClientRect.x + 15.f, windowClientRect.w - 25.f);
 	if( m_gui->addButton(u"New material", 0, Gui::Vec2f(170, 20),true,true,Gui::Vec4f(4.f,4.f,4.f,4.f)) )
 	{
 		createNewMaterial();
 	}
 
 
-    m_gui->setDrawPointPosition(materialListWidth,0);
+    m_gui->setDrawPosition(materialListWidth,0);
 	if( selectedMaterial )
 	{
 		selectedMaterial->m_nodeEditor.m_size.x = windowW - materialListWidth - materialNodeListWidth;
@@ -656,7 +656,7 @@ void MaterialEditor::drawWindow()
 		selectedMaterial->m_eyePosition    = selectedMaterial->m_nodeEditor.m_eyePosition;
 	}
 
-    m_gui->setDrawPointPosition(materialListWidth+3,windowH-13);
+    m_gui->setDrawPosition(materialListWidth+3,windowH-13);
 	auto currentFont = m_gui->getCurrentFont();
 	m_gui->setCurrentFont(m_app->m_iconsFont);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::Add1), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(10.f,10.f))
@@ -684,7 +684,7 @@ void MaterialEditor::drawWindow()
 			selectedMaterial->m_nodeEditorZoom = 1.f;
 		}
 	}
-    m_gui->setDrawPointPosition(windowW-materialNodeListWidth-30,windowH-10);
+    m_gui->setDrawPosition(windowW-materialNodeListWidth-30,windowH-10);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::ArrowB1), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(13.f,9.f))
 		|| m_gui->isLastItemPressed() )
 	{
@@ -693,7 +693,7 @@ void MaterialEditor::drawWindow()
 			selectedMaterial->m_eyePosition.y -= 250.0f * (*m_deltaTime);
 		}
 	}
-	m_gui->setDrawPointPosition(windowW-materialNodeListWidth-31,windowH-25);
+	m_gui->setDrawPosition(windowW-materialNodeListWidth-31,windowH-25);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::PushCircle), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(15.f,15.f)) )
 	{
 		if( selectedMaterial )
@@ -702,7 +702,7 @@ void MaterialEditor::drawWindow()
 			selectedMaterial->m_eyePosition.y = 0.0f;
 		}
 	}
-	m_gui->setDrawPointPosition(windowW-materialNodeListWidth-30,windowH-34);
+	m_gui->setDrawPosition(windowW-materialNodeListWidth-30,windowH-34);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::ArrowT1), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(13.f,9.f)) 
 		|| m_gui->isLastItemPressed() )
 	{
@@ -711,7 +711,7 @@ void MaterialEditor::drawWindow()
 			selectedMaterial->m_eyePosition.y += 250.0f * (*m_deltaTime);
 		}
 	}
-	m_gui->setDrawPointPosition(windowW-materialNodeListWidth-40,windowH-24);
+	m_gui->setDrawPosition(windowW-materialNodeListWidth-40,windowH-24);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::ArrowL1), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(9.f,13.f)) 
 		|| m_gui->isLastItemPressed())
 	{
@@ -720,7 +720,7 @@ void MaterialEditor::drawWindow()
 			selectedMaterial->m_eyePosition.x += 250.0f * (*m_deltaTime);
 		}
 	}
-	m_gui->setDrawPointPosition(windowW-materialNodeListWidth-16,windowH-24);
+	m_gui->setDrawPosition(windowW-materialNodeListWidth-16,windowH-24);
 	if( m_gui->addButton(kkrooo::getIconFontString(IconFontSymbol::ArrowR1), &m_guiStyle_materialList_iconButtons, Gui::Vec2f(9.f,13.f)) 
 		|| m_gui->isLastItemPressed())
 	{
@@ -731,9 +731,9 @@ void MaterialEditor::drawWindow()
 	}
 	m_gui->setCurrentFont(currentFont);
 
-    m_gui->setDrawPointPosition(windowW-materialNodeListWidth,0);
+    m_gui->setDrawPosition(windowW-materialNodeListWidth,0);
 	m_gui->addText(u"Materials:");
-    m_gui->setDrawPointPosition(windowW-materialNodeListWidth,materialNodeListHIndent);
+    m_gui->setDrawPosition(windowW-materialNodeListWidth,materialNodeListHIndent);
 
 
 //	if( m_materialEditorMaterialsGroup.m_inRect )
@@ -743,7 +743,7 @@ void MaterialEditor::drawWindow()
 		for( size_t i = 0, sz = m_materialTypeList.size(); i < sz; ++i )
 		{
 			auto & type = m_materialTypeList[i];
-			auto drawPointer1 = m_gui->getDrawPointPosition();
+			auto drawPointer1 = m_gui->getDrawPosition();
 			if( m_gui->addButton(type.m_name.data(), 0, Gui::Vec2f(materialNodeListWidth, 20),selectedMaterial ? true : false,
 				true,Gui::Vec4f(4.f,4.f,4.f,4.f)))
 			{
@@ -752,25 +752,25 @@ void MaterialEditor::drawWindow()
 					_createMaterialTypeNode(type);
 				}
 			}
-			m_gui->setDrawPointPosition(drawPointer1.x, drawPointer1.y);
+			m_gui->setDrawPosition(drawPointer1.x, drawPointer1.y);
 			m_gui->setCurrentFont(m_app->m_microFont);
 			m_gui->addText(type.m_renderer->GetName(), &m_guiStyle_materialTypesRendererText);
 			m_gui->setCurrentFont(nullptr);
-			m_gui->setDrawPointPosition(drawPointer1.x, drawPointer1.y);
+			m_gui->setDrawPosition(drawPointer1.x, drawPointer1.y);
 			m_gui->newLine(22.5f);
 		}
 
         m_gui->endGroup();
     }
-    m_gui->setDrawPointPosition(windowW-materialNodeListWidth,windowH_half);
+    m_gui->setDrawPosition(windowW-materialNodeListWidth,windowH_half);
 	m_gui->addText(u"Parameters:");
-	m_gui->setDrawPointPosition(windowW-materialNodeListWidth,windowH_half+materialParamsListHIndent);
+	m_gui->setDrawPosition(windowW-materialNodeListWidth,windowH_half+materialParamsListHIndent);
     if(m_gui->beginGroup(Gui::Vec2f(materialNodeListWidth, windowH_half-materialParamsListHIndent), 0, &m_materialEditorParametersGroupStyle))
     {
 		for( size_t i = 0, sz = m_materialParameterList.size(); i < sz; ++i )
 		{
 			auto & param = m_materialParameterList[i];
-			auto drawPointer1 = m_gui->getDrawPointPosition();
+			auto drawPointer1 = m_gui->getDrawPosition();
 			if( m_gui->addButton(param.m_name.data(), 0, Gui::Vec2f(materialNodeListWidth, 20),selectedMaterial ? true : false,
 				true,Gui::Vec4f(4.f,4.f,4.f,4.f)))
 			{
@@ -779,11 +779,11 @@ void MaterialEditor::drawWindow()
 					_createParameterNode(param);
 				}
 			}
-			m_gui->setDrawPointPosition(drawPointer1.x, drawPointer1.y);
+			m_gui->setDrawPosition(drawPointer1.x, drawPointer1.y);
 			m_gui->setCurrentFont(m_app->m_microFont);
 			m_gui->addText(param.m_renderer->GetName(), &m_guiStyle_materialTypesRendererText);
 			m_gui->setCurrentFont(nullptr);
-			m_gui->setDrawPointPosition(drawPointer1.x, drawPointer1.y);
+			m_gui->setDrawPosition(drawPointer1.x, drawPointer1.y);
 			m_gui->newLine(22.5f);
 		}
         m_gui->endGroup();

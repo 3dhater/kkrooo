@@ -15,6 +15,13 @@ bool kkIsRmbUp();
 bool kkIsMmbDownOnce();
 bool kkIsMmbDown();
 bool kkIsMmbUp();
+bool kkIsKeyDown(kkKey);
+void kkDrawAll();
+v2i* kkGetCursorPosition();
+AppState_keyboard* kkGetAppState_keyboard();
+bool * kkGetGlobalInputBlock();
+void* kkGetGUI();
+ShortcutManager* kkGetShortcutManager();
 
 enum class IconFontSymbol
 {

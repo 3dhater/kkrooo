@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __SHORTCUT_MANAGER_H__
+﻿#ifndef __SHORTCUT_MANAGER_H__
 #define __SHORTCUT_MANAGER_H__
 
 #include "Classes/Strings/kkString.h"
@@ -40,7 +39,6 @@ enum class ShortcutCommand_Viewport : u32
 	SetLeft,
 	SetRight,
 	ToggleGrid,
-	Maximize,
 	DrawModeLines,
 	DrawModeMaterial,
 	DrawModeMaterialAndLines,
@@ -99,11 +97,6 @@ struct ShortcutCommandNode
 	bool isReady = false;
 	bool isUsed  = false; //чтобы не было повтора из за удержания
 };
-
-class Application;
-class kkGraphicsSystem;
-class EventConsumer;
-struct kkXMLNode;
 
 class ShortcutManager
 {

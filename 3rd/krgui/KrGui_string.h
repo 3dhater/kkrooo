@@ -1,12 +1,76 @@
 ﻿#ifndef __KK_KRGUI_STRING_H__
 #define __KK_KRGUI_STRING_H__
-
+#include <string>
+#include <sstream>
+#include <cstdarg>
 namespace Kr
 {
 	namespace Gui
 	{
 		namespace _internal
 		{
+			inline void deformat( const char16_t* fmt,	va_list& args, std::u16string& message )
+			{
+				unsigned int len = 0U;
+				const char16_t* p = fmt;
+				do	{		++len;	} while(*p++);
+				--len;
+
+				va_list list = (va_list)args;
+
+				bool S = false;
+				for( unsigned int i(0); i < len; ++i )
+				{
+					std::wostringstream ss;
+					if( S )
+					{
+						if( fmt[ i ] == u'f' )
+						{
+							ss << va_arg( list, double );
+							message += (char16_t*)ss.str().c_str();
+							continue;
+						}
+						else if( fmt[ i ] == u'i' )
+						{
+							ss << va_arg( list, int );
+							message += (char16_t*)ss.str().c_str();
+							continue;
+						}
+						else if( fmt[ i ] == u'u' )
+						{
+							ss << va_arg( list, unsigned int );
+							message += (char16_t*)ss.str().c_str();
+							continue;
+						}
+						else if( fmt[ i ] == u'c' )
+						{
+							message += va_arg( list, /*char16_t*/int );
+							continue;
+						}
+						else if( fmt[ i ] == u's' )
+						{
+							char16_t * p2 = va_arg( list, char16_t* );
+							unsigned int len2( 0U );
+							do{ ++len2; } while(*p2++);
+							p2 -= len2;
+							for( unsigned int o(0U); o < len2-1; ++o )
+								message += p2[ o ];
+							continue;
+						}
+					}
+
+					if( fmt[ i ] == u'%' )
+					{
+						if( !S ) S = true;
+						else S = false;
+					}
+					else S = false;
+
+					if( !S )
+						message += fmt[ i ];
+				}
+			}
+
 			inline bool is_space(char16_t c){
 				switch (c)
 				{
