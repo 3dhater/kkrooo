@@ -387,7 +387,7 @@ void Application::init()
     m_guiImportExportWindow.OSWindow = m_importExportWindow->getHandle();
     setActiveRenderer(m_renderers[0]);
 
-    m_gs->useBackFaceCulling(true);
+    m_gs->useBackFaceCulling(m_useBackFaceCulling);
     setNeedToSave(false);
 }
 
@@ -2478,4 +2478,16 @@ bool Application::IsKeyDown(kkKey k)
 ShortcutManager* Application::GetShortcutManager()
 {
     return m_shortcutManager.ptr();
+}
+void Application::GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex)
+{
+    // рисование самой модели
+	m_shader3DObjectDefault->m_diffuseColor = difCol;
+    m_shader3DObjectDefault->m_diffTex = m_diffTex;
+	m_gs->drawMesh(mesh, mat, m_shader3DObjectDefault.ptr() );
+}
+void Application::GSDrawModelEdge(kkMesh* mesh,const kkMatrix4& mat, const kkColor& edgeCol)
+{
+	m_shaderLineModel->edge_color = edgeCol;
+	m_gs->drawMesh(mesh, mat, m_shaderLineModel.ptr() );
 }

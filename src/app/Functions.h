@@ -7,6 +7,8 @@ Scene3D** kkGetScene3D();
 kkGraphicsSystem* kkGetGS();
 void kkGSSetDepth(bool);
 void kkGSSetViewport(s32 x, s32 y, s32 z, s32 w);
+void kkGSDrawModel(kkMesh*,const kkMatrix4&, const kkColor& difCol, kkImageContainerNode* m_diffTex);
+void kkGSDrawModelEdge(kkMesh*,const kkMatrix4&, const kkColor& edgeCol);
 v2i  kkGetWindowClientSize();
 bool kkIsLmbDownOnce();
 bool kkIsLmbDown();

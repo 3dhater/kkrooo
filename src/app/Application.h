@@ -211,9 +211,8 @@ class Application
 	bool   m_debug_draw2DPoints   = false;
 
 	bool   m_isDrawViewportBorders = true;
-	bool   m_backfaceCull = false;
     
-	bool m_useBackFaceCulling = true;
+	bool m_useBackFaceCulling = false;
 
 	bool m_isLocalRotation = false;
 	bool m_isLocalScale    = false;
@@ -434,6 +433,8 @@ public:
 	void* GetGUI();
 	bool IsKeyDown(kkKey k);
 	ShortcutManager* GetShortcutManager();
+	void GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex);
+	void GSDrawModelEdge(kkMesh*,const kkMatrix4&, const kkColor& edgeCol);
 };
 
 

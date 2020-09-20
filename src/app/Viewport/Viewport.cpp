@@ -127,9 +127,9 @@ void ViewportObject::processShortcuts()
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::SetTop) ){setActiveCamera( m_cameraTop.ptr() );}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::SetBottom) ){setActiveCamera( m_cameraBottom.ptr() );}
 
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::DrawModeMaterial) ){setDrawMode( _draw_mode::_draw_mode_material );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::DrawModeLines) ){setDrawMode( _draw_mode::_draw_mode_lines );}
-	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::DrawModeMaterialAndLines) ){setDrawMode( _draw_mode::_draw_mode_lines_and_material );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::DrawModeMaterial) ){setDrawMode( DrawMode::Material );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::DrawModeLines) ){setDrawMode( DrawMode::Edge );}
+	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::DrawModeMaterialAndLines) ){setDrawMode( DrawMode::EdgesAndMaterial );}
 	
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::ToggleDrawModeMaterial) ){toggleDrawModeMaterial();}
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::ToggleDrawModeLines) ){toggleDrawModeLines();}
@@ -165,21 +165,21 @@ void ViewportObject::toggleDrawModeMaterial()
 {
 	static bool is_materail_mode = false;
 
-	if( m_draw_mode == _draw_mode::_draw_mode_lines )
+	if( m_draw_mode == DrawMode::Edge )
 	{
 		if( is_materail_mode )
 		{
-			m_draw_mode = _draw_mode::_draw_mode_material;
+			m_draw_mode = DrawMode::Material;
 			is_materail_mode = false;
 		}
 		else
-			m_draw_mode = _draw_mode::_draw_mode_lines_and_material;
+			m_draw_mode = DrawMode::EdgesAndMaterial;
 	}
-	else if( m_draw_mode == _draw_mode::_draw_mode_lines_and_material )
-		m_draw_mode = _draw_mode::_draw_mode_lines;
-	else if( m_draw_mode == _draw_mode::_draw_mode_material )
+	else if( m_draw_mode == DrawMode::EdgesAndMaterial )
+		m_draw_mode = DrawMode::Edge;
+	else if( m_draw_mode == DrawMode::Material )
 	{
-		m_draw_mode = _draw_mode::_draw_mode_lines;
+		m_draw_mode = DrawMode::Edge;
 		is_materail_mode = true;
 	}
 	kkDrawAll();
@@ -187,13 +187,13 @@ void ViewportObject::toggleDrawModeMaterial()
 
 void ViewportObject::toggleDrawModeLines()
 {
-	if( m_draw_mode == _draw_mode::_draw_mode_material )
-		m_draw_mode = _draw_mode::_draw_mode_lines_and_material;
-	else if( m_draw_mode == _draw_mode::_draw_mode_lines_and_material )
-		m_draw_mode = _draw_mode::_draw_mode_material;
+	if( m_draw_mode == DrawMode::Material )
+		m_draw_mode = DrawMode::EdgesAndMaterial;
+	else if( m_draw_mode == DrawMode::EdgesAndMaterial )
+		m_draw_mode = DrawMode::Material;
 	kkDrawAll();
 }
-void ViewportObject::setDrawMode( _draw_mode m )
+void ViewportObject::setDrawMode( DrawMode m )
 {
 	m_draw_mode = m;
 	kkDrawAll();
@@ -381,7 +381,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		{
 		case ViewportUID::ParallelHorUp:
 		{
-			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
+			if((*m_appState_key == AppState_keyboard::Ctrl) && g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.w += mouseDelta.y;
 				if(m_framePosition.w + half_size.y <= 30.f)
@@ -395,7 +395,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		}break;
 		case ViewportUID::ParallelHorDown:
 		{
-			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
+			if((*m_appState_key == AppState_keyboard::Ctrl) && g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.y += mouseDelta.y;
 				if(m_framePosition.y + half_size.y <= 30.f)
@@ -414,7 +414,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		{
 		case ViewportUID::ParallelVerLeft:
 		{
-			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
+			if((*m_appState_key == AppState_keyboard::Ctrl) && g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.z += mouseDelta.x;
 				if(m_framePosition.z + half_size.x <= 30.f)
@@ -428,7 +428,7 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 		}break;
 		case ViewportUID::ParallelVerRight:
 		{
-			if(g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
+			if((*m_appState_key == AppState_keyboard::Ctrl) && g_mouseState.RMB_HOLD && g_mouseState.IsFirstClick)
 			{
 				m_framePosition.x += mouseDelta.x;
 				if(m_framePosition.x + half_size.x <= 30.f)
@@ -540,6 +540,11 @@ void ViewportObject::_drawGrid_persp(ColorTheme* colorTheme)
 		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f,1.f),kkVector4(limits,0.f,0.f,1.f),colorTheme->viewport_grid_color1);
 		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color2);
 	}
+}
+void ViewportObject::drawScene()
+{
+	auto scene3D = *kkGetScene3D();
+	scene3D->drawAll(m_activeCamera->getCamera(), &m_draw_mode);
 }
 void ViewportObject::drawGrid(ColorTheme* colorTheme)
 {
@@ -787,6 +792,7 @@ void Viewport::draw(ColorTheme* colorTheme)
 			// draw 3d
 			vp->beginDraw();
 			vp->drawGrid(colorTheme);
+			vp->drawScene();
 
 			// draw 2d top layer
 			kkGSSetDepth(false);
@@ -801,163 +807,10 @@ void Viewport::draw(ColorTheme* colorTheme)
 	}
 }
 
-
-//
-//
-//void Viewport::_getObjectsOnRay()
-//{
-//
-//}
-//
 //void Viewport::_updateObjectsInFrustum()
 //{
 //	m_objects_inFrustum.clear();
 //	m_drawObjects.clear();
-//
-//	// пока просто добавлю все объекты
-//	auto objects = (*m_scene3D_ptr)->getObjects();
-//	
-//	auto frust = m_activeCamera->getCamera()->getFrustum();
-//
-//	auto camera_position = m_activeCamera->getPositionCamera();
-//
-//	kkAabb    aabb;
-//	kkObb     obb;
-//	kkVector4 center;
-//	kkVector4 extent;
-//	u32     object_index = 0;
-//
-//	for( size_t i = 0, sz = objects.size(); i < sz; ++i )
-//	{
-//		auto object = objects[i];
-//
-//
-//		obb  = object->Obb();
-//		aabb = object->Aabb();
-//		aabb.center(center);
-//
-//		object->m_distanceToCamera = camera_position.distance(center);
-//
-//		//if(sphereInFrustum(m_activeCamera->getCamera()->getFrustum(), aabb.m_max.distance(center),object->getPivot()))
-//		if( OBBInFrustum( obb, frust ) )
-//		{
-//			++object_index;
-//
-//			m_objects_inFrustum.push_back(object);
-//			m_drawObjects.push_back(object);
-//		}
-//	}
-//
-//	// нужно оптимизировать. не сортировать зря.
-//	// по сути можно добавить bool, и проверять выше.
-//	// если изменили позицию камеры или повернули или добавили объект то ИСТИНА, надо обновить
-//	//    возможно перед вызовом _updateObjectsInFrustum()
-//	sortObjectsInFrustum( m_drawObjects );
-//	
-//	//printf("%u\n",m_objects_inFrustum.size());
-//}
-//
-//void Viewport::setActive( bool v )
-//{
-//	if( !v )
-//	{
-//		// сброс чего-то, при переключении на другой вьюпорт
-//
-////		m_is_mouse_first_click = false;
-////		m_drawMouseSelectionRectangle = false; // если есть рамка выделения, то её нужно убрать
-//	}
-//
-//	if( m_activeViewport )
-//	{
-//		if( m_activeViewport != this )
-//		{
-//			m_activeViewport->m_drawContextMenu = false;
-//		}
-//	}
-//
-//	m_is_active = v;
-//	m_activeViewport = this;
-//}
-//
-//void Viewport::destroyViewport()
-//{
-//	_destroyViewportsRecursively();
-//}
-//
-//void Viewport::_destroyViewportsRecursively()
-//{
-//	for( size_t i = 0, sz = m_children.size(); i < sz; ++i )
-//	{
-//		m_children[i]->_destroyViewportsRecursively();
-//		_destroyViewports(m_children[i]);
-//	}
-//	m_children.clear();
-//}
-//
-//void Viewport::_destroyViewports(Viewport* v)
-//{
-//	kkDestroy(v);
-//}
-//
-//void Viewport::_addViewport(bool hor)
-//{
-//	Viewport * new_viewport = kkCreate<Viewport>(m_vd);
-//
-//	new_viewport->m_parent = this;
-//	
-//	/// новый вьюпорт изначально имеет размер родителя
-//	/// остаётся изменить размеры сначала родителя, потом нового вьюпорта
-//	new_viewport->m_rect_origin     = m_rect_origin; 
-//
-//	new_viewport->m_maximizedViewport = m_maximizedViewport;
-//
-//	if( hor )
-//	{
-//		/// Изменяю размеры родителя
-//		/// Сначала m_rect - значения в экранных координатах (0;0 - left top)
-//		/// Родитель уходит вниз, значит нужно отредактировать y координату
-//		/// Сначала берётся общая высота m_rect, делим на 2 получая половину, и из значания w вычитаем половинку...будет середина
-//		auto half = (m_rect_origin.w - m_rect_origin.y) / 2;
-//		m_rect_origin.y = m_rect_origin.w - half; /// теперь ГУИ кнопки родителя встанут на место
-//
-//		/// Далее изменяется m_rect нового вьюпорта
-//		/// нужно менять значение w, точку нужно поднимать
-//		/// вообще-то, эта точка должна вставать туда-же куда встала отодвинутая точка родителя
-//		new_viewport->m_rect_origin.w = m_rect_origin.y;
-//	}
-//	else
-//	{
-//		/// Изменяю размеры родителя
-//		/// Сначала m_rect - значения в экранных координатах (0;0 - left top)
-//		/// Родитель уходит влево, значит нужно отредактировать z координату
-//		/// Сначала берётся общая ширина m_rect, делим на 2 получая половину, и из значания z вычитаем половинку...будет середина
-//		auto half = (m_rect_origin.z - m_rect_origin.x) / 2;
-//		m_rect_origin.z = m_rect_origin.z - half; /// теперь ГУИ кнопки родителя встанут на место
-//
-//		/// Далее изменяется m_rect нового вьюпорта
-//		/// нужно менять значение x, точку нужно двигать вправо
-//		/// вообще-то, эта точка должна вставать туда-же куда встала отодвинутая точка родителя
-//		new_viewport->m_rect_origin.x = m_rect_origin.z;
-//	}
-//
-//	m_rect_modified = m_rect_origin;
-//	new_viewport->m_rect_modified = new_viewport->m_rect_origin;
-//	new_viewport->m_is_horizontal = hor;
-//
-//	update();
-//	
-//	m_children.push_back( new_viewport );
-//}
-//
-//void Viewport::_setGLViewport()
-//{
-//	m_vd.m_gs->setViewport(
-//		(s32)m_viewport_to_gl_funk.x,
-//		(s32)m_viewport_to_gl_funk.y,
-//		(s32)m_viewport_to_gl_funk.z,
-//		(s32)m_viewport_to_gl_funk.w 
-//	);
-//}
 //
 //void Viewport::_drawRecursively(Viewport* v)
 //{
@@ -1019,80 +872,6 @@ void Viewport::draw(ColorTheme* colorTheme)
 //	}
 //}
 //
-//void Viewport::_drawRecursivelyBorders(Viewport* v)
-//{
-//	
-//	v->m_vd.m_gs->setViewport(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
-//
-//	kkColor border_color = m_vd.m_current_color_theme->viewport_border_color;
-//#ifdef KK_DEBUG
-////	border_color = g_debugColorArray[v->m_debug_color_id];
-//#endif
-//	bool draw_borders = true;
-//	if( draw_borders )
-//	{
-//		v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.x,(s32)v->m_rect_modified.y),v2i((s32)v->m_rect_modified.z,(s32)v->m_rect_modified.y),border_color);
-//		v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.x,(s32)v->m_rect_modified.w),v2i((s32)v->m_rect_modified.z,(s32)v->m_rect_modified.w),border_color);
-//		v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.x,(s32)v->m_rect_modified.y),v2i((s32)v->m_rect_modified.x,(s32)v->m_rect_modified.w),border_color);
-//		v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.z,(s32)v->m_rect_modified.y),v2i((s32)v->m_rect_modified.z,(s32)v->m_rect_modified.w),border_color);
-//	}
-//
-//	if( !m_mainViewport->m_isMaximized )
-//	{
-//		for( size_t i = 0, sz = v->m_children.size(); i < sz; ++i )
-//		{
-//			v->_drawRecursivelyBorders(v->m_children[i]);
-//		}
-//	}
-//
-//	bool draw_big_border = false;
-//	kkColor big_border_color = m_vd.m_current_color_theme->viewport_active_color;
-//
-//	if(*m_vd.m_state_app == AppState_main::Idle)
-//	{
-//		if( kkrooo::pointInRect( *v->m_vd.m_cursor_position, v->m_rect_modified ) )
-//		{
-//			if( !v->m_is_active )
-//			{
-//				draw_big_border = true;
-//				big_border_color = m_vd.m_current_color_theme->viewport_mousehover_color;
-//			}
-//		}
-//	}
-//
-//	if( v->m_is_active )
-//	{
-//		draw_big_border = true;
-//	}
-//
-//	if( draw_big_border && v->m_vd.m_app->isDrawViewportBorders() == true )
-//	{
-//		const int border_size = 2;
-//		for( int i = 0; i < border_size; ++i )
-//		{
-//			v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.x,(s32)v->m_rect_modified.y+i),v2i((s32)v->m_rect_modified.z,(s32)v->m_rect_modified.y+i),big_border_color);
-//			v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.x,(s32)v->m_rect_modified.w-i),v2i((s32)v->m_rect_modified.z,(s32)v->m_rect_modified.w-i),big_border_color);
-//			v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.x+i,(s32)v->m_rect_modified.y),v2i((s32)v->m_rect_modified.x+i,(s32)v->m_rect_modified.w),big_border_color);
-//			v->m_vd.m_gs->drawLine2D(v2i((s32)v->m_rect_modified.z-i,(s32)v->m_rect_modified.y),v2i((s32)v->m_rect_modified.z-i,(s32)v->m_rect_modified.w),big_border_color);
-//		}
-//	}
-//
-//	if(*m_vd.m_state_app == AppState_main::Idle && !m_mainViewport->m_isMaximized )
-//	{
-//		if( kkrooo::pointInRect( *v->m_vd.m_cursor_position, v->m_rect_modified ) )
-//		{
-//			if( m_vd.m_event_consumer->isLmbDownOnce() || m_vd.m_event_consumer->isMmbDownOnce() || m_vd.m_event_consumer->isRmbUp() )
-//			{
-//				if( !v->m_is_active && !v->m_isMainMenuActive )
-//				{
-//					kkSetActiveViewport(v);
-//				}
-//			}
-//
-//		}
-//	}
-//}
-
 //
 //void Viewport::_drawObb( const kkObb& obb, const kkColor& color)
 //{				
@@ -1144,16 +923,13 @@ void Viewport::draw(ColorTheme* colorTheme)
 //void Viewport::_drawScene3D()
 //{
 //	bool       fff = false;
-//	
 //	m_frame_skip++;
-//
 //	if( m_frame_skip == m_frame_limit )
 //	{
 //		_updateObjectsInFrustum();
 //		m_frame_skip = 0;
 //		fff = true;
 //	}
-//
 //	if( fff )
 //		m_hoveredObjects.clear();
 //
@@ -1161,20 +937,11 @@ void Viewport::draw(ColorTheme* colorTheme)
 //
 //	for( size_t i = 0; i < m_drawObjects.size(); ++i )
 //	{
-//
 //		Scene3DObject*      object = m_drawObjects[i];
 //		kkScene3DObjectType object_type = object->GetType();
 //		auto & obb = object->Obb();
 //
 //		//printf("Draw num[%u] - [%s]\n", i, kkString(m_drawObjects[i]->getName()).to_kkStringA().data());
-//
-//		/*
-//		for( int q = 0; q < 20; ++q )
-//		{
-//			m_vd.m_app->m_shaderPoint->m_pos = kkVector4(0.f,0.f+q,0.f+i,1.f);
-//			m_vd.m_gs->drawPoint3D(kkVector4(0.f,4.f,0.f,1.f), m_vd.m_app->m_shaderPoint.ptr() );
-//		}
-//		*/
 //
 //		switch(object_type)
 //		{

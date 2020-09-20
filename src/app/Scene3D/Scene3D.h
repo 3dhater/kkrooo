@@ -31,6 +31,8 @@ class Scene3D : public kkScene3D
 	Application * m_app = nullptr;
 	Gizmo * m_gizmo = nullptr;
 
+	std::basic_string<Scene3DObject*> m_objects_inFrustum_unsorted;
+	std::basic_string<Scene3DObject*> m_objects_inFrustum_sorted;
 	std::basic_string<Scene3DObject*> m_objects;
 	std::basic_string<Scene3DObject*> m_objects_selected;
 
@@ -94,8 +96,8 @@ public:
 	u32 getNumOfSelectedObjects();
 	kkScene3DObject* getObjectOnScene( u32 );
 	kkScene3DObject* getSelectedObject( u32 );
-	//void beginTMPObject( kkScene3DObjectType );
-	//void endTMPObject();
+	
+	void drawAll(kkCamera* camera, DrawMode* );
 
 	void applyMatrices();
 	void resetMatrices();

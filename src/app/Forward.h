@@ -29,6 +29,7 @@ enum class ShortcutCommand_General : u32;
 enum class ShortcutCommand_Viewport : u32;
 enum class ShortcutCommand_Camera : u32;
 enum class ShortcutCommand_Edit : u32;
+enum class DrawMode : u32;
 struct ShortcutCommandDesc;
 struct ShortcutCommandNode;
 class Application;

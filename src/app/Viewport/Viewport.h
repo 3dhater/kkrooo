@@ -1,6 +1,13 @@
 ﻿#ifndef __VIEWPORT_H__
 #define __VIEWPORT_H__
 
+enum class DrawMode : u32
+{
+	Edge,
+	Material,
+	EdgesAndMaterial
+};
+
 struct ViewportMouseState
 {
 	bool LMB_UP   = false;
@@ -115,14 +122,9 @@ public:
 	v4f m_viewport_area;
 	f32 m_gridStep = 0.f;
 	bool m_isDrawGrid = true;
-	enum _draw_mode
-	{
-		_draw_mode_lines,
-		_draw_mode_material,
-		_draw_mode_lines_and_material
-	};
-	_draw_mode m_draw_mode = _draw_mode::_draw_mode_material; // так-же нужно передавать во m_maximizedViewport
-	void setDrawMode( _draw_mode );
+	
+	DrawMode m_draw_mode = DrawMode::EdgesAndMaterial;
+	void setDrawMode( DrawMode );
 	void toggleDrawModeMaterial();
 	void toggleDrawModeLines();
 	void moveToSelection();
@@ -154,6 +156,7 @@ public:
 	void beginDraw();
 	void drawBG(const v2i& windowSize, ColorTheme* colorTheme);
 	void drawGrid(ColorTheme* colorTheme);
+	void drawScene();
 	void drawName(bool isActive);
 	ViewportCamera * getActiveViewportCamera()
 	{

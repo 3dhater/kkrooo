@@ -9,7 +9,9 @@
 #include "../CursorRay.h"
 #include "../SelectionFrust.h"
 
+#include "../Viewport/Viewport.h"
 #include "../Viewport/ViewportCamera.h"
+#include "../Viewport/ViewportOptimizations.h"
 #include "../Geometry/PolygonalModel.h"
 #include "../Application.h"
 #include "../Gizmo.h"
@@ -2097,6 +2099,90 @@ void      Scene3D::updateObjectEdgeSelectList()
 	}*/
 }
 
+void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode)
+{
+	m_objects_inFrustum_unsorted.clear();
+	auto frust = camera->getFrustum();
+	auto camera_position = camera->getPositionInSpace();
+	for( size_t i = 0, sz = m_objects.size(); i < sz; ++i )
+	{
+		auto object = m_objects[i];
+		auto obb  = object->Obb();
+		auto aabb = object->Aabb();
+		kkVector4 center;
+		aabb.center(center);
+		object->m_distanceToCamera = camera_position.distance(center);
+		if(OBBInFrustum( obb, frust ))
+		{
+			m_objects_inFrustum_unsorted.push_back(object);
+		}
+	}
+	m_objects_inFrustum_sorted = m_objects_inFrustum_unsorted;
+	sortObjectsInFrustum( m_objects_inFrustum_sorted );
+
+	for(size_t i = 0, sz = m_objects_inFrustum_sorted.size(); i < sz; ++i)
+	{
+		auto object = m_objects_inFrustum_sorted[i];
+		kkScene3DObjectType object_type = object->GetType();
+		switch(object_type)
+		{
+		case kkScene3DObjectType::PolygonObject:
+		{
+			object->UpdateWorldMatrix();
+
+			if( *draw_mode == DrawMode::Material || *draw_mode == DrawMode::EdgesAndMaterial )
+			{
+				for( u64 i2 = 0, sz = object->getHardwareModelCount(); i2 < sz; ++i2 )
+				{
+					kkGSDrawModel(object->getHardwareModel(i2), object->GetMatrixWorld(), object->m_shaderParameter.m_diffuseColor, object->m_shaderParameter.m_diffuseTexture);
+				}
+			}
+
+			if( *draw_mode == DrawMode::Edge || *draw_mode == DrawMode::EdgesAndMaterial
+				|| m_app->getEditMode() == EditMode::Edge )
+			{
+				/*if( m_app->getEditMode() == EditMode::Polygon )
+				{
+					for( u64 i2 = 0, sz = object->getHardwareModelCount(); i2 < sz; ++i2 )
+					{
+						m_gs->drawMesh(object->getHardwareModel(i2), object->GetMatrixWorld() , m_vd.m_app->m_shader3DObjectDefault_polymodeforlinerender.ptr() );
+					}
+				}*/
+
+				for( u64 i2 = 0, sz = object->getHardwareModelCount_lines(); i2 < sz; ++i2 )
+				{
+					if(object->isSelected())
+						kkGSDrawModelEdge(object->getHardwareModel_lines(i2), object->GetMatrixWorld(), kkColorWhite);
+					else
+						kkGSDrawModelEdge(object->getHardwareModel_lines(i2), object->GetMatrixWorld(), object->m_edgeColor);
+				}
+			}
+
+			/*m_app->m_shaderPoint->setWorld( object->GetMatrixWorld() );
+			if( m_app->m_editMode == EditMode::Vertex && object->m_isSelected )
+			{
+				for( u64 i2 = 0, sz = object->getHardwareModelCount_points(); i2 < sz; ++i2 )
+				{
+					m_vd.m_gs->drawMesh(object->getHardwareModel_points(i2), object->GetMatrixWorld() , m_vd.m_app->m_shaderPoint.ptr() );
+				}
+			}*/
+
+			/*if( m_app->debugIsDrawObjectAabb() )
+			{
+				_drawAabb( object->Aabb(), kkColorYellowGreen );
+			}
+
+			if( m_app->debugIsDrawObjectObb()  )
+			{
+				_drawObb( obb, kkColorRed );
+			}*/
+
+		}break;
+		default:
+			break;
+		}
+	}
+}
 
 // Цель - преобразовать координаты controlVertex в соответствии с матрицами, перестроить модели и сбросить матрицы
 void Scene3D::applyMatrices()

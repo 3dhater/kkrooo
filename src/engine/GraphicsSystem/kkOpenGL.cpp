@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#define KK_EXPORTS
+﻿#define KK_EXPORTS
 
 #include "kkrooo.engine.h"
 #include "Classes/kkColor.h"
@@ -62,6 +61,7 @@ void kkOpenGL::setClearColor( const kkColor& C )
 
 void kkOpenGL::drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2, kkShader * shader )
 {
+    GLboolean last_enable_cull_face = glIsEnabled(GL_CULL_FACE);
 	//gl3wInit();
     glDisable(GL_CULL_FACE);
 	
@@ -83,11 +83,13 @@ void kkOpenGL::drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color
 	glBindVertexArray(m_rectangle_VAO);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+    if (last_enable_cull_face) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
 }
 
 
 void kkOpenGL::drawLine2D( const v2i& p1, const v2i& p2, const kkColor& color, kkShader * shader )
 {
+    GLboolean last_enable_cull_face = glIsEnabled(GL_CULL_FACE);
 	glDisable(GL_CULL_FACE);
 	if( shader )
 	{
@@ -105,6 +107,7 @@ void kkOpenGL::drawLine2D( const v2i& p1, const v2i& p2, const kkColor& color, k
 
 	glBindVertexArray(m_2dline_VAO);
 	glDrawArrays(GL_LINES, 0, 2);
+    if (last_enable_cull_face) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
 }
 
 void kkOpenGL::drawMesh(kkMesh* m, const kkMatrix4& w, kkShader * shader )
@@ -488,15 +491,15 @@ void kkOpenGL::setViewport( s32 x, s32 y, s32 w, s32 h )
 
 void kkOpenGL::useBackFaceCulling( bool v )
 {
-	if( v )
-	{
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-	}
-	else
-	{
-		glDisable(GL_CULL_FACE);
-	}
+  if( v )
+  {
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+  }
+  else
+  {
+    glDisable(GL_CULL_FACE);
+  }
 }
 
 void kkOpenGL::useDepth( bool v )
@@ -626,6 +629,7 @@ void kkOpenGL::drawPoint3D( const kkVector4& p, kkShader * shader )
 {
 	assert(shader!=nullptr);
 
+    GLboolean last_enable_cull_face = glIsEnabled(GL_CULL_FACE);
 	glDisable(GL_CULL_FACE);
 	
 	shader->setActive();
@@ -639,4 +643,5 @@ void kkOpenGL::drawPoint3D( const kkVector4& p, kkShader * shader )
 
 	glBindVertexArray(oglshader->m_VAO);
 	glDrawArrays(GL_POINTS, 0, 1);
+    if (last_enable_cull_face) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
 }

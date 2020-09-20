@@ -285,7 +285,8 @@ void Application::_drawMainMenuBar()
 				}
                 if( m_KrGuiSystem->addMenuItem(u"Cull back faces", 0, 0 /*,&m_backfaceCull*/ ))
 				{
-					m_backfaceCull = m_backfaceCull ? false : true;
+					m_useBackFaceCulling = m_useBackFaceCulling ? false : true;
+					m_gs->useBackFaceCulling(m_useBackFaceCulling);
 					redraw = true;
 				}
 				if( m_KrGuiSystem->popupMenuEnd() )

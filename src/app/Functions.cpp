@@ -10,6 +10,10 @@
 
 #include <math.h>
 
+/*
+I am very tired of OOP style
+*/
+
 bool g_cursorInViewport = false;
 void kkCursorInViewport(bool v)
 {
@@ -18,6 +22,14 @@ void kkCursorInViewport(bool v)
 bool kkIsCursorInViewport()
 {
 	return g_cursorInViewport;
+}
+void kkGSDrawModelEdge(kkMesh* mesh,const kkMatrix4& mat, const kkColor& edgeCol)
+{
+    return kkSingleton<Application>::s_instance->GSDrawModelEdge(mesh, mat, edgeCol);
+}
+void kkGSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex)
+{
+    return kkSingleton<Application>::s_instance->GSDrawModel(mesh, mat, difCol, m_diffTex);
 }
 bool * kkGetGlobalInputBlock()
 {

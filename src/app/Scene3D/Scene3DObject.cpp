@@ -162,10 +162,12 @@ void Scene3DObject::_createSoftwareModel_polys()
 	for(u64 i = 0; i < m_polyModel->m_polygonsCount; ++i)
 	{
 		kkVertex * base_vertex = current_polygon->m_verts->m_element;
-		kkVertex * vertex2 = base_vertex->m_mainNext;
-		kkVertex * vertex3 = base_vertex->m_mainNext;
+		auto v_node1 = current_polygon->m_verts->m_right;
+		auto v_node2 = v_node1->m_right;
 		for( u64 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
 		{
+			kkVertex * vertex2 = v_node1->m_element;
+			kkVertex * vertex3 = v_node2->m_element;
 			if( triangleCount == 0 )
 			{
 				softwareModel = _createNewSoftwareModel(_NEW_SOFTWARE_MODEL_TYPE::ENSMT_TRIANGLES);
@@ -175,7 +177,6 @@ void Scene3DObject::_createSoftwareModel_polys()
 				softwareModelIndex = (u32)m_SoftwareModels_polys.size() - 1;
 				index = 0;
 			}
-			vertex3 = vertex2->m_mainNext;
 			
 			verts_ptr->Position.x = base_vertex->m_position._f32[0];
 			verts_ptr->Position.y = base_vertex->m_position._f32[1];
@@ -212,8 +213,8 @@ void Scene3DObject::_createSoftwareModel_polys()
 				triangleCount = 0;
 			}
 
-			vertex2 = vertex3;
-			vertex3 = vertex3->m_mainNext;
+			v_node1 = v_node2;
+			v_node2 = v_node2->m_right;
 		}
 		current_polygon = current_polygon->m_mainNext;
 	}

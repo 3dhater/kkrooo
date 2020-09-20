@@ -67,7 +67,7 @@ public:
 		"}\n";
 
 	kkColor m_diffuseColor;
-	kkImageContainerNode * m_diffTex = nullptr;
+	kkImageContainerNode* m_diffTex = nullptr;
 	//kkVector4 m_eyePosition;
 };
 
