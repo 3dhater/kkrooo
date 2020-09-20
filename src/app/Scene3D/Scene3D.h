@@ -35,11 +35,15 @@ class Scene3D : public kkScene3D
 	std::basic_string<Scene3DObject*> m_objects_inFrustum_sorted;
 	std::basic_string<Scene3DObject*> m_objects;
 	std::basic_string<Scene3DObject*> m_objects_selected;
+	std::basic_string<Scene3DObject*> m_objects_mouseHover;
 
 	kkArray<ObjectVertexSelectInfo>   m_objectsVertexSelectInfo;
 	kkArray<ObjectVertexSelectInfo>   m_objectsEdgeSelectInfo;
 	kkArray<ObjectVertexSelectInfo>   m_objectsPolySelectInfo;
 
+
+	s32 m_frame_skip = 0;
+	s32 m_frame_limit = 1; // нужно сделать так чтобы при потере производительности это значение увеличивалось
 
 	// все aabb всех объектов складываются сюда
 	// если нет выделенных объектов то центрирование камеры идёт на центр aabb
@@ -97,7 +101,7 @@ public:
 	kkScene3DObject* getObjectOnScene( u32 );
 	kkScene3DObject* getSelectedObject( u32 );
 	
-	void drawAll(kkCamera* camera, DrawMode* );
+	void drawAll(kkCamera* camera, DrawMode*, bool cursorInViewportObject, CursorRay* ray);
 
 	void applyMatrices();
 	void resetMatrices();

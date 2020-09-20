@@ -123,7 +123,7 @@ public:
 	f32 m_gridStep = 0.f;
 	bool m_isDrawGrid = true;
 	
-	DrawMode m_draw_mode = DrawMode::EdgesAndMaterial;
+	DrawMode m_draw_mode = DrawMode::Material;
 	void setDrawMode( DrawMode );
 	void toggleDrawModeMaterial();
 	void toggleDrawModeLines();
@@ -150,6 +150,8 @@ public:
 	v4f m_orig_indent; // начальный отступ
 	v2f m_resize_window_coef; // для увеличения или уменьшения нужно умножать значения
 	v4f m_viewport_area_origin; /// зона вьюпорта. меньше чем окно. используется для вычисления m_resize_window_coef
+
+	bool m_cursorInRect = false;
 
 	ViewportUID m_uid = ViewportUID::Single;
 

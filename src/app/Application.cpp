@@ -941,6 +941,7 @@ void Application::_processShortcuts()
 	if( m_event_consumer->isKeyDownOnce( kkKey::K_DELETE ) )
     {
         _deleteSelectedObjects();
+        kkDrawAll();
     }
 }
 
@@ -2463,6 +2464,10 @@ AppState_keyboard* Application::GetAppState_keyboard()
 {
     return &m_state_keyboard;
 }
+AppState_main* Application::GetAppState_main()
+{
+    return &m_state_app;
+}
 bool * Application::GetGlobalInputBlock()
 {
     return &m_globalInputBlock;
@@ -2490,4 +2495,49 @@ void Application::GSDrawModelEdge(kkMesh* mesh,const kkMatrix4& mat, const kkCol
 {
 	m_shaderLineModel->edge_color = edgeCol;
 	m_gs->drawMesh(mesh, mat, m_shaderLineModel.ptr() );
+}
+void Application::GSDrawObb( const kkObb& obb, const kkColor& color)
+{
+	m_gs->drawLine3D( obb.v1, obb.v4, color );
+	m_gs->drawLine3D( obb.v5, obb.v8, color );
+	m_gs->drawLine3D( obb.v1, obb.v5, color );
+	m_gs->drawLine3D( obb.v4, obb.v8, color );
+	m_gs->drawLine3D( obb.v3, obb.v7, color );
+	m_gs->drawLine3D( obb.v6, obb.v2, color );
+	m_gs->drawLine3D( obb.v3, obb.v6, color );
+	m_gs->drawLine3D( obb.v7, obb.v2, color );
+	m_gs->drawLine3D( obb.v2, obb.v8, color );
+	m_gs->drawLine3D( obb.v4, obb.v7, color );
+	m_gs->drawLine3D( obb.v5, obb.v6, color );
+	m_gs->drawLine3D( obb.v1, obb.v3, color );
+}
+void Application::GSDrawAabb( const kkAabb& aabb, const kkColor& color)
+{
+	auto & p1 = aabb.m_min;
+	auto & p2 = aabb.m_max;
+
+	kkVector4 positionOffset;
+
+	kkVector4 v1 = p1;
+	kkVector4 v2 = p2;
+				
+	kkVector4 v3( p1.KK_X, p1.KK_Y, p2.KK_Z );
+	kkVector4 v4( p2.KK_X, p1.KK_Y, p1.KK_Z );
+	kkVector4 v5( p1.KK_X, p2.KK_Y, p1.KK_Z );
+	kkVector4 v6( p1.KK_X, p2.KK_Y, p2.KK_Z);
+	kkVector4 v7( p2.KK_X, p1.KK_Y, p2.KK_Z );
+	kkVector4 v8( p2.KK_X, p2.KK_Y, p1.KK_Z);
+				
+	m_gs->drawLine3D( v1 + positionOffset, v4 + positionOffset, color );
+	m_gs->drawLine3D( v5 + positionOffset, v8 + positionOffset, color );
+	m_gs->drawLine3D( v1 + positionOffset, v5 + positionOffset, color );
+	m_gs->drawLine3D( v4 + positionOffset, v8 + positionOffset, color );
+	m_gs->drawLine3D( v3 + positionOffset, v7 + positionOffset, color );
+	m_gs->drawLine3D( v6 + positionOffset, v2 + positionOffset, color );
+	m_gs->drawLine3D( v3 + positionOffset, v6 + positionOffset, color );
+	m_gs->drawLine3D( v7 + positionOffset, v2 + positionOffset, color );
+	m_gs->drawLine3D( v2 + positionOffset, v8 + positionOffset, color );
+	m_gs->drawLine3D( v4 + positionOffset, v7 + positionOffset, color );
+	m_gs->drawLine3D( v5 + positionOffset, v6 + positionOffset, color );
+	m_gs->drawLine3D( v1 + positionOffset, v3 + positionOffset, color );
 }

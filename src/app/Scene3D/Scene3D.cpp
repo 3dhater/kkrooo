@@ -14,11 +14,14 @@
 #include "../Viewport/ViewportOptimizations.h"
 #include "../Geometry/PolygonalModel.h"
 #include "../Application.h"
+#include "../ApplicationState.h"
 #include "../Gizmo.h"
 #include "Scene3D.h"
 #include "Scene3DObject.h"
 
 #include <algorithm>
+
+extern ViewportMouseState g_mouseState;
 
 const s32 g_edgeColorNumber = 62;
 const kkColor g_edgeColors[] = 
@@ -164,7 +167,6 @@ Scene3DObject * Scene3D::createNewPolygonalObject( const char16_t* n, PolygonalM
 		new_object->ApplyPivot();
 		
 		new_object->UpdateAabb();
-	//	new_object->UpdateScreenSpacePoints();
 
 		m_objects.push_back( new_object );
 		
@@ -2099,27 +2101,36 @@ void      Scene3D::updateObjectEdgeSelectList()
 	}*/
 }
 
-void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode)
+void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewportObject, CursorRay* ray)
 {
-	m_objects_inFrustum_unsorted.clear();
-	auto frust = camera->getFrustum();
-	auto camera_position = camera->getPositionInSpace();
-	for( size_t i = 0, sz = m_objects.size(); i < sz; ++i )
+	bool optimize = false;
+	++m_frame_skip;
+	if( m_frame_skip == m_frame_limit )
 	{
-		auto object = m_objects[i];
-		auto obb  = object->Obb();
-		auto aabb = object->Aabb();
-		kkVector4 center;
-		aabb.center(center);
-		object->m_distanceToCamera = camera_position.distance(center);
-		if(OBBInFrustum( obb, frust ))
+		m_frame_skip = 0;
+		optimize = true;
+		m_objects_mouseHover.clear();
+		m_objects_inFrustum_unsorted.clear();
+		auto frust = camera->getFrustum();
+		auto camera_position = camera->getPositionInSpace();
+		for( size_t i = 0, sz = m_objects.size(); i < sz; ++i )
 		{
-			m_objects_inFrustum_unsorted.push_back(object);
+			auto object = m_objects[i];
+			auto obb  = object->Obb();
+			auto aabb = object->Aabb();
+			kkVector4 center;
+			aabb.center(center);
+			object->m_distanceToCamera = camera_position.distance(center);
+			if(OBBInFrustum( obb, frust ))
+			{
+				m_objects_inFrustum_unsorted.push_back(object);
+			}
 		}
+		m_objects_inFrustum_sorted = m_objects_inFrustum_unsorted;
+		sortObjectsInFrustum( m_objects_inFrustum_sorted );
 	}
-	m_objects_inFrustum_sorted = m_objects_inFrustum_unsorted;
-	sortObjectsInFrustum( m_objects_inFrustum_sorted );
 
+	
 	for(size_t i = 0, sz = m_objects_inFrustum_sorted.size(); i < sz; ++i)
 	{
 		auto object = m_objects_inFrustum_sorted[i];
@@ -2181,6 +2192,34 @@ void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode)
 		default:
 			break;
 		}
+		
+		if( optimize && !kkIsMmbDown() && *kkGetAppState_main() != AppState_main::Gizmo && !g_mouseState.IsSelectByRect
+			&& m_app->m_editMode == EditMode::Object )
+		{
+			if( cursorInViewportObject )
+			{
+				if( kkrooo::rayIntersection_obb(ray->m_center, object->m_obb) )
+				{
+					// далее проверка на пересечение луч-треугольник
+					kkRayTriangleIntersectionResultSimple intersectionResult;
+					if( object->IsRayIntersect(ray->m_center, intersectionResult) )
+					{
+						auto camera_position = camera->getPositionInSpace();
+						object->m_distanceToCamera = camera_position.distance(intersectionResult.m_intersectionPoint);
+						m_objects_mouseHover.push_back(object);
+					}
+				}
+			}
+		}
+
+		if( m_objects_mouseHover.size() )
+		{
+			sortMouseHoverObjects( m_objects_mouseHover );
+		}
+	}
+	if( m_objects_mouseHover.size() )
+	{
+		kkGSDrawObb( m_objects_mouseHover[0]->Obb(), kkColorRed );
 	}
 }
 

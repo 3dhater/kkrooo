@@ -234,13 +234,16 @@ class PolygonalModel : public kkPolygonalModel
 	void _rayTestTriangle( std::vector<kkTriangleRayTestResult>& outTriangles, const kkRay& ray, kkMaterialImplementation * renderObjectMaterial, kkTriangleRayTestResult* );
 
 	std::unordered_map<std::string,kkVertex*> m_weldMap;
-	// 2 объединённых адреса как ключ
-	std::unordered_map<u64, kkEdge*> m_edgeMap;
 	
 	void _addVertexToList(kkVertex*);
 	void _removeVertexFromList(kkVertex*);
 	void _addPolygonToList(kkPolygon*);
 	void _removePolygonFromList(kkPolygon*);
+	void _addEdgeToList(kkEdge*);
+	void _removeEdgeFromList(kkEdge*);
+
+	void _createEdges();
+	void _deleteEdges();
 public:
 	PolygonalModel();
 	virtual ~PolygonalModel();
@@ -273,8 +276,10 @@ public:
 
 	kkPolygon* m_polygons = nullptr;
 	kkVertex*  m_verts    = nullptr;
+	kkEdge*    m_edges    = nullptr;
 	u64 m_polygonsCount = 0;
 	u64 m_vertsCount    = 0;
+	u64 m_edgesCount    = 0;
 };
 
 #endif

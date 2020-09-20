@@ -13,7 +13,7 @@ enum class AppState_main : u32
 	Gizmo, 
 
 	// когда нажали правую кнопку мыши в моменте когда объект трансформируется с помощью гизмо
-	CancelTransformation, 
+	CancelTransformation, /// вроде не нужно...
 
 };
 

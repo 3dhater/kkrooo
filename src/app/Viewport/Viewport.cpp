@@ -287,15 +287,15 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	_update_frame(mouseDelta);
 	update(windowSize);
 
-	bool inRect = false;
 	if( kkrooo::pointInRect( *m_cursor_position, m_rect_modified ) )
 	{
 		kkCursorInViewport(true);
-		inRect = true;
+		m_cursorInRect = true;
 		// определяю если курсор двигается
 		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f || Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
 		{
 			g_mouseState.IsMove = true;
+			updateCursorRay();
 		}
 
 		if(g_mouseState.LMB_DOWN || g_mouseState.MMB_DOWN)
@@ -303,7 +303,11 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			res = true;
 		}
 	}
-	if( (g_mouseState.LMB_DOWN || g_mouseState.RMB_DOWN || g_mouseState.MMB_DOWN) && inRect )
+	else
+	{
+		m_cursorInRect = false;
+	}
+	if( (g_mouseState.LMB_DOWN || g_mouseState.RMB_DOWN || g_mouseState.MMB_DOWN) && m_cursorInRect )
 	{
 		if( !g_mouseState.IsFirstClick )
 		{
@@ -544,7 +548,7 @@ void ViewportObject::_drawGrid_persp(ColorTheme* colorTheme)
 void ViewportObject::drawScene()
 {
 	auto scene3D = *kkGetScene3D();
-	scene3D->drawAll(m_activeCamera->getCamera(), &m_draw_mode);
+	scene3D->drawAll(m_activeCamera->getCamera(), &m_draw_mode, m_cursorInRect, m_cursorRay);
 }
 void ViewportObject::drawGrid(ColorTheme* colorTheme)
 {
@@ -872,54 +876,6 @@ void Viewport::draw(ColorTheme* colorTheme)
 //	}
 //}
 //
-//
-//void Viewport::_drawObb( const kkObb& obb, const kkColor& color)
-//{				
-//	m_vd.m_gs->drawLine3D( obb.v1, obb.v4, color );
-//	m_vd.m_gs->drawLine3D( obb.v5, obb.v8, color );
-//	m_vd.m_gs->drawLine3D( obb.v1, obb.v5, color );
-//	m_vd.m_gs->drawLine3D( obb.v4, obb.v8, color );
-//	m_vd.m_gs->drawLine3D( obb.v3, obb.v7, color );
-//	m_vd.m_gs->drawLine3D( obb.v6, obb.v2, color );
-//	m_vd.m_gs->drawLine3D( obb.v3, obb.v6, color );
-//	m_vd.m_gs->drawLine3D( obb.v7, obb.v2, color );
-//	m_vd.m_gs->drawLine3D( obb.v2, obb.v8, color );
-//	m_vd.m_gs->drawLine3D( obb.v4, obb.v7, color );
-//	m_vd.m_gs->drawLine3D( obb.v5, obb.v6, color );
-//	m_vd.m_gs->drawLine3D( obb.v1, obb.v3, color );
-//}
-//
-//void Viewport::_drawAabb( const kkAabb& aabb, const kkColor& color )
-//{
-//	auto & p1 = aabb.m_min;
-//	auto & p2 = aabb.m_max;
-//
-//	kkVector4 positionOffset;
-//
-//	kkVector4 v1 = p1;
-//	kkVector4 v2 = p2;
-//				
-//	kkVector4 v3( p1.KK_X, p1.KK_Y, p2.KK_Z );
-//	kkVector4 v4( p2.KK_X, p1.KK_Y, p1.KK_Z );
-//	kkVector4 v5( p1.KK_X, p2.KK_Y, p1.KK_Z );
-//	kkVector4 v6( p1.KK_X, p2.KK_Y, p2.KK_Z);
-//	kkVector4 v7( p2.KK_X, p1.KK_Y, p2.KK_Z );
-//	kkVector4 v8( p2.KK_X, p2.KK_Y, p1.KK_Z);
-//				
-//	m_vd.m_gs->drawLine3D( v1 + positionOffset, v4 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v5 + positionOffset, v8 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v1 + positionOffset, v5 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v4 + positionOffset, v8 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v3 + positionOffset, v7 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v6 + positionOffset, v2 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v3 + positionOffset, v6 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v7 + positionOffset, v2 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v2 + positionOffset, v8 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v4 + positionOffset, v7 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v5 + positionOffset, v6 + positionOffset, color );
-//	m_vd.m_gs->drawLine3D( v1 + positionOffset, v3 + positionOffset, color );
-//}
-//
 //void Viewport::_drawScene3D()
 //{
 //	bool       fff = false;
@@ -981,21 +937,7 @@ void Viewport::draw(ColorTheme* colorTheme)
 //				}
 //			}
 //
-//			switch (g_m_f)
-//			{
-//			case 0: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_ALWAYS); break;
-//			case 1: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_EQUAL); break;
-//			case 2: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_GEQUAL); break;
-//			case 3: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_GREATER); break;
-//			case 4: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_LEQUAL); break;
-//			case 5: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_LESS); break;
-//			case 6: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_NEVER); break;
-//			case 7: m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_NOTEQUAL); break;
-//			}
-//			//m_vd.m_gs->setCompFunc(kkGraphicsSystemCompFunc::_NOTEQUAL);
-//
 //			m_vd.m_app->m_shaderPoint->setWorld( object->GetMatrixWorld() );
-//			//m_vd.m_app->m_shaderPoint->m_world = kkMatrix4();
 //
 //			if( m_vd.m_app->m_editMode == EditMode::Vertex && object->m_isSelected )
 //			{
@@ -1004,25 +946,6 @@ void Viewport::draw(ColorTheme* colorTheme)
 //					m_vd.m_gs->drawMesh(object->getHardwareModel_points(i2), object->GetMatrixWorld() , m_vd.m_app->m_shaderPoint.ptr() );
 //				}
 //			}
-//
-//			/*object->prepareForRaytracing();
-//			int icol = 0;
-//			for( auto n : object->m_PolyModel->m_BVHNodes )
-//			{
-//				_drawAabb( n->m_aabb, g_debugColorArray[icol++] );
-//			}
-//			object->finishRaytracing();*/
-//
-//			if( m_vd.m_app->debugIsDrawObjectAabb() )
-//			{
-//				_drawAabb( object->Aabb(), kkColorYellowGreen );
-//			}
-//
-//			if( m_vd.m_app->debugIsDrawObjectObb()  )
-//			{
-//				_drawObb( obb, kkColorRed );
-//			}
-//
 //		}break;
 //		default:
 //			break;

@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __APPLICATION_H__
+﻿#ifndef __APPLICATION_H__
 #define __APPLICATION_H__
 
 #include <exception>
@@ -429,12 +428,15 @@ public:
 	void DrawAllEvent();
 	v2i* GetCursorPosition();
 	AppState_keyboard* GetAppState_keyboard();
+	AppState_main* GetAppState_main();
 	bool * GetGlobalInputBlock();
 	void* GetGUI();
 	bool IsKeyDown(kkKey k);
 	ShortcutManager* GetShortcutManager();
 	void GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex);
 	void GSDrawModelEdge(kkMesh*,const kkMatrix4&, const kkColor& edgeCol);
+	void GSDrawObb( const kkObb& obb, const kkColor& color);
+	void GSDrawAabb( const kkAabb& aabb, const kkColor& color);
 };
 
 

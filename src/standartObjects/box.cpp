@@ -33,22 +33,22 @@ void generateTopPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(begin_x+segment_size_w-half_width,  half_height,   begin_z-half_length);
-			gc->AddNormal(0.,1.,0.);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
-			
-			gc->AddPosition(begin_x+segment_size_w-half_width,  half_height,   begin_z+segment_size_h-half_length);
-			gc->AddNormal(0.,1.,0.);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
-			
-			gc->AddPosition(begin_x-half_width,  half_height,   begin_z+segment_size_h-half_length);
-			gc->AddNormal(0.,1.,0.);
-			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
 			
 			gc->AddPosition(begin_x-half_width,   half_height,   begin_z-half_length);
 			gc->AddNormal(0.,1.,0.);
 			gc->AddUV(uv_begin_x, uv_begin_y);
 			
+			gc->AddPosition(begin_x-half_width,  half_height,   begin_z+segment_size_h-half_length);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(begin_x+segment_size_w-half_width,  half_height,   begin_z+segment_size_h-half_length);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(begin_x+segment_size_w-half_width,  half_height,   begin_z-half_length);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0,0);
 
@@ -99,22 +99,22 @@ void generateBottomPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(-(begin_x+segment_size_w-half_width),  -half_height,   begin_z-half_length);
-			gc->AddNormal(0.,-1.,0.);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
-			
-			gc->AddPosition(-(begin_x+segment_size_w-half_width),  -half_height,   begin_z+segment_size_h-half_length);
-			gc->AddNormal(0.,-1.,0.);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
-			
-			gc->AddPosition( -(begin_x-half_width),  -half_height,   begin_z+segment_size_h-half_length);
-			gc->AddNormal(0.,-1.,0.);
-			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
 			
 			gc->AddPosition( -(begin_x-half_width),   -half_height,   begin_z-half_length);
 			gc->AddNormal(0.,-1.,0.);
 			gc->AddUV(uv_begin_x, uv_begin_y);
 			
+			gc->AddPosition( -(begin_x-half_width),  -half_height,   begin_z+segment_size_h-half_length);
+			gc->AddNormal(0.,-1.,0.);
+			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(-(begin_x+segment_size_w-half_width),  -half_height,   begin_z+segment_size_h-half_length);
+			gc->AddNormal(0.,-1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(-(begin_x+segment_size_w-half_width),  -half_height,   begin_z-half_length);
+			gc->AddNormal(0.,-1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0,0);
 
@@ -165,22 +165,22 @@ void generateFrontPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(-(begin_x+segment_size_w-half_width),  begin_y-half_height,   half_length);
+			gc->AddPosition( -(begin_x-half_width),   begin_y-half_height,   half_length);
 			gc->AddNormal(0.f,0.f,1.f);
-			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
+			gc->AddUV(uv_begin_x, uv_begin_y);
 
-			gc->AddPosition(-(begin_x+segment_size_w-half_width),  begin_y+segment_size_h-half_height,   half_length);
-			gc->AddNormal(0.f,0.f,1.f);
-			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y+uv_segment_size_h);
 			
 			gc->AddPosition( -(begin_x-half_width),  begin_y+segment_size_h-half_height,   half_length);
 			gc->AddNormal(0.f,0.f,1.f);
 			gc->AddUV(uv_begin_x, uv_begin_y+uv_segment_size_h);
 			
-			gc->AddPosition( -(begin_x-half_width),   begin_y-half_height,   half_length);
+			gc->AddPosition(-(begin_x+segment_size_w-half_width),  begin_y+segment_size_h-half_height,   half_length);
 			gc->AddNormal(0.f,0.f,1.f);
-			gc->AddUV(uv_begin_x, uv_begin_y);
+			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y+uv_segment_size_h);
 			
+			gc->AddPosition(-(begin_x+segment_size_w-half_width),  begin_y-half_height,   half_length);
+			gc->AddNormal(0.f,0.f,1.f);
+			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0,0);
 
@@ -231,22 +231,21 @@ void generateBackPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(begin_x+segment_size_w-half_width,  begin_y-half_height,   -half_length);
+			gc->AddPosition( begin_x-half_width,   begin_y-half_height,   -half_length);
 			gc->AddNormal(0.f,0.f,-1.f);
-			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
+			gc->AddUV(uv_begin_x, uv_begin_y);
+			
+			gc->AddPosition( begin_x-half_width,  begin_y+segment_size_h-half_height,   -half_length);
+			gc->AddNormal(0.f,0.f,-1.f);
+			gc->AddUV(uv_begin_x, uv_begin_y+uv_segment_size_h);
 
 			gc->AddPosition(begin_x+segment_size_w-half_width,  begin_y+segment_size_h-half_height,   -half_length);
 			gc->AddNormal(0.f,0.f,-1.f);
 			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y+uv_segment_size_h);
 			
-			gc->AddPosition( begin_x-half_width,  begin_y+segment_size_h-half_height,   -half_length);
+			gc->AddPosition(begin_x+segment_size_w-half_width,  begin_y-half_height,   -half_length);
 			gc->AddNormal(0.f,0.f,-1.f);
-			gc->AddUV(uv_begin_x, uv_begin_y+uv_segment_size_h);
-			
-			gc->AddPosition( begin_x-half_width,   begin_y-half_height,   -half_length);
-			gc->AddNormal(0.f,0.f,-1.f);
-			gc->AddUV(uv_begin_x, uv_begin_y);
-			
+			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0,0);
 
@@ -297,22 +296,22 @@ void generateRightPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(-half_width,  begin_y-half_height,   -(begin_z+segment_size_w-half_length));
-			gc->AddNormal(-1.f,0.f,0.f);
-			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 
-			gc->AddPosition(-half_width,  begin_y+segment_size_h-half_height,   -(begin_z+segment_size_w-half_length));
+			gc->AddPosition( -half_width,   begin_y-half_height,   -(begin_z-half_length));
 			gc->AddNormal(-1.f,0.f,0.f);
-			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y+uv_segment_size_h);
+			gc->AddUV(uv_begin_x, uv_begin_y);
 			
 			gc->AddPosition( -half_width,  begin_y+segment_size_h-half_height,   -(begin_z-half_length));
 			gc->AddNormal(-1.f,0.f,0.f);
 			gc->AddUV(uv_begin_x, uv_begin_y+uv_segment_size_h);
 			
-			gc->AddPosition( -half_width,   begin_y-half_height,   -(begin_z-half_length));
+			gc->AddPosition(-half_width,  begin_y+segment_size_h-half_height,   -(begin_z+segment_size_w-half_length));
 			gc->AddNormal(-1.f,0.f,0.f);
-			gc->AddUV(uv_begin_x, uv_begin_y);
+			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y+uv_segment_size_h);
 			
+			gc->AddPosition(-half_width,  begin_y-half_height,   -(begin_z+segment_size_w-half_length));
+			gc->AddNormal(-1.f,0.f,0.f);
+			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0,0);
 
@@ -363,22 +362,22 @@ void generateLeftPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(half_width,  -(begin_y-half_height),   -(begin_z+segment_size_w-half_length));
+			gc->AddPosition( half_width,   -(begin_y-half_height),   -(begin_z-half_length));
 			gc->AddNormal(1.f,0.f,0.f);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
+			gc->AddUV(uv_begin_x, uv_begin_y);
 
-			gc->AddPosition(half_width,  -(begin_y+segment_size_h-half_height),   -(begin_z+segment_size_w-half_length));
-			gc->AddNormal(1.f,0.f,0.f);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
 			
 			gc->AddPosition( half_width,  -(begin_y+segment_size_h-half_height),   -(begin_z-half_length));
 			gc->AddNormal(1.f,0.f,0.f);
 			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
 			
-			gc->AddPosition( half_width,   -(begin_y-half_height),   -(begin_z-half_length));
+			gc->AddPosition(half_width,  -(begin_y+segment_size_h-half_height),   -(begin_z+segment_size_w-half_length));
 			gc->AddNormal(1.f,0.f,0.f);
-			gc->AddUV(uv_begin_x, uv_begin_y);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
 			
+			gc->AddPosition(half_width,  -(begin_y-half_height),   -(begin_z+segment_size_w-half_length));
+			gc->AddNormal(1.f,0.f,0.f);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0,0);
 

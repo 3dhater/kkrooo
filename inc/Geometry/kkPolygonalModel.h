@@ -17,8 +17,11 @@ struct kkLoopNode
 
 struct kkEdge
 {
+	// предидущий\следующий в главном списке
+	kkEdge* m_mainPrev = nullptr;
+	kkEdge* m_mainNext = nullptr;
+
 	// вершины образующие ребро
-	// вершины должны принадлежать одному полигону
 	kkVertex * m_v1 = nullptr;
 	kkVertex * m_v2 = nullptr;
 
@@ -35,6 +38,9 @@ struct kkPolygon
 
 	kkLoopNode<kkVertex> * m_verts = nullptr;
 	u64        m_vertexCount = 0;
+
+	kkLoopNode<kkEdge> * m_edges = nullptr;
+	u64 m_edgeCount = 0;
 };
 
 struct kkVertex
@@ -48,6 +54,9 @@ struct kkVertex
 	
 	kkLoopNode<kkPolygon> * m_polygons = nullptr;
 	u64 m_polygonCount = 0;
+	
+	kkLoopNode<kkEdge> * m_edges = nullptr;
+	u64 m_edgeCount = 0;
 };
 
 struct kkTriangle

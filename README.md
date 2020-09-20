@@ -6,6 +6,13 @@
 
 ## Features
 
+* Unique GUI
+* C++ plugins
+* Object generator
+* Import\Export
+* Material editor
+* Rendering
+
 ## Goals
 
 * Mesh editing (vertex weld, face extrude and other)

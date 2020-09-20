@@ -328,8 +328,16 @@ class Scene3DObject : public Scene3DObjectCommon
 	friend class Scene3D;
 	friend class Viewport;
 	friend class Application;
-	friend void Scene3DObject_isRayIntersect( int* out_result,int* stop_flag,u64 start_index,u64 end_index,Scene3DObject* object,
-		kkRay* ray,kkRayTriangleIntersectionResultSimple* ip, kkRayTriangleIntersectionAlgorithm alg);
+	friend void Scene3DObject_isRayIntersect( 
+		int* out_result,
+		int* stop_flag,
+		kkPolygon* begin,
+		kkPolygon* end,
+		Scene3DObject* object,
+		kkRay* ray,
+		kkRayTriangleIntersectionResultSimple* iResult,
+		kkRayTriangleIntersectionAlgorithm alg
+		);
 
 	//void _updateScreenSpacePoints_object();
 	//void _updateScreenSpacePoints_vertex();

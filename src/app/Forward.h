@@ -15,6 +15,7 @@ class RenderManager;
 class Scene3DObject;
 struct CursorRay;
 enum class AppState_keyboard : u32;
+enum class AppState_main : u32;
 #ifdef KK_PLATFORM_WINDOWS
     struct IFileSaveDialog;
 #endif

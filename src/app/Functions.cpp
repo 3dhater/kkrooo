@@ -31,9 +31,21 @@ void kkGSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kk
 {
     return kkSingleton<Application>::s_instance->GSDrawModel(mesh, mat, difCol, m_diffTex);
 }
+void kkGSDrawObb( const kkObb& obb, const kkColor& color)
+{
+    return kkSingleton<Application>::s_instance->GSDrawObb(obb, color);
+}
+void kkGSDrawAabb( const kkAabb& aabb, const kkColor& color)
+{
+    return kkSingleton<Application>::s_instance->GSDrawAabb(aabb, color);
+}
 bool * kkGetGlobalInputBlock()
 {
     return kkSingleton<Application>::s_instance->GetGlobalInputBlock();
+}
+AppState_main* kkGetAppState_main()
+{
+    return kkSingleton<Application>::s_instance->GetAppState_main();
 }
 AppState_keyboard* kkGetAppState_keyboard()
 {

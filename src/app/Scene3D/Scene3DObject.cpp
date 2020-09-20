@@ -152,6 +152,8 @@ bool Scene3DObject::_buildModel_polymodel()
 
 void Scene3DObject::_createSoftwareModel_polys()
 {
+	if(!m_polyModel->m_polygons)
+		return;
 	auto current_polygon = m_polyModel->m_polygons;
 	u32 triangleCount = 0;
 	kkSMesh*     softwareModel = nullptr;
@@ -166,8 +168,8 @@ void Scene3DObject::_createSoftwareModel_polys()
 		auto v_node2 = v_node1->m_right;
 		for( u64 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
 		{
-			kkVertex * vertex2 = v_node1->m_element;
-			kkVertex * vertex3 = v_node2->m_element;
+			kkVertex * vertex3 = v_node1->m_element;
+			kkVertex * vertex2 = v_node2->m_element;
 			if( triangleCount == 0 )
 			{
 				softwareModel = _createNewSoftwareModel(_NEW_SOFTWARE_MODEL_TYPE::ENSMT_TRIANGLES);
@@ -382,14 +384,62 @@ void Scene3DObject::_createSoftwareModel_points()
 
 void Scene3DObject::_createSoftwareModel_edges()
 {
-	//u32         num_of_verts  = 0;
-	//u32         lineCount = 0;
-	//u16         index         = 0;
-	//Polygon3D *   polygon       = nullptr;
-	//kkSMesh*      softwareModel = nullptr;
+	if(!m_polyModel->m_edges)
+		return;
+	u32 lineCount = 0;
+	kkSMesh*      softwareModel = nullptr;
+	LineModelVertex*  verts_ptr     = nullptr;
+	u16     *   inds_ptr      = nullptr;
+	u32 softwareModelIndex = 0;
+	u16         index         = 0;
+	auto E = m_polyModel->m_edges;
+	for(u64 i = 0; i < m_polyModel->m_edgesCount; ++i)
+	{
+		if( lineCount == 0 )
+		{
+			softwareModel = _createNewSoftwareModel(_NEW_SOFTWARE_MODEL_TYPE::ENSMT_LINES);
+			verts_ptr     = (LineModelVertex*)softwareModel->m_vertices;
+			inds_ptr      = softwareModel->m_indices;
+			m_SoftwareModels_edges.push_back(softwareModel);
+			softwareModelIndex = (u32)m_SoftwareModels_edges.size() - 1;
+			index = 0;
+		}
+		
+		verts_ptr->_position.x  = E->m_v1->m_position.KK_X;
+		verts_ptr->_position.y  = E->m_v1->m_position.KK_Y;
+		verts_ptr->_position.z  = E->m_v1->m_position.KK_Z;
 
-	//LineModelVertex*  verts_ptr     = nullptr;
-	//u16     *   inds_ptr      = nullptr;
+		v4f color(1.f,1.f,1.f,1.f);
+		// ********************
+
+		verts_ptr->_color = color;
+		*inds_ptr = index;
+		
+		// E->m_v1->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+
+		++verts_ptr;
+		++inds_ptr;
+		++index;
+
+		verts_ptr->_position.x  = E->m_v2->m_position.KK_X;
+		verts_ptr->_position.y  = E->m_v2->m_position.KK_Y;
+		verts_ptr->_position.z  = E->m_v2->m_position.KK_Z;
+		verts_ptr->_color = color;
+		*inds_ptr = index;
+		
+		// E->m_v2->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+
+		++verts_ptr;
+		++inds_ptr;
+		++index;
+		softwareModel->m_vCount += 2;
+		softwareModel->m_iCount += 2;
+		++lineCount;
+		if( lineCount == m_lineLimit )
+			lineCount = 0;
+
+		E = E->m_mainNext;
+	}
 
 	//for(u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
 	//	((Vertex*)m_PolyModel->m_verts[ i ])->m_vertexIndexForSoftware_lines.clear();
@@ -612,101 +662,90 @@ u64       Scene3DObject::getHardwareModelCount_points()
 }
 
 
-
+// friend for `class Scene3DObject`
 void Scene3DObject_isRayIntersect( 
 	int* out_result,
 	int* stop_flag,
-	u64 start_index,
-	u64 end_index,
+	kkPolygon* begin,
+	kkPolygon* end,
 	Scene3DObject* object,
 	kkRay* ray,
 	kkRayTriangleIntersectionResultSimple* iResult,
 	kkRayTriangleIntersectionAlgorithm alg
 	)
 {
-	//Polygon3D * polygon;
-	//Vertex*     vertex1;
-	//Vertex*     vertex2;
-	//Vertex*     vertex3;
-	//u32       num_of_verts;
+	kkPolygon* polygon = begin;
+	auto M = object->m_matrix;
+	while(true)
+	{
+		auto base_vertex_node = polygon->m_verts;
+		auto VN1 = base_vertex_node->m_right;
+		auto VN2 = VN1->m_right;
+		for( u32 i = 0, sz = polygon->m_vertexCount - 2; i < sz; ++i )
+		{
+			u32 index2  = i+1;
+			u32 index3  = index2 + 1;
+			if( index3 == polygon->m_vertexCount )
+				index3 = 0;
+			
+			kkTriangle t;
+			t.v1 = math::mul( base_vertex_node->m_element->m_position, M ) + object->m_pivot;
+			t.v2 = math::mul( VN1->m_element->m_position, M ) + object->m_pivot;
+			t.v3 = math::mul( VN2->m_element->m_position, M ) + object->m_pivot;
+			t.update();
 
-	//auto M = object->m_matrix;
+			auto r = *ray;
+			r.update();
+			float f1,f2,f3,f4;
 
-	///*kkVector4 rayDir = ray->m_end - ray->m_origin;
-	//rayDir.normalize();*/
+			switch (alg)
+			{
+			default:
+			case kkRayTriangleIntersectionAlgorithm::MollerTrumbore:
+				if( t.rayTest_MT(r, true, f1, f2, f3, f4 ) )
+				{
+					iResult->m_object = object;
+					iResult->m_T = f1;
+					iResult->m_U = f2;
+					iResult->m_V = f3;
+					iResult->m_W = f4;
+					iResult->m_intersectionPoint = r.m_origin + r.m_direction * f1;
+					iResult->m_polygon = polygon;
+					*out_result = 1;
+					*stop_flag  = 1;
+					return;
+				}
+				break;
+			case kkRayTriangleIntersectionAlgorithm::Watertight:
+				if( t.rayTest_Watertight(r, true, f1, f2, f3, f4 ) )
+				{
+					iResult->m_object = object;
+					iResult->m_T = f1;
+					iResult->m_U = f2;
+					iResult->m_V = f3;
+					iResult->m_W = f4;
+					iResult->m_intersectionPoint = r.m_origin + r.m_direction * f1;
+					iResult->m_polygon = polygon;
+					*out_result = 1;
+					*stop_flag  = 1;
+					return;
+				}
+				break;
+			}
 
-	//for(u64 i = start_index; i < end_index; ++i )
-	//{
-	//	polygon = (Polygon3D *)object->m_PolyModel->m_polygons.at(i);
+			if( *stop_flag == 1 )
+				return;
 
-	//	num_of_verts = (u32)polygon->m_verts.size();
-	//	u32 index2, index3;
-	//	for( u32 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
-	//	{
-	//		index2  = i2+1;
-	//		index3  = index2 + 1;
-	//		if( index3 == num_of_verts )
-	//			index3 = 0;
+			if( *out_result == 1 )
+				return;
 
-	//		vertex2 = (Vertex*)polygon->m_verts[0];
-	//		vertex1 = (Vertex*)polygon->m_verts[index2];
-	//		vertex3 = (Vertex*)polygon->m_verts[index3];
-
-	//		kkTriangle t;
-	//		t.v1 = math::mul( vertex2->m_Position, M ) + object->m_pivot;
-	//		t.v2 = math::mul( vertex1->m_Position, M ) + object->m_pivot;
-	//		t.v3 = math::mul( vertex3->m_Position, M ) + object->m_pivot;
-	//		t.update();
-
-	//		auto r = *ray;
-	//		r.update();
-
-	//		float f1,f2,f3,f4;
-
-	//		
-
-	//		switch (alg)
-	//		{
-	//		default:
-	//		case kkRayTriangleIntersectionAlgorithm::MollerTrumbore:
-	//			if( t.rayTest_MT(r, true, f1, f2, f3, f4 ) )
-	//			{
-	//				iResult->m_object = object;
-	//				iResult->m_T = f1;
-	//				iResult->m_U = f2;
-	//				iResult->m_V = f3;
-	//				iResult->m_W = f4;
-	//				iResult->m_intersectionPoint = r.m_origin + r.m_direction * f1;
-	//				iResult->m_polygonIndex = i;
-	//				*out_result = 1;
-	//				*stop_flag  = 1;
-	//				return;
-	//			}
-	//			break;
-	//		case kkRayTriangleIntersectionAlgorithm::Watertight:
-	//			if( t.rayTest_Watertight(r, true, f1, f2, f3, f4 ) )
-	//			{
-	//				iResult->m_object = object;
-	//				iResult->m_T = f1;
-	//				iResult->m_U = f2;
-	//				iResult->m_V = f3;
-	//				iResult->m_W = f4;
-	//				iResult->m_intersectionPoint = r.m_origin + r.m_direction * f1;
-	//				iResult->m_polygonIndex = i;
-	//				*out_result = 1;
-	//				*stop_flag  = 1;
-	//				return;
-	//			}
-	//			break;
-	//		}
-
-	//		if( *stop_flag == 1 )
-	//			return;
-
-	//		if( *out_result == 1 )
-	//			return;
-	//	}
-	//}
+			VN1 = VN2;
+			VN2 = VN2->m_right;
+		}
+		if(polygon == end)
+			break;
+		polygon = polygon->m_mainNext;
+	}
 }
 
 bool Scene3DObject::IsRayIntersect( const kkRay& ray, kkRayTriangleIntersectionResultSimple& result, kkRayTriangleIntersectionAlgorithm alg )
@@ -715,20 +754,46 @@ bool Scene3DObject::IsRayIntersect( const kkRay& ray, kkRayTriangleIntersectionR
 	int thread_stop_flag = 0;
 	int thread_result    = 0;
 
-	/*if( m_PolyModel->m_polygons.size() > 3000 )
+	if( m_polyModel->m_polygonsCount > 40000 )
 	{
+		kkPolygon* arr[8];
+		arr[0] = m_polyModel->m_polygons;
+		arr[1] = arr[2] = arr[3] = arr[4] = arr[5] = arr[6] = arr[0];
+
+		u64 number = (u64)std::floor((f64)m_polyModel->m_polygonsCount * 0.25f);
+		for( s32 i = 1; i < 7; )
+		{
+			u64 counter = 0;
+			while(true)
+			{
+				arr[i] = arr[i]->m_mainNext;
+				++counter;
+				if(counter == number)
+					break;
+			}
+			++i; // new begin
+			arr[i] = arr[i-1]->m_mainNext;
+
+			if(i == 6)
+				break;
+
+			++i;
+			arr[i] = arr[i-1];
+		}
+
+		arr[7] = m_polyModel->m_polygons->m_mainPrev;
 
 		std::thread t1( Scene3DObject_isRayIntersect,  &thread_result, &thread_stop_flag,
-			0, m_PolyModel->m_polygons.size() / 4, this, &r, &result, alg );
+			arr[0], arr[1], this, &r, &result, alg );
 
 		std::thread t2( Scene3DObject_isRayIntersect,  &thread_result, &thread_stop_flag, 
-			m_PolyModel->m_polygons.size() / 4, (m_PolyModel->m_polygons.size() / 4)*2,  this, &r, &result, alg  );
+			arr[2], arr[3],  this, &r, &result, alg  );
 
 		std::thread t3( Scene3DObject_isRayIntersect,  &thread_result, &thread_stop_flag, 
-			(m_PolyModel->m_polygons.size() / 4)*2, (m_PolyModel->m_polygons.size() / 4)*3,  this, &r, &result, alg  );
+			arr[4], arr[5],  this, &r, &result, alg  );
 
 		Scene3DObject_isRayIntersect( &thread_result, &thread_stop_flag,
-			(m_PolyModel->m_polygons.size() / 4)*3, m_PolyModel->m_polygons.size(),  this, &r, &result, alg  );
+			arr[6], arr[7],  this, &r, &result, alg  );
 		t1.join();
 		t2.join();
 		t3.join();
@@ -736,8 +801,8 @@ bool Scene3DObject::IsRayIntersect( const kkRay& ray, kkRayTriangleIntersectionR
 	else
 	{
 		Scene3DObject_isRayIntersect( &thread_result, &thread_stop_flag,
-			0, m_PolyModel->m_polygons.size(), this, &r, &result, alg  );
-	}*/
+			m_polyModel->m_polygons, m_polyModel->m_polygons->m_mainPrev, this, &r, &result, alg  );
+	}
 
 	return thread_result == 1;
 }

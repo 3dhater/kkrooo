@@ -29,6 +29,25 @@ void kkVertex_addPolygon(kkVertex* v, kkPolygon* p)
 	}
 	++v->m_polygonCount;
 }
+void kkVertex_addEdge(kkVertex* v, kkEdge* e)
+{
+	auto new_loop = kkCreate<kkLoopNode<kkEdge>>();
+	new_loop->m_element = e;
+	if(!v->m_edgeCount)
+	{
+		v->m_edges = new_loop;
+		v->m_edges->m_left  = v->m_edges;
+		v->m_edges->m_right = v->m_edges;
+	}
+	else
+	{
+		new_loop->m_right = v->m_edges;
+		new_loop->m_left  = v->m_edges->m_left;
+		v->m_edges->m_left->m_right = new_loop;
+		v->m_edges->m_left = new_loop;
+	}
+	++v->m_edgeCount;
+}
 void kkPolygon_addVertex(kkVertex* v, kkPolygon* p)
 {
 	auto new_loop = kkCreate<kkLoopNode<kkVertex>>();
@@ -47,6 +66,25 @@ void kkPolygon_addVertex(kkVertex* v, kkPolygon* p)
 		p->m_verts->m_left = new_loop;
 	}
 	++p->m_vertexCount;
+}
+void kkPolygon_addEdge(kkEdge* e, kkPolygon* p)
+{
+	auto new_loop = kkCreate<kkLoopNode<kkEdge>>();
+	new_loop->m_element = e;
+	if(!p->m_edgeCount)
+	{
+		p->m_edges = new_loop;
+		p->m_edges->m_left  = p->m_edges;
+		p->m_edges->m_right = p->m_edges;
+	}
+	else
+	{
+		new_loop->m_right = p->m_edges;
+		new_loop->m_left  = p->m_edges->m_left;
+		p->m_edges->m_left->m_right = new_loop;
+		p->m_edges->m_left = new_loop;
+	}
+	++p->m_edgeCount;
 }
 void kkPolygon_removeVertex(kkLoopNode<kkVertex>* vn, kkPolygon* p)
 {
@@ -92,6 +130,7 @@ PolygonalModel::PolygonalModel()
 }
 PolygonalModel::~PolygonalModel()
 {
+	_deleteEdges();
 	while(m_polygons)
 	{
 		DeletePolygon(m_polygons);
@@ -160,7 +199,35 @@ void PolygonalModel::_removePolygonFromList(kkPolygon* p)
 		p->m_mainNext->m_mainPrev = p->m_mainPrev;
 	}
 }
-
+void PolygonalModel::_addEdgeToList(kkEdge* e)
+{
+	++m_edgesCount;
+	if(!m_edges)
+	{
+		m_edges = e;
+		m_edges->m_mainNext = e;
+	}
+	else
+	{
+		e->m_mainNext = m_edges;
+		e->m_mainPrev = m_edges->m_mainPrev;
+		m_edges->m_mainPrev->m_mainNext = e;
+	}
+	m_edges->m_mainPrev = e;
+}
+void PolygonalModel::_removeEdgeFromList(kkEdge* e)
+{
+	--m_edgesCount;
+	if(!m_edgesCount)
+	{
+		m_edges = nullptr;
+	}
+	else
+	{
+		e->m_mainPrev->m_mainNext = e->m_mainNext;
+		e->m_mainNext->m_mainPrev = e->m_mainPrev;
+	}
+}
 kkPolygon* PolygonalModel::GetPolygons()
 {
 	return m_polygons;
@@ -314,7 +381,118 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool trian
 	//	}
 	//}
 }
+void PolygonalModel::_deleteEdges()
+{
+	if(!m_edgesCount)
+		return;
+	auto E = m_edges;
+	for(u64 i = 0; i < m_edgesCount; ++i)
+	{
+		auto next = E->m_mainNext;
+		kkDestroy(E);
+		E = next;
+	}
+	m_edges = nullptr;
+	m_edgesCount = 0;
+	auto P = m_polygons;
+	for(u64 i = 0; i < m_polygonsCount; ++i)
+	{
+		if(P->m_edgeCount)
+		{
+			auto PE_node = P->m_edges;
+			for(u64 o = 0; o < P->m_edgeCount; ++o)
+			{
+				auto next = PE_node->m_right;
+				kkDestroy(PE_node);
+				PE_node = next;
+			}
+			P->m_edgeCount = 0;
+			P->m_edges = nullptr;
+		}
+		P = P->m_mainNext;
+	}
+	auto V = m_verts;
+	for(u64 i = 0; i < m_vertsCount; ++i)
+	{
+		if(V->m_edgeCount)
+		{
+			auto VE_node = V->m_edges;
+			for(u64 o = 0; o < V->m_edgeCount; ++o)
+			{
+				auto next = VE_node->m_right;
+				kkDestroy(VE_node);
+				VE_node = next;
+			}
+			V->m_edgeCount = 0;
+			V->m_edges = nullptr;
+		}
+		V = V->m_mainNext;
+	}
+}
+void PolygonalModel::_createEdges()
+{
+	if(m_edges)
+		_deleteEdges();
+	if(!m_polygons)
+		return;
+	auto polygon = m_polygons;
+	for(u64 i = 0; i < m_polygonsCount; ++i )
+	{
+		auto vertex_node1 = polygon->m_verts;
+		auto vertex_node2 = vertex_node1->m_right;
+		for(u64 o = 0; o < polygon->m_vertexCount; ++o )
+		{
+			auto v1 = vertex_node1->m_element;
+			auto v2 = vertex_node2->m_element;
 
+			// пусть вершина с адресом значение которого меньше
+			//  будет на первом месте.
+			if(v2 < v1)
+			{
+				v1 = vertex_node2->m_element;
+				v2 = vertex_node1->m_element;
+			}
+
+			kkEdge* new_edge = nullptr;
+			bool create_new = true;
+			if( v1->m_edgeCount )
+			{
+				auto edge_node = v1->m_edges;
+				for(u64 k = 0; k < v1->m_edgeCount; ++k)
+				{
+					if(edge_node->m_element->m_v1 == v1 
+						&& edge_node->m_element->m_v2 == v2)
+					{
+						new_edge = edge_node->m_element;
+						create_new = false;
+						break;
+					}
+					edge_node = edge_node->m_right;
+				}
+			}
+
+			if(create_new)
+			{
+				new_edge = kkCreate<kkEdge>();
+				new_edge->m_v1 = v1;
+				new_edge->m_v2 = v2;
+				_addEdgeToList(new_edge);
+			}
+			if(!new_edge->m_p1)
+				new_edge->m_p1 = polygon;
+			else
+				new_edge->m_p2 = polygon;
+			kkVertex_addEdge(v1, new_edge);
+			kkVertex_addEdge(v2, new_edge);
+			kkPolygon_addEdge(new_edge, polygon);
+
+			vertex_node1 = vertex_node2;
+			vertex_node2 = vertex_node2->m_right;
+		}
+		
+		polygon = polygon->m_mainNext;
+	}
+}
 //void PolygonalModel::_findNeighbors()
 //{
 //	// добавляю соседей
@@ -407,9 +585,8 @@ void PolygonalModel::weldByLen(f32 len)
 void PolygonalModel::onEndCreation()
 {
 	calculateTriangleCount();
+	_createEdges();
 	m_weldMap.clear();
-	m_edgeMap.clear();
-//	printf("####  ####  ####   ###  ###\n");
 }
 
 void PolygonalModel::generateBT()

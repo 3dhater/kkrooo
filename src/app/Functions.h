@@ -22,10 +22,13 @@ bool kkIsMmbUp();
 bool kkIsKeyDown(kkKey);
 void kkDrawAll();
 v2i* kkGetCursorPosition();
+AppState_main* kkGetAppState_main();
 AppState_keyboard* kkGetAppState_keyboard();
 bool * kkGetGlobalInputBlock();
 void* kkGetGUI();
 ShortcutManager* kkGetShortcutManager();
+void kkGSDrawObb( const kkObb& obb, const kkColor& color);
+void kkGSDrawAabb( const kkAabb& aabb, const kkColor& color);
 
 enum class IconFontSymbol
 {

@@ -54,7 +54,7 @@ struct kkRayTriangleIntersectionResultSimple
 	f32 m_U = 0.f;
 	f32 m_V = 0.f;
 	f32 m_W = 0.f;
-	u64 m_polygonIndex = 0;
+	kkPolygon* m_polygon = nullptr;
 
 	kkScene3DObject * m_object = nullptr;
 };

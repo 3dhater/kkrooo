@@ -138,8 +138,8 @@ kkScene3DObject* GeometryCreator::EndModel(bool forceWeld, f32 len)
 			if( m_generateBT )
 				m_newModel->generateBT();
 
-			ptr = m_scene3D->createNewPolygonalObject(m_newModel_name.data(), m_newModel, m_newModel_position);
 			m_newModel->onEndCreation();
+			ptr = m_scene3D->createNewPolygonalObject(m_newModel_name.data(), m_newModel, m_newModel_position);
 		}
 
 		m_newModel            = nullptr;
