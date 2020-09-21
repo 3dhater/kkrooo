@@ -198,6 +198,15 @@ void Application::_init_materialEditor(bool first)
         }
     }
 }
+void Application::_init_shortcutEditor()
+{
+    m_shortcutEditorWindow = m_main_system->createWindow( kk::window::style::center,
+        v4i(0,0,400,280), kk::window::state::hide, m_mainWindow.ptr(), E_WINDOW_ID::EWID_SHORTCUTEDITOR_WINDOW );
+	m_shortcutEditorWindow->set_onClose(window_onClose);
+    m_shortcutEditorWindow->setWindowText(u"Shortcut editor");
+    m_gs->initWindow(m_shortcutEditorWindow.ptr());
+}
+
 
 void Application::_init_plugins()
 {
@@ -247,14 +256,6 @@ void Application::_init_mainWindow()
 	m_mainWindow->set_onSize(window_onSize);
 	m_mainWindow->set_onClose(window_onClose);
 }
-
-//void Application::_init_materialEditorWindow()
-//{
-//    m_materialEditorWindow = m_main_system->createWindow( kk::window::style::resize | kk::window::style::center | kk::window::style::maximize,
-//        v4i(0,0,1000,600), kk::window::state::hide, m_mainWindow.ptr(), E_WINDOW_ID::EWID_MATERIALEDITOR_WINDOW );
-//	m_materialEditorWindow->set_onClose(window_onClose);
-//    m_materialEditorWindow->setWindowText(u"Material editor");
-//}
 
 void Application::_init_renderWindow()
 {
@@ -351,7 +352,6 @@ void Application::init()
     m_gs->initWindow(m_importExportWindow.ptr());
 
     _init_plugins();
-   // _init_materialEditorWindow();
     _init_krgui();
     _init_input();
 
@@ -381,6 +381,8 @@ void Application::init()
     _init_materialEditor(false);
     m_isClearCanvas = true;
 
+    _init_shortcutEditor();
+    m_guiShortcutWindow.OSWindow = m_shortcutEditorWindow->getHandle();
     m_guiMainWindow.OSWindow = m_mainWindow->getHandle();
     m_guiMaterialEditorWindow.OSWindow = m_materialEditorWindow->getHandle();
     m_guiRenderWindow.OSWindow = m_renderWindow->getHandle();
@@ -389,6 +391,25 @@ void Application::init()
 
     m_gs->useBackFaceCulling(m_useBackFaceCulling);
     setNeedToSave(false);
+    m_mainWindow->setFocus(true);
+}
+
+void Application::_draw_shortcutEditor()
+{
+    m_shortcutManager->enable();
+    if(!m_shortcutEditorWindow.ptr())
+        return;
+    if(!m_shortcutEditorWindow->isVisible())
+        return;
+    m_shortcutManager->disable();
+    m_gs->setActive(m_shortcutEditorWindow.ptr());
+    m_gs->update();
+    m_KrGuiSystem->switchWindow(&m_guiShortcutWindow );
+    drawBegin();
+    m_shortcutManager->draw();
+    m_KrGuiSystem->render();
+    drawEnd();
+    m_KrGuiSystem->m_cursorCoords.set(0.f,0.f);
 }
 
 bool Application::isSelectedObjectNeedConvert()
@@ -644,16 +665,24 @@ void Application::drawAll(bool force)
         {
             drawBegin();
             drawViewport();
-
+            if(m_activeOSWindow == E_WINDOW_ID::EWID_MAIN_WINDOW)
+            {
+                m_KrGuiSystem->disableInput();
+            }
             _drawMainMenuBar();
             _drawMainToolBar();
             _drawLeftToolBar();
             _drawRightToolBar();
+            if(m_activeOSWindow == E_WINDOW_ID::EWID_MAIN_WINDOW)
+            {
+                m_KrGuiSystem->enableInput();
+            }
             m_KrGuiSystem->render();
 
             drawEnd();
         }
     
+        _draw_shortcutEditor();
         _processMainMenuCommand();
     }
    
@@ -804,24 +833,6 @@ void Application::updateInput()
 
     if( m_state_app != AppState_main::MainMenu )
     {
-        // ввод во вьюпорте будет отключен если показано это окно
-        if( m_drawShortcutManager || m_drawPreferencesWindow )
-        {
-            return;
-        }
-
-        if( m_state_app == AppState_main::Idle )
-        {
-            if( m_event_consumer->isLmbUp())
-            {
-            }
-
-
-            if( m_state_keyboard == AppState_keyboard::None )
-            {
-            }
-        }
-
         // ввод для активного вьюпорта
         // там-же _processShortcuts для вьюпорта
         if( !m_cursorInGUI )

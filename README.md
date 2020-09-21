@@ -6,7 +6,7 @@
 
 ## Features
 
-* Unique GUI
+* Own GUI
 * C++ plugins
 * Object generator
 * Import\Export

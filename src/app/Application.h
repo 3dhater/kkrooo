@@ -58,6 +58,7 @@ class Application
 	kkPtr<kkWindow>         m_materialEditorWindow; //bool m_showMaterialEditorWindow = false;
 	kkPtr<kkWindow>         m_renderWindow;
 	kkPtr<kkWindow>         m_importExportWindow;
+	kkPtr<kkWindow>         m_shortcutEditorWindow;
 
 	PluginGUIWindow*     m_importExportGUIWindow = nullptr;
 
@@ -73,7 +74,6 @@ class Application
 
 	kkPtr<MaterialEditor>   m_materialEditor;
 	kkPtr<RenderManager>    m_renderManager;
-	bool                    m_drawShortcutManager = false;
 
 	bool m_globalInputBlock = false;
 
@@ -96,7 +96,9 @@ class Application
 	void _init_krgui();
 	void _init_renderManager();
 	void _init_viewports();
+	void _init_shortcutEditor();
 
+	void _draw_shortcutEditor();
 
 	Kr::Gui::GuiSystem * m_KrGuiSystem = nullptr;
 	Kr::Gui::Font * m_smallFont = nullptr;
@@ -106,6 +108,7 @@ class Application
 	Kr::Gui::Window m_guiMaterialEditorWindow;
 	Kr::Gui::Window m_guiRenderWindow;
 	Kr::Gui::Window m_guiImportExportWindow;
+	Kr::Gui::Window m_guiShortcutWindow;
 
 	bool _initFonts();
     

@@ -68,7 +68,7 @@ enum class ShortcutCommand_Edit : u32
 	SelectModeMove,
 	SelectModeRotate,
 	SelectModeScale,
-	EnterTransformation,
+	EnterTransformation, // old
 	EditModeObject,
 	EditModeVertex,
 	EditModeEdge,
@@ -81,7 +81,7 @@ struct ShortcutCommandDesc
 {
 	ShortcutCommandCategory  category   = ShortcutCommandCategory::_End;
 	u32 id = 0;
-	const char * name = "";
+	const char16_t * name = u" ";
 };
 
 struct ShortcutCommandNode
@@ -103,14 +103,12 @@ class ShortcutManager
 	Application   * m_app = nullptr;
 	EventConsumer * m_eventConsumer = nullptr;
 
+	kkArray<kkString> m_commandNames;
+
 	ShortcutCommandDesc m_cammandDesc_General[(u32)ShortcutCommand_General::_End];
 	ShortcutCommandDesc m_cammandDesc_Viewport[(u32)ShortcutCommand_Viewport::_End];
 	ShortcutCommandDesc m_cammandDesc_Camera[(u32)ShortcutCommand_Camera::_End];
 	ShortcutCommandDesc m_cammandDesc_Edit[(u32)ShortcutCommand_Edit::_End];
-	const char * m_imguiComboText_General[(u32)ShortcutCommand_General::_End];
-	const char * m_imguiComboText_Viewport[(u32)ShortcutCommand_Viewport::_End];
-	const char * m_imguiComboText_Camera[(u32)ShortcutCommand_Camera::_End];
-	const char * m_imguiComboText_Edit[(u32)ShortcutCommand_Edit::_End];
 
 	kkArray<ShortcutCommandNode> m_cammandNodes_General;
 	kkArray<ShortcutCommandNode> m_cammandNodes_Viewport;
@@ -119,8 +117,10 @@ class ShortcutManager
 
 	friend class Application;
 
-	kkString m_inputBuffer;
+	kkString m_combinationStr;
+	kkString m_combinationStr_new;
 	const char16_t* _getKeyString( kkKey key );
+	const char16_t* _getKeyboardStateString( AppState_keyboard state );
 
 	ShortcutCommandNode * _getNode(u32 i1, u32 i2);
 	void _save();
@@ -130,15 +130,17 @@ class ShortcutManager
 	void _setUpXMLNode(kkArray<ShortcutCommandNode>& , const char16_t* , kkXMLNode*);
 	void _readXMLNodes(const kkArray<kkXMLNode*>& xmlnodes, kkArray<ShortcutCommandNode>& );
 
-
+	bool m_disabled = false;
 public:
 	ShortcutManager();
 	~ShortcutManager();
 
 	bool init();
 	void onFrame();
-
-	void draw(bool*);
+	void enable(){m_disabled = false;}
+	void disable(){m_disabled = true;}
+	void draw();
+	void reset();
 
 	const char16_t* getShortcutText( ShortcutCommand_General );
 	const char16_t* getShortcutText( ShortcutCommand_Viewport );

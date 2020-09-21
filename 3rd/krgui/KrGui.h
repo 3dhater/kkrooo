@@ -273,6 +273,7 @@ namespace Kr
 			};
 			void _updateMouseInputInRectMoveHover()
 			{
+				if(m_disableInput) return;
 				if( m_mouseDelta.x == 0 && m_mouseDelta.y == 0 ) // mouse not move
 					m_lastCursorHoverItemId = m_uniqueIdCounter; // then hover
 				else // mouse move
@@ -280,6 +281,7 @@ namespace Kr
 			}
 			void _updateMouseInputInRect(mouseButton button)
 			{
+				if(m_disableInput) return;
 				if( m_doWindowInput )
 				{
 					_updateMouseInputInRectMoveHover();
@@ -316,6 +318,7 @@ namespace Kr
 			}
 			void _updateMouseInput(mouseButton button)
 			{
+				if(m_disableInput) return;
 				if( _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentClipRect ) )
 				{
 					m_currentWindow->m_currentItemId_inRect = m_uniqueIdCounter;
@@ -324,6 +327,7 @@ namespace Kr
 			}
 			void _checkMouseHover()
 			{
+				if(m_disableInput) return;
 				if( _internal::pointInRect( m_cursorCoords.x, m_cursorCoords.y, m_currentClipRect ) )
 				{
 					m_currentWindow->m_currentItemId_inRect = m_uniqueIdCounter;
@@ -367,6 +371,8 @@ namespace Kr
 			void _checkZoomPosition(Vec2f* point);
 
 			float m_deltaTime = 0.f;
+
+			bool m_disableInput = false;
 
 			friend GuiSystem* CreateSystem( GraphicsSystemType type, const char* defaultFontDir, const char* defaultFontFileName );
 			friend void GraphicsSystem_OpenGL3Draw(GuiSystem*);
@@ -577,7 +583,8 @@ namespace Kr
 
 			float getZoom(){return m_guiZoom;}
 			void setZoom(float v){m_guiZoom = v;}
-
+			void disableInput(){m_disableInput = true;}
+			void enableInput(){m_disableInput = false;}
 			private:
 				bool _popupMenuBegin( bool * active, Style* style, const Vec2f& positionLT);
 		};

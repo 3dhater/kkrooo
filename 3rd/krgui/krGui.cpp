@@ -426,13 +426,13 @@ void Gui::GuiSystem::drawLine( const Vec2f& begin, const Vec2f& end, float size,
 	command->verts.push_back(vertex4);
 }
 
-bool Gui::GuiSystem::isLastItemCursorHover(){ return m_lastCursorHoverItemId == m_lastItemId;}
-bool Gui::GuiSystem::isLastItemCursorMove() { return m_lastCursorMoveItemId == m_lastItemId;}
-bool Gui::GuiSystem::isLastItemPressed()    { return m_pressedItemIdLMB == m_lastItemId;  }
-bool Gui::GuiSystem::isLastItemPressedOnce(){ bool result = m_pressedItemIdLMB == m_lastItemId; if(result)m_pressedItemIdLMB = -1; return result;  }
-bool Gui::GuiSystem::isLastItemDisabled()   { return m_lastDisabledItemId == m_lastItemId;}
-bool Gui::GuiSystem::isLastItemKeyboardInput(){ return m_lastKeyboardInputItemId == m_lastItemId;}
-bool Gui::GuiSystem::isLastItemKeyboardInputExit(){ return m_lastKeyboardInputItemIdExit == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemCursorHover(){ if(m_disableInput)return false; return m_lastCursorHoverItemId == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemCursorMove() { if(m_disableInput)return false; return m_lastCursorMoveItemId == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemPressed()    { if(m_disableInput)return false; return m_pressedItemIdLMB == m_lastItemId;  }
+bool Gui::GuiSystem::isLastItemPressedOnce(){ if(m_disableInput)return false; bool result = m_pressedItemIdLMB == m_lastItemId; if(result)m_pressedItemIdLMB = -1; return result;  }
+bool Gui::GuiSystem::isLastItemDisabled()   { if(m_disableInput)return false; return m_lastDisabledItemId == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemKeyboardInput(){ if(m_disableInput)return false; return m_lastKeyboardInputItemId == m_lastItemId;}
+bool Gui::GuiSystem::isLastItemKeyboardInputExit(){ if(m_disableInput)return false; return m_lastKeyboardInputItemIdExit == m_lastItemId;}
 
 
 void Gui::GuiSystem::newLine(float offset)

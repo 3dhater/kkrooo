@@ -116,7 +116,8 @@ void ViewportObject::processShortcuts()
 		if( m_isDrawGrid )
 			m_isDrawGrid = false;	
 		else
-			m_isDrawGrid = true;	
+			m_isDrawGrid = true;
+		kkDrawAll();
 	}
 
 	if( m_shortcutManager->isShortcutActive(ShortcutCommand_Viewport::SetPerspective) ){setActiveCamera( m_cameraPersp.ptr() );}

@@ -115,6 +115,10 @@ void EventConsumer::processEvent( const kkEvent& ev )
 			{
 				m_app->m_activeOSWindow = E_WINDOW_ID::EWID_IMPORTEXPORT_WINDOW;
 			}
+			else if( ev.windowEvent.window == m_app->m_shortcutEditorWindow.ptr() )
+			{
+				m_app->m_activeOSWindow = E_WINDOW_ID::EWID_SHORTCUTEDITOR_WINDOW;
+			}
 			else
 			{
 				KK_PRINT_FAILED;

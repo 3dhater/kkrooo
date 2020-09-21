@@ -254,7 +254,7 @@ void Application::_drawMainMenuBar()
 				m_KrGuiSystem->addSeparator(&m_mainMenuStyle);
 				if(m_KrGuiSystem->addMenuItem(u"Shortcut Manager",0))
 				{
-					m_drawShortcutManager = true;
+					m_shortcutEditorWindow->show();
 					redraw = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Preferences",0))
@@ -308,7 +308,7 @@ void Application::_drawMainMenuBar()
 			bool showMenu = true;
 			if(m_KrGuiSystem->popupMenuBegin( &showMenu, &m_mainMenuStyle ))
 			{
-                if( m_KrGuiSystem->addMenuItem(u"Material editor", 0, 0 ))
+                if( m_KrGuiSystem->addMenuItem(u"Material editor", m_shortcutManager->getShortcutText(ShortcutCommand_General::ShowMaterialEditor), 0 ))
 				{
 					m_mainMenuCommand.type   = MainMenuCommandType::ShowMaterialEditor;
 					redraw = true;
@@ -327,7 +327,7 @@ void Application::_drawMainMenuBar()
 			bool showMenu = true;
 			if(m_KrGuiSystem->popupMenuBegin( &showMenu, &m_mainMenuStyle ))
 			{
-                if( m_KrGuiSystem->addMenuItem(u"Render", 0, 0 ))
+                if( m_KrGuiSystem->addMenuItem(u"Render", m_shortcutManager->getShortcutText(ShortcutCommand_General::ShowRenderWindow), 0 ))
 				{
 					m_mainMenuCommand.type   = MainMenuCommandType::ShowRenderWindow;
 					redraw = true;

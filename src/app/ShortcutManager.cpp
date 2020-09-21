@@ -13,6 +13,7 @@
 #include "Common/kkUtil.h"
 #include "FileSystem/kkFileSystem.h"
 
+using namespace Kr;
 
 ShortcutManager::ShortcutManager()
 {
@@ -71,6 +72,11 @@ void ShortcutManager::onFrame()
 
 bool ShortcutManager::init()
 {
+    m_commandNames.push_back(u"General");
+    m_commandNames.push_back(u"Viewport");
+    m_commandNames.push_back(u"Camera");
+    m_commandNames.push_back(u"Edit");
+
 	int command_end = (int)ShortcutCommand_General::_End;
 	for( int i = 0; i < command_end; ++i )
     {
@@ -79,17 +85,15 @@ bool ShortcutManager::init()
 
         switch((ShortcutCommand_General)i)
         {
-        case ShortcutCommand_General::ShowMaterialEditor: m_cammandDesc_General[i].name = "ShowMaterialEditor"; break;
-        case ShortcutCommand_General::ShowRenderWindow:   m_cammandDesc_General[i].name = "ShowRenderWindow";   break;
-        case ShortcutCommand_General::New:    m_cammandDesc_General[i].name = "New";    break;
-        case ShortcutCommand_General::Save:   m_cammandDesc_General[i].name = "Save";   break;
-        case ShortcutCommand_General::SaveAs: m_cammandDesc_General[i].name = "SaveAs"; break;
-        case ShortcutCommand_General::Open:   m_cammandDesc_General[i].name = "Open";   break;
+        case ShortcutCommand_General::ShowMaterialEditor: m_cammandDesc_General[i].name = u"ShowMaterialEditor"; break;
+        case ShortcutCommand_General::ShowRenderWindow:   m_cammandDesc_General[i].name = u"ShowRenderWindow";   break;
+        case ShortcutCommand_General::New:    m_cammandDesc_General[i].name = u"New";    break;
+        case ShortcutCommand_General::Save:   m_cammandDesc_General[i].name = u"Save";   break;
+        case ShortcutCommand_General::SaveAs: m_cammandDesc_General[i].name = u"SaveAs"; break;
+        case ShortcutCommand_General::Open:   m_cammandDesc_General[i].name = u"Open";   break;
         case ShortcutCommand_General::_End:                                             break;
         default:                              fprintf(stdout, "Need to implement....\n");      return false;
         }
-
-        m_imguiComboText_General[i] = m_cammandDesc_General[i].name;
     }
 
     command_end = (int)ShortcutCommand_Viewport::_End;
@@ -100,25 +104,22 @@ bool ShortcutManager::init()
 
         switch((ShortcutCommand_Viewport)i)
         {
-        case ShortcutCommand_Viewport::SetPerspective:  m_cammandDesc_Viewport[i].name = "SetPerspective";  break;
-        case ShortcutCommand_Viewport::SetFront:        m_cammandDesc_Viewport[i].name = "SetFront";        break;
-        case ShortcutCommand_Viewport::SetBack:         m_cammandDesc_Viewport[i].name = "SetBack";         break;
-        case ShortcutCommand_Viewport::SetTop:          m_cammandDesc_Viewport[i].name = "SetTop";          break;
-        case ShortcutCommand_Viewport::SetBottom:       m_cammandDesc_Viewport[i].name = "SetBottom";       break;
-        case ShortcutCommand_Viewport::SetLeft:         m_cammandDesc_Viewport[i].name = "SetLeft";         break;
-        case ShortcutCommand_Viewport::SetRight:        m_cammandDesc_Viewport[i].name = "SetRight";        break;
-        case ShortcutCommand_Viewport::ToggleGrid:      m_cammandDesc_Viewport[i].name = "ToggleGrid";      break;
-        case ShortcutCommand_Viewport::DrawModeLines:   m_cammandDesc_Viewport[i].name = "DrawModeLines";   break;
-        case ShortcutCommand_Viewport::DrawModeMaterial:m_cammandDesc_Viewport[i].name = "DrawModeMaterial";break;
-        case ShortcutCommand_Viewport::DrawModeMaterialAndLines:m_cammandDesc_Viewport[i].name = "DrawModeMaterialAndLines";   break;
-        case ShortcutCommand_Viewport::ToggleDrawModeLines:m_cammandDesc_Viewport[i].name = "ToggleDrawModeLines";   break;
-        case ShortcutCommand_Viewport::ToggleDrawModeMaterial:m_cammandDesc_Viewport[i].name = "ToggleDrawModeMaterial";   break;
+        case ShortcutCommand_Viewport::SetPerspective:  m_cammandDesc_Viewport[i].name = u"SetPerspective";  break;
+        case ShortcutCommand_Viewport::SetFront:        m_cammandDesc_Viewport[i].name = u"SetFront";        break;
+        case ShortcutCommand_Viewport::SetBack:         m_cammandDesc_Viewport[i].name = u"SetBack";         break;
+        case ShortcutCommand_Viewport::SetTop:          m_cammandDesc_Viewport[i].name = u"SetTop";          break;
+        case ShortcutCommand_Viewport::SetBottom:       m_cammandDesc_Viewport[i].name = u"SetBottom";       break;
+        case ShortcutCommand_Viewport::SetLeft:         m_cammandDesc_Viewport[i].name = u"SetLeft";         break;
+        case ShortcutCommand_Viewport::SetRight:        m_cammandDesc_Viewport[i].name = u"SetRight";        break;
+        case ShortcutCommand_Viewport::ToggleGrid:      m_cammandDesc_Viewport[i].name = u"ToggleGrid";      break;
+        case ShortcutCommand_Viewport::DrawModeLines:   m_cammandDesc_Viewport[i].name = u"DrawModeLines";   break;
+        case ShortcutCommand_Viewport::DrawModeMaterial:m_cammandDesc_Viewport[i].name = u"DrawModeMaterial";break;
+        case ShortcutCommand_Viewport::DrawModeMaterialAndLines:m_cammandDesc_Viewport[i].name = u"DrawModeMaterialAndLines";   break;
+        case ShortcutCommand_Viewport::ToggleDrawModeLines:m_cammandDesc_Viewport[i].name = u"ToggleDrawModeLines";   break;
+        case ShortcutCommand_Viewport::ToggleDrawModeMaterial:m_cammandDesc_Viewport[i].name = u"ToggleDrawModeMaterial";   break;
         case ShortcutCommand_Viewport::_End:                                                                                break;
         default:                                                fprintf(stdout, "Need to implement....\n");                 return false;
         }
-
-
-        m_imguiComboText_Viewport[i] = m_cammandDesc_Viewport[i].name;
     }
 
     command_end = (int)ShortcutCommand_Camera::_End;
@@ -129,13 +130,11 @@ bool ShortcutManager::init()
 
         switch((ShortcutCommand_Camera)i)
         {
-        case ShortcutCommand_Camera::Reset:             m_cammandDesc_Camera[i].name = "Reset";            break;
-        case ShortcutCommand_Camera::ToSelection:       m_cammandDesc_Camera[i].name = "ToSelection";      break;
+        case ShortcutCommand_Camera::Reset:             m_cammandDesc_Camera[i].name = u"Reset";            break;
+        case ShortcutCommand_Camera::ToSelection:       m_cammandDesc_Camera[i].name = u"ToSelection";      break;
         case ShortcutCommand_Camera::_End:                                                                             break;
         default:                                              fprintf(stdout, "Need to implement....\n");              return false;
         }
-
-        m_imguiComboText_Camera[i] = m_cammandDesc_Camera[i].name;
     }
 
     command_end = (int)ShortcutCommand_Edit::_End;
@@ -146,25 +145,23 @@ bool ShortcutManager::init()
 
         switch((ShortcutCommand_Edit)i)
         {
-        case ShortcutCommand_Edit::DeselectAll:             m_cammandDesc_Edit[i].name = "DeselectAll";             break;
-        case ShortcutCommand_Edit::Redo:                    m_cammandDesc_Edit[i].name = "Redo";                    break;
-        case ShortcutCommand_Edit::SelectAll:               m_cammandDesc_Edit[i].name = "SelectAll";               break;
-        case ShortcutCommand_Edit::SelectInvert:            m_cammandDesc_Edit[i].name = "SelectInvert";            break;
-        case ShortcutCommand_Edit::Undo:                    m_cammandDesc_Edit[i].name = "Undo";                    break;
-        case ShortcutCommand_Edit::SelectModeJustSelect:    m_cammandDesc_Edit[i].name = "SelectModeJustSelect";    break;
-        case ShortcutCommand_Edit::SelectModeMove:          m_cammandDesc_Edit[i].name = "SelectModeMove";          break;
-        case ShortcutCommand_Edit::SelectModeRotate:        m_cammandDesc_Edit[i].name = "SelectModeRotate";        break;
-        case ShortcutCommand_Edit::SelectModeScale:         m_cammandDesc_Edit[i].name = "SelectModeScale";         break;
-        case ShortcutCommand_Edit::EnterTransformation:     m_cammandDesc_Edit[i].name = "EnterTransformation";     break;
-        case ShortcutCommand_Edit::EditModeObject:          m_cammandDesc_Edit[i].name = "EditModeObject";          break;
-        case ShortcutCommand_Edit::EditModeVertex:          m_cammandDesc_Edit[i].name = "EditModeVertex";          break;
-        case ShortcutCommand_Edit::EditModeEdge:            m_cammandDesc_Edit[i].name = "EditModeEdge";            break;
-        case ShortcutCommand_Edit::EditModePolygon:         m_cammandDesc_Edit[i].name = "EditModePolygon";         break;
+        case ShortcutCommand_Edit::DeselectAll:             m_cammandDesc_Edit[i].name = u"DeselectAll";             break;
+        case ShortcutCommand_Edit::Redo:                    m_cammandDesc_Edit[i].name = u"Redo";                    break;
+        case ShortcutCommand_Edit::SelectAll:               m_cammandDesc_Edit[i].name = u"SelectAll";               break;
+        case ShortcutCommand_Edit::SelectInvert:            m_cammandDesc_Edit[i].name = u"SelectInvert";            break;
+        case ShortcutCommand_Edit::Undo:                    m_cammandDesc_Edit[i].name = u"Undo";                    break;
+        case ShortcutCommand_Edit::SelectModeJustSelect:    m_cammandDesc_Edit[i].name = u"SelectModeJustSelect";    break;
+        case ShortcutCommand_Edit::SelectModeMove:          m_cammandDesc_Edit[i].name = u"SelectModeMove";          break;
+        case ShortcutCommand_Edit::SelectModeRotate:        m_cammandDesc_Edit[i].name = u"SelectModeRotate";        break;
+        case ShortcutCommand_Edit::SelectModeScale:         m_cammandDesc_Edit[i].name = u"SelectModeScale";         break;
+        case ShortcutCommand_Edit::EnterTransformation:     m_cammandDesc_Edit[i].name = u"EnterTransformation";     break;
+        case ShortcutCommand_Edit::EditModeObject:          m_cammandDesc_Edit[i].name = u"EditModeObject";          break;
+        case ShortcutCommand_Edit::EditModeVertex:          m_cammandDesc_Edit[i].name = u"EditModeVertex";          break;
+        case ShortcutCommand_Edit::EditModeEdge:            m_cammandDesc_Edit[i].name = u"EditModeEdge";            break;
+        case ShortcutCommand_Edit::EditModePolygon:         m_cammandDesc_Edit[i].name = u"EditModePolygon";         break;
         case ShortcutCommand_Edit::_End:                                                                            break;
         default:                                            fprintf(stdout, "Need to implement....\n");             return false;
         }
-
-        m_imguiComboText_Edit[i] = m_cammandDesc_Edit[i].name;
     }
 
 
@@ -206,7 +203,23 @@ void ShortcutManager::_load()
     _load(fn.data());
 }
 
-
+const char16_t* ShortcutManager::_getKeyboardStateString( AppState_keyboard state )
+{
+    switch (state)
+    {
+    case AppState_keyboard::Ctrl: return u"Ctrl";
+    case AppState_keyboard::Alt: return u"Alt";
+    case AppState_keyboard::Shift: return u"Shift";
+    case AppState_keyboard::ShiftAlt: return u"Shift+Alt";
+    case AppState_keyboard::ShiftCtrl: return u"Shift+Ctrl";
+    case AppState_keyboard::ShiftCtrlAlt: return u"Shift+Ctrl+Alt";
+    case AppState_keyboard::CtrlAlt: return u"Ctrl + Alt";
+        break;
+    default:
+        break;
+    }
+    return nullptr;
+}
 const char16_t* ShortcutManager::_getKeyString( kkKey key )
 {
     switch(key)
@@ -274,64 +287,376 @@ const char16_t* ShortcutManager::_getKeyString( kkKey key )
     return nullptr;
 }
 
-void ShortcutManager::draw(bool * drawShortcutManager)
+void ShortcutManager::draw()
 {
-    m_inputBuffer.clear();
+    m_combinationStr_new.clear();
+    m_combinationStr.clear();
+    static ShortcutCommand_General active_command_General  = ShortcutCommand_General::ShowMaterialEditor;
+    static ShortcutCommand_Viewport active_command_Viewport = ShortcutCommand_Viewport::SetPerspective;
+    static ShortcutCommand_Camera active_command_Camera = ShortcutCommand_Camera::Reset;
+    static ShortcutCommand_Edit active_command_Edit = ShortcutCommand_Edit::Undo;
+    static ShortcutCommandCategory active_cat = ShortcutCommandCategory::General;
+    static u32 active_command_u32 = 0;
+    static Gui::Style active_cat_style;
+    active_cat_style.buttonIdleColor2 = active_cat_style.buttonIdleColor1;
 
-    auto window_size = m_app->getWindowSize();
-
-    static int combo_item_current = 0;
-    static const char * active_label   = "...";
-
-    static const char * label_general  = "General";
-    static const char * label_viewport = "Viewport";
-    static const char * label_camera   = "Camera";
-    static const char * label_edit     = "Edit";
-
-
-    constexpr u32 item_count_general  = (u32)ShortcutCommand_General::_End;
-    constexpr u32 item_count_viewport = (u32)ShortcutCommand_Viewport::_End;
-    constexpr u32 item_count_camera   = (u32)ShortcutCommand_Camera::_End;
-    constexpr u32 item_count_edit     = (u32)ShortcutCommand_Edit::_End;
-    int item_count                      = item_count_general;
-
-
-    const char** current_items = m_imguiComboText_General;
-
-    static int selected_category = 0;
-    switch (selected_category)
+    auto gui = (Kr::Gui::GuiSystem*)kkGetGUI();
+    gui->setDrawPosition(0.f,0.f);
+    Gui::Style group_style;
+    group_style.groupColor2 = group_style.groupColor1;
+    group_style.groupHoverColor1 = group_style.groupColor1;
+    group_style.groupHoverColor2 = group_style.groupColor1;
+    f32 group_height = 180.f;
+    if( gui->beginGroup(Gui::Vec2f(80.f,group_height), nullptr, &group_style) )
     {
-    case 0:
-        active_label=label_general;
-        break;
-    case 1:
-        active_label=label_viewport;
-        current_items = m_imguiComboText_Viewport;
-        item_count = item_count_viewport;
-        break;
-    case 2:
-        active_label=label_camera;
-        current_items = m_imguiComboText_Camera;
-        item_count = item_count_camera;
-        break;
-    case 3:
-        active_label=label_edit;
-        current_items = m_imguiComboText_Edit;
-        item_count = item_count_edit;
-        break;
+        for(u32 i = 0; i < (u32)ShortcutCommandCategory::_End; ++i)
+        {
+            if(gui->addButton(m_commandNames[i].c_str(), active_cat == (ShortcutCommandCategory)i ? &active_cat_style : nullptr, Gui::Vec2f(80.f,20.f) ))
+            {
+                active_cat = (ShortcutCommandCategory)i;
+                active_command_u32 = 0;
+            }
+        }
+        gui->endGroup();
     }
+    gui->setDrawPosition(80.f,0.f);
+    gui->setScrollMultipler(32.f);
+    gui->setCurrentFont(nullptr);
+    if( gui->beginGroup(Gui::Vec2f(320.f,group_height), nullptr, &group_style) )
+    {
+        switch (active_cat)
+        {
+        case ShortcutCommandCategory::General:
+        {
+            for(u32 i = 0; i < (u32)ShortcutCommand_General::_End; ++i)
+            {
+                if(gui->addButton(m_cammandDesc_General[i].name, active_command_General == (ShortcutCommand_General)i ? &active_cat_style : nullptr, Gui::Vec2f(320.f,18.f) ))
+                {
+                    active_command_General = (ShortcutCommand_General)i;
+                    active_command_u32 = i;
+                }
+            }
+        }break;
+        case ShortcutCommandCategory::Viewport:
+        {
+            for(u32 i = 0; i < (u32)ShortcutCommand_Viewport::_End; ++i)
+            {
+                if(gui->addButton(m_cammandDesc_Viewport[i].name, active_command_Viewport == (ShortcutCommand_Viewport)i ? &active_cat_style : nullptr, Gui::Vec2f(320.f,18.f) ))
+                {
+                    active_command_Viewport = (ShortcutCommand_Viewport)i;
+                    active_command_u32 = i;
+                }
+            }
+        }break;
+        case ShortcutCommandCategory::Camera:
+        {
+            for(u32 i = 0; i < (u32)ShortcutCommand_Camera::_End; ++i)
+            {
+                if(gui->addButton(m_cammandDesc_Camera[i].name, active_command_Camera == (ShortcutCommand_Camera)i ? &active_cat_style : nullptr, Gui::Vec2f(320.f,18.f) ))
+                {
+                    active_command_Camera = (ShortcutCommand_Camera)i;
+                    active_command_u32 = i;
+                }
+            }
+        }break;
+        case ShortcutCommandCategory::Edit:
+        {
+            for(u32 i = 0; i < (u32)ShortcutCommand_Edit::_End; ++i)
+            {
+                if(gui->addButton(m_cammandDesc_Edit[i].name, active_command_Edit == (ShortcutCommand_Edit)i ? &active_cat_style : nullptr, Gui::Vec2f(320.f,18.f) ))
+                {
+                    active_command_Edit = (ShortcutCommand_Edit)i;
+                    active_command_u32 = i;
+                }
+            }
+        }break;
+        case ShortcutCommandCategory::_End:
+        {
+        }break;
+        default:
+            break;
+        }
+        gui->endGroup();
+    }
+    gui->setDrawPosition(0.f,group_height + 5.f);
+    auto node = _getNode((u32)active_cat, active_command_u32);
+    if(!node)
+        return;
     
+    auto key_state_str = _getKeyboardStateString( node->keyboardState );
+    if(key_state_str)
+        m_combinationStr += key_state_str;
 
+    auto key_str = _getKeyString( node->key );
+    if(key_str)
+    {
+        if(key_state_str)
+        {
+            m_combinationStr += u"+";
+        }
+        m_combinationStr += key_str;
+    }
+    auto window_w = 400.f;
+    auto old_position = gui->getDrawPosition();
+    gui->addText(nullptr, u"Combination: %s", m_combinationStr.c_str());
+    gui->setDrawPosition(window_w - 110.f, old_position.y);
+    if( gui->addButton(u"Clear", nullptr, Gui::Vec2f(100.f,18.f), true, true, Gui::Vec4f(5.f,5.f,5.f,5.f)) )
+    {
+        node->key = kkKey::K_NONE;
+        node->keyboardState = AppState_keyboard::None;
+        node->title.clear();
+    }
+    gui->newLine(10.f);
+    old_position = gui->getDrawPosition();
+
+    auto new_comb_appKey_state = m_app->getStateKeyboard();
+    key_state_str = _getKeyboardStateString( new_comb_appKey_state );
+    if(key_state_str)
+    {
+        m_combinationStr_new += key_state_str;
+    }
+    key_str = nullptr;
+    kkKey new_key = kkKey::K_NONE;
+    for(u32 i = 0; i < (u32)kkKey::END; ++i)
+    {
+        if( m_eventConsumer->isKeyDown((kkKey)i) )
+        {
+            key_str = _getKeyString((kkKey)i);
+            if(key_str)
+            {
+                new_key = (kkKey)i;
+                if(key_state_str)
+                {
+                    m_combinationStr_new += u"+";
+                }
+                m_combinationStr_new += key_str;
+                break;
+            }
+        }
+    }
+    gui->addText(nullptr, u"New combination: %s", m_combinationStr_new.c_str());
+    gui->setDrawPosition(window_w - 110.f, old_position.y);
+    if( gui->addButton(u"Assign", nullptr, Gui::Vec2f(100.f,18.f), true, true, Gui::Vec4f(5.f,5.f,5.f,5.f)) )
+    {
+        if(new_key != kkKey::K_NONE)
+        {
+            node->key = new_key;
+            node->keyboardState = new_comb_appKey_state;
+            node->title = m_combinationStr_new;
+        }
+    }
+    f32 window_h = 280.f;
+    gui->setDrawPosition(window_w - 38.f, window_h-15.f);
+    if( gui->addButton(u"Reset", nullptr, Gui::Vec2f(38.f,13.f), true, true, Gui::Vec4f(5.f,5.f,5.f,5.f)) )
+    {
+        reset();
+    }
+    gui->setDrawPosition(0.f, window_h-15.f);
+    if( gui->addButton(u"Save", nullptr, Gui::Vec2f(38.f,13.f), true, true, Gui::Vec4f(5.f,5.f,5.f,5.f)) )
+    {
+        this->_save();
+    }
+    gui->moveLeftRight(10.f);
+    if( gui->addButton(u"Load", nullptr, Gui::Vec2f(38.f,13.f), true, true, Gui::Vec4f(5.f,5.f,5.f,5.f)) )
+    {
+        this->_load();
+    }
+}
+
+void ShortcutManager::reset()
+{
+    for(u64 i = 0, sz = m_cammandNodes_General.size(); i < sz; ++i)
+    {
+        auto & node = m_cammandNodes_General[i];
+        switch((ShortcutCommand_General)i)
+        {
+        case ShortcutCommand_General::ShowMaterialEditor:{
+            node.key = kkKey::K_M;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_General::ShowRenderWindow:{
+            node.key = kkKey::K_F10;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_General::New:{
+            node.key = kkKey::K_N;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_General::Save:{
+            node.key = kkKey::K_S;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_General::SaveAs:{
+            node.key = kkKey::K_N;
+            node.keyboardState = AppState_keyboard::ShiftCtrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_General::Open:{
+            node.key = kkKey::K_O;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_General::_End:break;
+        default:fprintf(stdout, "Need to implement....\n");
+        }
+    }
+    for(u64 i = 0, sz = m_cammandNodes_Camera.size(); i < sz; ++i)
+    {
+        auto & node = m_cammandNodes_Camera[i];
+        switch((ShortcutCommand_Camera)i)
+        {
+        case ShortcutCommand_Camera::Reset:{
+        }break;
+        case ShortcutCommand_Camera::ToSelection:{
+            node.key = kkKey::K_Z;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Camera::_End:break;
+        default:fprintf(stdout, "Need to implement....\n");
+        }
+    }
+    for(u64 i = 0, sz = m_cammandNodes_Edit.size(); i < sz; ++i)
+    {
+        auto & node = m_cammandNodes_Edit[i];
+        switch((ShortcutCommand_Edit)i)
+        {
+        case ShortcutCommand_Edit::DeselectAll:{
+            node.key = kkKey::K_D;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::EditModeEdge:{
+            node.key = kkKey::K_2;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::EditModeObject:{
+        }break;
+        case ShortcutCommand_Edit::EditModePolygon:{
+            node.key = kkKey::K_3;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::EditModeVertex:{
+            node.key = kkKey::K_1;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::Redo:{
+            node.key = kkKey::K_Y;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::Undo:{
+            node.key = kkKey::K_Z;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::SelectAll:{
+            node.key = kkKey::K_A;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::SelectInvert:{
+            node.key = kkKey::K_I;
+            node.keyboardState = AppState_keyboard::Ctrl;
+            node.title = _getKeyboardStateString(node.keyboardState);
+            node.title += u"+";
+            node.title += _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::SelectModeJustSelect:{
+            node.key = kkKey::K_Q;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::SelectModeMove:{
+            node.key = kkKey::K_W;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::SelectModeScale:{
+            node.key = kkKey::K_E;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::SelectModeRotate:{
+            node.key = kkKey::K_R;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Edit::_End:break;
+        default:fprintf(stdout, "Need to implement....\n");
+        }
+    }
+    for(u64 i = 0, sz = m_cammandNodes_Viewport.size(); i < sz; ++i)
+    {
+        auto & node = m_cammandNodes_Viewport[i];
+        switch((ShortcutCommand_Viewport)i)
+        {
+        case ShortcutCommand_Viewport::DrawModeLines:break;
+        case ShortcutCommand_Viewport::DrawModeMaterial:break;
+        case ShortcutCommand_Viewport::DrawModeMaterialAndLines:break;
+        case ShortcutCommand_Viewport::SetBack:{
+            node.key = kkKey::K_B;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::SetBottom:{
+        }break;
+        case ShortcutCommand_Viewport::SetFront:{
+            node.key = kkKey::K_F;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::SetLeft:{
+            node.key = kkKey::K_L;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::SetPerspective:{
+            node.key = kkKey::K_P;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::SetRight:{
+        }break;
+        case ShortcutCommand_Viewport::SetTop:{
+            node.key = kkKey::K_T;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::ToggleDrawModeLines:{
+            node.key = kkKey::K_F2;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::ToggleDrawModeMaterial:{
+            node.key = kkKey::K_F3;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::ToggleGrid:{
+            node.key = kkKey::K_G;
+            node.title = _getKeyString(node.key);
+        }break;
+        case ShortcutCommand_Viewport::_End:break;
+        default:fprintf(stdout, "Need to implement....\n");
+        }
+    }
 }
 
 ShortcutCommandNode * ShortcutManager::_getNode(u32 i1, u32 i2)
 {
     switch(i1)
     {
-    case 0:  return &m_cammandNodes_General[i2];
-    case 1:  return &m_cammandNodes_Viewport[i2];
-    case 2:  return &m_cammandNodes_Camera[i2];
-    case 3:  return &m_cammandNodes_Edit[i2];
+    case 0: if( i2 < m_cammandNodes_General.size() ) return &m_cammandNodes_General[i2];
+    case 1: if( i2 < m_cammandNodes_Viewport.size() ) return &m_cammandNodes_Viewport[i2];
+    case 2: if( i2 < m_cammandNodes_Camera.size() ) return &m_cammandNodes_Camera[i2];
+    case 3: if( i2 < m_cammandNodes_Edit.size() ) return &m_cammandNodes_Edit[i2];
     default:
         fprintf(stderr,"implement please!!!!\n");
         KK_PRINT_FAILED;
@@ -349,19 +674,19 @@ const char16_t* ShortcutManager::getShortcutText( ShortcutCommand_Edit c ){ retu
 
 bool ShortcutManager::isShortcutActive( ShortcutCommand_General c )
 {
-    return m_cammandNodes_General[(u32)c].isReady; 
+    return m_disabled ? false : m_cammandNodes_General[(u32)c].isReady; 
 }
 bool ShortcutManager::isShortcutActive( ShortcutCommand_Viewport c )
 {
-    return m_cammandNodes_Viewport[(u32)c].isReady; 
+    return m_disabled ? false : m_cammandNodes_Viewport[(u32)c].isReady; 
 }
 bool ShortcutManager::isShortcutActive( ShortcutCommand_Camera c )
 {
-    return m_cammandNodes_Camera[(u32)c].isReady; 
+    return m_disabled ? false : m_cammandNodes_Camera[(u32)c].isReady; 
 }
 bool ShortcutManager::isShortcutActive( ShortcutCommand_Edit c )
 {
-    return m_cammandNodes_Edit[(u32)c].isReady; 
+    return m_disabled ? false : m_cammandNodes_Edit[(u32)c].isReady; 
 }
 
 void ShortcutManager::_save()

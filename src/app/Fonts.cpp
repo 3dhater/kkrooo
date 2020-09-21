@@ -1,5 +1,4 @@
-﻿#define KRGUI_DEFAULT_FONT_FILE_PATH "../res/gui/defaultFont.data"
-#include "kkrooo.engine.h"
+﻿#include "kkrooo.engine.h"
 #include "Common.h"
 
 #include "Application.h"
