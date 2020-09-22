@@ -51,6 +51,8 @@ protected:
 
 	kkMatrix4 m_ortho_projection;
 
+	kkTexture* m_defaultTexture = nullptr;
+
 	bool _createShaderFor2DRectangle();
 	bool _createShaderFor2DLine();
 	bool _createShaderFor3DLine();
@@ -62,6 +64,8 @@ public:
 
 	kkOpenGL();
 	virtual ~kkOpenGL();
+
+	void setDefaultTexture(kkTexture * t);
 
 	virtual bool init(kkWindow* output_window, const v2i& back_buffer_size, u32 color_depth) = 0;
 	virtual void endDraw() = 0;
@@ -75,7 +79,7 @@ public:
 	void drawPoint3D( const kkVector4& p, kkShader * shader );
 	void beginDraw( bool clear_canvas );
 	void setClearColor( const kkColor& c );
-	void drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2, kkShader * shader = nullptr );
+	void drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2 );
 	void drawLine2D( const v2i& p1, const v2i& p2, const kkColor& color, kkShader * shader = nullptr );
 	void drawLine3D( const kkVector4& p1, const kkVector4& p2, const kkColor& color, kkShader * shader = nullptr );
 	void drawMesh(kkMesh*, const kkMatrix4& W, kkShader * shader = nullptr);
@@ -92,6 +96,7 @@ public:
 	void setScissor( int x1, int y1, int x2, int y2 );
 
 	void setCompFunc(kkGraphicsSystemCompFunc f);
+	void setTarget( kkTexture* t );
 };
 
 

@@ -16,8 +16,7 @@ GUIResources::~GUIResources()
 	if( m_smallFontTexture )     kkDestroy(m_smallFontTexture);
 	if( m_microFontTexture )     kkDestroy(m_microFontTexture);
 	if( m_blenderIcons )     kkDestroy(m_blenderIcons);
-	if( m_DIB_viewportSplitHor ) kkDestroy(m_DIB_viewportSplitHor);
-	if( m_DIB_viewportSplitVer ) kkDestroy(m_DIB_viewportSplitVer);
+	if( m_projTexture )     kkDestroy(m_projTexture);
 }
 
 #define KK_LOAD_GUI_BITMAP(str,ptr) \
@@ -32,6 +31,5 @@ void GUIResources::loadResources(Application* app, kkGraphicsSystem* gs)
 	gs->setLinearFilter(false);
     image = KK_LOAD_GUI_BITMAP( u"../res/gui/smallFont.png", m_smallFontTexture);
     image = KK_LOAD_GUI_BITMAP( u"../res/gui/microFont.png", m_microFontTexture);
-    image = KK_LOAD_GUI_BITMAP( u"../res/gui/b_vp_sh.png", m_DIB_viewportSplitHor);
-    image = KK_LOAD_GUI_BITMAP( u"../res/gui/b_vp_sv.png", m_DIB_viewportSplitVer);
+    image = KK_LOAD_GUI_BITMAP( u"../res/gui/proj.png", m_projTexture);
 }

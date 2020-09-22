@@ -174,7 +174,6 @@ void Application::_drawMainMenuBar()
 				if(m_KrGuiSystem->addMenuItem(u"Enter transformation",m_shortcutManager->getShortcutText(ShortcutCommand_Edit::EnterTransformation)))
 				{
 					redraw = true;
-					m_drawTransformWindow = true;
 				}
 				if(m_KrGuiSystem->addMenuItem(u"Pivot tool",0))
 				{

@@ -1,4 +1,5 @@
 ﻿#include "kkrooo.engine.h"
+#include "GraphicsSystem/kkTexture.h"
 #include "KrGui.h"
 #include "../Common.h"
 #include "Viewport.h"
@@ -9,7 +10,9 @@
 #include "../CursorRay.h"
 #include "../ShortcutManager.h"
 #include "../Scene3D/Scene3D.h"
+#include "../SelectionFrust.h"
 
+SelectionFrust g_selFrust;
 ViewportMouseState g_mouseState;
 kkGraphicsSystem* g_GS = nullptr;
 Kr::Gui::GuiSystem* g_GUI = nullptr;
@@ -17,6 +20,8 @@ Kr::Gui::GuiSystem* g_GUI = nullptr;
 ViewportObject::ViewportObject(){}
 ViewportObject::~ViewportObject()
 {
+	//if(m_silhouetteFBO)
+	//	kkDestroy(m_silhouetteFBO);
 	delete m_cursorRay;
 }
 
@@ -47,7 +52,7 @@ void ViewportObject::drawName(bool isActive)
 	else if(m_activeCamera == m_cameraRight.ptr()) name = u"Right";
 	else if(m_activeCamera == m_cameraTop.ptr()) name = u"Top";
 	else if(m_activeCamera == m_cameraBottom.ptr()) name = u"Bottom";
-	if( m_activeCamera->m_isRotated && m_activeCamera == m_cameraPersp.ptr() )
+	if( m_activeCamera->m_isRotated && m_activeCamera != m_cameraPersp.ptr() )
 	{
 		name = u"Orthographic";
 	}
@@ -269,15 +274,28 @@ void ViewportObject::updateInputCamera(const v2f& mouseDelta, bool inFocus)
 	}
 	if(inFocus)
 	{
+		auto appState = kkGetAppStateMain();
+		if( appState != AppState_main::Gizmo && appState != AppState_main::SelectRectangle )
+			kkSetAppStateMain(AppState_main::Idle);
+
+		if( kkIsLmbUp() && appState == AppState_main::SelectRectangle )
+		{
+			g_mouseState.IsSelectByRect = false;
+			kkSetAppStateMain(AppState_main::Idle);
+			auto scene3D = *kkGetScene3D();
+			scene3D->selectObjectsByRectangle(g_selFrust);
+		}
 		if( (g_mouseState.MMB_HOLD && g_mouseState.IsFirstClick) || kkIsKeyDown( kkKey::K_SPACE )  )
 		{
 			if( *m_appState_key == AppState_keyboard::Alt )
 			{
 				_rotate();
+				kkSetAppStateMain(AppState_main::CameraTransformation);
 			}
 			else
 			{
 				_panMove();
+				kkSetAppStateMain(AppState_main::CameraTransformation);
 			}
 		}
 	}
@@ -287,7 +305,7 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	bool res = false;
 	_update_frame(mouseDelta);
 	update(windowSize);
-
+	auto appState = kkGetAppStateMain();
 	if( kkrooo::pointInRect( *m_cursor_position, m_rect_modified ) )
 	{
 		kkCursorInViewport(true);
@@ -318,6 +336,14 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	}
 	if(inFocus)
 	{
+		if( g_mouseState.LMB_HOLD )
+		{
+			if(appState != AppState_main::Gizmo && g_mouseState.IsMove && g_mouseState.IsFirstClick)
+			{
+				g_mouseState.IsSelectByRect = true;
+				kkSetAppStateMain(AppState_main::SelectRectangle);
+			}
+		}
 		this->processShortcuts();
 	}
 	return res;
@@ -365,8 +391,32 @@ void ViewportObject::update(const v2i& windowSize)
 	m_gs_viewport.y -= m_gs_viewport.w;
 
 	m_activeCamera->getCamera()->setAspect((f32)m_gs_viewport.z/(f32)m_gs_viewport.w);
-	m_activeCamera->getAxisCamera()->setAspect((f32)m_gs_viewport.z/(f32)m_gs_viewport.w);
+
+	/*if(m_silhouetteFBO)
+		kkDestroy(m_silhouetteFBO);
+	m_silhouetteFBO = kkGetGS()->createTexture(v2i((s32)m_gs_viewport.z, (s32)m_gs_viewport.w),false);*/
 }
+//void ViewportObject::drawSilhouette(const v2i& windowSize)
+//{
+//	//kkGSSetTarget(m_silhouetteFBO);
+//	//kkGSSetViewport(0,0, windowSize.x, windowSize.y);
+//	//auto scene3D = *kkGetScene3D();
+//	//scene3D->drawAllSilhouette(m_activeCamera->getCamera());
+//	//kkGSSetTarget(nullptr);
+//	//
+//	///*g_GS->drawRectangle(
+//	//	v2i(0,0),
+//	//	windowSize,
+//	//	kkColorWhite,
+//	//	kkColorWhite );*/
+//	////kkGSDrawRectangle(v2i(0,0),windowSize,kkColorWhite,m_silhouetteFBO);
+//	////kkGSDrawRectangle(v2i(m_rect_modified.x, m_rect_modified.y),v2i(m_rect_modified.z, m_rect_modified.w), kkColorWhite, m_silhouetteFBO);
+//
+//	//g_GUI->setDrawPosition(m_rect_modified.x, m_rect_modified.y);
+//	//g_GUI->setNextItemIgnoreInput();
+//	//g_GUI->addPictureBox(Kr::Gui::Vec2f(m_rect_modified.z - m_rect_modified.x, m_rect_modified.w - m_rect_modified.y),
+//	//	(unsigned long long)m_silhouetteFBO->getHandle());
+//}
 void ViewportObject::beginDraw()
 {
 	g_GS->setActiveCamera(m_activeCamera->getCamera());
@@ -546,10 +596,38 @@ void ViewportObject::_drawGrid_persp(ColorTheme* colorTheme)
 		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color2);
 	}
 }
-void ViewportObject::drawScene()
+void ViewportObject::drawSelectionRectangle(bool inFocus)
+{
+	if(!inFocus)
+		return;
+	
+	kkGSSetScissor(true, v4i(m_gs_viewport.x, m_gs_viewport.y, m_gs_viewport.z, m_gs_viewport.w));
+	auto p1 = *m_cursor_position;
+	auto p2 = v2i( m_cursor_position->x, m_mouse_first_click_coords.y );
+	auto p3 = v2i( m_mouse_first_click_coords.x, m_cursor_position->y );
+	auto p4 = v2i( m_mouse_first_click_coords.x, m_mouse_first_click_coords.y );
+	kkGSDrawLine2D(p1, p2, kkColorWhite);
+	kkGSDrawLine2D(p3, p4, kkColorWhite);
+	kkGSDrawLine2D(p1, p3, kkColorWhite);
+	kkGSDrawLine2D(p2, p4, kkColorWhite);
+	kkGSSetScissor(false,v4i());
+
+	kkAabb aabb;
+	aabb.add( kkVector4( (f32)m_cursor_position->x, (f32)m_cursor_position->y, 0.f ) );
+	aabb.add( kkVector4( (f32)m_mouse_first_click_coords.x, (f32)m_mouse_first_click_coords.y, 0.f ) );
+
+	v4i selectionFrame((s32)aabb.m_min.KK_X, (s32)aabb.m_min.KK_Y, (s32)aabb.m_max.KK_X, (s32)aabb.m_max.KK_Y);
+	g_selFrust.createWithFrame(selectionFrame, m_rect_modified, m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
+}
+void ViewportObject::drawObjectPivot(bool inFocus)
 {
 	auto scene3D = *kkGetScene3D();
-	scene3D->drawAll(m_activeCamera->getCamera(), &m_draw_mode, m_cursorInRect, m_cursorRay);
+	scene3D->drawObjectPivot(m_activeCamera == m_cameraPersp.ptr(), this, inFocus);
+}
+void ViewportObject::drawScene(bool inFocus)
+{
+	auto scene3D = *kkGetScene3D();
+	scene3D->drawAll(m_activeCamera->getCamera(), &m_draw_mode, m_cursorInRect, m_cursorRay, inFocus);
 }
 void ViewportObject::drawGrid(ColorTheme* colorTheme)
 {
@@ -708,6 +786,7 @@ void Viewport::init(ViewportType type, ViewportLayoutType l_type, const v4f& ind
 		_init_parallel_v(indent, l_type);
 		break;
 	}
+	kkSetActiveViewport(m_viewportInFocus);
 }
 
 void Viewport::updateInputCamera(const v2f& mouseDelta)
@@ -748,6 +827,7 @@ void Viewport::updateInput(const v2f& mouseDelta)
 			if( vp->updateInput(m_windowSize, mouseDelta, m_viewportInFocus == vp) )
 			{
 				m_viewportInFocus = vp;
+				kkSetActiveViewport(m_viewportInFocus);
 			}
 			if(vp == end)
 				break;
@@ -783,11 +863,11 @@ void Viewport::draw(ColorTheme* colorTheme)
 		auto vp = m_viewports;
 		while(true)
 		{
+			bool inFocus = m_viewportInFocus == vp;
 			if( kkrooo::pointInRect( *vp->m_cursor_position, vp->m_rect_modified ))
 			{
 				kkCursorInViewport(true);
 			}
-
 			auto next = vp->m_right;
 			kkGSSetDepth(false);
 			kkGSSetViewport((s32)vp->m_gs_viewport.x, (s32)vp->m_gs_viewport.y, (s32)vp->m_gs_viewport.z, (s32)vp->m_gs_viewport.w);
@@ -795,14 +875,18 @@ void Viewport::draw(ColorTheme* colorTheme)
 			kkGSSetDepth(true);
 
 			// draw 3d
+			kkGSSetViewport((s32)vp->m_gs_viewport.x, (s32)vp->m_gs_viewport.y, (s32)vp->m_gs_viewport.z, (s32)vp->m_gs_viewport.w);
 			vp->beginDraw();
 			vp->drawGrid(colorTheme);
-			vp->drawScene();
+			vp->drawScene(inFocus);
 
 			// draw 2d top layer
 			kkGSSetDepth(false);
+			vp->drawObjectPivot(inFocus);
 			kkGSSetViewport(0,0, m_windowSize.x, m_windowSize.y);
-			vp->drawName(m_viewportInFocus == vp);
+			if( g_mouseState.IsSelectByRect )
+				vp->drawSelectionRectangle(inFocus);
+			vp->drawName(inFocus);
 			kkGSSetDepth(true);
 
 			if(vp == end)
@@ -1405,17 +1489,6 @@ void Viewport::draw(ColorTheme* colorTheme)
 //
 //		g_mouseState.InViewport = true;
 //
-//		/*if( *m_vd.m_mouseWheel > 0 )
-//		{
-//			m_activeViewport->m_activeCamera->zoomIn( *m_vd.m_state_keyboard , (s32)*m_vd.m_mouseWheel );
-//			m_activeViewport->updateCursorRay();
-//		}
-//		else if( *m_vd.m_mouseWheel < 0 )
-//		{
-//			m_activeViewport->m_activeCamera->zoomOut( *m_vd.m_state_keyboard, (s32)*m_vd.m_mouseWheel );
-//			m_activeViewport->updateCursorRay();
-//		}*/
-//		
 //
 //		if( *m_vd.m_state_app == AppState_main::Idle )
 //		{
@@ -1428,15 +1501,6 @@ void Viewport::draw(ColorTheme* colorTheme)
 //			if( g_mouseState.MMB_HOLD || m_vd.m_event_consumer->isKeyDown( kkKey::K_SPACE )  )
 //			{
 //				ignore_disabling_mouseInFocus = true;
-//				/*m_activeViewport->m_is_mouse_focus = true;
-//				if( *m_vd.m_state_keyboard == AppState_keyboard::Alt )
-//				{
-//					m_activeViewport->_rotate();
-//				}
-//				else
-//				{
-//					m_activeViewport->_panMove();
-//				}*/
 //			}
 //		}
 //
@@ -1465,7 +1529,6 @@ void Viewport::draw(ColorTheme* colorTheme)
 //
 //			if( m_vd.m_app->m_editMode == EditMode::Object )
 //			{
-//				//g_ray = m_cursorRay;
 //				if( m_activeViewport->m_hoveredObjects.size() )
 //				{
 //					if( m_activeViewport->m_hoveredObjects[m_activeViewport->m_hoveredObjects.size()-1]->isSelected() )
@@ -1749,100 +1812,7 @@ void Viewport::draw(ColorTheme* colorTheme)
 //	m_vd.m_gs->setScissor(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
 //	m_vd.m_gs->useScissor(false);
 //}
-//
-//void Viewport::_drawSelectionRectangle()
-//{
-//	//_setGLViewport();
-//	m_vd.m_gs->useScissor(true);
-//	m_vd.m_gs->setViewport(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
-//	m_vd.m_gs->setScissor((s32)m_viewport_to_gl_funk.x,(s32)m_viewport_to_gl_funk.y,(s32)m_viewport_to_gl_funk.z,(s32)m_viewport_to_gl_funk.w );
-//
-//	auto p1 = *m_vd.m_cursor_position;
-//	auto p2 = v2i( m_vd.m_cursor_position->x, m_mouse_first_click_coords.y );
-//	auto p3 = v2i( m_mouse_first_click_coords.x, m_vd.m_cursor_position->y );
-//	auto p4 = v2i( m_mouse_first_click_coords.x, m_mouse_first_click_coords.y );
-//
-//	m_vd.m_gs->drawLine2D(p1, p2, kkColorWhite);
-//	m_vd.m_gs->drawLine2D(p3, p4, kkColorWhite);
-//
-//	m_vd.m_gs->drawLine2D(p1, p3, kkColorWhite);
-//	m_vd.m_gs->drawLine2D(p2, p4, kkColorWhite);
-//
-//	
-//	
-//
-//	m_vd.m_gs->setScissor(0,0,m_vd.m_window_client_size->x,m_vd.m_window_client_size->y);
-//	m_vd.m_gs->useScissor(false);
-//
-//	kkAabb aabb;
-//	aabb.add( kkVector4( (f32)m_vd.m_cursor_position->x, (f32)m_vd.m_cursor_position->y, 0.f ) );
-//	aabb.add( kkVector4( (f32)m_mouse_first_click_coords.x, (f32)m_mouse_first_click_coords.y, 0.f ) );
-//
-//	m_selectionFrame.x = (s32)aabb.m_min.KK_X;
-//	m_selectionFrame.y = (s32)aabb.m_min.KK_Y;
-//	m_selectionFrame.z = (s32)aabb.m_max.KK_X;
-//	m_selectionFrame.w = (s32)aabb.m_max.KK_Y;
-//
-//
-//	g_selFrust.createWithFrame(m_selectionFrame, m_activeViewport->m_rect_modified, m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-//	// get 4 rays from screen
-//	/*kkRay ray1, ray2, ray3, ray4;
-//
-//	kkrooo::getRay(ray1, v2i(m_selectionFrame.x, m_selectionFrame.y), m_activeViewport->m_rect_modified, m_activeViewport->m_rect_modified.getWidthAndHeight(),m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-//	kkrooo::getRay(ray2, v2i(m_selectionFrame.z, m_selectionFrame.y), m_activeViewport->m_rect_modified, m_activeViewport->m_rect_modified.getWidthAndHeight(),m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-//	kkrooo::getRay(ray3, v2i(m_selectionFrame.x, m_selectionFrame.w), m_activeViewport->m_rect_modified, m_activeViewport->m_rect_modified.getWidthAndHeight(),m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-//	kkrooo::getRay(ray4, v2i(m_selectionFrame.z, m_selectionFrame.w), m_activeViewport->m_rect_modified, m_activeViewport->m_rect_modified.getWidthAndHeight(),m_activeViewport->m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-//	ray1.update();
-//	ray2.update();
-//	ray3.update();
-//	ray4.update();
-//
-//	g_selFrust.m_top[0] = ray1.m_origin;
-//	g_selFrust.m_top[1] = ray2.m_origin;
-//	g_selFrust.m_top[2] = ray1.m_end;
-//	g_selFrust.m_top[3] = ray2.m_end;
-//
-//	g_selFrust.m_right[0] = ray2.m_origin;
-//	g_selFrust.m_right[1] = ray4.m_origin;
-//	g_selFrust.m_right[2] = ray2.m_end;
-//	g_selFrust.m_right[3] = ray4.m_end;
-//
-//	g_selFrust.m_bottom[0] = ray4.m_origin;
-//	g_selFrust.m_bottom[1] = ray3.m_origin;
-//	g_selFrust.m_bottom[2] = ray4.m_end;
-//	g_selFrust.m_bottom[3] = ray3.m_end;
-//
-//	g_selFrust.m_left[0] = ray3.m_origin;
-//	g_selFrust.m_left[1] = ray1.m_origin;
-//	g_selFrust.m_left[2] = ray3.m_end;
-//	g_selFrust.m_left[3] = ray1.m_end;
-//
-//	kkVector4 e1, e2;
-//	
-//	e1 = g_selFrust.m_right[1] - g_selFrust.m_right[0];
-//	e2 = g_selFrust.m_right[2] - g_selFrust.m_right[0];
-//	e1.cross(e2, g_selFrust.m_RN);
-//	g_selFrust.m_RC = g_selFrust.m_right[0] + g_selFrust.m_right[1] + g_selFrust.m_right[2]+g_selFrust.m_right[3];
-//	g_selFrust.m_RC *= 0.25;
-//
-//	e1 = g_selFrust.m_bottom[1] - g_selFrust.m_bottom[0];
-//	e2 = g_selFrust.m_bottom[2] - g_selFrust.m_bottom[0];
-//	e1.cross(e2, g_selFrust.m_BN);
-//	g_selFrust.m_BC = g_selFrust.m_bottom[0] + g_selFrust.m_bottom[1] + g_selFrust.m_bottom[2]+g_selFrust.m_bottom[3];
-//	g_selFrust.m_BC *= 0.25;
-//
-//	e1 = g_selFrust.m_top[1] - g_selFrust.m_top[0];
-//	e2 = g_selFrust.m_top[2] - g_selFrust.m_top[0];
-//	e1.cross(e2, g_selFrust.m_TN);
-//	g_selFrust.m_TC = g_selFrust.m_top[0] + g_selFrust.m_top[1] + g_selFrust.m_top[2]+g_selFrust.m_top[3];
-//	g_selFrust.m_TC *= 0.25;
-//
-//	e1 = g_selFrust.m_left[1] - g_selFrust.m_left[0];
-//	e2 = g_selFrust.m_left[2] - g_selFrust.m_left[0];
-//	e1.cross(e2, g_selFrust.m_LN);
-//	g_selFrust.m_LC = g_selFrust.m_left[0] + g_selFrust.m_left[1] + g_selFrust.m_left[2]+g_selFrust.m_left[3];
-//	g_selFrust.m_LC *= 0.25;*/
-//}
+
 //
 //void Viewport::_drawGizmo2DPart(const v2i& point2d)
 //{
@@ -1881,162 +1851,7 @@ void Viewport::draw(ColorTheme* colorTheme)
 //	//m_drawContextMenu             = false;
 //}
 //
-//void Viewport::_drawSelectedObjectFrame()
-//{
-//	kkVector4  ext;
-//	f32 frameSize   = 0.f;
-//	f32 frameIndent = 0.f;
-//
-//	for( u32 i = 0, sz = (*m_scene3D_ptr)->getNumOfSelectedObjects(); i < sz; ++i )
-//	{
-//		auto obj = (*m_scene3D_ptr)->getSelectedObject( i );
-//
-//		auto & aabb = obj->Aabb();
-//		aabb.m_max.KK_W = 0.f;
-//		aabb.m_min.KK_W = 0.f;
-//
-//		frameSize = aabb.m_max.distance( aabb.m_min )+0.01f;
-//		frameSize /= 12.f;
-//		frameIndent = frameSize * 0.2f;
-//
-//		//printf("frameSize %f\n",frameSize);
-//
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y-frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y-frameSize,   aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_max.KK_Y+frameIndent,   aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
-//		
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y-frameSize, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
-//
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y-frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
-//		
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
-//
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
-//		m_vd.m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
-//	}
-//}
-//
-//void Viewport::_drawSelectedObjectPivot()
-//{
-//	if( m_vd.m_app->isGlobalInputBlocked() )
-//		return;
-//
-//	auto numOfObjects = (*m_scene3D_ptr)->getNumOfSelectedObjects();
-//
-//	if( !numOfObjects )
-//		return;
-//
-//	f32 size = 0.f;
-//
-//	
-//
-//	if( m_activeCamera->getType() != ViewportCameraType::Perspective )
-//    {
-//        size = 0.5f / m_activeCamera->getZoomOrt();
-//    }
-//
-//	kkVector4 point;
-//	
-//	if( numOfObjects == 1 )
-//	{
-//		auto obj = (*m_scene3D_ptr)->getSelectedObject( 0 );
-//		point = obj->GetPivot();
-//	}
-//	else
-//	{
-//		auto	aabb = (*m_scene3D_ptr)->getSelectionAabb();
-//		aabb.center(point);
-//	}
-//
-//	if( m_vd.m_app->m_editMode == EditMode::Vertex
-//		|| m_vd.m_app->m_editMode == EditMode::Edge
-//		|| m_vd.m_app->m_editMode == EditMode::Polygon )
-//	{
-//		(*m_scene3D_ptr)->getSelectionAabb().center(point);
-//
-//	}
-//
-//	if( m_activeCamera->getType() == ViewportCameraType::Perspective )
-//	{
-//		size = (f32)m_activeCamera->getPositionCamera().distance(point);
-//		size *= 0.1f;
-//	}
-//
-//	// TEST target\direction
-//	/*auto cameraTergaet = m_activeCamera->getCamera()->getDirection();
-//	m_vd.m_gs->useDepth(true);
-//	m_vd.m_gs->drawLine3D( cameraTergaet, kkVector4( cameraTergaet.KK_X, cameraTergaet.KK_Y, cameraTergaet.KK_Z + size ), kkColorRed);
-//	m_vd.m_gs->drawLine3D( cameraTergaet, kkVector4( cameraTergaet.KK_X, cameraTergaet.KK_Y+ size, cameraTergaet.KK_Z  ), kkColorRed );
-//	m_vd.m_gs->drawLine3D( cameraTergaet, kkVector4( cameraTergaet.KK_X+ size, cameraTergaet.KK_Y, cameraTergaet.KK_Z  ), kkColorRed );*/
-//	
-//	m_vd.m_gs->useDepth(false);
-//
-//	m_vd.m_gs->drawLine3D( point, kkVector4( point.KK_X, point.KK_Y, point.KK_Z + size ), kkColorLightGray );
-//	m_vd.m_gs->drawLine3D( point, kkVector4( point.KK_X, point.KK_Y+ size, point.KK_Z  ), kkColorLightGray );
-//	m_vd.m_gs->drawLine3D( point, kkVector4( point.KK_X+ size, point.KK_Y, point.KK_Z  ), kkColorLightGray );
-//
-//	if( m_activeViewport == this )
-//	{
-//		for( auto o : (*m_scene3D_ptr)->m_objects_selected )
-//		{
-//			if( m_vd.m_app->m_editMode == EditMode::Object 
-//				|| (o->m_isObjectHaveSelectedVerts && m_vd.m_app->m_editMode == EditMode::Vertex)
-//				|| ( o->m_isObjectHaveSelectedEdges && m_vd.m_app->m_editMode == EditMode::Edge)
-//				|| ( o->m_isObjectHaveSelectedPolys && m_vd.m_app->m_editMode == EditMode::Polygon) )
-//			{
-//				m_vd.m_app->m_currentGizmoEvent.point2D = kkrooo::worldToScreen( m_activeCamera->m_kk_camera->getViewProjectionMatrix(), point, 
-//					m_rect_modified.getWidthAndHeight(),
-//					v2f(m_rect_modified.x,m_rect_modified.y) );
-//
-//				switch(m_vd.m_app->getSelectMode())
-//				{
-//				case SelectMode::JustSelect:
-//				default:
-//					break;
-//				case SelectMode::Move:
-//					m_vd.m_gizmo->drawMove(point, size, m_cursorRay->m_center);
-//					break;
-//				case SelectMode::Rotate:
-//					m_vd.m_app->m_currentGizmoEvent.point2D = kkrooo::worldToScreen( m_activeCamera->m_kk_camera->getViewProjectionMatrix(), point, 
-//						m_rect_modified.getWidthAndHeight(),
-//						v2f(m_rect_modified.x,m_rect_modified.y) );
-//
-//					m_vd.m_gizmo->drawRotation(point, size, m_cursorRay->m_center);
-//					break;
-//				case SelectMode::Scale:
-//					m_vd.m_gizmo->drawScale(point, size, m_cursorRay->m_center);
-//					break;
-//				}
-//		
-//				_drawGizmo2DPart( m_vd.m_app->m_currentGizmoEvent.point2D );
-//				break;
-//			}
-//		}
-//	}
-//	
-//
-//	m_vd.m_gs->useDepth(true);
-//}
-//
+
 //void Viewport::onDeleteObjects()
 //{
 //	_onDeleteObjects(this);

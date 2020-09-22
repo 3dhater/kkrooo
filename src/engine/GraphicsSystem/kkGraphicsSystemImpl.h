@@ -30,7 +30,8 @@ public:
 	void endDraw();
 	void update();
 	void setViewport( s32 x, s32 y, s32 w, s32 h );
-	void drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2, kkShader * shader = nullptr );
+	void setDefaultTexture(kkTexture * t);
+	void drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2 );
 	void drawLine2D( const v2i& p1, const v2i& p2, const kkColor& color, kkShader * shader = nullptr );
 	void drawCircle2D( const v2i& position, s32 radius, s32 smoothLevel, const kkColor& color, kkShader * shader = nullptr );
 	void drawLine3D( const kkVector4& p1, const kkVector4& p2, const kkColor& color, kkShader * shader = nullptr );
@@ -47,6 +48,7 @@ public:
 	void useScissor( bool );
 	void setScissor( int x1, int y1, int x2, int y2 );
 	void setCompFunc(kkGraphicsSystemCompFunc f);
+	void setTarget( kkTexture* );
 };
 
 

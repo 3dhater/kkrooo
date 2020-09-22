@@ -71,12 +71,11 @@ void ViewportCamera::_destroy()
         m_kk_camera = nullptr;
     }
 
-    if( m_kk_axisCamera )
+    /*if( m_kk_axisCamera )
     {
         kkDestroy(m_kk_axisCamera);
         m_kk_axisCamera = nullptr;
-    }
-
+    }*/
 }
 
 
@@ -100,13 +99,13 @@ void ViewportCamera::reset()
     m_kk_camera->setFOV(m_fov);
 
     
-    m_kk_axisCamera = kkCreateCamera();
+    /*m_kk_axisCamera = kkCreateCamera();
     m_kk_axisCamera->setNear(0.1f);
     m_kk_axisCamera->setFar(10.f);
-    m_kk_axisCamera->setFOV((math::degToRad(50.f)));
+    m_kk_axisCamera->setFOV((math::degToRad(50.f)));*/
 
     m_kk_camera->setRotation(kkVector4(math::degToRad(-90),0.f,0.f));
-    m_kk_axisCamera->setRotation(kkVector4(math::degToRad(-90),0.f,0.f));
+    //m_kk_axisCamera->setRotation(kkVector4(math::degToRad(-90),0.f,0.f));
 
 
     m_camera_parts[_Camera::RotY_]->setParent( m_camera_parts[_Camera::Base_] );
@@ -127,7 +126,7 @@ void ViewportCamera::reset()
     m_camera_parts[_Camera::CamPos_Ax]->setPosition(kkVector4(0.f,3.f,0.f));
     
 
-    m_kk_axisCamera->setCameraType(kkCameraType::FPS);
+ //   m_kk_axisCamera->setCameraType(kkCameraType::FPS);
 
     switch(m_type)
     {
@@ -218,8 +217,8 @@ void ViewportCamera::update()
     m_kk_camera->setPosition(m_camera_parts[_Camera::CamPos_]->getPositionInSpace());
     m_kk_camera->update();
 
-    m_kk_axisCamera->setPosition(m_camera_parts[_Camera::CamPos_Ax]->getPositionInSpace() - m_camera_parts[_Camera::Base_]->getPositionInSpace());
-    m_kk_axisCamera->update();
+    //m_kk_axisCamera->setPosition(m_camera_parts[_Camera::CamPos_Ax]->getPositionInSpace() - m_camera_parts[_Camera::Base_]->getPositionInSpace());
+    //m_kk_axisCamera->update();
 }
 
 kkCamera * ViewportCamera::getCamera()
@@ -264,7 +263,7 @@ void ViewportCamera::rotateX( f32 x )
     m_camera_parts[_Camera::RotX_]->setRotation(kkVector4(rot.KK_X + math::degToRad(x),0.f,0.f));
 
     m_kk_camera->setRotation(m_kk_camera->getRotation() - kkVector4(math::degToRad(x),0.f,0.f));
-    m_kk_axisCamera->setRotation(m_kk_axisCamera->getRotation() - kkVector4(math::degToRad(x),0.f,0.f));
+    //m_kk_axisCamera->setRotation(m_kk_axisCamera->getRotation() - kkVector4(math::degToRad(x),0.f,0.f));
 }
 
 void ViewportCamera::rotateY( f32 y )
@@ -282,7 +281,7 @@ void ViewportCamera::rotateY( f32 y )
     m_camera_parts[_Camera::RotY_]->setRotation(kkVector4(math::degToRad(0.f),rot.KK_Y + math::degToRad(-y),0.f));
 
     m_kk_camera->setRotation( m_kk_camera->getRotation() + kkVector4(0.f,math::degToRad(y),0.f));
-    m_kk_axisCamera->setRotation( m_kk_axisCamera->getRotation() + kkVector4(0.f,math::degToRad(y),0.f));
+    //m_kk_axisCamera->setRotation( m_kk_axisCamera->getRotation() + kkVector4(0.f,math::degToRad(y),0.f));
 }
 
 void ViewportCamera::zoomIn( AppState_keyboard key, s32 wheel_delta )

@@ -11,8 +11,8 @@ struct GUIResources
 	kkTexture * m_microFontTexture = nullptr;
 	kkTexture * m_blenderIcons = nullptr;
 
-	kkTexture * m_DIB_viewportSplitHor = nullptr;
-	kkTexture * m_DIB_viewportSplitVer = nullptr;
+	kkTexture* m_projTexture = nullptr;
+
 
 	void loadResources(Application* app, kkGraphicsSystem* gs);
 };

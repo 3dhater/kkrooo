@@ -632,11 +632,11 @@ void ShortcutManager::reset()
             node.title = _getKeyString(node.key);
         }break;
         case ShortcutCommand_Viewport::ToggleDrawModeLines:{
-            node.key = kkKey::K_F2;
+            node.key = kkKey::K_F3;
             node.title = _getKeyString(node.key);
         }break;
         case ShortcutCommand_Viewport::ToggleDrawModeMaterial:{
-            node.key = kkKey::K_F3;
+            node.key = kkKey::K_F2;
             node.title = _getKeyString(node.key);
         }break;
         case ShortcutCommand_Viewport::ToggleGrid:{

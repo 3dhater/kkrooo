@@ -87,11 +87,14 @@ void kkGraphicsSystemImpl::setViewport( s32 x, s32 y, s32 w, s32 h )
 	m_open_gl->setViewport( x,y,w,h );
 }
 
-void kkGraphicsSystemImpl::drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2, kkShader * shader )
+void kkGraphicsSystemImpl::drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2 )
 {
-	m_open_gl->drawRectangle( c1, c2, color1, color2, shader );
+	m_open_gl->drawRectangle( c1, c2, color1, color2 );
 }
-
+void kkGraphicsSystemImpl::setDefaultTexture(kkTexture * t)
+{
+	m_open_gl->setDefaultTexture( t );
+}
 void kkGraphicsSystemImpl::drawLine3D( const kkVector4& p1, const kkVector4& p2, const kkColor& color, kkShader * shader )
 {
 	m_open_gl->drawLine3D( p1, p2, color, shader );
@@ -214,4 +217,9 @@ void kkGraphicsSystemImpl::setCompFunc(kkGraphicsSystemCompFunc f)
 {
 	m_compFunc = f;
 	m_open_gl->setCompFunc(f);
+}
+
+void kkGraphicsSystemImpl::setTarget( kkTexture* t )
+{
+	m_open_gl->setTarget(t);
 }

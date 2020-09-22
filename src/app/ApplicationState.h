@@ -8,9 +8,12 @@ enum class AppState_main : u32
 {
 	Idle,
 	MainMenu,
+	CameraTransformation,
 
 	//когда нажимается гизмо, включается это состояние
 	Gizmo, 
+
+	SelectRectangle,
 
 	// когда нажали правую кнопку мыши в моменте когда объект трансформируется с помощью гизмо
 	CancelTransformation, /// вроде не нужно...

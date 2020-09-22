@@ -225,9 +225,6 @@ class Application
 	bool   m_drawPreferencesWindow = false;
     void   _drawPreferencesWindow();
 
-	bool   m_drawTransformWindow = false;
-    void   _drawTransformWindow();
-
 	bool   m_drawImportByPluginWindow = false;
     void   _drawImportByPluginWindow();
 
@@ -245,10 +242,6 @@ class Application
 	kkStringW m_lastFilePath;
 
 	void _onEndFrame();
-
-	// когда берётся элемент гизмо, состояние сохраняется сюда
-	// используется в трансформациях
-	AppEvent_gizmo m_currentGizmoEvent;
 
     kkString m_programName;
     kkString m_sceneName;
@@ -301,7 +294,7 @@ class Application
 	void (*m_vertexPickCallback)(s32 id, void* data) = nullptr;
 
 	//bool m_drawPickLine = false;
-
+	ViewportObject* m_activeViewport = nullptr;
 public:
 
 	Application();
@@ -391,6 +384,7 @@ public:
 	kkPtr<ShaderSimple>     m_shaderSimple;
 	kkPtr<ShaderPoint>      m_shaderPoint;
 	kkPtr<ShaderLineModel>  m_shaderLineModel;
+	//kkPtr<ShaderScene3DObjectSilhouette>   m_shader3DObjectSilhouette;
 	kkPtr<ShaderScene3DObjectDefault>      m_shader3DObjectDefault;
 	kkPtr<ShaderScene3DObjectDefault_polymodeforlinerender>      m_shader3DObjectDefault_polymodeforlinerender;
 	bool _createShaders();
@@ -401,6 +395,7 @@ public:
 
 	kkPluginObjectCategory*  createObjectCategory( const char16_t* name, const kkPluginID& id );
 
+	kkTexture* getProjTexture();
 	kkTexture* getWhiteTexture();
 	void saveImageToFile(kkImage*);
 
@@ -436,10 +431,18 @@ public:
 	void* GetGUI();
 	bool IsKeyDown(kkKey k);
 	ShortcutManager* GetShortcutManager();
-	void GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex);
+	void GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex, bool isSelected);
 	void GSDrawModelEdge(kkMesh*,const kkMatrix4&, const kkColor& edgeCol);
 	void GSDrawObb( const kkObb& obb, const kkColor& color);
 	void GSDrawAabb( const kkAabb& aabb, const kkColor& color);
+	void GSDrawModelSilhouette(kkMesh* mesh,const kkMatrix4& mat, const kkColor& difCol);
+	void GSSetTarget(kkTexture* fbo);
+	void GSDrawRectangle(const v2i& LT, const v2i& RB, const kkColor& color, kkTexture* t );
+	void SetAppStateMain(AppState_main s);
+	void GSSetScissor(bool, const v4i&);
+	void GSDrawLine2D(const v2i& p1, const v2i& p2, const kkColor& color);
+	ViewportObject* GetActiveViewport();
+	void SetActiveViewport(ViewportObject* v);
 };
 
 

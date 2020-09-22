@@ -16,6 +16,8 @@
 #include "../Application.h"
 #include "../Plugins/PluginGUIWindow.h"
 #include "Renderer/kkRenderer.h"
+#include "../Viewport/Viewport.h"
+#include "../Viewport/ViewportCamera.h"
 
 #include <thread>
 #include <unordered_set>
@@ -681,10 +683,10 @@ void Scene3DObject_isRayIntersect(
 		auto base_vertex_node = polygon->m_verts;
 		auto VN1 = base_vertex_node->m_right;
 		auto VN2 = VN1->m_right;
-		for( u32 i = 0, sz = polygon->m_vertexCount - 2; i < sz; ++i )
+		for( u64 i = 0, sz = polygon->m_vertexCount - 2; i < sz; ++i )
 		{
-			u32 index2  = i+1;
-			u32 index3  = index2 + 1;
+			u64 index2  = i+1;
+			u64 index3  = index2 + 1;
 			if( index3 == polygon->m_vertexCount )
 				index3 = 0;
 			
@@ -809,103 +811,74 @@ bool Scene3DObject::IsRayIntersect( const kkRay& ray, kkRayTriangleIntersectionR
 
 bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangleIntersectionResultSimple>& result, kkRayTriangleIntersectionAlgorithm alg )
 {
-//	auto viewport = kkSingleton<Application>::s_instance->getActiveViewport();
-//	auto camera   = viewport->getCamera();
-//	auto frustum  = camera->getFrustum();
+	if(!m_polyModel->m_polygonsCount)
+		return false;
+	auto viewport = kkGetActiveViewport();
+	auto camera   = viewport->m_activeCamera->getCamera();
+	auto frustum  = camera->getFrustum();
 	
 	bool ret = false;
 
-	//Polygon3D * polygon;
-	//Vertex*     vertex1;
-	//Vertex*     vertex2;
-	//Vertex*     vertex3;
-	//u32       num_of_verts;
+	kkRayTriangleIntersectionResultSimple iResult;
+	iResult.m_object = this;
+	auto M = m_matrix;
 
-	//kkRayTriangleIntersectionResultSimple iResult;
-	//iResult.m_object = this;
-	//auto M = m_matrix;
+	kkPolygon* polygon = m_polyModel->m_polygons;
+	auto end =  m_polyModel->m_polygons->m_mainPrev;
+	while(true)
+	{
+		auto base_vertex_node = polygon->m_verts;
+		auto VN1 = base_vertex_node->m_right;
+		auto VN2 = VN1->m_right;
+		for( u64 i = 0, sz = polygon->m_vertexCount - 2; i < sz; ++i )
+		{
+			u64 index2  = i+1;
+			u64 index3  = index2 + 1;
+			if( index3 == polygon->m_vertexCount )
+				index3 = 0;
+			
+			kkTriangle t;
+			t.v1 = math::mul( base_vertex_node->m_element->m_position, M ) + m_pivot;
+			t.v2 = math::mul( VN1->m_element->m_position, M ) + m_pivot;
+			t.v3 = math::mul( VN2->m_element->m_position, M ) + m_pivot;
+			t.update();
 
-	//for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//{
-	//	polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
-
-	//	num_of_verts = (u32)polygon->m_verts.size();
-	//	u32 index2, index3;
-	//	for( u32 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
-	//	{
-	//		index2  = i2+1;
-	//		index3  = index2 + 1;
-	//		if( index3 == num_of_verts )
-	//			index3 = 0;
-
-	//		vertex2 = (Vertex*)polygon->m_verts[0];
-	//		vertex1 = (Vertex*)polygon->m_verts[index2];
-	//		vertex3 = (Vertex*)polygon->m_verts[index3];
-	//		vertex1->m_Position.setW(1.f);
-	//		vertex2->m_Position.setW(1.f);
-	//		vertex3->m_Position.setW(1.f);
-
-	//		kkTriangle t;
-	//		t.v1 = math::mul( vertex2->m_Position, M ) + m_pivot;
-	//		t.v2 = math::mul( vertex1->m_Position, M ) + m_pivot;
-	//		t.v3 = math::mul( vertex3->m_Position, M ) + m_pivot;
-	//		t.update();
-
-	//		t.v1.setW(1.f);
-	//		t.v2.setW(1.f);
-	//		t.v3.setW(1.f);
-
-
-	//		/*if( frustum->pointInFrustum( vertex2->m_Position )
-	//			|| frustum->pointInFrustum( vertex1->m_Position )
-	//			|| frustum->pointInFrustum( vertex3->m_Position ))*/
-	//		if( kkrooo::pointOnFrontSideCamera(t.v1, camera->getViewProjectionMatrix())
-	//			|| kkrooo::pointOnFrontSideCamera(t.v2, camera->getViewProjectionMatrix())
-	//			|| kkrooo::pointOnFrontSideCamera(t.v3, camera->getViewProjectionMatrix()))
-	//		{
-
-	//			//auto r = ray;
-	//			//r.update();
-
-	//		//	std::cout << r.m_origin <<"\n";
-	//		//	std::cout << r.m_end <<"\n\n";
-
-	//			float f1,f2,f3,f4;
-	//			switch (alg)
-	//			{
-	//			default:
-	//			case kkRayTriangleIntersectionAlgorithm::MollerTrumbore:
-	//				if( t.rayTest_MT(r, true, f1, f2, f3, f4 ) )
-	//				{
-	//					iResult.m_T = f1;
-	//					iResult.m_U = f2;
-	//					iResult.m_V = f3;
-	//					iResult.m_W = f4;
-	//					iResult.m_intersectionPoint = r.m_origin + r.m_direction * f1;
-	//					iResult.m_polygonIndex = i;
-	//					result.push_back(iResult);
-	//					ret = true;
-	//				}
-	//				break;
-	//			case kkRayTriangleIntersectionAlgorithm::Watertight:
-	//				if( t.rayTest_Watertight(r, true, f1, f2, f3, f4 ) )
-	//				{
-	//					iResult.m_T = f1;
-	//					iResult.m_U = f2;
-	//					iResult.m_V = f3;
-	//					iResult.m_W = f4;
-	//					iResult.m_intersectionPoint = r.m_origin + r.m_direction * f1;
-	//					iResult.m_polygonIndex = i;
-	//					result.push_back(iResult);
-	//					ret = true;
-	//				}
-	//				break;
-	//			}
-	//		}
-
-	//	}
-	//}
-
+			float f1,f2,f3,f4;
+			switch (alg)
+			{
+			default:
+			case kkRayTriangleIntersectionAlgorithm::MollerTrumbore:
+				if( t.rayTest_MT(r, true, f1, f2, f3, f4 ) )
+				{
+					iResult.m_T = f1;
+					iResult.m_U = f2;
+					iResult.m_V = f3;
+					iResult.m_W = f4;
+					iResult.m_intersectionPoint = r.m_origin + r.m_direction * f1;
+					iResult.m_polygon = polygon;
+					ret = true;
+				}
+				break;
+			case kkRayTriangleIntersectionAlgorithm::Watertight:
+				if( t.rayTest_Watertight(r, true, f1, f2, f3, f4 ) )
+				{
+					iResult.m_T = f1;
+					iResult.m_U = f2;
+					iResult.m_V = f3;
+					iResult.m_W = f4;
+					iResult.m_intersectionPoint = r.m_origin + r.m_direction * f1;
+					iResult.m_polygon = polygon;
+					ret = true;
+				}
+				break;
+			}
+			VN1 = VN2;
+			VN2 = VN2->m_right;
+		}
+		if(polygon == end)
+			break;
+		polygon = polygon->m_mainNext;
+	}
 	return ret;
 }
 

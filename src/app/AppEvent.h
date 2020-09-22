@@ -19,45 +19,11 @@ enum class AppEventPriority : u32
 enum class AppEventType : u32
 {
 	Default,
-	Gizmo,
 	GS,
 };
 
 
-struct AppEvent_gizmo
-{
-	enum class _type : u32
-	{
-		Default,
-		Move,
-		Rotate,
-		Scale
-	};
 
-	enum class _part : u32
-	{
-		Default,
-		X,
-		Y,
-		Z,
-		XZ_plane,
-		XY_plane,
-		ZY_plane,
-		Screen_plane
-	};
-
-	_type type = _type::Default;
-	_part part = _part::Default;
-
-	v2i point2D; // должна вычисляться 2д точка 
-	//kkVector4 point3D;
-
-	void reset()
-	{
-		type = _type::Default;
-		part = _part::Default;
-	}
-};
 struct AppEvent_GS
 {
 	enum class _type : u32
@@ -77,9 +43,6 @@ struct AppEvent
 		{
 		case AppEventType::Default:
 			break;
-		case AppEventType::Gizmo:
-			gizmo = e.gizmo;
-			break;
 		case AppEventType::GS:
 			GS = e.GS;
 			break;
@@ -92,7 +55,6 @@ struct AppEvent
 
 	union
 	{
-		AppEvent_gizmo gizmo;
 		AppEvent_GS GS;
 	};
 
@@ -108,9 +70,6 @@ struct AppEvent
 			break;
 		case AppEventType::GS:
 			GS = e.GS;
-			break;
-		case AppEventType::Gizmo:
-			gizmo = e.gizmo;
 			break;
 		default:
 			break;

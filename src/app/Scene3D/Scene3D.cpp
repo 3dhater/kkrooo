@@ -94,6 +94,7 @@ Scene3D::Scene3D()
 {
 	m_app = kkSingleton<Application>::s_instance;
 	m_gizmo = m_app->m_gizmo.ptr();
+	m_gs = m_app->m_gs.ptr();
 }
 
 Scene3D::~Scene3D()
@@ -265,75 +266,73 @@ std::basic_string<Scene3DObject*>& Scene3D::getObjects()
 	return m_objects;
 }
 
-// rayobjects | drawobjects - отсортированные по дальности объекты
-// самый близкий в конце
-void Scene3D::_selectObjectsByRectangle_object( std::basic_string<Scene3DObject*>& rayobjects, std::basic_string<Scene3DObject*>& drawobjects, const SelectionFrust& frust )
+void Scene3D::_selectObjectsByRectangle_object( const SelectionFrust& frust )
 {
-	//auto ks = m_app->getStateKeyboard();
-	//if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
-	//	deselectAll();
-	//
-	//for( auto * obj : drawobjects )
-	//{
-	//	bool found = false;
-	//	for(u64 i = 0, sz = obj->m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//	{
-	//		auto polygon = (Polygon3D *)obj->m_PolyModel->m_polygons.at(i);
-	//		for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
-	//		{
-	//			u64 o2 = o + 1;
-	//			if(o2 == sz2) o2=0;
-	//			auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
-	//			auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
-	//			auto V1 = cv1->m_verts[0];
-	//			auto V2 = cv2->m_verts[0];
-	//			if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
-	//			{
-	//				found = true;
-	//				if( ks == AppState_keyboard::Alt )
-	//				{
-	//					_deselectObject_object( obj );
-	//				}
-	//				else
-	//				{
-	//					_selectObject_object( obj );
-	//				}
-	//				goto next_object;
-	//			}
-	//		}
-	//	}
-	//next_object:;
+	auto ks = m_app->getStateKeyboard();
+	if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
+		deselectAll();
+	
+	for( auto * obj : m_objects_inFrustum_sorted )
+	{
+		if(!obj->m_polyModel->m_edges)
+			continue;
 
-	//	// try ray-triangle
-	//	if(!found)
-	//	{
-	//		kkRay ray[4];
-	//		ray[0].m_origin = frust.m_top[0];
-	//		ray[0].m_end = frust.m_top[3];
-	//		ray[0].update();
-	//		ray[1].m_origin = frust.m_top[1];
-	//		ray[1].m_end = frust.m_top[2];
-	//		ray[1].update();
-	//		ray[2].m_origin = frust.m_bottom[0];
-	//		ray[2].m_end = frust.m_bottom[3];
-	//		ray[2].update();
-	//		ray[3].m_origin = frust.m_bottom[1];
-	//		ray[3].m_end = frust.m_bottom[2];
-	//		ray[3].update();
-	//		for(s32 i = 0; i < 4; ++i)
-	//		{
-	//			std::vector<kkRayTriangleIntersectionResultSimple> results;
-	//			if( obj->IsRayIntersectMany(ray[i], results) )
-	//			{
-	//				if( ks == AppState_keyboard::Alt )
-	//					_deselectObject_object( obj );
-	//				else
-	//					_selectObject_object( obj );
-	//				break;
-	//			}
-	//		}
-	//	}
-	//}
+		bool found = false;
+		auto E = obj->m_polyModel->m_edges;
+		for(u64 i = 0; i < obj->m_polyModel->m_edgesCount; ++i)
+		{
+			if( frust.lineInFrust( 
+				math::mul( E->m_v1->m_position, 
+					obj->GetMatrix()) + obj->GetPivot() , 
+				math::mul( E->m_v2->m_position, 
+					obj->GetMatrix()) + obj->GetPivot() ) 
+				)
+			{
+				found = true;
+				if( ks == AppState_keyboard::Alt )
+				{
+					_deselectObject_object( obj );
+				}
+				else
+				{
+					_selectObject_object( obj );
+				}
+				goto next_object;
+			}
+			E = E->m_mainNext;
+		}
+	next_object:;
+
+		// try ray-triangle
+		if(!found)
+		{
+			kkRay ray[4];
+			ray[0].m_origin = frust.m_top[0];
+			ray[0].m_end = frust.m_top[3];
+			ray[0].update();
+			ray[1].m_origin = frust.m_top[1];
+			ray[1].m_end = frust.m_top[2];
+			ray[1].update();
+			ray[2].m_origin = frust.m_bottom[0];
+			ray[2].m_end = frust.m_bottom[3];
+			ray[2].update();
+			ray[3].m_origin = frust.m_bottom[1];
+			ray[3].m_end = frust.m_bottom[2];
+			ray[3].update();
+			for(s32 i = 0; i < 4; ++i)
+			{
+				std::vector<kkRayTriangleIntersectionResultSimple> results;
+				if( obj->IsRayIntersectMany(ray[i], results) )
+				{
+					if( ks == AppState_keyboard::Alt )
+						_deselectObject_object( obj );
+					else
+						_selectObject_object( obj );
+					break;
+				}
+			}
+		}
+	}
 }
 
 void Scene3D::_selectObjectsByRectangle_poly( const SelectionFrust& frust )
@@ -539,13 +538,13 @@ void Scene3D::_selectObjectsByRectangle_vertex( /*const v4i& r*/ const Selection
 	updateObjectVertexSelectList();*/
 }
 
-void Scene3D::selectObjectsByRectangle( std::basic_string<Scene3DObject*>& ro, std::basic_string<Scene3DObject*>& dro, const v4i& r, const SelectionFrust& sfrust )
+void Scene3D::selectObjectsByRectangle( const SelectionFrust& sfrust )
 {
 	switch(m_app->getEditMode())
 	{
 	case EditMode::Object:
 	default:
-		_selectObjectsByRectangle_object(ro, dro, sfrust);
+		_selectObjectsByRectangle_object(sfrust);
 		break;
 	case EditMode::Vertex:
 		_selectObjectsByRectangle_vertex( sfrust );
@@ -558,6 +557,7 @@ void Scene3D::selectObjectsByRectangle( std::basic_string<Scene3DObject*>& ro, s
 		break;
 	}
 	//m_objects_selected.push_back(m_objects[i]);
+	kkDrawAll();
 }
 
 void Scene3D::_selectObject_object(Scene3DObject* o)
@@ -1145,7 +1145,7 @@ void Scene3D::unregisterObject( Scene3DObject* o )
 		m_objects_selected.erase( m_objects_selected.begin() + m_objects_selected.find_first_of(o) );
 }
 
-void Scene3D::rotateSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool cancel, bool first )
+void Scene3D::rotateSelectedObjects(bool startStop, bool cancel, bool first )
 {
 //	auto em = m_app->getEditMode();
 //
@@ -1501,7 +1501,7 @@ void Scene3D::rotateSelectedObjects(bool startStop, const AppEvent_gizmo& e, boo
 //	}
 }
 
-void Scene3D::scaleSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool cancel,bool first )
+void Scene3D::scaleSelectedObjects(bool startStop, bool cancel,bool first )
 {
 //	kkVector4 pivotFix;
 //
@@ -1737,7 +1737,7 @@ void Scene3D::scaleSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool
 //	}
 }
 
-void Scene3D::moveSelectedObjects(bool startStop, const AppEvent_gizmo& e, bool cancel,bool first )
+void Scene3D::moveSelectedObjects(bool startStop, bool cancel,bool first )
 {
 //	auto em = m_app->getEditMode();
 //
@@ -2100,16 +2100,91 @@ void      Scene3D::updateObjectEdgeSelectList()
 			m_objectsEdgeSelectInfo.push_back(info);
 	}*/
 }
-
-void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewportObject, CursorRay* ray)
+void Scene3D::drawObjectPivot(bool isPersp, ViewportObject* vp, bool activeViewport)
 {
-	bool optimize = false;
+	if( m_app->isGlobalInputBlocked() )
+		return;
+	auto numOfObjects = getNumOfSelectedObjects();
+	if( !numOfObjects )
+		return;
+	kkVector4 point;
+	if( numOfObjects == 1 )
+	{
+		auto obj = getSelectedObject( 0 );
+		point = obj->GetPivot();
+	}
+	else
+	{
+		auto	aabb = getSelectionAabb();
+		aabb.center(point);
+	}
+	if( m_app->m_editMode == EditMode::Vertex
+		|| m_app->m_editMode == EditMode::Edge
+		|| m_app->m_editMode == EditMode::Polygon )
+	{
+		getSelectionAabb().center(point);
+	}
+	f32 size = 0.f;
+	if( isPersp )
+	{
+		size = (f32)vp->m_activeCamera->getPositionCamera().distance(point);
+		size *= 0.1f;
+	}else
+    {
+        size = 0.5f / vp->m_activeCamera->getZoomOrt();
+    }
+	kkGetGS()->drawLine3D( point, kkVector4( point.KK_X, point.KK_Y, point.KK_Z + size ), kkColorLimeGreen );
+	kkGetGS()->drawLine3D( point, kkVector4( point.KK_X, point.KK_Y+ size, point.KK_Z  ), kkColorBlue);
+	kkGetGS()->drawLine3D( point, kkVector4( point.KK_X+ size, point.KK_Y, point.KK_Z  ), kkColorRed);
+	if(activeViewport)
+	{
+		for( auto o : m_objects_selected )
+		{
+			if( m_app->m_editMode == EditMode::Object 
+				|| (o->m_isObjectHaveSelectedVerts && m_app->m_editMode == EditMode::Vertex)
+				|| ( o->m_isObjectHaveSelectedEdges && m_app->m_editMode == EditMode::Edge)
+				|| ( o->m_isObjectHaveSelectedPolys && m_app->m_editMode == EditMode::Polygon) )
+			{
+				/*m_app->m_currentGizmoEvent.point2D = 
+					kkrooo::worldToScreen( 
+						vp->m_activeCamera->getCamera()->getViewProjectionMatrix(), 
+						point, 
+						vp->m_rect_modified.getWidthAndHeight(),
+						v2f(vp->m_rect_modified.x,vp->m_rect_modified.y) 
+					);*/
+				switch(m_app->getSelectMode())
+				{
+				case SelectMode::JustSelect:
+				default:
+					break;
+				case SelectMode::Move:
+					m_gizmo->drawMove(point, size, vp->m_cursorRay->m_center);
+					break;
+				case SelectMode::Rotate:
+					/*m_app->m_currentGizmoEvent.point2D = kkrooo::worldToScreen( vp->m_activeCamera->getCamera()->getViewProjectionMatrix(), point, 
+						vp->m_rect_modified.getWidthAndHeight(),
+						v2f(vp->m_rect_modified.x,vp->m_rect_modified.y) );*/
+
+					m_gizmo->drawRotation(point, size, vp->m_cursorRay->m_center);
+					break;
+				case SelectMode::Scale:
+					m_gizmo->drawScale(point, size, vp->m_cursorRay->m_center);
+					break;
+				}
+//				_drawGizmo2DPart( m_vd.m_app->m_currentGizmoEvent.point2D );
+				break;
+			}
+		}
+	}
+}
+void Scene3D::_drawOptimize(kkCamera* camera)
+{
+	m_drawOptimize = false;
 	++m_frame_skip;
 	if( m_frame_skip == m_frame_limit )
 	{
 		m_frame_skip = 0;
-		optimize = true;
-		m_objects_mouseHover.clear();
+		m_drawOptimize = true;
 		m_objects_inFrustum_unsorted.clear();
 		auto frust = camera->getFrustum();
 		auto camera_position = camera->getPositionInSpace();
@@ -2129,8 +2204,71 @@ void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewpo
 		m_objects_inFrustum_sorted = m_objects_inFrustum_unsorted;
 		sortObjectsInFrustum( m_objects_inFrustum_sorted );
 	}
+}
+void Scene3D::_drawSelectedObjectFrame()
+{
+	kkVector4  ext;
+	f32 frameSize   = 0.f;
+	f32 frameIndent = 0.f;
 
-	
+	for( u32 i = 0, sz = getNumOfSelectedObjects(); i < sz; ++i )
+	{
+		auto obj = getSelectedObject( i );
+
+		auto & aabb = obj->Aabb();
+		aabb.m_max.KK_W = 0.f;
+		aabb.m_min.KK_W = 0.f;
+
+		frameSize = aabb.m_max.distance( aabb.m_min )+0.01f;
+		frameSize /= 12.f;
+		frameIndent = frameSize * 0.2f;
+
+		//printf("frameSize %f\n",frameSize);
+
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y-frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y-frameSize,   aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_max.KK_Y+frameIndent,   aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
+		
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y-frameSize, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
+
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X+frameSize, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y-frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_min.KK_X-frameIndent, aabb.m_max.KK_Y+frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
+		
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_min.KK_Z-frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z-frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_min.KK_Z+frameSize ), kkColorLightGray );
+
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X-frameSize, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y+frameSize, aabb.m_max.KK_Z+frameIndent ), kkColorLightGray );
+		m_gs->drawLine3D( kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z+frameIndent ), kkVector4( aabb.m_max.KK_X+frameIndent, aabb.m_min.KK_Y-frameIndent, aabb.m_max.KK_Z-frameSize ), kkColorLightGray );
+	}
+}
+void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewport, CursorRay* ray, bool activeViewport)
+{
+	if(activeViewport)
+	{
+		m_objects_mouseHover.clear();
+		m_cursorRay = ray;
+		m_cursorInViewport = cursorInViewport;
+	}
+
+	_drawOptimize(camera);
+
 	for(size_t i = 0, sz = m_objects_inFrustum_sorted.size(); i < sz; ++i)
 	{
 		auto object = m_objects_inFrustum_sorted[i];
@@ -2139,13 +2277,14 @@ void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewpo
 		{
 		case kkScene3DObjectType::PolygonObject:
 		{
-			object->UpdateWorldMatrix();
+			if(m_drawOptimize)
+				object->UpdateWorldMatrix();
 
 			if( *draw_mode == DrawMode::Material || *draw_mode == DrawMode::EdgesAndMaterial )
 			{
 				for( u64 i2 = 0, sz = object->getHardwareModelCount(); i2 < sz; ++i2 )
 				{
-					kkGSDrawModel(object->getHardwareModel(i2), object->GetMatrixWorld(), object->m_shaderParameter.m_diffuseColor, object->m_shaderParameter.m_diffuseTexture);
+					kkGSDrawModel(object->getHardwareModel(i2), object->GetMatrixWorld(), object->m_shaderParameter.m_diffuseColor, object->m_shaderParameter.m_diffuseTexture, object->isSelected());
 				}
 			}
 
@@ -2193,10 +2332,10 @@ void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewpo
 			break;
 		}
 		
-		if( optimize && !kkIsMmbDown() && *kkGetAppState_main() != AppState_main::Gizmo && !g_mouseState.IsSelectByRect
+		if( m_drawOptimize && !kkIsMmbDown() && *kkGetAppState_main() != AppState_main::Gizmo && !g_mouseState.IsSelectByRect
 			&& m_app->m_editMode == EditMode::Object )
 		{
-			if( cursorInViewportObject )
+			if( cursorInViewport)
 			{
 				if( kkrooo::rayIntersection_obb(ray->m_center, object->m_obb) )
 				{
@@ -2211,18 +2350,80 @@ void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewpo
 				}
 			}
 		}
+	}
+	if( m_objects_mouseHover.size() )
+	{
+		auto object = m_objects_mouseHover[0];
+		kkGSDrawObb( object->Obb(), kkColorRed );
+		sortMouseHoverObjects( m_objects_mouseHover );
+	}
 
-		if( m_objects_mouseHover.size() )
+	_drawSelectedObjectFrame();
+}
+void Scene3D::updateInput()
+{
+	static bool isGizmo = false;
+	if(m_app->m_selectMode != SelectMode::JustSelect)
+	{
+		if(m_app->m_state_app == AppState_main::Idle && m_objects_selected.size())
 		{
-			sortMouseHoverObjects( m_objects_mouseHover );
+			isGizmo = false;
+			if( m_gizmo->updateInput(m_cursorRay) != GizmoPart::Default )
+			{
+				if( g_mouseState.LMB_DOWN && m_cursorInViewport )
+				{
+					m_app->m_state_app = AppState_main::Gizmo;
+					isGizmo = true;
+				}
+			}
+		}
+		if( g_mouseState.LMB_UP )
+		{
+			isGizmo = false;
+			if(m_app->m_state_app == AppState_main::Gizmo)
+			{
+				m_app->m_state_app = AppState_main::Idle;
+			}
 		}
 	}
 	if( m_objects_mouseHover.size() )
 	{
-		kkGSDrawObb( m_objects_mouseHover[0]->Obb(), kkColorRed );
+		auto object = m_objects_mouseHover[0];		
+		if( g_mouseState.LMB_UP && !isGizmo && g_mouseState.IsFirstClick )
+		{
+			if( m_app->m_editMode == EditMode::Object )
+			{
+				if(object->isSelected())
+				{
+					if( m_app->m_state_keyboard != AppState_keyboard::Ctrl && m_app->m_state_keyboard != AppState_keyboard::Alt )
+						deselectAll();
+					else
+						deselectObject(object);
+				}
+				else
+				{
+					if( m_app->m_state_keyboard != AppState_keyboard::Ctrl )
+						deselectAll();
+					selectObject(object);
+				}
+				kkDrawAll();
+			}
+		}
+	}
+	else
+	{
+		// снятие выделения если кликнули не по объекту
+		if( g_mouseState.LMB_DOWN && m_cursorInViewport && !isGizmo)
+		{
+			if( m_app->m_state_keyboard != AppState_keyboard::Ctrl
+				&& m_app->m_state_keyboard != AppState_keyboard::Alt)
+			{
+				deselectAll();
+				kkDrawAll();
+			}
+		}
 	}
 }
-
 // Цель - преобразовать координаты controlVertex в соответствии с матрицами, перестроить модели и сбросить матрицы
 void Scene3D::applyMatrices()
 {

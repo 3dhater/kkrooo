@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "PluginSDK.h"
+﻿#include "PluginSDK.h"
 
 #include <cstdlib>
 #include <cctype>

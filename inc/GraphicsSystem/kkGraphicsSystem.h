@@ -69,11 +69,12 @@ public:
 	virtual void useScissor( bool ) = 0;
 	virtual void setScissor( int x1, int y1, int x2, int y2 ) = 0;
 	
-	
+	virtual void setTarget( kkTexture* ) = 0;
+	virtual void setDefaultTexture(kkTexture * t) = 0;
 	//  c1----------
 	//   |          |
 	//   |_________c2
-	virtual void drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2, kkShader * shader = nullptr ) = 0;
+	virtual void drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2) = 0;
 
 	virtual void drawPoint3D( const kkVector4& p, kkShader * shader ) = 0;
 

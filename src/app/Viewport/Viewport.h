@@ -105,6 +105,8 @@ public:
 	CursorRay* m_cursorRay = nullptr;
 	v2i* m_windowSize = nullptr;
 
+	//kkTexture* m_silhouetteFBO = nullptr;
+
 	ViewportCamera* m_activeCamera = nullptr;
 	kkPtr<ViewportCamera> m_cameraPersp ;
 	kkPtr<ViewportCamera> m_cameraFront ;
@@ -156,9 +158,12 @@ public:
 	ViewportUID m_uid = ViewportUID::Single;
 
 	void beginDraw();
+	//void drawSilhouette(const v2i& windowSize);
 	void drawBG(const v2i& windowSize, ColorTheme* colorTheme);
 	void drawGrid(ColorTheme* colorTheme);
-	void drawScene();
+	void drawScene(bool inFocus);
+	void drawObjectPivot(bool inFocus);
+	void drawSelectionRectangle(bool inFocus);
 	void drawName(bool isActive);
 	ViewportCamera * getActiveViewportCamera()
 	{

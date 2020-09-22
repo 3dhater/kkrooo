@@ -30,8 +30,6 @@ void ShaderScene3DObjectDefault::onShader( void * ptr, const kkMatrix4& world )
 	auto P = active_camera->getProjectionMatrix();
 	auto WVP = P * V * world;
 
-	auto 
-
 	setActive();
 
 	auto sunDir = -active_camera->getDirection();
@@ -41,31 +39,30 @@ void ShaderScene3DObjectDefault::onShader( void * ptr, const kkMatrix4& world )
 	glUniform4fv(m_uniforms[ 2 ], 1, m_diffuseColor.data() );
 	glUniform4fv(m_uniforms[ 3 ], 1, sunDir.data() );
 
-	glActiveTexture(GL_TEXTURE0);
-	
-	//kkAddressType taddress = (kkAddressType)m_whiteTexture->getHandle();
 	unsigned long long * t_ptr = (unsigned long long *)m_whiteTexture->getHandle();
-
-	
 	if( m_diffTex )
 	{
 		if( m_diffTex->m_texture )
 		{
 			t_ptr = (unsigned long long *)m_diffTex->m_texture->getHandle();
 			glBindTexture(GL_TEXTURE_2D,(GLuint)*t_ptr);
-			//glUniform1i(m_uniforms[ 4 ], 0 );
 		}
 		else
 		{
 			glBindTexture(GL_TEXTURE_2D,(GLuint)*t_ptr);
-			//glUniform1i(m_uniforms[ 4 ], 0 );
 		}
 	}
 	else
 	{
 		glBindTexture(GL_TEXTURE_2D,(GLuint)*t_ptr);
-		//glUniform1i(m_uniforms[ 4 ], 0 );
 	}
+	glActiveTexture(GL_TEXTURE0);
+
+//	t_ptr = (unsigned long long *)m_projTexture->getHandle();
+//	glBindTexture(GL_TEXTURE_2D,(GLuint)*t_ptr);
+//	glActiveTexture(GL_TEXTURE1);
+	//m_fragmentFlags |= 1;
+	//glUniform1i(m_uniforms[ 6 ], m_fragmentFlags );
 }
 
 void ShaderScene3DObjectDefault::onCreate( void * ptr )
@@ -78,6 +75,8 @@ void ShaderScene3DObjectDefault::onCreate( void * ptr )
 	m_uniforms.push_back( glGetUniformLocation(m_shaderData.m_program, "diffuseColor"));
 	m_uniforms.push_back( glGetUniformLocation(m_shaderData.m_program, "sunDir"));
 	m_uniforms.push_back( glGetUniformLocation(m_shaderData.m_program, "diffuseTexture"));
+	//m_uniforms.push_back( glGetUniformLocation(m_shaderData.m_program, "projectionTexture"));
+	//m_uniforms.push_back( glGetUniformLocation(m_shaderData.m_program, "fragmentFlags"));
 }
 
 void ShaderScene3DObjectDefault::setActive()

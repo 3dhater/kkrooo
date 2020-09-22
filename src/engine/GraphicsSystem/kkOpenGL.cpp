@@ -39,14 +39,7 @@ void kkOpenGL::beginDraw( bool clear_canvas )
 {
 	if( clear_canvas )
 	{
-
 		GLbitfield mask = GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT;
-		
-		if( clear_canvas )
-		{
-			
-		}
-
 		glClear(mask);
 	}
 }
@@ -58,27 +51,23 @@ void kkOpenGL::setClearColor( const kkColor& C )
 	glClearColor( c[0], c[1], c[2], c[3] ); 
 }
 
+void kkOpenGL::setDefaultTexture(kkTexture * t)
+{
+	m_defaultTexture = t;
+}
 
-void kkOpenGL::drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2, kkShader * shader )
+void kkOpenGL::drawRectangle( const v2i& c1, const v2i& c2, const kkColor& color1, const kkColor& color2 )
 {
     GLboolean last_enable_cull_face = glIsEnabled(GL_CULL_FACE);
 	//gl3wInit();
     glDisable(GL_CULL_FACE);
 	
-	if( shader )
-	{
-		shader->setActive();
-		shader->onShader( &m_shaderOpenGLData, m_defaultMatrix );
-	}
-	else
-	{
-		m_shader_rectangle->setActive();
-		v4f corners((f32)c1.x,(f32)c1.y,(f32)c2.x,(f32)c2.y);
-		glUniformMatrix4fv(m_shader_rectangle->getUniform(0), 1, GL_FALSE, m_ortho_projection.getPtr() );
-		glUniform4fv(m_shader_rectangle->getUniform(1), 1, corners.data() );
-		glUniform4fv(m_shader_rectangle->getUniform(2), 1, color1.data() );
-		glUniform4fv(m_shader_rectangle->getUniform(3), 1, color2.data() );
-	}
+	m_shader_rectangle->setActive();
+	v4f corners((f32)c1.x,(f32)c1.y,(f32)c2.x,(f32)c2.y);
+	glUniformMatrix4fv(m_shader_rectangle->getUniform(0), 1, GL_FALSE, m_ortho_projection.getPtr() );
+	glUniform4fv(m_shader_rectangle->getUniform(1), 1, corners.data() );
+	glUniform4fv(m_shader_rectangle->getUniform(2), 1, color1.data() );
+	glUniform4fv(m_shader_rectangle->getUniform(3), 1, color2.data() );
 
 	glBindVertexArray(m_rectangle_VAO);
 
@@ -644,4 +633,17 @@ void kkOpenGL::drawPoint3D( const kkVector4& p, kkShader * shader )
 	glBindVertexArray(oglshader->m_VAO);
 	glDrawArrays(GL_POINTS, 0, 1);
     if (last_enable_cull_face) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
+}
+
+void kkOpenGL::setTarget( kkTexture* t )
+{
+	if(t)
+	{
+		kkOpenGLTexture* oglt = (kkOpenGLTexture*)t;
+		glBindFramebuffer(GL_FRAMEBUFFER, oglt->m_FBO);
+	}
+	else
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }

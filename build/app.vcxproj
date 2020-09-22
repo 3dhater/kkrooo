@@ -82,6 +82,7 @@
     <ClCompile Include="..\src\app\Shaders\linemodel.cpp" />
     <ClCompile Include="..\src\app\Shaders\points.cpp" />
     <ClCompile Include="..\src\app\Shaders\scene3DobjectDefault.cpp" />
+    <ClCompile Include="..\src\app\Shaders\scene3DobjectDefaultSilhouette.cpp" />
     <ClCompile Include="..\src\app\Shaders\ShaderScene3DObjectDefault_polymodeforlinerender.cpp" />
     <ClCompile Include="..\src\app\Shaders\simple.cpp" />
     <ClCompile Include="..\src\app\ShortcutManager.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="..\src\app\Shaders\linemodel.h" />
     <ClInclude Include="..\src\app\Shaders\points.h" />
     <ClInclude Include="..\src\app\Shaders\scene3DobjectDefault.h" />
+    <ClInclude Include="..\src\app\Shaders\scene3DobjectDefaultSilhouette.h" />
     <ClInclude Include="..\src\app\Shaders\ShaderScene3DObjectDefault_polymodeforlinerender.h" />
     <ClInclude Include="..\src\app\Shaders\simple.h" />
     <ClInclude Include="..\src\app\ShortcutManager.h" />

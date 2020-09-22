@@ -30,7 +30,7 @@ class ViewportCamera
 
 	// камера которая нужна для рисования линий в углу вьюпорта
 	// тоже-самое что основная камера, только она не двигается, а только вращается
-	kkCamera * m_kk_axisCamera = nullptr;
+	//kkCamera * m_kk_axisCamera = nullptr;
 
 	enum _Camera
 	{
@@ -111,10 +111,10 @@ public:
 	const kkVector4& getCameraPosition_ort(){return m_cameraPos_ort;}
 	void setCameraPosition_ort(const kkVector4& p){m_cameraPos_ort= p;}
 
-	kkCamera * getAxisCamera()
+	/*kkCamera * getAxisCamera()
 	{
 		return m_kk_axisCamera;
-	}
+	}*/
 
 	f32 getZoomOrt()
 	{

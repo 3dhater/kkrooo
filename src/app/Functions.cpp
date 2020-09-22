@@ -27,9 +27,21 @@ void kkGSDrawModelEdge(kkMesh* mesh,const kkMatrix4& mat, const kkColor& edgeCol
 {
     return kkSingleton<Application>::s_instance->GSDrawModelEdge(mesh, mat, edgeCol);
 }
-void kkGSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex)
+void kkGSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex, bool isSelected)
 {
-    return kkSingleton<Application>::s_instance->GSDrawModel(mesh, mat, difCol, m_diffTex);
+    return kkSingleton<Application>::s_instance->GSDrawModel(mesh, mat, difCol, m_diffTex, isSelected);
+}
+void kkGSSetTarget(kkTexture* fbo)
+{
+    return kkSingleton<Application>::s_instance->GSSetTarget(fbo);
+}
+void kkGSDrawRectangle(const v2i& LT, const v2i& RB, const kkColor& color, kkTexture* t )
+{
+    return kkSingleton<Application>::s_instance->GSDrawRectangle(LT, RB, color, t );
+}
+void kkGSDrawModelSilhouette(kkMesh* mesh,const kkMatrix4& mat, const kkColor& difCol)
+{
+    return kkSingleton<Application>::s_instance->GSDrawModelSilhouette(mesh, mat, difCol);
 }
 void kkGSDrawObb( const kkObb& obb, const kkColor& color)
 {
@@ -66,6 +78,30 @@ bool kkIsKeyDown(kkKey k)
 void* kkGetGUI()
 {
     return kkSingleton<Application>::s_instance->GetGUI();
+}
+AppState_main kkGetAppStateMain()
+{
+    return *kkSingleton<Application>::s_instance->GetAppState_main();
+}
+void kkGSSetScissor(bool set, const v4i& r)
+{
+    kkSingleton<Application>::s_instance->GSSetScissor(set,r);
+}
+ViewportObject* kkGetActiveViewport()
+{
+    return kkSingleton<Application>::s_instance->GetActiveViewport();
+}
+void kkSetActiveViewport(ViewportObject* v)
+{
+    kkSingleton<Application>::s_instance->SetActiveViewport(v);
+}
+void kkGSDrawLine2D(const v2i& p1, const v2i& p2, const kkColor& color)
+{
+    kkSingleton<Application>::s_instance->GSDrawLine2D(p1,p2,color);
+}
+void kkSetAppStateMain(AppState_main s)
+{
+    kkSingleton<Application>::s_instance->SetAppStateMain(s);
 }
 void kkDrawAll()
 {
