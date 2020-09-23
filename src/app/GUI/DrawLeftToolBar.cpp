@@ -4,6 +4,7 @@
 #include "Common/kkInfoSharedLibrary.h"
 #include "../Application.h"
 #include "../Functions.h" 
+#include "../Viewport/Viewport.h" 
 
 using namespace Kr;
 
@@ -112,6 +113,29 @@ void Application::_drawLeftToolBar()
 	}
 	m_KrGuiSystem->newLine();
 
+
+	
+	m_KrGuiSystem->setDrawPosition(oldDrawPosition.x, m_window_client_size.y - m_bottomAreaHeight - 21.f);
+	if( m_KrGuiSystem->beginButtonGroup(kkrooo::getIconFontString(IconFontSymbol::Viewport), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
+	{
+		m_KrGuiSystem->setDrawPosition(oldDrawPosition.x + 23.f, m_window_client_size.y - m_bottomAreaHeight - 21.f);
+		if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ViewportLY_full), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
+		{
+			_init_viewports(ViewportLayoutType::Single);
+			kkDrawAll();
+		}
+		if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ViewportLY_2h), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
+		{
+			_init_viewports(ViewportLayoutType::ParallelHor);
+			kkDrawAll();
+		}
+		if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ViewportLY_2v), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
+		{
+			_init_viewports(ViewportLayoutType::ParallelVer);
+			kkDrawAll();
+		}
+		m_KrGuiSystem->endButtonGroup();
+	}
 	m_KrGuiSystem->setCurrentFont(oldFont);
 }
 

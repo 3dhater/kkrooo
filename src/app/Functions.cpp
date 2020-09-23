@@ -157,6 +157,10 @@ namespace kkrooo
 		case IconFontSymbol::CollapseCategory: return u"5";
 		case IconFontSymbol::CheckBoxCheck: return u"6";
 		case IconFontSymbol::CheckBoxUncheck: return u"7";
+		case IconFontSymbol::Viewport: return u"8";
+		case IconFontSymbol::ViewportLY_full: return u"9";
+		case IconFontSymbol::ViewportLY_2h: return u"!";
+		case IconFontSymbol::ViewportLY_2v: return u"-";
 
 		case IconFontSymbol::Cross1: return u"A";
 		case IconFontSymbol::Add1:   return u"B";

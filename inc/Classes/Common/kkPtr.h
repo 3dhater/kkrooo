@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __KKROO_PTR_H__
+﻿#ifndef __KKROO_PTR_H__
 #define __KKROO_PTR_H__
 
 // It is necessary to ensure that objects are destroyed before the call `kkStopEngine`

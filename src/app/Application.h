@@ -95,7 +95,7 @@ class Application
 	void _init_GUIResources();
 	void _init_krgui();
 	void _init_renderManager();
-	void _init_viewports();
+	void _init_viewports(ViewportLayoutType);
 	void _init_shortcutEditor();
 
 	void _draw_shortcutEditor();
@@ -189,7 +189,8 @@ class Application
 	bool m_need_to_save = false;
 
 	PluginCommonInterface * m_plugin_interface = nullptr;
-
+	
+	bool m_drawAllEvent = false;
 	kkList<AppEvent> m_appEvents[3];
 
 	// Для того чтобы рисовать ГУИ из плагинов нужно выйти из рисования менюшки.

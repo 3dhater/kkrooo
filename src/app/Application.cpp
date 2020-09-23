@@ -310,15 +310,17 @@ void Application::_init_renderManager()
 	m_renderManager->init(m_gs.ptr(), m_KrGuiSystem, m_renderWindow.ptr());
 }
 
-void Application::_init_viewports()
+void Application::_init_viewports(ViewportLayoutType lyt)
 {
 	v4f indent;
 	indent.x = m_leftToolBarWidth;
 	indent.y = m_mainMenuHeight + m_mainToolBarHeight;
 	indent.z = m_leftToolBarWidth;
 	indent.w = m_bottomAreaHeight;
+	if(m_mainViewport.ptr())
+		kkDestroy(m_mainViewport.ptr());
 	m_mainViewport = kkCreate<Viewport>(m_mainWindow.ptr());
-	m_mainViewport->init(ViewportType::Main, ViewportLayoutType::ParallelVer, indent);
+	m_mainViewport->init(ViewportType::Main, lyt, indent);
 	m_mainViewport->update();
 }
 
@@ -375,7 +377,7 @@ void Application::init()
 	resetScene3D();
 	ShowWindow((HWND)m_mainWindow->getHandle(), SW_MAXIMIZE);
 	updateBuffers();
-	_init_viewports();
+	_init_viewports(ViewportLayoutType::Single);
 	m_gizmo->init();
 
 	_initEditParamsWindow();
@@ -462,6 +464,7 @@ void Application::run()
 
 	while( m_main_system->update() )
 	{
+		m_drawAllEvent = false;
 		if( isWindowActive(EWID_MAIN_WINDOW) )
 		{
 			m_cursor_position.set( (s32)Kr::Gui::GuiSystem::m_cursorCoords.x,  (s32)Kr::Gui::GuiSystem::m_cursorCoords.y );
@@ -549,6 +552,9 @@ void Application::run()
 
 			if(m_event_consumer)
 				_onEndFrame();
+
+			if(m_KrGuiSystem->m_mouseIsLMB_up)
+				kkDrawAll();
 		}
 		//printf("Time: %f \n", (work_time + sleep_time).count());
 	}
@@ -2162,10 +2168,14 @@ bool Application::IsMmbDown(){return m_event_consumer->isMmbDown();}
 bool Application::IsMmbUp(){return m_event_consumer->isMmbUp();}
 void Application::DrawAllEvent()
 {
-	AppEvent e;
-	e.type = AppEventType::GS;
-	e.GS.type = AppEvent_GS::_type::DrawAll;
-	addAppEvent(e,AppEventPriority::Low);
+	if(!m_drawAllEvent)
+	{
+		m_drawAllEvent = true;
+		AppEvent e;
+		e.type = AppEventType::GS;
+		e.GS.type = AppEvent_GS::_type::DrawAll;
+		addAppEvent(e,AppEventPriority::Low);
+	}
 }
 v2i* Application::GetCursorPosition()
 {

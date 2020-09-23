@@ -191,6 +191,10 @@ bool Application::_initFonts()
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::EditUV), Gui::Vec4f(45,29,64,48), 0, 0, 0, 602,640 ); 
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::CollapseCategory), Gui::Vec4f(30,9,38,13), 0, 0, 0, 602,640 ); 
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::ExpandCategory), Gui::Vec4f(30,15,38,23), 0, 0, 0, 602,640 ); 
+	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::Viewport), Gui::Vec4f(3,50,22,69), 0, 0, 0, 602,640 ); 
+	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::ViewportLY_full), Gui::Vec4f(24,50,43,69), 0, 0, 0, 602,640 ); 
+	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::ViewportLY_2v), Gui::Vec4f(45,50,64,69), 0, 0, 0, 602,640 ); 
+	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::ViewportLY_2h), Gui::Vec4f(66,50,85,69), 0, 0, 0, 602,640 ); 
 	
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::Cross1), Gui::Vec4f(155,601,164,610), 0, 0, 0, 602,640 ); 
 	font->addCharacter(kkrooo::getIconFontChar(IconFontSymbol::Add1), Gui::Vec4f(238,621,248,631), 0, 0, 0, 602,640 ); 

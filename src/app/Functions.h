@@ -73,6 +73,10 @@ enum class IconFontSymbol
 	EditFace,
 	CheckBoxCheck,
 	CheckBoxUncheck,
+	Viewport,
+	ViewportLY_full,
+	ViewportLY_2v,
+	ViewportLY_2h,
 };
 
 namespace kkrooo

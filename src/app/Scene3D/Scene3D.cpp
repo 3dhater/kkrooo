@@ -1043,6 +1043,8 @@ void Scene3D::_deleteSelectedObjects_object()
 		m_app->setNeedToSave(true);
 
 	m_objects_selected.clear();
+	m_objects_mouseHover.clear();
+	m_objects_inFrustum_sorted.clear();
 }
 
 void Scene3D::_deleteSelectedObjects_vertex(Scene3DObject* object)

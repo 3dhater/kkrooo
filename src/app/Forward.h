@@ -1,5 +1,10 @@
 ﻿#ifndef __FORWARD_H__
 #define __FORWARD_H__
+struct ViewportMouseState;
+enum class ViewportLayoutType;
+enum class ViewportType;
+enum class ViewportUID;
+
 class Gizmo;
 class GeometryCreator;
 class EventConsumer;

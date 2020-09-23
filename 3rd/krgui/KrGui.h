@@ -481,6 +481,9 @@ namespace Kr
 			Gui::Group* getCurrentGroup();
 			void endGroup();
 
+			bool beginButtonGroup( const char16_t* text, Style* style = nullptr, const Vec2f& size = Vec2f(), bool enabled = true, bool textToCenter = true, const Vec4f& rounding = Vec4f() );
+			void endButtonGroup();
+
 			void drawLine( const Vec2f& begin, const Vec2f& end, float size, const Vec4f& color1, const Vec4f& color2 );
 
 			bool beginNodeEditor( NodeEditor * nodeEditor );

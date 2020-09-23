@@ -317,7 +317,7 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			updateCursorRay();
 		}
 
-		if(g_mouseState.LMB_DOWN || g_mouseState.MMB_DOWN)
+		if(g_mouseState.LMB_DOWN || g_mouseState.MMB_DOWN || g_mouseState.RMB_DOWN)
 		{
 			res = true;
 		}
@@ -839,7 +839,6 @@ void Viewport::updateInput(const v2f& mouseDelta)
 void Viewport::update()
 {
 	m_windowSize = m_window->getClientRect().getWidthAndHeight();
-
 	if(m_viewports)
 	{
 		auto end = m_viewports->m_left;
