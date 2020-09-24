@@ -16,13 +16,16 @@
 #include "../Application.h"
 #include "../ApplicationState.h"
 #include "../Gizmo.h"
+#include "../EventConsumer.h"
 #include "Scene3D.h"
 #include "Scene3DObject.h"
 
 #include <algorithm>
 
 extern ViewportMouseState g_mouseState;
-
+f32 g_pivotSize = 0.f;
+kkVector4 g_pivotPoint;
+v2i g_pivotPoint2D;
 const s32 g_edgeColorNumber = 62;
 const kkColor g_edgeColors[] = 
 {
@@ -1147,804 +1150,735 @@ void Scene3D::unregisterObject( Scene3DObject* o )
 		m_objects_selected.erase( m_objects_selected.begin() + m_objects_selected.find_first_of(o) );
 }
 
-void Scene3D::rotateSelectedObjects(bool startStop, bool cancel, bool first )
+void Scene3D::rotateSelectedObjects(GizmoPart* gizmoPart,bool startStop, bool cancel, bool first )
 {
-//	auto em = m_app->getEditMode();
-//
-//	bool blender_style = true;
-//
-//	static f32 first_x = 0, first_y = 0, first_z = 0;
-//	static f32 toolTip_angle_x = 0.f, toolTip_angle_y = 0.f, toolTip_angle_z = 0.f;
-//	static kkStringA toolTip;
-//
-//	static kkVector4 C;
-//	if( first )
-//		m_selectionAabb.center(C);
-//
-//	f32 x = 0, y = 0, z = 0;
-//
-//	auto camera  = m_app->m_active_viewport->getCamera();
-//
-//	auto p1 = m_app->m_currentGizmoEvent.point2D;
-//	auto p2 = m_app->m_cursor_position;
-//	auto p3 = p2 - p1;
-//	v2f point((float)p3.x,(float)p3.y);
-//
-//	if( e.part == AppEvent_gizmo::_part::_x )
-//	{
-//		if( blender_style )
-//		{
-//			x = (f32)std::atan2((f32)point.x, (f32)point.y);
-//
-//			if( first )
-//			{
-//				first_x = x;
-//			}
-//
-//			x -= first_x;
-//		}
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_y )
-//	{
-//		if( blender_style )
-//		{
-//			y = (f32)std::atan2((f32)point.x, (f32)point.y);
-//			if( first )
-//			{
-//				first_y = y;
-//			}
-//
-//			y -= first_y;
-//		}
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_z )
-//	{
-//		if( blender_style )
-//		{
-//			z = (f32)std::atan2((f32)point.x, (f32)point.y);
-//			if( first )
-//			{
-//				first_z = z;
-//			}
-//
-//			z -= first_z;
-//		}
-//
-//		
-//	}
-//
-//	kkMatrix4 M;
-//	float deg_f = 0.f;
-//
-//	if( e.part == AppEvent_gizmo::_part::_screen_plane )
-//	{
-//		auto vprc = m_app->m_active_viewport->getRect();
-//		auto vpsz = vprc.getWidthAndHeight();
-//
-//		auto p1 = v2i( (vpsz.x/2.f)+vprc.x,(vpsz.y/2.f)+vprc.y);
-//		auto p2 = m_app->m_cursor_position;
-//		auto point = p2 - p1;
-//
-//		x = (f32)std::atan2((f32)point.x, (f32)point.y);
-//		if( first )
-//		{
-//			first_x = x;
-//		}
-//
-//		x -= first_x;
-//
-//
-//		if( m_app->m_state_keyboard == AppState_keyboard::Shift )
-//		{
-//			int deg = (int)math::radToDeg( x );
-//			if( deg % 5 != 0 )
-//				deg -= deg % 5;
-//				deg_f = (float)deg;
-//		}
-//		else
-//		{
-//			deg_f = math::radToDeg( x );
-//		}
-//
-//		m_app->m_active_viewport->getActiveViewportCamera()->setObjectRotationAngle(-math::degToRad((float)deg_f));
-//
-//		m_app->m_active_viewport->getActiveViewportCamera()->update();
-//		M = m_app->m_active_viewport->getActiveViewportCamera()->getObjectRotationMatrix();
-//	}
-//
-//	//printf("%f %f\n", x, y);
-//	auto cameraRotation = m_app->m_active_viewport->getActiveViewportCamera()->getAllRotation();
-//	//printf("%f\n", cameraRotation.y );
-//
-//
-//	if( e.part == AppEvent_gizmo::_part::_x )
-//	{
-//		if( blender_style )
-//		{
-//			static float last_x =  0.f;
-//			if( x > 0.f )
-//			{
-//				x = -(math::PI+math::PI) + x;
-//			}
-//			toolTip_angle_x += -x - last_x;
-//			last_x = -x;
-//
-//
-//			if( m_app->m_state_keyboard == AppState_keyboard::Shift )
-//			{
-//				int   deg_i = (int)math::radToDeg( std::abs( toolTip_angle_x ));
-//				if( deg_i % 5 != 0 )
-//					deg_i -= (deg_i % 5);
-//				deg_f = (float)deg_i;
-//			}
-//			else
-//			{
-//				deg_f = math::radToDeg( std::abs( toolTip_angle_x ));
-//			}
-//
-//			if( cameraRotation.y < 0.f )
-//			{
-//				kkQuaternion Q( -math::degToRad((float)deg_f),0.f,0.f);
-//				math::makeRotationMatrix(M,Q);
-//			}
-//			else	
-//			{
-//				kkQuaternion Q( math::degToRad((float)deg_f),0.f,0.f);
-//				math::makeRotationMatrix(M,Q);
-//			}
-//		}
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_y )
-//	{
-//		if( blender_style )
-//		{
-//			static float last_y =  0.f;
-//
-//			if( y > 0.f )
-//			{
-//				y = -(math::PI+math::PI) + y;
-//			}
-//			toolTip_angle_y += -y - last_y;
-//			last_y = -y;
-//
-//
-//			if( m_app->m_state_keyboard == AppState_keyboard::Shift )
-//			{
-//				int deg_i = (int)math::radToDeg( std::abs( toolTip_angle_y ));
-//				if( deg_i % 5 != 0 )
-//					deg_i -= (deg_i % 5);
-//
-//				deg_f = (float)deg_i;
-//			}
-//			else
-//			{
-//				deg_f = math::radToDeg( std::abs( toolTip_angle_y ));
-//			}
-//
-//			if( cameraRotation.x > 90.f || cameraRotation.x < -90.f  )
-//			{
-//				kkQuaternion Q( 0.f,-math::degToRad((float)deg_f),0.f);
-//				math::makeRotationMatrix(M,Q);
-//			}
-//			else	
-//			{
-//				kkQuaternion Q( 0.f,math::degToRad((float)deg_f),0.f);
-//				math::makeRotationMatrix(M,Q);
-//			}
-//		}
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_z )
-//	{
-//		if( blender_style )
-//		{
-//			static float last_z =  0.f;
-//
-//			if( z > 0.f )
-//			{
-//				z = -(math::PI+math::PI) + z;
-//			}
-//			toolTip_angle_z += -z - last_z;
-//			last_z = -z;
-//			
-//
-//			if( m_app->m_state_keyboard == AppState_keyboard::Shift )
-//			{
-//				int deg = (int)math::radToDeg( std::abs( toolTip_angle_z ));
-//				if( deg % 5 != 0 )
-//					deg -= deg % 5;
-//				deg_f = (float)deg;
-//			}
-//			else
-//			{
-//				deg_f = math::radToDeg( std::abs( toolTip_angle_z ));
-//			}
-//
-//			if( cameraRotation.y < 90.f && cameraRotation.y > -90.f )
-//			{
-//				kkQuaternion Q( 0.f,0.f, math::degToRad((float)deg_f) );
-//				math::makeRotationMatrix(M,Q);
-//			}
-//			else	
-//			{
-//				kkQuaternion Q( 0.f,0.f, -math::degToRad((float)deg_f) );
-//				math::makeRotationMatrix(M,Q);
-//			}
-//		}
-//	}
-//
-//	kkVector4 pivotFix;
-//
-//	auto num = m_objects_selected.size();
-//
-//	if( startStop )
-//	{
-//		switch (em)
-//		{
-//		case EditMode::Object:
-//		{
-//			auto M2 = M;
-//			for( auto * o : m_objects_selected )
-//			{
-//				o->m_matrix = M * o->m_matrixFixed;
-//
-//				o->m_matrixOnlyRotation = M * o->m_matrixOnlyRotationFixed;
-//
-//				// global
-//				if( m_app->m_isLocalRotation == false && num > 1 )
-//				{
-//					pivotFix = o->GetPivotFixed();
-//					auto & pivot  = o->GetPivot();
-//					pivot = math::mul(pivotFix-C,M2)+C;
-//				}
-//
-////				o->updateMatrixPosition();
-//				o->UpdateAabb();
-//			}
-//		}
-//			break;
-//		case EditMode::Vertex:
-//		{
-//			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
-//			{
-//				auto info = &m_objectsVertexSelectInfo[ i ];
-//				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
-//			}
-//		}
-//			break;
-//		case EditMode::Edge:
-//			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
-//			{
-//				auto info = &m_objectsEdgeSelectInfo[ i ];
-//				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
-//			}
-//			break;
-//		case EditMode::Polygon:
-//			for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
-//			{
-//				auto info = &m_objectsPolySelectInfo[ i ];
-//				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
-//			}
-//			break;
-//		default:
-//			break;
-//		}
-//		
-//	}
-//	else
-//	{
-//		switch (em)
-//		{
-//		case EditMode::Object:
-//		{
-//			for( auto * o : m_objects_selected )
-//			{
-//				if( cancel )
-//				{
-//					// global
-//					if( m_app->m_isLocalRotation  == false && num > 1 )
-//					{
-//						o->RestorePivot();
-//					}
-//
-//					o->m_matrix = o->m_matrixFixed;
-//					o->m_matrixOnlyRotation = o->m_matrixOnlyRotationFixed;
-//
-//					o->UpdateAabb();
-//				}
-//				else
-//				{
-//					// global
-//					if( m_app->m_isLocalRotation  == false && num > 1 )
-//					{
-//						o->ApplyPivot();
-//					}
-//
-//					o->m_matrixFixed = o->m_matrix;
-//					o->m_matrixOnlyRotationFixed = o->m_matrixOnlyRotation;
-//				}
-//			
-//			//	updateObject2DPoints(o);
-//			}
-//		}
-//			break;
-//		case EditMode::Edge:
-//		case EditMode::Vertex:
-//		case EditMode::Polygon:
-//		{
-//			for( auto * o : m_objects_selected )
-//			{
-//				if( cancel )
-//				{
-//					o->RestorePosition();
-//				}
-//				else
-//				{
-//					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
-//					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
-//				}
-//			//	updateObject2DPoints(o);
-//			}
-//		}
-//			break;
-//		//case EditMode::Edge:
-//		//	break;
-//		//case EditMode::Polygon:
-//		//	break;
-//		default:
-//			break;
-//		}
-//		
-//		updateSelectionAabb();
-//		updateSceneAabb();
-//	}
+	auto em = m_app->getEditMode();
+
+	static f32 first_x = 0, first_y = 0, first_z = 0;
+	static f32 toolTip_angle_x = 0.f, toolTip_angle_y = 0.f, toolTip_angle_z = 0.f;
+	static kkStringA toolTip;
+
+	static kkVector4 C;
+	if( first )
+		m_selectionAabb.center(C);
+
+	f32 x = 0, y = 0, z = 0;
+
+	auto VO = kkGetActiveViewport();
+	auto camera  = VO->m_activeCamera->getCamera();
+
+	auto p1 = g_pivotPoint2D;
+	auto p2 = m_app->m_cursor_position;
+	auto p3 = p2 - p1;
+	v2f point((float)p3.x,(float)p3.y);
+
+	if( *gizmoPart == GizmoPart::X )
+	{
+		x = (f32)std::atan2((f32)point.x, (f32)point.y);
+		if( first )
+			first_x = x;
+		x -= first_x;
+	}
+
+	if( *gizmoPart == GizmoPart::Y )
+	{
+		y = (f32)std::atan2((f32)point.x, (f32)point.y);
+		if( first )
+			first_y = y;
+		y -= first_y;
+	}
+
+	if( *gizmoPart == GizmoPart::Z )
+	{
+		z = (f32)std::atan2((f32)point.x, (f32)point.y);
+		if( first )
+			first_z = z;
+		z -= first_z;
+	}
+
+	kkMatrix4 M;
+	float deg_f = 0.f;
+
+	if( *gizmoPart == GizmoPart::Screen_plane )
+	{
+		auto vprc = VO->m_rect_modified;
+		auto vpsz = vprc.getWidthAndHeight();
+
+		auto p1 = v2i( (vpsz.x/2.f)+vprc.x,(vpsz.y/2.f)+vprc.y);
+		auto p2 = m_app->m_cursor_position;
+		auto point = p2 - p1;
+
+		x = (f32)std::atan2((f32)point.x, (f32)point.y);
+		if( first )
+			first_x = x;
+		x -= first_x;
+
+		if( m_app->m_state_keyboard == AppState_keyboard::Shift )
+		{
+			int deg = (int)math::radToDeg( x );
+			if( deg % 5 != 0 )
+				deg -= deg % 5;
+				deg_f = (float)deg;
+		}
+		else
+		{
+			deg_f = math::radToDeg( x );
+		}
+
+		VO->m_activeCamera->setObjectRotationAngle(-math::degToRad((float)deg_f));
+
+		VO->m_activeCamera->update();
+		M = VO->m_activeCamera->getObjectRotationMatrix();
+	}
+
+	//printf("%f %f\n", x, y);
+	auto cameraRotation = VO->m_activeCamera->getAllRotation();
+	//printf("%f\n", cameraRotation.y );
+
+	if( *gizmoPart == GizmoPart::X )
+	{
+		static float last_x =  0.f;
+		if( x > 0.f )
+			x = -(math::PI+math::PI) + x;
+		toolTip_angle_x += -x - last_x;
+		last_x = -x;
+
+
+		if( m_app->m_state_keyboard == AppState_keyboard::Shift )
+		{
+			int   deg_i = (int)math::radToDeg( std::abs( toolTip_angle_x ));
+			if( deg_i % 5 != 0 )
+				deg_i -= (deg_i % 5);
+			deg_f = (float)deg_i;
+		}
+		else
+			deg_f = math::radToDeg( std::abs( toolTip_angle_x ));
+
+		if( cameraRotation.y < 0.f )
+		{
+			kkQuaternion Q( -math::degToRad((float)deg_f),0.f,0.f);
+			math::makeRotationMatrix(M,Q);
+		}
+		else	
+		{
+			kkQuaternion Q( math::degToRad((float)deg_f),0.f,0.f);
+			math::makeRotationMatrix(M,Q);
+		}
+	}
+
+	if( *gizmoPart == GizmoPart::Y )
+	{
+		static float last_y =  0.f;
+		if( y > 0.f )
+			y = -(math::PI+math::PI) + y;
+		toolTip_angle_y += -y - last_y;
+		last_y = -y;
+
+
+		if( m_app->m_state_keyboard == AppState_keyboard::Shift )
+		{
+			int deg_i = (int)math::radToDeg( std::abs( toolTip_angle_y ));
+			if( deg_i % 5 != 0 )
+				deg_i -= (deg_i % 5);
+
+			deg_f = (float)deg_i;
+		}
+		else
+			deg_f = math::radToDeg( std::abs( toolTip_angle_y ));
+
+		if( cameraRotation.x > 90.f || cameraRotation.x < -90.f  )
+		{
+			kkQuaternion Q( 0.f,-math::degToRad((float)deg_f),0.f);
+			math::makeRotationMatrix(M,Q);
+		}
+		else	
+		{
+			kkQuaternion Q( 0.f,math::degToRad((float)deg_f),0.f);
+			math::makeRotationMatrix(M,Q);
+		}
+	}
+
+	if( *gizmoPart == GizmoPart::Z )
+	{
+		static float last_z =  0.f;
+		if( z > 0.f )
+			z = -(math::PI+math::PI) + z;
+		toolTip_angle_z += -z - last_z;
+		last_z = -z;
+			
+
+		if( m_app->m_state_keyboard == AppState_keyboard::Shift )
+		{
+			int deg = (int)math::radToDeg( std::abs( toolTip_angle_z ));
+			if( deg % 5 != 0 )
+				deg -= deg % 5;
+			deg_f = (float)deg;
+		}
+		else
+			deg_f = math::radToDeg( std::abs( toolTip_angle_z ));
+
+		if( cameraRotation.y < 90.f && cameraRotation.y > -90.f )
+		{
+			kkQuaternion Q( 0.f,0.f, math::degToRad((float)deg_f) );
+			math::makeRotationMatrix(M,Q);
+		}
+		else	
+		{
+			kkQuaternion Q( 0.f,0.f, -math::degToRad((float)deg_f) );
+			math::makeRotationMatrix(M,Q);
+		}
+	}
+
+	kkVector4 pivotFix;
+	auto num = m_objects_selected.size();
+
+	if( startStop )
+	{
+		switch (em)
+		{
+		case EditMode::Object:
+		{
+			auto M2 = M;
+			for( auto * o : m_objects_selected )
+			{
+				o->m_matrix = M * o->m_matrixFixed;
+
+				o->m_matrixOnlyRotation = M * o->m_matrixOnlyRotationFixed;
+
+				// global
+				if( m_app->m_isLocalRotation == false && num > 1 )
+				{
+					pivotFix = o->GetPivotFixed();
+					auto & pivot  = o->GetPivot();
+					pivot = math::mul(pivotFix-C,M2)+C;
+				}
+
+//				o->updateMatrixPosition();
+				o->UpdateAabb();
+			}
+		}
+			break;
+		/*case EditMode::Vertex:
+		{
+			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
+			{
+				auto info = &m_objectsVertexSelectInfo[ i ];
+				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
+			}
+		}
+			break;
+		case EditMode::Edge:
+			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
+			{
+				auto info = &m_objectsEdgeSelectInfo[ i ];
+				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
+			}
+			break;
+		case EditMode::Polygon:
+			for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
+			{
+				auto info = &m_objectsPolySelectInfo[ i ];
+				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
+			}
+			break;*/
+		default:
+			break;
+		}
+		
+	}
+	else
+	{
+		switch (em)
+		{
+		case EditMode::Object:
+		{
+			for( auto * o : m_objects_selected )
+			{
+				if( cancel )
+				{
+					// global
+					if( m_app->m_isLocalRotation  == false && num > 1 )
+					{
+						o->RestorePivot();
+					}
+
+					o->m_matrix = o->m_matrixFixed;
+					o->m_matrixOnlyRotation = o->m_matrixOnlyRotationFixed;
+
+					o->UpdateAabb();
+				}
+				else
+				{
+					// global
+					if( m_app->m_isLocalRotation  == false && num > 1 )
+					{
+						o->ApplyPivot();
+					}
+
+					o->m_matrixFixed = o->m_matrix;
+					o->m_matrixOnlyRotationFixed = o->m_matrixOnlyRotation;
+				}
+			
+			//	updateObject2DPoints(o);
+			}
+		}
+			break;
+		case EditMode::Edge:
+		case EditMode::Vertex:
+		case EditMode::Polygon:
+		{
+			for( auto * o : m_objects_selected )
+			{
+				if( cancel )
+				{
+					o->RestorePosition();
+				}
+				else
+				{
+					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
+					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
+				}
+			//	updateObject2DPoints(o);
+			}
+		}
+			break;
+		//case EditMode::Edge:
+		//	break;
+		//case EditMode::Polygon:
+		//	break;
+		default:
+			break;
+		}
+		
+		updateSelectionAabb();
+		updateSceneAabb();
+	}
 }
 
-void Scene3D::scaleSelectedObjects(bool startStop, bool cancel,bool first )
+void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool cancel,bool first )
 {
-//	kkVector4 pivotFix;
-//
-//	f32 x = 0, y = 0, z = 0;
-//
-//	auto r1 = m_app->m_cursorRayFirstClick.m_origin;
-//	auto r2 = m_app->m_cursorRayCurrent.m_origin;
-//
-//	auto camera  = m_app->m_active_viewport->getCamera();
-//
-//	// почему минус. если мы спускаемся вниз, то думаем, что камера идёт в минус Y
-//	// но на самом деле это мир идёт ВВЕРХ, плюс Y
-//	auto cam_pos = -camera->getPositionInSpace();
-//	
-//
-//	if( e.part == AppEvent_gizmo::_part::_x )
-//	{
-//		x = (r2-r1).KK_X;
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_y )
-//	{
-//		y = (r2-r1).KK_Y;
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_z )
-//	{
-//		z = (r2-r1).KK_Z;
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_xy_plane )
-//	{
-//		x = (r2-r1).KK_X;
-//		y = (r2-r1).KK_Y;
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_xz_plane )
-//	{
-//		x = (r2-r1).KK_X;
-//		z = (r2-r1).KK_Z;
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_zy_plane )
-//	{
-//		y = (r2-r1).KK_Y;
-//		z = (r2-r1).KK_Z;
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_screen_plane )
-//	{
-//		x = (r2-r1).KK_X;
-//		z = (r2-r1).KK_X;
-//		y = (r2-r1).KK_X;
-//	}
-//
-//	//printf("%f %f\n", x, y);
-//
-//	//auto D = 5000.f; // должно быть значение far камеры
-//
-//	static kkVector4 C;
-//	if( first )
-//		m_selectionAabb.center(C);
-//
-//	f32 L = 1.f;
-//	if( m_app->m_active_viewport->isPerspective() )
-//	{
-//		L = 500.0f;
-//	}
-//	
-//	x = x * L;
-//	y = y * L;
-//	z = z * L;
-//
-//	//printf("%f\n", x );
-//	// здесь попробую сделать так, чтобы уменьшение масштаба было не линейным
-//	if(x<0.f){ x = x * 1.f / (1.f-x); }
-//	if(y<0.f){ y = y * 1.f / (1.f-y); }
-//	if(z<0.f){ z = z * 1.f / (1.f-z); }
-//
-//	x += 1.f;
-//	y += 1.f;
-//	z += 1.f;
-//
-//	if( x <= 0.f ) x = FLT_MIN;
-//	if( y <= 0.f ) y = FLT_MIN;
-//	if( z <= 0.f ) z = FLT_MIN;
-//	
-//	//printf("%f\n", m_gizmo->m_scaleSize.KK_X );
-//
-//	if( startStop )
-//	{
-//		m_gizmo->m_scaleSize.KK_X  = x-1.f;
-//		m_gizmo->m_scaleSize.KK_Y  = y-1.f;
-//		m_gizmo->m_scaleSize.KK_Z  = z-1.f;
-//	}
-//	else
-//	{
-//		m_gizmo->m_scaleSize.KK_X  = 0;
-//		m_gizmo->m_scaleSize.KK_Y  = 0;
-//		m_gizmo->m_scaleSize.KK_Z  = 0;
-//	}
-//
-//	kkMatrix4 S;
-//	math::makeScaleMatrix(kkVector4(x,y,z,1.f),S);
-//
-//	////printf("%f\n", L );
-//
-//	kkMatrix4 M;
-//
-//	auto em = m_app->getEditMode();
-//
-//	if( startStop )
-//	{
-//		switch (em)
-//		{
-//		case EditMode::Object:
-//		{
-//			auto n = m_objects_selected.size();
-//			for( auto * o : m_objects_selected )
-//			{
-//				//o->m_scaleMatrix = S;
-//				o->m_matrix = S * o->m_matrixFixed;
-//
-//				// global
-//				if( n == 1)
-//				{
-//					pivotFix = o->GetPivotFixed();
-//					auto & pivot  = o->GetPivot();
-//					pivot = math::mul(pivotFix-pivotFix,S)+pivotFix;
-//				}
-//				else if( m_app->m_isLocalScale  == false )
-//				{
-//					pivotFix = o->GetPivotFixed();
-//					auto & pivot  = o->GetPivot();
-//					pivot = math::mul(pivotFix-C,S)+C; // для глобал нужно C
-//				}
-//
-//
-////				o->updateMatrixPosition();
-//				o->UpdateAabb();
-//			}
-//		}
-//			break;
-//		case EditMode::Vertex:
-//		{
-//			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
-//			{
-//				auto info = &m_objectsVertexSelectInfo[ i ];
-//				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
-//			}
-//		}
-//			break;
-//		case EditMode::Edge:
-//			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
-//			{
-//				auto info = &m_objectsEdgeSelectInfo[ i ];
-//				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
-//			}
-//			break;
-//		case EditMode::Polygon:
-//			for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
-//			{
-//				auto info = &m_objectsPolySelectInfo[ i ];
-//				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
-//			}
-//			break;
-//		default:
-//			break;
-//		}
-//		
-//	}
-//	else
-//	{
-//		switch (em)
-//		{
-//		case EditMode::Object:
-//			for( auto * o : m_objects_selected )
-//			{
-//				if( cancel )
-//				{
-//					// global
-//					if( m_app->m_isLocalScale  == false )
-//					{
-//						o->RestorePivot();
-//					}
-//
-//					o->m_matrix      = o->m_matrixFixed;
-//					//o->m_scaleMatrix = o->m_scaleMatrixFixed;
-////					o->updateMatrixPosition();
-//					o->UpdateAabb();
-//				}
-//				else
-//				{
-//					// global
-//					if( m_app->m_isLocalScale  == false )
-//					{
-//						o->ApplyPivot();
-//					}
-//
-//					o->m_matrixFixed = o->m_matrix;
-//				}
-//			//	updateObject2DPoints(o);
-//			}
-//			break;
-//		case EditMode::Edge:
-//		case EditMode::Vertex:
-//		case EditMode::Polygon:
-//			for( auto * o : m_objects_selected )
-//			{
-//				if( cancel )
-//				{
-//					o->RestorePosition();
-//				}
-//				else
-//				{
-//					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
-//				//	o->generateNormals();
-//					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
-//				}
-//			//	updateObject2DPoints(o);
-//			}
-//			break;
-//		//case EditMode::Edge:
-//		//	break;
-//		//case EditMode::Polygon:
-//		//	break;
-//		default:
-//			break;
-//		}
-//		
-//		updateSelectionAabb();
-//		updateSceneAabb();
-//	}
+	auto VO = kkGetActiveViewport();
+	kkVector4 pivotFix;
+	f32 x = 0, y = 0, z = 0;
+	auto r1 = VO->m_rayOnClick.m_origin;
+	auto r2 = VO->m_cursorRay->m_center.m_origin;
+	auto camera  = VO->m_activeCamera->getCamera();
+
+	// почему минус. если мы спускаемся вниз, то думаем, что камера идёт в минус Y
+	// но на самом деле это мир идёт ВВЕРХ, плюс Y
+	auto cam_pos = -camera->getPositionInSpace();
+
+	if( *gizmoPart == GizmoPart::X )
+		x = (r2-r1).KK_X;
+	if( *gizmoPart == GizmoPart::Y )
+		y = (r2-r1).KK_Y;
+	if( *gizmoPart == GizmoPart::Z )
+		z = (r2-r1).KK_Z;
+	if( *gizmoPart == GizmoPart::XY_plane )
+	{
+		x = (r2-r1).KK_X;
+		y = (r2-r1).KK_Y;
+	}
+
+	if( *gizmoPart == GizmoPart::XZ_plane )
+	{
+		x = (r2-r1).KK_X;
+		z = (r2-r1).KK_Z;
+	}
+
+	if( *gizmoPart == GizmoPart::ZY_plane )
+	{
+		y = (r2-r1).KK_Y;
+		z = (r2-r1).KK_Z;
+	}
+
+	if( *gizmoPart == GizmoPart::Screen_plane )
+	{
+		x = (r2-r1).KK_X;
+		z = (r2-r1).KK_X;
+		y = (r2-r1).KK_X;
+	}
+
+	//printf("%f %f\n", x, y);
+	//auto D = 5000.f; // должно быть значение far камеры
+
+	static kkVector4 C;
+	if( first )
+		m_selectionAabb.center(C);
+
+	f32 L = 1.f;
+	bool isPerspective = VO->m_activeCamera == VO->m_cameraPersp.ptr();
+	if( isPerspective )
+		L = 500.0f;
+	
+	x = x * L;
+	y = y * L;
+	z = z * L;
+
+	//printf("%f\n", x );
+	// здесь попробую сделать так, чтобы уменьшение масштаба было не линейным
+	if(x<0.f){ x = x * 1.f / (1.f-x); }
+	if(y<0.f){ y = y * 1.f / (1.f-y); }
+	if(z<0.f){ z = z * 1.f / (1.f-z); }
+
+	x += 1.f;
+	y += 1.f;
+	z += 1.f;
+
+	if( x <= 0.f ) x = FLT_MIN;
+	if( y <= 0.f ) y = FLT_MIN;
+	if( z <= 0.f ) z = FLT_MIN;
+	
+	//printf("%f\n", m_gizmo->m_scaleSize.KK_X );
+
+	if( startStop )
+	{
+		m_gizmo->m_scaleSize.KK_X  = x-1.f;
+		m_gizmo->m_scaleSize.KK_Y  = y-1.f;
+		m_gizmo->m_scaleSize.KK_Z  = z-1.f;
+	}
+	else
+	{
+		m_gizmo->m_scaleSize.KK_X  = 0;
+		m_gizmo->m_scaleSize.KK_Y  = 0;
+		m_gizmo->m_scaleSize.KK_Z  = 0;
+	}
+
+	kkMatrix4 S;
+	math::makeScaleMatrix(kkVector4(x,y,z,1.f),S);
+
+	////printf("%f\n", L );
+
+	kkMatrix4 M;
+
+	auto em = m_app->getEditMode();
+
+	if( startStop )
+	{
+		switch (em)
+		{
+		case EditMode::Object:
+		{
+			auto n = m_objects_selected.size();
+			for( auto * o : m_objects_selected )
+			{
+				//o->m_scaleMatrix = S;
+				o->m_matrix = S * o->m_matrixFixed;
+
+				// global
+				if( n == 1)
+				{
+					pivotFix = o->GetPivotFixed();
+					auto & pivot  = o->GetPivot();
+					pivot = math::mul(pivotFix-pivotFix,S)+pivotFix;
+				}
+				else if( m_app->m_isLocalScale  == false )
+				{
+					pivotFix = o->GetPivotFixed();
+					auto & pivot  = o->GetPivot();
+					pivot = math::mul(pivotFix-C,S)+C; // для глобал нужно C
+				}
+
+
+//				o->updateMatrixPosition();
+				o->UpdateAabb();
+			}
+		}
+			break;
+		/*case EditMode::Vertex:
+		{
+			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
+			{
+				auto info = &m_objectsVertexSelectInfo[ i ];
+				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
+			}
+		}
+			break;
+		case EditMode::Edge:
+			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
+			{
+				auto info = &m_objectsEdgeSelectInfo[ i ];
+				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
+			}
+			break;
+		case EditMode::Polygon:
+			for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
+			{
+				auto info = &m_objectsPolySelectInfo[ i ];
+				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
+			}
+			break;*/
+		default:
+			break;
+		}
+		
+	}
+	else
+	{
+		switch (em)
+		{
+		case EditMode::Object:
+			for( auto * o : m_objects_selected )
+			{
+				if( cancel )
+				{
+					// global
+					if( m_app->m_isLocalScale  == false )
+					{
+						o->RestorePivot();
+					}
+
+					o->m_matrix      = o->m_matrixFixed;
+					//o->m_scaleMatrix = o->m_scaleMatrixFixed;
+//					o->updateMatrixPosition();
+					o->UpdateAabb();
+				}
+				else
+				{
+					// global
+					if( m_app->m_isLocalScale  == false )
+					{
+						o->ApplyPivot();
+					}
+
+					o->m_matrixFixed = o->m_matrix;
+				}
+			//	updateObject2DPoints(o);
+			}
+			break;
+		case EditMode::Edge:
+		case EditMode::Vertex:
+		case EditMode::Polygon:
+			for( auto * o : m_objects_selected )
+			{
+				if( cancel )
+				{
+					o->RestorePosition();
+				}
+				else
+				{
+					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
+				//	o->generateNormals();
+					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
+				}
+			//	updateObject2DPoints(o);
+			}
+			break;
+		//case EditMode::Edge:
+		//	break;
+		//case EditMode::Polygon:
+		//	break;
+		default:
+			break;
+		}
+		
+		updateSelectionAabb();
+		updateSceneAabb();
+	}
 }
 
-void Scene3D::moveSelectedObjects(bool startStop, bool cancel,bool first )
+void Scene3D::moveSelectedObjects(
+	GizmoPart* gizmoPart,
+	bool moving, 
+	bool cancel, 
+	bool first)
 {
-//	auto em = m_app->getEditMode();
-//
-//	kkVector4 pivotFix;
-//
-//	static f32 x = 0, y = 0, z = 0;
-//
-//	// старая версия. Проблема была в том, что 2д точки получаются корректными только когда они видны
-//	// если точка уходит за пределы видимости, значения получаются гигантскими и модель улетает.
-//	// замена на обычные координаты курсора
-//	// старая версия подходит только для масштабирования
-//	// так-же пока она будет использоваться для перемещения в плоскости экрана
-//	auto r1 = m_app->m_cursorRayFirstClick.m_origin;
-//	auto r2 = m_app->m_cursorRayCurrent.m_origin;
-//
-//	static v2i p1 = m_app->m_cursor_position;
-//	auto p2 = m_app->m_cursor_position;
-//	
-//	//printf("%i %i\n",p2.x,p2.y);
-//
-//	if( first )
-//	{
-//		p1 = p2;
-//		x = y = z = 0;
-//	}
-//
-//	auto point = p2 - p1;
-//
-//	p1 = p2;
-//
-//	auto camera  = m_app->m_active_viewport->getCamera();
-//
-//	// почему минус. если мы спускаемся вниз, то думаем, что камера идёт в минус Y
-//	// но на самом деле это мир идёт ВВЕРХ, плюс Y
-//	auto cam_pos = -camera->getPositionInSpace();
-//	
-//	auto cameraRotation = m_app->m_active_viewport->getActiveViewportCamera()->getAllRotation();
-//
-//	if( e.part == AppEvent_gizmo::_part::_x || e.part == AppEvent_gizmo::_part::_xy_plane || e.part == AppEvent_gizmo::_part::_xz_plane )
-//	{
-//		x += point.x * std::cos( cameraRotation.y / 180.f * math::PI );
-//		x += point.y * std::sin( cameraRotation.y / 180.f * math::PI );
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_y || e.part == AppEvent_gizmo::_part::_xy_plane || e.part == AppEvent_gizmo::_part::_zy_plane)
-//	{
-//		if( cameraRotation.x < 0.f )
-//			y += -point.y;
-//		else
-//			y += point.y;
-//	}
-//	
-//	if( e.part == AppEvent_gizmo::_part::_z || e.part == AppEvent_gizmo::_part::_zy_plane || e.part == AppEvent_gizmo::_part::_xz_plane )
-//	{
-//		z -= point.x * std::sin( cameraRotation.y / 180.f * math::PI );
-//		z += point.y * std::cos( cameraRotation.y / 180.f * math::PI );
-//	}
-//
-//	if( e.part == AppEvent_gizmo::_part::_screen_plane )
-//	{
-//	//	printf("m");
-//		if( m_app->m_active_viewport->isPerspective() )
-//		{
-//			const f32 s = 1.f;
-//			z = (r2-r1).KK_Z * s;
-//			x = (r2-r1).KK_X * s;
-//			y = (r2-r1).KK_Y * s;
-//		}
-//		else
-//		{
-//			z = (r2-r1).KK_Z;
-//			x = (r2-r1).KK_X;
-//			y = (r2-r1).KK_Y;
-//		}
-//	}
-//
-//	//printf("%f %f\n", r1.KK_X, r2.KK_X);
-//
-//	auto D = 5000.f; // должно быть значение far камеры
-//
-//	static kkVector4 C;
-//	if( first )
-//		m_selectionAabb.center(C);
-//
-//	f32 L = 1.f;
-//	if( m_app->m_active_viewport->isPerspective() )
-//	{
-//		if( e.part == AppEvent_gizmo::_part::_screen_plane )
-//			D *= 0.00001f; // делаю чтобы было побыстрее
-//		else
-//			D *= 0.15f;
-//
-//		L = C.distance(cam_pos);
-//		if( L == 0.f )
-//			L += 0.01f;
-//
-//		L /= D;
-//	}
-//	else
-//	{
-//		if( e.part != AppEvent_gizmo::_part::_screen_plane )
-//		{
-//			auto vpcam = m_app->m_active_viewport->getActiveViewportCamera();
-//			L /= vpcam->getZoomOrt() * 100.f;
-//		}
-//	}
-//	
-//	//printf("%f\n", L );
-//
-//	ObjectVertexSelectInfo * info;
-//	auto V = kkVector4(x*L,y*L,z*L);
-//	if( startStop )
-//	{
-//		switch (em)
-//		{
-//		case EditMode::Object:
-//			for( auto * o : m_objects_selected )
-//			{
-//				pivotFix = o->GetPivotFixed();
-//				auto & pivot  = o->GetPivot();
-//
-//				pivot = pivotFix + V;
-//
-////				o->updateMatrixPosition();
-//				o->UpdateAabb();
-//			}
-//			break;
-//		case EditMode::Vertex:
-//			//printf("%llu\n",m_objectsVertexSelectInfo.size());
-//			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
-//			{
-//				info = &m_objectsVertexSelectInfo[ i ];
-//				info->m_object->moveVerts( V,info->m_verts);
-//			}
-//			break;
-//		case EditMode::Edge:
-//			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
-//			{
-//				info = &m_objectsEdgeSelectInfo[ i ];
-//				info->m_object->moveVerts( V,info->m_verts);
-//			}
-//			break;
-//		case EditMode::Polygon:
-//			for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
-//			{
-//				info = &m_objectsPolySelectInfo[ i ];
-//				info->m_object->moveVerts( V,info->m_verts);
-//			}
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-//	else
-//	{
-//		// нажимается правой кнопкой. Левая кнопка может быть ещё нажата
-//		if( cancel )
-//		{
-//			m_app->m_state_app = AppState_main::CancelTransformation;
-//		}
-//
-//		switch (em)
-//		{
-//		case EditMode::Object:
-//			for( auto * o : m_objects_selected )
-//			{
-//				if( cancel )
-//				{
-//					o->RestorePivot();
-//					o->UpdateAabb();
-//				}
-//				else
-//				{
-//					o->ApplyPivot();
-//				}
-//			//	updateObject2DPoints(o);
-//			}
-//			break;
-//		case EditMode::Edge:
-//		case EditMode::Vertex:
-//		case EditMode::Polygon:
-//			for( auto * o : m_objects_selected )
-//			{
-//				if( cancel )
-//					o->RestorePosition();
-//				else
-//				{
-//					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
-//					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
-//				}
-//			//	updateObject2DPoints(o);
-//			}
-//			break;
-//		/*case EditMode::Edge:
-//			break;*/
-//		//case EditMode::Polygon:
-//		//	break;
-//		default:
-//			break;
-//		}
-//		
-//	}
-//    
-//	updateSelectionAabb();
-//	updateSceneAabb();
+	auto em = m_app->getEditMode();
+	kkVector4 pivotFix;
+	static f32 x = 0, y = 0, z = 0;
+	auto VO = kkGetActiveViewport();
+
+	// старая версия. Проблема была в том, что 2д точки получаются корректными только когда они видны
+	// если точка уходит за пределы видимости, значения получаются гигантскими и модель улетает.
+	// замена на обычные координаты курсора
+	// старая версия подходит только для масштабирования
+	// так-же пока она будет использоваться для перемещения в плоскости экрана
+	auto r1 = VO->m_rayOnClick.m_origin;
+	auto r2 = VO->m_cursorRay->m_center.m_origin;
+
+	static v2i p1 = m_app->m_cursor_position;
+	auto p2 = m_app->m_cursor_position;
+
+	if( first )
+	{
+		p1 = p2;
+		x = y = z = 0;
+	}
+
+	auto point = p2 - p1;
+
+	p1 = p2;
+
+	auto camera  = VO->m_activeCamera->getCamera();
+
+	// почему минус. если мы спускаемся вниз, то думаем, что камера идёт в минус Y
+	// но на самом деле это мир идёт ВВЕРХ, плюс Y
+	auto cam_pos = -camera->getPositionInSpace();
+	
+	auto cameraRotation = VO->m_activeCamera->getAllRotation();
+
+	if( *gizmoPart == GizmoPart::X || *gizmoPart == GizmoPart::XY_plane || *gizmoPart == GizmoPart::XZ_plane )
+	{
+		x += point.x * std::cos( cameraRotation.y / 180.f * math::PI );
+		x += point.y * std::sin( cameraRotation.y / 180.f * math::PI );
+	}
+
+	if( *gizmoPart == GizmoPart::Y|| *gizmoPart == GizmoPart::XY_plane || *gizmoPart == GizmoPart::ZY_plane)
+	{
+		if( cameraRotation.x < 0.f )
+			y += -point.y;
+		else
+			y += point.y;
+	}
+	
+	if( *gizmoPart == GizmoPart::Z || *gizmoPart == GizmoPart::ZY_plane || *gizmoPart == GizmoPart::XZ_plane )
+	{
+		z -= point.x * std::sin( cameraRotation.y / 180.f * math::PI );
+		z += point.y * std::cos( cameraRotation.y / 180.f * math::PI );
+	}
+
+	bool isPerspective = VO->m_activeCamera == VO->m_cameraPersp.ptr();
+	if( *gizmoPart == GizmoPart::Screen_plane )
+	{
+	//	printf("m");
+		if( isPerspective )
+		{
+			const f32 s = 1.f;
+			z = (r2-r1).KK_Z * s;
+			x = (r2-r1).KK_X * s;
+			y = (r2-r1).KK_Y * s;
+		}
+		else
+		{
+			z = (r2-r1).KK_Z;
+			x = (r2-r1).KK_X;
+			y = (r2-r1).KK_Y;
+		}
+	}
+
+	//printf("%f %f\n", r1.KK_X, r2.KK_X);
+
+	auto D = 5000.f; // должно быть значение far камеры
+
+	static kkVector4 C;
+	if( first )
+		m_selectionAabb.center(C);
+
+	f32 L = 1.f;
+	if( isPerspective )
+	{
+		if( *gizmoPart == GizmoPart::Screen_plane )
+			D *= 0.00001f; // делаю чтобы было побыстрее
+		else
+			D *= 0.15f;
+
+		L = C.distance(cam_pos);
+		if( L == 0.f )
+			L += 0.01f;
+
+		L /= D;
+	}
+	else
+	{
+		if( *gizmoPart != GizmoPart::Screen_plane )
+		{
+			auto vpcam = VO->getActiveViewportCamera();
+			L /= vpcam->getZoomOrt() * 100.f;
+		}
+	}
+	//printf("%f\n", L );
+
+	ObjectVertexSelectInfo * info;
+	auto V = kkVector4(x*L,y*L,z*L);
+	if( moving )
+	{
+		switch (em)
+		{
+		case EditMode::Object:
+			for( auto * o : m_objects_selected )
+			{
+				pivotFix = o->GetPivotFixed();
+				auto & pivot  = o->GetPivot();
+				pivot = pivotFix + V;
+				o->UpdateAabb();
+			}
+			break;
+		//case EditMode::Vertex:
+		//	//printf("%llu\n",m_objectsVertexSelectInfo.size());
+		//	for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
+		//	{
+		//		info = &m_objectsVertexSelectInfo[ i ];
+		//		info->m_object->moveVerts( V,info->m_verts);
+		//	}
+		//	break;
+		//case EditMode::Edge:
+		//	for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
+		//	{
+		//		info = &m_objectsEdgeSelectInfo[ i ];
+		//		info->m_object->moveVerts( V,info->m_verts);
+		//	}
+		//	break;
+		//case EditMode::Polygon:
+		//	for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
+		//	{
+		//		info = &m_objectsPolySelectInfo[ i ];
+		//		info->m_object->moveVerts( V,info->m_verts);
+		//	}
+		//	break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		// нажимается правой кнопкой. Левая кнопка может быть ещё нажата
+		if( cancel )
+		{
+			m_app->m_state_app = AppState_main::CancelTransformation;
+		}
+
+		switch (em)
+		{
+		case EditMode::Object:
+			for( auto * o : m_objects_selected )
+			{
+				if( cancel )
+				{
+					o->RestorePivot();
+					o->UpdateAabb();
+				}
+				else
+				{
+					o->ApplyPivot();
+				}
+			}
+			break;
+		case EditMode::Edge:
+		case EditMode::Vertex:
+		case EditMode::Polygon:
+			for( auto * o : m_objects_selected )
+			{
+				if( cancel )
+					o->RestorePosition();
+				else
+				{
+					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
+					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
+				}
+			}
+			break;
+		/*case EditMode::Edge:
+			break;*/
+		//case EditMode::Polygon:
+		//	break;
+		default:
+			break;
+		}
+		
+	}
+    
+	updateSelectionAabb();
+	updateSceneAabb();
 }
 
 
@@ -2102,6 +2036,71 @@ void      Scene3D::updateObjectEdgeSelectList()
 			m_objectsEdgeSelectInfo.push_back(info);
 	}*/
 }
+void Scene3D::drawGizmo3D(kkRay* center)
+{
+	for( auto o : m_objects_selected )
+	{
+		if( m_app->m_editMode == EditMode::Object 
+			|| (o->m_isObjectHaveSelectedVerts && m_app->m_editMode == EditMode::Vertex)
+			|| ( o->m_isObjectHaveSelectedEdges && m_app->m_editMode == EditMode::Edge)
+			|| ( o->m_isObjectHaveSelectedPolys && m_app->m_editMode == EditMode::Polygon) )
+		{
+			switch(m_app->getSelectMode())
+			{
+			case SelectMode::JustSelect:
+			default:
+				break;
+			case SelectMode::Move:
+				m_gizmo->drawMove(g_pivotPoint, g_pivotSize, *center);
+				return;
+			case SelectMode::Rotate:
+				m_gizmo->drawRotation(g_pivotPoint, g_pivotSize, *center);
+				return;
+			case SelectMode::Scale:
+				m_gizmo->drawScale(g_pivotPoint, g_pivotSize, *center);
+				return;
+			}
+			break;
+		}
+	}
+}
+void Scene3D::drawGizmo2D()
+{
+	for( auto o : m_objects_selected )
+	{
+		if( m_app->m_editMode == EditMode::Object 
+			|| (o->m_isObjectHaveSelectedVerts && m_app->m_editMode == EditMode::Vertex)
+			|| ( o->m_isObjectHaveSelectedEdges && m_app->m_editMode == EditMode::Edge)
+			|| ( o->m_isObjectHaveSelectedPolys && m_app->m_editMode == EditMode::Polygon) )
+		{
+			auto VO = kkGetActiveViewport();
+			g_pivotPoint2D = 
+				kkrooo::worldToScreen( 
+					VO->m_activeCamera->getCamera()->getViewProjectionMatrix(), 
+					g_pivotPoint, 
+					VO->m_rect_modified.getWidthAndHeight(),
+					v2f(VO->m_rect_modified.x,VO->m_rect_modified.y) 
+				);
+			
+			switch(m_app->getSelectMode())
+			{
+			case SelectMode::JustSelect:
+			default:
+				break;
+			case SelectMode::Move:
+				m_gizmo->drawMove2D(&m_app->m_cursor_position, g_pivotPoint2D);
+				return;
+			case SelectMode::Rotate:
+				m_gizmo->drawRotation2D(&m_app->m_cursor_position, VO->m_rect_modified.getWidthAndHeight(), VO->m_rect_modified);
+				return;
+			case SelectMode::Scale:
+				m_gizmo->drawScale2D(&m_app->m_cursor_position, g_pivotPoint2D);
+				return;
+			}
+			break;
+		}
+	}
+}
 void Scene3D::drawObjectPivot(bool isPersp, ViewportObject* vp, bool activeViewport)
 {
 	if( m_app->isGlobalInputBlocked() )
@@ -2109,75 +2108,34 @@ void Scene3D::drawObjectPivot(bool isPersp, ViewportObject* vp, bool activeViewp
 	auto numOfObjects = getNumOfSelectedObjects();
 	if( !numOfObjects )
 		return;
-	kkVector4 point;
 	if( numOfObjects == 1 )
 	{
 		auto obj = getSelectedObject( 0 );
-		point = obj->GetPivot();
+		g_pivotPoint = obj->GetPivot();
 	}
 	else
 	{
 		auto	aabb = getSelectionAabb();
-		aabb.center(point);
+		aabb.center(g_pivotPoint);
 	}
 	if( m_app->m_editMode == EditMode::Vertex
 		|| m_app->m_editMode == EditMode::Edge
 		|| m_app->m_editMode == EditMode::Polygon )
 	{
-		getSelectionAabb().center(point);
+		getSelectionAabb().center(g_pivotPoint);
 	}
-	f32 size = 0.f;
+
 	if( isPersp )
 	{
-		size = (f32)vp->m_activeCamera->getPositionCamera().distance(point);
-		size *= 0.1f;
+		g_pivotSize = (f32)vp->m_activeCamera->getPositionCamera().distance(g_pivotPoint);
+		g_pivotSize *= 0.1f;
 	}else
     {
-        size = 0.5f / vp->m_activeCamera->getZoomOrt();
+        g_pivotSize = 0.5f / vp->m_activeCamera->getZoomOrt();
     }
-	kkGetGS()->drawLine3D( point, kkVector4( point.KK_X, point.KK_Y, point.KK_Z + size ), kkColorLimeGreen );
-	kkGetGS()->drawLine3D( point, kkVector4( point.KK_X, point.KK_Y+ size, point.KK_Z  ), kkColorBlue);
-	kkGetGS()->drawLine3D( point, kkVector4( point.KK_X+ size, point.KK_Y, point.KK_Z  ), kkColorRed);
-	if(activeViewport)
-	{
-		for( auto o : m_objects_selected )
-		{
-			if( m_app->m_editMode == EditMode::Object 
-				|| (o->m_isObjectHaveSelectedVerts && m_app->m_editMode == EditMode::Vertex)
-				|| ( o->m_isObjectHaveSelectedEdges && m_app->m_editMode == EditMode::Edge)
-				|| ( o->m_isObjectHaveSelectedPolys && m_app->m_editMode == EditMode::Polygon) )
-			{
-				/*m_app->m_currentGizmoEvent.point2D = 
-					kkrooo::worldToScreen( 
-						vp->m_activeCamera->getCamera()->getViewProjectionMatrix(), 
-						point, 
-						vp->m_rect_modified.getWidthAndHeight(),
-						v2f(vp->m_rect_modified.x,vp->m_rect_modified.y) 
-					);*/
-				switch(m_app->getSelectMode())
-				{
-				case SelectMode::JustSelect:
-				default:
-					break;
-				case SelectMode::Move:
-					m_gizmo->drawMove(point, size, vp->m_cursorRay->m_center);
-					break;
-				case SelectMode::Rotate:
-					/*m_app->m_currentGizmoEvent.point2D = kkrooo::worldToScreen( vp->m_activeCamera->getCamera()->getViewProjectionMatrix(), point, 
-						vp->m_rect_modified.getWidthAndHeight(),
-						v2f(vp->m_rect_modified.x,vp->m_rect_modified.y) );*/
-
-					m_gizmo->drawRotation(point, size, vp->m_cursorRay->m_center);
-					break;
-				case SelectMode::Scale:
-					m_gizmo->drawScale(point, size, vp->m_cursorRay->m_center);
-					break;
-				}
-//				_drawGizmo2DPart( m_vd.m_app->m_currentGizmoEvent.point2D );
-				break;
-			}
-		}
-	}
+	kkGetGS()->drawLine3D( g_pivotPoint, kkVector4( g_pivotPoint.KK_X, g_pivotPoint.KK_Y, g_pivotPoint.KK_Z + g_pivotSize ), kkColorLimeGreen );
+	kkGetGS()->drawLine3D( g_pivotPoint, kkVector4( g_pivotPoint.KK_X, g_pivotPoint.KK_Y+ g_pivotSize, g_pivotPoint.KK_Z  ), kkColorBlue);
+	kkGetGS()->drawLine3D( g_pivotPoint, kkVector4( g_pivotPoint.KK_X+ g_pivotSize, g_pivotPoint.KK_Y, g_pivotPoint.KK_Z  ), kkColorRed);
 }
 void Scene3D::_drawOptimize(kkCamera* camera)
 {
@@ -2365,14 +2323,81 @@ void Scene3D::drawAll(kkCamera* camera, DrawMode* draw_mode, bool cursorInViewpo
 void Scene3D::updateInput()
 {
 	static bool isGizmo = false;
+	static GizmoPart gizmoPart = GizmoPart::Default;
+
+	// первый клик пролетает так как код перемещения начинает работать на след. итерации
+	static bool firstClick = false;
+	if(m_app->m_event_consumer->isLmbDownOnce())
+		firstClick = true;
+
+	if(isGizmo)
+	{
+		if(gizmoPart != GizmoPart::Default)
+		{
+			if( m_app->m_selectMode == SelectMode::Move)
+			{
+				g_mouseState.IsFirstClick = false;
+				bool cancel = m_app->m_event_consumer->isRmbDownOnce() || 
+					m_app->m_event_consumer->isKeyDown(kkKey::K_ESCAPE);
+				moveSelectedObjects(
+					&gizmoPart,
+					cancel ? false : m_app->m_event_consumer->isLmbDown(),
+					cancel,
+					firstClick);
+				if(firstClick)
+					firstClick = false;
+				if(cancel)
+				{
+					isGizmo = false;
+					gizmoPart = GizmoPart::Default;
+				}
+			}else if( m_app->m_selectMode == SelectMode::Rotate)
+			{
+				g_mouseState.IsFirstClick = false;
+				bool cancel = m_app->m_event_consumer->isRmbDownOnce() || 
+					m_app->m_event_consumer->isKeyDown(kkKey::K_ESCAPE);
+				rotateSelectedObjects(
+					&gizmoPart,
+					cancel ? false : m_app->m_event_consumer->isLmbDown(),
+					cancel,
+					firstClick);
+				if(firstClick)
+					firstClick = false;
+				if(cancel)
+				{
+					isGizmo = false;
+					gizmoPart = GizmoPart::Default;
+				}
+			}else if( m_app->m_selectMode == SelectMode::Scale)
+			{
+				g_mouseState.IsFirstClick = false;
+				bool cancel = m_app->m_event_consumer->isRmbDownOnce() || 
+					m_app->m_event_consumer->isKeyDown(kkKey::K_ESCAPE);
+				scaleSelectedObjects(
+					&gizmoPart,
+					cancel ? false : m_app->m_event_consumer->isLmbDown(),
+					cancel,
+					firstClick);
+				if(firstClick)
+					firstClick = false;
+				if(cancel)
+				{
+					isGizmo = false;
+					gizmoPart = GizmoPart::Default;
+				}
+			}
+		}
+	}
+
 	if(m_app->m_selectMode != SelectMode::JustSelect)
 	{
 		if(m_app->m_state_app == AppState_main::Idle && m_objects_selected.size())
 		{
 			isGizmo = false;
-			if( m_gizmo->updateInput(m_cursorRay) != GizmoPart::Default )
+			gizmoPart = m_gizmo->updateInput(m_cursorRay);
+			if( gizmoPart != GizmoPart::Default )
 			{
-				if( g_mouseState.LMB_DOWN && m_cursorInViewport )
+				if( g_mouseState.LMB_DOWN )
 				{
 					m_app->m_state_app = AppState_main::Gizmo;
 					isGizmo = true;
@@ -2382,49 +2407,55 @@ void Scene3D::updateInput()
 		if( g_mouseState.LMB_UP )
 		{
 			isGizmo = false;
+			gizmoPart = GizmoPart::Default;
 			if(m_app->m_state_app == AppState_main::Gizmo)
 			{
 				m_app->m_state_app = AppState_main::Idle;
 			}
 		}
 	}
-	if( m_objects_mouseHover.size() )
+
+	if(!isGizmo)
 	{
-		auto object = m_objects_mouseHover[0];		
-		if( g_mouseState.LMB_UP && !isGizmo && g_mouseState.IsFirstClick )
+		if( m_objects_mouseHover.size() )
 		{
-			if( m_app->m_editMode == EditMode::Object )
+			auto object = m_objects_mouseHover[0];		
+			if( g_mouseState.LMB_UP && g_mouseState.IsFirstClick )
 			{
-				if(object->isSelected())
+				if( m_app->m_editMode == EditMode::Object )
 				{
-					if( m_app->m_state_keyboard != AppState_keyboard::Ctrl && m_app->m_state_keyboard != AppState_keyboard::Alt )
-						deselectAll();
+					if(object->isSelected())
+					{
+						if( m_app->m_state_keyboard != AppState_keyboard::Ctrl && m_app->m_state_keyboard != AppState_keyboard::Alt )
+							deselectAll();
+						else
+							deselectObject(object);
+					}
 					else
-						deselectObject(object);
+					{
+						if( m_app->m_state_keyboard != AppState_keyboard::Ctrl )
+							deselectAll();
+						selectObject(object);
+					}
+					kkDrawAll();
 				}
-				else
-				{
-					if( m_app->m_state_keyboard != AppState_keyboard::Ctrl )
-						deselectAll();
-					selectObject(object);
-				}
-				kkDrawAll();
 			}
 		}
-	}
-	else
-	{
-		// снятие выделения если кликнули не по объекту
-		if( g_mouseState.LMB_DOWN && m_cursorInViewport && !isGizmo)
+		else
 		{
-			if( m_app->m_state_keyboard != AppState_keyboard::Ctrl
-				&& m_app->m_state_keyboard != AppState_keyboard::Alt)
+			// снятие выделения если кликнули не по объекту
+			if( g_mouseState.LMB_DOWN && m_cursorInViewport)
 			{
-				deselectAll();
-				kkDrawAll();
+				if( m_app->m_state_keyboard != AppState_keyboard::Ctrl
+					&& m_app->m_state_keyboard != AppState_keyboard::Alt)
+				{
+					deselectAll();
+					kkDrawAll();
+				}
 			}
 		}
 	}
+	
 }
 // Цель - преобразовать координаты controlVertex в соответствии с матрицами, перестроить модели и сбросить матрицы
 void Scene3D::applyMatrices()

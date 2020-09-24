@@ -321,6 +321,15 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 		{
 			res = true;
 		}
+
+		/*Kr::Gui::GuiSystem* gui = (Kr::Gui::GuiSystem*)kkGetGUI();
+		if(gui->m_mouseIsLMB_firstClick)
+		{
+		}*/
+		if(g_mouseState.LMB_DOWN)
+		{
+			m_rayOnClick = m_cursorRay->m_center;
+		}
 	}
 	else
 	{
@@ -601,7 +610,7 @@ void ViewportObject::drawSelectionRectangle(bool inFocus)
 	if(!inFocus)
 		return;
 	
-	kkGSSetScissor(true, v4i(m_gs_viewport.x, m_gs_viewport.y, m_gs_viewport.z, m_gs_viewport.w));
+	kkGSSetScissor(true, v4i((s32)m_gs_viewport.x, (s32)m_gs_viewport.y, (s32)m_gs_viewport.z, (s32)m_gs_viewport.w));
 	auto p1 = *m_cursor_position;
 	auto p2 = v2i( m_cursor_position->x, m_mouse_first_click_coords.y );
 	auto p3 = v2i( m_mouse_first_click_coords.x, m_cursor_position->y );
@@ -623,6 +632,18 @@ void ViewportObject::drawObjectPivot(bool inFocus)
 {
 	auto scene3D = *kkGetScene3D();
 	scene3D->drawObjectPivot(m_activeCamera == m_cameraPersp.ptr(), this, inFocus);
+}
+void ViewportObject::drawGizmo3D()
+{
+	auto scene3D = *kkGetScene3D();
+	scene3D->drawGizmo3D(&m_cursorRay->m_center);
+}
+void ViewportObject::drawGizmo2D()
+{
+	kkGSSetScissor(true, v4i((s32)m_gs_viewport.x,(s32)m_gs_viewport.y,(s32)m_gs_viewport.z,(s32)m_gs_viewport.w));
+	auto scene3D = *kkGetScene3D();
+	scene3D->drawGizmo2D();
+	kkGSSetScissor(false, v4i());
 }
 void ViewportObject::drawScene(bool inFocus)
 {
@@ -882,7 +903,11 @@ void Viewport::draw(ColorTheme* colorTheme)
 			// draw 2d top layer
 			kkGSSetDepth(false);
 			vp->drawObjectPivot(inFocus);
+			if(inFocus)
+				vp->drawGizmo3D();
 			kkGSSetViewport(0,0, m_windowSize.x, m_windowSize.y);
+			if(inFocus)
+				vp->drawGizmo2D();
 			if( g_mouseState.IsSelectByRect )
 				vp->drawSelectionRectangle(inFocus);
 			vp->drawName(inFocus);

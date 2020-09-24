@@ -4,6 +4,7 @@ struct ViewportMouseState;
 enum class ViewportLayoutType;
 enum class ViewportType;
 enum class ViewportUID;
+enum class GizmoPart : u32;
 
 class Gizmo;
 class GeometryCreator;

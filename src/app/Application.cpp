@@ -838,7 +838,9 @@ void Application::updateInput()
 	{
 		// ввод для активного вьюпорта
 		// там-же _processShortcuts для вьюпорта
-		if( !m_cursorInGUI || m_state_app == AppState_main::CameraTransformation
+		if( !m_cursorInGUI 
+			|| m_state_app == AppState_main::Gizmo
+			|| m_state_app == AppState_main::CameraTransformation
 			|| m_state_app == AppState_main::SelectRectangle )
 		{
 			if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )

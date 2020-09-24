@@ -103,8 +103,10 @@ public:
 
 	bool * m_inputBlock = nullptr;
 	CursorRay* m_cursorRay = nullptr;
+	kkRay m_rayOnClick;
 	v2i* m_windowSize = nullptr;
 
+	//kkMesh* m_gridMesh = nullptr;
 	//kkTexture* m_silhouetteFBO = nullptr;
 
 	ViewportCamera* m_activeCamera = nullptr;
@@ -169,6 +171,9 @@ public:
 	{
 		return m_activeCamera;
 	}
+
+	void drawGizmo3D();
+	void drawGizmo2D();
 };
 
 class Viewport

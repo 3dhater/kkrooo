@@ -108,6 +108,8 @@ public:
 	
 	void drawAll(kkCamera* camera, DrawMode*, bool cursorInViewportObject, CursorRay* ray, bool activeViewport);
 	void drawObjectPivot(bool isPersp, ViewportObject* vp, bool activeViewport);
+	void drawGizmo3D(kkRay* center);
+	void drawGizmo2D();
 
 	void applyMatrices();
 	void resetMatrices();
@@ -152,9 +154,9 @@ public:
 	void unregisterObject( Scene3DObject* o );
 
 	// предполагается, что тут будут перемещаться объекты, вершины и так далее
-	void moveSelectedObjects(bool, bool,bool first );
-	void scaleSelectedObjects(bool, bool,bool first );
-	void rotateSelectedObjects(bool, bool, bool first );
+	void moveSelectedObjects(GizmoPart*, bool, bool,bool first );
+	void scaleSelectedObjects(GizmoPart*,bool, bool,bool first );
+	void rotateSelectedObjects(GizmoPart*,bool, bool, bool first );
 
 	//bool isVertexHover(v2i*);
 	bool isVertexHover(const SelectionFrust&);
