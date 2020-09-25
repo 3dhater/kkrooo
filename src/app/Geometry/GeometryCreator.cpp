@@ -66,7 +66,7 @@ void GeometryCreator::AddColor( f32 r, f32 g, f32 b )
 
 void GeometryCreator::AddUV( f32 u, f32 v )
 {
-	m_geomInfo.m_uv.push_back(v2f(u,v));
+	m_geomInfo.m_tcoords.push_back(v2f(u,v));
 }
 
 void GeometryCreator::AddNormal( f32 x, f32 y, f32 z )
@@ -84,7 +84,7 @@ void GeometryCreator::AddTangent( f32 x, f32 y, f32 z )
 	m_geomInfo.m_tangent.push_back(v3f(x,y,z));
 }
 
-void GeometryCreator::EndPolygon( bool weld_verts, bool triangulate, bool flip )
+void GeometryCreator::EndPolygon( bool weld_verts, bool flip )
 {
 	if( m_isPolygonBegin )
 	{
@@ -95,7 +95,7 @@ void GeometryCreator::EndPolygon( bool weld_verts, bool triangulate, bool flip )
 		}
 		else
 		{
-			m_newModel->AddPolygon(&m_geomInfo, weld_verts, triangulate, flip);
+			m_newModel->AddPolygon(&m_geomInfo, weld_verts, flip);
 		}
 		m_isPolygonBegin = false;
 	}

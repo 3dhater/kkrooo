@@ -12,7 +12,7 @@
 struct DefaultVert
 {
 	v3f Position;
-	v2f UV;
+	v2f TCoords;
 	v3f Normal;
 	v4f Color;
 };

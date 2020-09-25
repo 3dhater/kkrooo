@@ -41,6 +41,9 @@ struct kkPolygon
 
 	kkLoopNode<kkEdge> * m_edges = nullptr;
 	u64 m_edgeCount = 0;
+
+	v3f * m_normals = nullptr;
+	v2f * m_tcoords = nullptr;
 };
 
 struct kkVertex
@@ -242,7 +245,7 @@ public:
 	virtual u64 GetPolygonsCount() = 0;
 	virtual void DeletePolygon(kkPolygon*) = 0;
 	//virtual void DeleteVertex(kkVertex*) = 0;
-	virtual void AddPolygon(kkGeometryInformation* p,bool weld, bool triangulate, bool flip) = 0;
+	virtual void AddPolygon(kkGeometryInformation* p,bool weld, bool flip) = 0;
 };
 
 #endif

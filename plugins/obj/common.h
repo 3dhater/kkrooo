@@ -55,7 +55,6 @@ struct ImportData
 
 	bool option_import_materials = false;
 	bool option_write_materials  = true;
-	bool option_triangulate      = false;
 	bool option_triangulate_export = false;
 	bool option_write_normals    = true;
 	bool option_write_UVs        = true;

@@ -438,10 +438,7 @@ void Gizmo::drawScale2D(v2i * cp, const v2i& point2d)
 		g_cursorInGizmo2D = true;
 		color = kkColorYellow;
 	}
-	else if(m_gizmoPart == GizmoPart::Screen_plane)
-	{
-		color = kkColorYellow;
-	}
+
 	m_gs->drawLine2D( v2i( point2d.x-size, point2d.y-size ), v2i( point2d.x+size, point2d.y-size ), color );
 	m_gs->drawLine2D( v2i( point2d.x-size, point2d.y+size ), v2i( point2d.x+size, point2d.y+size ), color );
 	m_gs->drawLine2D( v2i( point2d.x-size, point2d.y-size ), v2i( point2d.x-size, point2d.y+size ), color );

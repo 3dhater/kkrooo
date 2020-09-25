@@ -122,9 +122,6 @@ extern "C"
 		importData->import_window->AddNewLine(5.f, kkPluginGUIParameterType::Object);
 		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
 		importData->import_window->AddCheckBox(u"Import materials",&importData->option_import_materials, kkPluginGUIParameterType::Object);
-		importData->import_window->AddNewLine(0.f, kkPluginGUIParameterType::Object);
-		importData->import_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Object);
-		importData->import_window->AddCheckBox(u"Triangulate",&importData->option_triangulate, kkPluginGUIParameterType::Object);
 		importData->import_window->EndGroup();
 
 		importData->import_window->BeginGroup(u"Fix", true);

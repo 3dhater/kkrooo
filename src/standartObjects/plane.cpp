@@ -108,7 +108,7 @@ void planeCallback(s32 id, void * d )
 			gc->AddUV(uv_begin_x, uv_begin_y);
 			
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_x += segment_size_w;
 			uv_begin_x += uv_segment_size_w;

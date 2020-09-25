@@ -262,10 +262,16 @@ void PolygonalModel::DeletePolygon(kkPolygon* p)
 	if(p == m_polygons)
 		m_polygons = m_polygons->m_mainNext;
 	_removePolygonFromList(p);
+
+	if(p->m_normals)
+		kkMemory::freeAligned(p->m_normals);
+	if(p->m_tcoords)
+		kkMemory::freeAligned(p->m_tcoords);
+
 	kkDestroy(p);
 }
 
-void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool triangulate, bool flip)
+void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 {
 	if(!gi)
 	{
@@ -274,11 +280,36 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool trian
 	}
 	kkPolygon* new_polygon = kkCreate<kkPolygon>();
 	
-	for( u64 i = 0, sz = gi->m_position.size(); i < sz; ++i )
+	auto positionSize = gi->m_position.size();
+	if(gi->m_normal.size())
+	{
+		new_polygon->m_normals = (v3f*)kkMemory::allocateAligned(sizeof(v3f)*positionSize,4);
+	}
+	if(gi->m_tcoords.size())
+	{
+		new_polygon->m_tcoords = (v2f*)kkMemory::allocateAligned(sizeof(v2f)*positionSize,4);
+	}
+
+	for( u64 i = 0; i < positionSize; ++i )
 	{
 		auto & pos = gi->m_position[i];
 		VertexHash vh;
 		vh.set(&pos);
+
+		if(new_polygon->m_normals)
+		{
+			new_polygon->m_normals[i] = gi->m_normal[i];
+			if( flip )
+			{
+				new_polygon->m_normals[i].x = -new_polygon->m_normals[i].x;
+				new_polygon->m_normals[i].y = -new_polygon->m_normals[i].y;
+				new_polygon->m_normals[i].z = -new_polygon->m_normals[i].z;
+			}
+		}
+		if(new_polygon->m_tcoords)
+		{
+			new_polygon->m_tcoords[i] = gi->m_tcoords[i];
+		}
 
 		kkVertex * new_vertex = nullptr;
 		if(weld)
@@ -306,80 +337,6 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool trian
 		kkPolygon_addVertex(new_vertex, new_polygon);
 	}
 	_addPolygonToList(new_polygon);
-
-	//new_polygon->m_model = this;
-	//Vertex * V;
-	//u64 num_of_tris = new_polygon->m_verts.size() - 2;
-	//for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz; ++i )
-	//{
-	//	V = (Vertex*)new_polygon->m_verts[i];
-	//	V->m_weld = weld;
-	//}
-	//if( triangulate && num_of_tris > 1 )
-	//{
-	//	u64 index2;
-	//	u64 index3;
-	//	Polygon3D* new_polygon2 = nullptr;
-	//	for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz; ++i )
-	//	{
-	//		new_polygon2 = kkCreate<Polygon3D>();
-	//		index2  = i+2;
-	//		index3  = index2 + 1;
-	//		if( index3 == sz )
-	//			index3 = 0;
-
-	//		V = kkCreate<Vertex>();
-	//		*V = *(Vertex*)new_polygon->m_verts[1];
-	//		V->m_weld = weld;
-	//		new_polygon2->addVertex( V );
-
-	//		V = kkCreate<Vertex>();
-	//		*V = *(Vertex*)new_polygon->m_verts[index2];
-	//		V->m_weld = weld;
-	//		new_polygon2->addVertex( V );
-
-	//		V = kkCreate<Vertex>();
-	//		*V = *(Vertex*)new_polygon->m_verts[index3];
-	//		V->m_weld = weld;
-	//		new_polygon2->addVertex( V );
-
-	//		if( index3 == 0 )
-	//			break;
-
-	//		addPolygon(new_polygon2, true, false, flip);
-	//	}
-
-	//	kkDestroy(new_polygon);
-	//	new_polygon = new_polygon2;
-	//}
-	//m_polygons.push_back(new_polygon);
-
-	//// передаю вершины полигона в модель
-	//for( u64 i = 0, sz = new_polygon->m_verts.size() ; i < sz; ++i )
-	//{
-	//	V = (Vertex*)new_polygon->m_verts[ i ];
-
-	//	if( flip )
-	//	{
-	//		V->m_Normal.KK_X = -V->m_Normal.KK_X;
-	//		V->m_Normal.KK_Y = -V->m_Normal.KK_Y;
-	//		V->m_Normal.KK_Z = -V->m_Normal.KK_Z;
-	//		V->m_Normal_fix = V->m_Normal;
-	//	}
-
-	//	V->m_parentPolygon = new_polygon;
-	//	m_verts.push_back( V );
-	//}
-	//if( flip )
-	//{
-	//	for( u64 i = 0, sz = new_polygon->m_verts.size(); i < sz/2; ++i )
-	//	{
-	//		auto v = new_polygon->m_verts[ i ];
-	//		auto index = sz - (1+i);
-	//		new_polygon->m_verts[ i ] = new_polygon->m_verts[ index ];
-	//		new_polygon->m_verts[ index ] = v;
-	//	}
-	//}
 }
 void PolygonalModel::_deleteEdges()
 {

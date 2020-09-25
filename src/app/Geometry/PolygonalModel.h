@@ -252,7 +252,7 @@ public:
 	virtual void DeletePolygon(kkPolygon*);
 	//virtual void DeleteVertex(kkVertex*);
 
-	void  AddPolygon(kkGeometryInformation* gi,bool weld, bool triangulate, bool flip);
+	void  AddPolygon(kkGeometryInformation* gi,bool weld, bool flip);
 
 	void calculateTriangleCount();
 

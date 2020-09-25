@@ -71,7 +71,7 @@ public:
 	void AddBinormal( f32 x, f32 y, f32 z );
 	void AddTangent( f32 x, f32 y, f32 z );
 	//void endVertex();
-	void EndPolygon( bool weld_verts, bool triangulate, bool flip );
+	void EndPolygon( bool weld_verts, bool flip );
 	void GenerateNormals(bool flat);
 	void GenerateBT();
 	void Triangulate();

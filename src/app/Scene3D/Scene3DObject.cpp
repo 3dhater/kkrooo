@@ -185,6 +185,14 @@ void Scene3DObject::_createSoftwareModel_polys()
 			verts_ptr->Position.x = base_vertex->m_position._f32[0];
 			verts_ptr->Position.y = base_vertex->m_position._f32[1];
 			verts_ptr->Position.z = base_vertex->m_position._f32[2];
+			if(current_polygon->m_normals)
+			{
+				verts_ptr->Normal   = current_polygon->m_normals[0];
+			}
+			if(current_polygon->m_tcoords)
+			{
+				verts_ptr->TCoords   = current_polygon->m_tcoords[0];
+			}
 			m_aabbOriginal.add( base_vertex->m_position );
 			*inds_ptr = index; 
 			++index;
@@ -194,6 +202,14 @@ void Scene3DObject::_createSoftwareModel_polys()
 			verts_ptr->Position.x = vertex2->m_position._f32[0];
 			verts_ptr->Position.y = vertex2->m_position._f32[1];
 			verts_ptr->Position.z = vertex2->m_position._f32[2];
+			if(current_polygon->m_normals)
+			{
+				verts_ptr->Normal   = current_polygon->m_normals[i2+2];
+			}
+			if(current_polygon->m_tcoords)
+			{
+				verts_ptr->TCoords   = current_polygon->m_tcoords[i2+2];
+			}
 			m_aabbOriginal.add( vertex2->m_position );
 			*inds_ptr = index; 
 			++index;
@@ -203,6 +219,14 @@ void Scene3DObject::_createSoftwareModel_polys()
 			verts_ptr->Position.x = vertex3->m_position._f32[0];
 			verts_ptr->Position.y = vertex3->m_position._f32[1];
 			verts_ptr->Position.z = vertex3->m_position._f32[2];
+			if(current_polygon->m_normals)
+			{
+				verts_ptr->Normal   = current_polygon->m_normals[i2+1];
+			}
+			if(current_polygon->m_tcoords)
+			{
+				verts_ptr->TCoords   = current_polygon->m_tcoords[i2+1];
+			}
 			m_aabbOriginal.add( vertex3->m_position );
 			*inds_ptr = index; 
 			++index;

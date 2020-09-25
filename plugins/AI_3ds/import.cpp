@@ -101,7 +101,7 @@ extern "C"
 							}
 						}
 
-						geometry_creator->EndPolygon( true, false, false );
+						geometry_creator->EndPolygon( true, false );
 					}
 
 					geometry_creator->GenerateNormals(false);

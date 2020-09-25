@@ -50,7 +50,7 @@ void generateTopPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 			gc->AddNormal(0.,1.,0.);
 			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_x += segment_size_w;
 			uv_begin_x += uv_segment_size_w;
@@ -116,7 +116,7 @@ void generateBottomPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 			gc->AddNormal(0.,-1.,0.);
 			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_x += segment_size_w;
 			uv_begin_x += uv_segment_size_w;
@@ -182,7 +182,7 @@ void generateFrontPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 			gc->AddNormal(0.f,0.f,1.f);
 			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_x += segment_size_w;
 			uv_begin_x -= uv_segment_size_w;
@@ -247,7 +247,7 @@ void generateBackPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 			gc->AddNormal(0.f,0.f,-1.f);
 			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_x += segment_size_w;
 			uv_begin_x -= uv_segment_size_w;
@@ -313,7 +313,7 @@ void generateRightPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 			gc->AddNormal(-1.f,0.f,0.f);
 			gc->AddUV(uv_begin_x-uv_segment_size_w, uv_begin_y);
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_z += segment_size_w;
 			uv_begin_x -= uv_segment_size_w;
@@ -379,7 +379,7 @@ void generateLeftPlane(ParametersBox * box_data, kkGeometryCreator* gc)
 			gc->AddNormal(1.f,0.f,0.f);
 			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
-			gc->EndPolygon(1,0,0);
+			gc->EndPolygon(1,0);
 
 			begin_z += segment_size_w;
 			uv_begin_x += uv_segment_size_w;
