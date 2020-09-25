@@ -27,6 +27,7 @@ kkEventSystemImpl::~kkEventSystemImpl()
 void kkEventSystemImpl::clearEvents()
 {
 	m_num_of_events = 0;
+	m_current_event = 0;
 }
 
 void kkEventSystemImpl::getKeyboardAndMouseStates()
@@ -94,10 +95,10 @@ void kkEventSystemImpl::runEventLoop()
 	system_event.type = kkEventType::System;
 	system_event.systemEvent.action = kkEventSystemAction::BeginEventLoop;
 
-	if( m_user_consumer )
+	/*if( m_user_consumer )
 	{
 		m_user_consumer->processEvent( system_event );
-	}
+	}*/
 
 	while( true )
 	{
@@ -121,12 +122,12 @@ void kkEventSystemImpl::runEventLoop()
 			m_current_event = 0;
 		}
 	}
-
 	system_event.systemEvent.action = kkEventSystemAction::EndEventLoop;
-	if( m_user_consumer )
+	/*if( m_user_consumer )
 	{
 		m_user_consumer->processEvent( system_event );
-	}
+	}*/
+	this->clearEvents();
 }
 
 kkEventConsumer* kkEventSystemImpl::getEventConsumer()

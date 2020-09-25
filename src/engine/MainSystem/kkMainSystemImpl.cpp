@@ -56,7 +56,6 @@ kkGraphicsSystem * kkMainSystemImpl::createGraphicsSystem( kkWindow* output_wind
 
 kkWindow* kkMainSystemImpl::createWindow( u32 style, const v4i& rect, u32 state, kkWindow* parent, s32 id )
 {
-	//kkWindowWin32 * w = kkCreate( kkWindowWin32() );
 	kkWindowWin32 * w = kkCreate<kkWindowWin32>();
 	if( w )
 	{

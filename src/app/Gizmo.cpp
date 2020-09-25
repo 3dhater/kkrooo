@@ -155,7 +155,7 @@ void Gizmo::setGraphicsSystem( kkGraphicsSystem * gs )
 	m_gs = gs;
 }
 
-GizmoPart Gizmo::updateInput(CursorRay* cursorRay)
+GizmoPart Gizmo::updateInput(const kkRay& cursorRay)
 {
 	if(m_app->m_state_app == AppState_main::Idle)
 	{
@@ -167,22 +167,22 @@ GizmoPart Gizmo::updateInput(CursorRay* cursorRay)
 			if(g_cursorInGizmo2D)
 			{
 				m_gizmoPart = GizmoPart::Screen_plane;
-			}else if( m_gizmoMoveObjects_col[ 0 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoMoveObjects_col[ 0 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::X;
-			}else if( m_gizmoMoveObjects_col[ 1 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoMoveObjects_col[ 1 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::Y;
-			}else if( m_gizmoMoveObjects_col[ 2 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoMoveObjects_col[ 2 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::Z;
-			}else if( m_gizmoMoveObjects_col[ 3 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoMoveObjects_col[ 3 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::XY_plane;
-			}else if( m_gizmoMoveObjects_col[ 4 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoMoveObjects_col[ 4 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::ZY_plane;
-			}else if( m_gizmoMoveObjects_col[ 5 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoMoveObjects_col[ 5 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::XZ_plane;
 			}
@@ -192,22 +192,22 @@ GizmoPart Gizmo::updateInput(CursorRay* cursorRay)
 			if(g_cursorInGizmo2D)
 			{
 				m_gizmoPart = GizmoPart::Screen_plane;
-			}else if( m_gizmoScaleObjects[ 0 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoScaleObjects[ 0 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::X;
-			}else if( m_gizmoScaleObjects[ 1 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoScaleObjects[ 1 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::Y;
-			}else if( m_gizmoScaleObjects[ 2 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoScaleObjects[ 2 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::Z;
-			}else if( m_gizmoScaleObjects[ 3 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoScaleObjects[ 3 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::XY_plane;
-			}else if( m_gizmoScaleObjects[ 4 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoScaleObjects[ 4 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::ZY_plane;
-			}else if( m_gizmoScaleObjects[ 5 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoScaleObjects[ 5 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::XZ_plane;
 			}
@@ -217,13 +217,13 @@ GizmoPart Gizmo::updateInput(CursorRay* cursorRay)
 			if(g_cursorInGizmo2D)
 			{
 				m_gizmoPart = GizmoPart::Screen_plane;
-			}else if( m_gizmoRotationObjects_col[ 0 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoRotationObjects_col[ 0 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::Y;
-			}else if( m_gizmoRotationObjects_col[ 1 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoRotationObjects_col[ 1 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::Z;
-			}else if( m_gizmoRotationObjects_col[ 2 ]->IsRayIntersect(cursorRay->m_center, m_intersectionResult) )
+			}else if( m_gizmoRotationObjects_col[ 2 ]->IsRayIntersect(cursorRay, m_intersectionResult) )
 			{
 				m_gizmoPart = GizmoPart::X;
 			}
@@ -236,6 +236,18 @@ GizmoPart Gizmo::updateInput(CursorRay* cursorRay)
 }
 void Gizmo::drawMove(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 {
+	auto gizmoPart = updateInput(cursorRay);
+	AppEvent e;
+	e.type       = AppEventType::Gizmo;
+	e.gizmo.type = AppEvent_gizmo::_type::_move;
+	e.gizmo.part = gizmoPart;
+	if( m_app->m_state_app == AppState_main::Idle && e.gizmo.part != GizmoPart::Default)
+	{
+		if(e.gizmo.part == GizmoPart::Screen_plane)
+			m_app->addAppEvent( e, AppEventPriority::High );
+		else
+			m_app->addAppEvent( e, AppEventPriority::Medium );
+	}
 	math::makeTranslationMatrix(pivot,m_matrix);
 	m_matrix[ 0 ].KK_X = size;
 	m_matrix[ 1 ].KK_Y = size;
@@ -330,6 +342,13 @@ void Gizmo::drawMove2D(v2i * cp, const v2i& point2d)
 
 void Gizmo::drawScale(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 {
+	auto gizmoPart = updateInput(cursorRay);
+	AppEvent e;
+	e.type       = AppEventType::Gizmo;
+	e.gizmo.type = AppEvent_gizmo::_type::_scale;
+	e.gizmo.part = gizmoPart;
+	if( m_app->m_state_app == AppState_main::Idle && e.gizmo.part != GizmoPart::Default )
+		m_app->addAppEvent( e, AppEventPriority::Medium );
 	kkMatrix4 mat_for_active;
 	math::makeTranslationMatrix(pivot,m_matrix);
 	mat_for_active = m_matrix;
@@ -448,8 +467,15 @@ void Gizmo::drawScale2D(v2i * cp, const v2i& point2d)
 
 void Gizmo::drawRotation(const kkVector4& pivot, f32 size, const kkRay& cursorRay )
 {
+	auto gizmoPart = updateInput(cursorRay);
+	AppEvent e;
+	e.type       = AppEventType::Gizmo;
+	e.gizmo.type = AppEvent_gizmo::_type::_rotate;
+	e.gizmo.part = gizmoPart;
+	if( m_app->m_state_app == AppState_main::Idle && e.gizmo.part != GizmoPart::Default )
+		m_app->addAppEvent( e, AppEventPriority::Medium );
+
 	math::makeTranslationMatrix(pivot,m_matrix);
-	
 	m_matrix[ 0 ].KK_X = size;
 	m_matrix[ 1 ].KK_Y = size;
 	m_matrix[ 2 ].KK_Z = size;

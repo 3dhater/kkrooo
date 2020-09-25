@@ -31,11 +31,11 @@ class Scene3D : public kkScene3D
 	Gizmo * m_gizmo = nullptr;
 	kkGraphicsSystem * m_gs = nullptr;
 
-	std::basic_string<Scene3DObject*> m_objects_inFrustum_unsorted;
-	std::basic_string<Scene3DObject*> m_objects_inFrustum_sorted;
+	//std::basic_string<Scene3DObject*> m_objects_inFrustum_unsorted;
+	//std::basic_string<Scene3DObject*> m_objects_inFrustum_sorted;
 	std::basic_string<Scene3DObject*> m_objects;
 	std::basic_string<Scene3DObject*> m_objects_selected;
-	std::basic_string<Scene3DObject*> m_objects_mouseHover;
+	//std::basic_string<Scene3DObject*> m_objects_mouseHover;
 
 	kkArray<ObjectVertexSelectInfo>   m_objectsVertexSelectInfo;
 	kkArray<ObjectVertexSelectInfo>   m_objectsEdgeSelectInfo;
@@ -79,10 +79,14 @@ class Scene3D : public kkScene3D
 	void _deleteSelectedObjects_edge(Scene3DObject*);
 	void _deleteSelectedObjects_poly(Scene3DObject*);
 
-	void _selectObjectsByRectangle_object( const SelectionFrust& frust );
-	void _selectObjectsByRectangle_vertex( /*const v4i& r*/const SelectionFrust& frust );
-	void _selectObjectsByRectangle_edge( const SelectionFrust& );
-	void _selectObjectsByRectangle_poly( const SelectionFrust& );
+	void _selectObjectsByFrame_object( 
+		std::basic_string<Scene3DObject*>& hov, 
+		std::basic_string<Scene3DObject*>& drw, 
+		const SelectionFrust& frust );
+	void _selectObjectsByFrame_vertex( /*const v4i& r*/const SelectionFrust& frust );
+	void _selectObjectsByFrame_edge( const SelectionFrust& );
+	void _selectObjectsByFrame_poly( const SelectionFrust& );
+
 
 	bool m_ignoreDeselect = false;
 
@@ -90,12 +94,12 @@ class Scene3D : public kkScene3D
 	//bool m_tmpBegin = false;
 	//Scene3DObject * m_tmpObject = nullptr;
 
-	bool m_drawOptimize = false;
-	void _drawOptimize(kkCamera* camera);
-	void _drawSelectedObjectFrame();
-	bool m_cursorInViewport = false;
-	CursorRay* m_cursorRay = nullptr;
-	friend class Viewport;
+	//bool m_drawOptimize = false;
+	//void _drawOptimize(kkCamera* camera);
+	//void _drawSelectedObjectFrame();
+	//bool m_cursorInViewport = false;
+	//CursorRay* m_cursorRay = nullptr;
+	friend class ViewportObject;
 
 public:
 	Scene3D();
@@ -106,10 +110,10 @@ public:
 	kkScene3DObject* getObjectOnScene( u32 );
 	kkScene3DObject* getSelectedObject( u32 );
 	
-	void drawAll(kkCamera* camera, DrawMode*, bool cursorInViewportObject, CursorRay* ray, bool activeViewport);
-	void drawObjectPivot(bool isPersp, ViewportObject* vp, bool activeViewport);
-	void drawGizmo3D(kkRay* center);
-	void drawGizmo2D();
+	//void drawAll(kkCamera* camera, DrawMode*, bool cursorInViewportObject, CursorRay* ray, bool activeViewport);
+	//void drawObjectPivot(bool isPersp, ViewportObject* vp, bool activeViewport);
+	//void drawGizmo3D(kkRay* center);
+	//void drawGizmo2D();
 
 	void applyMatrices();
 	void resetMatrices();
@@ -140,13 +144,17 @@ public:
 
 	std::basic_string<Scene3DObject*>& getObjects();
 
-	void selectObjectsByRectangle( const SelectionFrust& );
+	void selectObjectsByFrame( 
+		std::basic_string<Scene3DObject*>& hoverObjects, 
+		std::basic_string<Scene3DObject*>& drawObjects,
+		const v4i& selFrame,
+		const SelectionFrust& selFrust);
 	void selectObject(kkScene3DObject*);
 	void deselectObject(kkScene3DObject*);
 	void selectAll();
     void deselectAll();
     void selectInvert();
-    void updateInput();
+    //void updateInput();
 	void deleteSelectedObjects();
 
 	// просто уберёт указанный объект из массивов
@@ -154,7 +162,7 @@ public:
 	void unregisterObject( Scene3DObject* o );
 
 	// предполагается, что тут будут перемещаться объекты, вершины и так далее
-	void moveSelectedObjects(GizmoPart*, bool, bool,bool first );
+	bool moveSelectedObjects(GizmoPart*, bool, bool,bool first );
 	void scaleSelectedObjects(GizmoPart*,bool, bool,bool first );
 	void rotateSelectedObjects(GizmoPart*,bool, bool, bool first );
 

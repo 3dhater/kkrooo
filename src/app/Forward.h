@@ -5,7 +5,10 @@ enum class ViewportLayoutType;
 enum class ViewportType;
 enum class ViewportUID;
 enum class GizmoPart : u32;
+enum class EditMode;
+enum class SelectMode;
 
+struct SelectionFrust;
 class Gizmo;
 class GeometryCreator;
 class EventConsumer;

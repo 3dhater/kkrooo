@@ -474,27 +474,27 @@ void Application::run()
 			m_mouseWheel = (f32)Kr::Gui::GuiSystem::m_wheel_delta;
 		}
 
-		if(m_KrGuiSystem->m_mouseIsRMB_up)
-		{
-			kkEvent e;
-			e.type = kkEventType::Mouse;
-			e.mouseEvent.state = kkEventMouse::MS_RMB_UP;
-			m_main_system->addEvent(e);
-		}
-		if(m_KrGuiSystem->m_mouseIsLMB_up)
-		{
-			kkEvent e;
-			e.type = kkEventType::Mouse;
-			e.mouseEvent.state = kkEventMouse::MS_LMB_UP;
-			m_main_system->addEvent(e);
-		}
-		if(m_KrGuiSystem->m_mouseIsMMB_up)
-		{
-			kkEvent e;
-			e.type = kkEventType::Mouse;
-			e.mouseEvent.state = kkEventMouse::MS_MMB_UP;
-			m_main_system->addEvent(e);
-		}
+		//if(m_KrGuiSystem->m_mouseIsRMB_up)
+		//{
+		//	kkEvent e;
+		//	e.type = kkEventType::Mouse;
+		//	e.mouseEvent.state = kkEventMouse::MS_RMB_UP;
+		//	m_main_system->addEvent(e);
+		//}
+		//if(m_KrGuiSystem->m_mouseIsLMB_up)
+		//{
+		//	kkEvent e;
+		//	e.type = kkEventType::Mouse;
+		//	e.mouseEvent.state = kkEventMouse::MS_LMB_UP;
+		//	m_main_system->addEvent(e);
+		//}
+		//if(m_KrGuiSystem->m_mouseIsMMB_up)
+		//{
+		//	kkEvent e;
+		//	e.type = kkEventType::Mouse;
+		//	e.mouseEvent.state = kkEventMouse::MS_MMB_UP;
+		//	m_main_system->addEvent(e);
+		//}
 
 		//printf("m_mouseWheel %f\n",m_mouseWheel);
 
@@ -557,6 +557,7 @@ void Application::run()
 				kkDrawAll();
 		}
 		//printf("Time: %f \n", (work_time + sleep_time).count());
+		m_event_consumer->_reset();
 	}
 }
 
@@ -846,9 +847,9 @@ void Application::updateInput()
 			if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
 			{
 				auto md = Kr::Gui::GuiSystem::m_mouseDelta;
+				//m_current_scene3D->updateInput();
 				m_mainViewport->updateInput(v2f(md.x,md.y));
-				m_mainViewport->updateInputCamera(v2f(md.x,md.y));
-				m_current_scene3D->updateInput();
+				//m_mainViewport->updateInputCamera(v2f(md.x,md.y));
 			}
 		}
 		else
@@ -1809,18 +1810,17 @@ void Application::_onEndFrame()
 	while( m_appEvents[0].size() )
 	{
 		auto & e = m_appEvents[0].front();
-
-		//if( e.type == AppEventType::Gizmo && m_state_app != AppState_main::Gizmo )
-		//{
-		//    // Более приоритетная часть гизмо
-		//    // устанавливается новый аппстейн, дальнейшие изменения m_currentGizmoEvent запрещены
-		//    if( m_event_consumer->isLmbDownOnce() )
-		//    {
-		//        e.gizmo.point2D = m_currentGizmoEvent.point2D;
-		//        m_currentGizmoEvent = e.gizmo;
-		//        m_state_app = AppState_main::Gizmo;
-		//    }
-		//}
+		if( e.type == AppEventType::Gizmo && m_state_app != AppState_main::Gizmo )
+		{
+		    // Более приоритетная часть гизмо
+		    // устанавливается новый аппстейн, дальнейшие изменения m_currentGizmoEvent запрещены
+		    if( m_event_consumer->isLmbDownOnce() )
+		    {
+		        e.gizmo.point2D = m_currentGizmoEvent.point2D;
+		        m_currentGizmoEvent = e.gizmo;
+		        m_state_app = AppState_main::Gizmo;
+		    }
+		}
 
 		m_appEvents[0].pop_front();
 	}
@@ -1828,61 +1828,59 @@ void Application::_onEndFrame()
 	while( m_appEvents[1].size() )
 	{
 		auto & e = m_appEvents[1].front();
-
-		//// если тип события = гизмо, и небыло события гизмо в более высоком приоритете
-		//if( e.type == AppEventType::Gizmo && m_state_app != AppState_main::Gizmo )
-		//{
-		//    if( m_event_consumer->isLmbDownOnce() )
-		//    {
-		//        e.gizmo.point2D = m_currentGizmoEvent.point2D;
-		//        m_currentGizmoEvent = e.gizmo;
-		//        m_state_app = AppState_main::Gizmo;
-		//    }
-		//}
+		// если тип события = гизмо, и небыло события гизмо в более высоком приоритете
+		if( e.type == AppEventType::Gizmo && m_state_app != AppState_main::Gizmo )
+		{
+		    if( m_event_consumer->isLmbDownOnce() )
+		    {
+		        e.gizmo.point2D = m_currentGizmoEvent.point2D;
+		        m_currentGizmoEvent = e.gizmo;
+		        m_state_app = AppState_main::Gizmo;
+		    }
+		}
 
 		m_appEvents[1].pop_front();
 	}
 
+	if(m_event_consumer->isLmbUp() || m_event_consumer->isRmbUp() || m_event_consumer->isMmbUp())
+	{
+	    // если перемещали объект то этот вызов должен применить изменения
+	    if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)
+	    {
+	        m_current_scene3D->moveSelectedObjects( &m_currentGizmoEvent.part, false, m_event_consumer->isRmbUp(), false );
 
-	//if(m_event_consumer->isLmbUp() || m_event_consumer->isRmbUp() || m_event_consumer->isMmbUp())
-	//{
-	//    // если перемещали объект то этот вызов должен применить изменения
-	//    if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Move )
-	//    {
-	//        m_current_scene3D->moveSelectedObjects( false, m_currentGizmoEvent, m_event_consumer->isRmbUp(), false );
+	    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale )
+	    {
+	        m_current_scene3D->scaleSelectedObjects( &m_currentGizmoEvent.part, false, m_event_consumer->isRmbUp(), false );
 
-	//    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Scale )
-	//    {
-	//        m_current_scene3D->scaleSelectedObjects( false, m_currentGizmoEvent, m_event_consumer->isRmbUp(), false );
+	    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate )
+	    {
+	        m_current_scene3D->rotateSelectedObjects( &m_currentGizmoEvent.part, false, m_event_consumer->isRmbUp(), false );
+	    }
 
-	//    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Rotate )
-	//    {
-	//        m_current_scene3D->rotateSelectedObjects( false, m_currentGizmoEvent, m_event_consumer->isRmbUp(), false );
-	//    }
-
-	//    if( m_state_app != AppState_main::CancelTransformation )
-	//        m_state_app = AppState_main::Idle;
-	//    m_currentGizmoEvent.reset();
-	//    // при перемещении гизмо остаётся на месте, и луч остаётся там-же
-	//    // при отжатии, нужно получить новый луч по курсором
-	//    //   убираю видимость активной части гизмо
-	//}
+	    if( m_state_app != AppState_main::CancelTransformation )
+	        m_state_app = AppState_main::Idle;
+	    m_currentGizmoEvent.reset();
+	    // при перемещении гизмо остаётся на месте, и луч остаётся там-же
+	    // при отжатии, нужно получить новый луч по курсором
+	    //   убираю видимость активной части гизмо
+	}
 	
-	//// попробую здесь настроить перемещение объектов...
-	//if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Move)
-	//{
-	//    m_current_scene3D->moveSelectedObjects(true,m_currentGizmoEvent,false,m_event_consumer->isLmbDownOnce());
-	//    setNeedToSave(true);
-	//}else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Scale)
-	//{
-	//    m_current_scene3D->scaleSelectedObjects(true,m_currentGizmoEvent,false,m_event_consumer->isLmbDownOnce());
-	//    setNeedToSave(true);
-	//
-	//}else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::Rotate)
-	//{
-	//    m_current_scene3D->rotateSelectedObjects(true,m_currentGizmoEvent,false,m_event_consumer->isLmbDownOnce());
-	//    setNeedToSave(true);
-	//}
+	// попробую здесь настроить перемещение объектов...
+	if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)
+	{
+	    m_current_scene3D->moveSelectedObjects(&m_currentGizmoEvent.part, true,false,m_event_consumer->isLmbDownOnce());
+	    setNeedToSave(true);
+	}else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale)
+	{
+	    m_current_scene3D->scaleSelectedObjects(&m_currentGizmoEvent.part, true,false,m_event_consumer->isLmbDownOnce());
+	    setNeedToSave(true);
+	
+	}else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate)
+	{
+	    m_current_scene3D->rotateSelectedObjects(&m_currentGizmoEvent.part, true,false,m_event_consumer->isLmbDownOnce());
+	    setNeedToSave(true);
+	}
 
 	while( m_appEvents[2].size() )
 	{
@@ -2191,6 +2189,7 @@ AppState_main* Application::GetAppState_main()
 {
 	return &m_state_app;
 }
+
 bool * Application::GetGlobalInputBlock()
 {
 	return &m_globalInputBlock;
@@ -2215,10 +2214,19 @@ void Application::GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor&
 	m_shader3DObjectDefault->m_diffTex = m_diffTex;
 	m_gs->drawMesh(mesh, mat, m_shader3DObjectDefault.ptr() );
 }
+void Application::GSDrawModelLineModePolyEdit(kkMesh* mesh,const kkMatrix4& mat)
+{
+	m_gs->drawMesh(mesh, mat, m_shader3DObjectDefault_polymodeforlinerender.ptr() );
+}
 void Application::GSDrawModelEdge(kkMesh* mesh,const kkMatrix4& mat, const kkColor& edgeCol)
 {
 	m_shaderLineModel->edge_color = edgeCol;
 	m_gs->drawMesh(mesh, mat, m_shaderLineModel.ptr() );
+}
+void Application::GSDrawModelPoint(kkMesh* mesh,const kkMatrix4& mat)
+{
+	m_shaderPoint->setWorld( mat );
+	m_gs->drawMesh(mesh, mat , m_shaderPoint.ptr() );
 }
 void Application::GSDrawObb( const kkObb& obb, const kkColor& color)
 {
@@ -2299,4 +2307,16 @@ ViewportObject* Application::GetActiveViewport()
 void Application::SetActiveViewport(ViewportObject* v)
 {
 	m_activeViewport = v;
+}
+EventConsumer* Application::GetEventConsumer()
+{
+	return m_event_consumer.get();
+}
+EditMode* Application::GetEditMode()
+{
+	return &m_editMode;
+}
+SelectMode* Application::GetSelectMode()
+{
+	return &m_selectMode;
 }

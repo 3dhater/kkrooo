@@ -23,9 +23,17 @@ bool kkIsCursorInViewport()
 {
 	return g_cursorInViewport;
 }
+void kkGSDrawModelPoint(kkMesh* mesh,const kkMatrix4& mat)
+{
+    return kkSingleton<Application>::s_instance->GSDrawModelPoint(mesh, mat);
+}
 void kkGSDrawModelEdge(kkMesh* mesh,const kkMatrix4& mat, const kkColor& edgeCol)
 {
     return kkSingleton<Application>::s_instance->GSDrawModelEdge(mesh, mat, edgeCol);
+}
+void kkGSDrawModelLineModePolyEdit(kkMesh* mesh,const kkMatrix4& mat)
+{
+    return kkSingleton<Application>::s_instance->GSDrawModelLineModePolyEdit(mesh, mat);
 }
 void kkGSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex, bool isSelected)
 {
@@ -63,6 +71,18 @@ AppState_keyboard* kkGetAppState_keyboard()
 {
     return kkSingleton<Application>::s_instance->GetAppState_keyboard();
 }
+EventConsumer* kkGetEventConsumer()
+{
+    return kkSingleton<Application>::s_instance->GetEventConsumer();
+}
+EditMode* kkGetEditMode()
+{
+    return kkSingleton<Application>::s_instance->GetEditMode();
+}
+SelectMode* kkGetSelectMode()
+{
+    return kkSingleton<Application>::s_instance->GetSelectMode();
+}
 v2i* kkGetCursorPosition()
 {
     return kkSingleton<Application>::s_instance->GetCursorPosition();
@@ -78,10 +98,6 @@ bool kkIsKeyDown(kkKey k)
 void* kkGetGUI()
 {
     return kkSingleton<Application>::s_instance->GetGUI();
-}
-AppState_main kkGetAppStateMain()
-{
-    return *kkSingleton<Application>::s_instance->GetAppState_main();
 }
 void kkGSSetScissor(bool set, const v4i& r)
 {

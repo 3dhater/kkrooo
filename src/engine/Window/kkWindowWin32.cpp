@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#define KK_EXPORTS
+﻿#define KK_EXPORTS
 
 #include "kkrooo.engine.h"
 
@@ -537,7 +536,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ev.mouseEvent.x = -1;
 		ev.mouseEvent.y = -1;
 		kkGetMainSystem()->addEvent( ev );
-		break;
+		return 0;
 	case WM_MOUSEWHEEL:
 		if(pD)
 		{
@@ -605,7 +604,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		switch( message )
 		{
-			case WM_LBUTTONUP:	ev.mouseEvent.state    |= kkEventMouse::kkEventMouseState::MS_LMB_UP; break;
+		case WM_LBUTTONUP:{	
+			ev.mouseEvent.state    |= kkEventMouse::kkEventMouseState::MS_LMB_UP; 
+		}break;
 			case WM_RBUTTONUP:	ev.mouseEvent.state    |= kkEventMouse::kkEventMouseState::MS_RMB_UP; break;
 			case WM_MBUTTONUP:	ev.mouseEvent.state    |= kkEventMouse::kkEventMouseState::MS_MMB_UP; break;
 			case WM_LBUTTONDBLCLK: ev.mouseEvent.state |= kkEventMouse::kkEventMouseState::MS_LMB_DOUBLE; break;

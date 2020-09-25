@@ -326,7 +326,7 @@ class Scene3DObject : public Scene3DObjectCommon
 	friend class RenderManager;
 	friend class MaterialEditor;
 	friend class Scene3D;
-	friend class Viewport;
+	friend class ViewportObject;
 	friend class Application;
 	friend void Scene3DObject_isRayIntersect( 
 		int* out_result,
@@ -339,13 +339,8 @@ class Scene3DObject : public Scene3DObjectCommon
 		kkRayTriangleIntersectionAlgorithm alg
 		);
 
-	//void _updateScreenSpacePoints_object();
-	//void _updateScreenSpacePoints_vertex();
-	//void _updateScreenSpacePoints_edge();
-
 	// нужно знать, выделены ли вершины или другие вещи или нет
 	bool m_isObjectHaveSelectedVerts = false;
-	
 	bool m_isObjectHaveSelectedEdges = false;
 	bool m_isObjectHaveSelectedPolys = false;
 	
@@ -381,7 +376,6 @@ public:
 	void deleteSelectedEdges();
 	void deleteSelectedPolys();
 	bool  isSelected(){ return m_isSelected; }
-	bool  isObjectHaveSelectedVerts(){ return m_isObjectHaveSelectedVerts;}
 
 	kkMesh    * getHardwareModel(u64);
 	kkMesh    * getHardwareModel_lines(u64);

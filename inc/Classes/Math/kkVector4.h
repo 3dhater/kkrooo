@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-/*
+﻿/*
 Используется часть кода из библиотеки Bullet
 
 Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/

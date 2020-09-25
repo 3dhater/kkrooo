@@ -4,18 +4,6 @@
 #include "GraphicsSystem/kkGraphicsSystem.h"
 #include "Scene3D/kkScene3DObject.h"
 
-enum class GizmoPart : u32
-{
-	Default,
-	X,
-	Y,
-	Z,
-	XZ_plane,
-	XY_plane,
-	ZY_plane,
-	Screen_plane
-};
-
 class Scene3DObject;
 class Gizmo
 {
@@ -49,7 +37,7 @@ public:
 
 	void setGraphicsSystem( kkGraphicsSystem * );
 	void init();
-	GizmoPart updateInput(CursorRay*);
+	GizmoPart updateInput(const kkRay&);
 	void drawMove(const kkVector4&,f32, const kkRay& );
 	void drawMove2D( v2i * cp, const v2i& point2d );
 	void drawScale(const kkVector4&,f32, const kkRay& );

@@ -56,10 +56,20 @@ struct kkVertex
 	kkVertex* m_mainNext = nullptr;
 	
 	kkLoopNode<kkPolygon> * m_polygons = nullptr;
-	u64 m_polygonCount = 0;
+	u32 m_polygonCount = 0;
 	
 	kkLoopNode<kkEdge> * m_edges = nullptr;
-	u64 m_edgeCount = 0;
+	u32 m_edgeCount = 0;
+
+	// Индекс software модели для точек
+	u32 m_pointsModelIndex = 0;
+	u32 m_pointsVertexIndex = 0;
+
+	enum _flags
+	{
+		EF_SELECTED = 1
+	};
+	u32 m_flags = 0;
 };
 
 struct kkTriangle
@@ -244,7 +254,6 @@ public:
 	virtual kkPolygon* GetPolygons() = 0;
 	virtual u64 GetPolygonsCount() = 0;
 	virtual void DeletePolygon(kkPolygon*) = 0;
-	//virtual void DeleteVertex(kkVertex*) = 0;
 	virtual void AddPolygon(kkGeometryInformation* p,bool weld, bool flip) = 0;
 };
 

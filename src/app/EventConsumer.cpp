@@ -86,7 +86,7 @@ void EventConsumer::processEvent( const kkEvent& ev )
 		case kkEventSystemAction::Timer:
 			break;
 		case kkEventSystemAction::BeginEventLoop:
-			_reset();
+			//_reset();
 			break;
 		case kkEventSystemAction::EndEventLoop:
 			break;

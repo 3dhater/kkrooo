@@ -244,6 +244,10 @@ class Application
 
 	void _onEndFrame();
 
+	// когда берётся элемент гизмо, состояние сохраняется сюда
+	// используется в трансформациях
+	AppEvent_gizmo m_currentGizmoEvent;
+
     kkString m_programName;
     kkString m_sceneName;
     kkString m_sceneFilePath;
@@ -251,6 +255,7 @@ class Application
 	f32 * m_deltaTime = nullptr;
 
 	friend class EventConsumer;
+	friend class ViewportObject;
 	friend class Viewport;
 	friend class Scene3D;
 	friend class Gizmo;
@@ -433,6 +438,7 @@ public:
 	bool IsKeyDown(kkKey k);
 	ShortcutManager* GetShortcutManager();
 	void GSDrawModel(kkMesh* mesh, const kkMatrix4& mat, const kkColor& difCol, kkImageContainerNode* m_diffTex, bool isSelected);
+	void GSDrawModelLineModePolyEdit(kkMesh* mesh,const kkMatrix4& mat);
 	void GSDrawModelEdge(kkMesh*,const kkMatrix4&, const kkColor& edgeCol);
 	void GSDrawObb( const kkObb& obb, const kkColor& color);
 	void GSDrawAabb( const kkAabb& aabb, const kkColor& color);
@@ -444,6 +450,10 @@ public:
 	void GSDrawLine2D(const v2i& p1, const v2i& p2, const kkColor& color);
 	ViewportObject* GetActiveViewport();
 	void SetActiveViewport(ViewportObject* v);
+	void GSDrawModelPoint(kkMesh* mesh,const kkMatrix4& mat);
+	EditMode* GetEditMode();
+	SelectMode* GetSelectMode();
+	EventConsumer* GetEventConsumer();
 };
 
 

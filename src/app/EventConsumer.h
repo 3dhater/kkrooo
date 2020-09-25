@@ -24,7 +24,6 @@ class EventConsumer : public kkEventConsumer
 	bool m_mmb_once_state = false;
 	bool m_mmb_up = false;
 
-	void _reset();
 
 	bool m_isLastKeyDownOnce = false;
 	kkKey m_lastKeyDownOnce;
@@ -33,6 +32,7 @@ public:
 	EventConsumer();
 	~EventConsumer();
 
+	void _reset();
 	void processEvent( const kkEvent& ev );
 	
 	bool isKeyDown( kkKey k );

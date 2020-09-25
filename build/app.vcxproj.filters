@@ -198,6 +198,9 @@
     <ClCompile Include="..\src\app\Shaders\scene3DobjectDefaultSilhouette.cpp">
       <Filter>src\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\app\Scene3D\Scene3DObject_transform.cpp">
+      <Filter>src\Scene3D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\app\Application.h">
