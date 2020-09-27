@@ -28,6 +28,12 @@ struct kkEdge
 	// у ребра может быть 1 или 2 полигона
 	kkPolygon* m_p1 = nullptr;
 	kkPolygon* m_p2 = nullptr;
+
+	enum _flags
+	{
+		EF_SELECTED = 1
+	};
+	u32 m_flags = 0;
 };
 
 struct kkPolygon
@@ -44,6 +50,12 @@ struct kkPolygon
 
 	v3f * m_normals = nullptr;
 	v2f * m_tcoords = nullptr;
+
+	enum _flags
+	{
+		EF_SELECTED = 1
+	};
+	u32 m_flags = 0;
 };
 
 struct kkVertex

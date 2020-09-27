@@ -405,24 +405,38 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 		m_app->m_state_app = AppState_main::CameraTransformation;
 	}
 
-	//if( g_mouseState.LMB_UP && !isGizmo && g_mouseState.IsFirstClickLMB )
-	//{
-	//	auto checkCursorHover = [&]()->bool
-	//	{
-	//		for( size_t i = 0; i < m_drawObjects.size(); ++i )
-	//		{
-	//			auto object = m_drawObjects[i];
-	//			auto & obb = object->Obb();
-	//			if( kkrooo::rayIntersection_obb(m_cursorRay->m_center, obb) )
-	//			{
-	//				// далее проверка на пересечение луч-треугольник
-	//				kkRayTriangleIntersectionResultSimple intersectionResult;
-	//				if( object->IsRayIntersect(m_cursorRay->m_center, intersectionResult) )
-	//					return true;
-	//			}
-	//		}
-	//		return false;
-	//	};
+	auto checkCursorHover = [&]()->bool
+	{
+		for( size_t i = 0; i < m_drawObjects.size(); ++i )
+		{
+			auto object = m_drawObjects[i];
+			auto & obb = object->Obb();
+			kkRayTriangleIntersectionResultSimple intersectionResult;
+			if( kkrooo::rayIntersection_obb(m_cursorRay->m_center, obb) )
+			{
+				// далее проверка на пересечение луч-треугольник
+				if( object->IsRayIntersect(m_cursorRay->m_center, intersectionResult) )
+					return true;
+			}
+			if( kkrooo::rayIntersection_obb(m_cursorRay->m_E, obb) )
+			{
+				if( object->IsRayIntersect(m_cursorRay->m_E, intersectionResult) ) return true;
+			}
+			if( kkrooo::rayIntersection_obb(m_cursorRay->m_N, obb) )
+			{
+				if( object->IsRayIntersect(m_cursorRay->m_N, intersectionResult) ) return true;
+			}
+			if( kkrooo::rayIntersection_obb(m_cursorRay->m_S, obb) )
+			{
+				if( object->IsRayIntersect(m_cursorRay->m_S, intersectionResult) ) return true;
+			}
+			if( kkrooo::rayIntersection_obb(m_cursorRay->m_W, obb) )
+			{
+				if( object->IsRayIntersect(m_cursorRay->m_W, intersectionResult) ) return true;
+			}
+		}
+		return false;
+	};
 
 	if(m_app->m_state_app == AppState_main::CancelTransformation)
 	{
@@ -479,51 +493,61 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			}
 		}
 	}
-	//	else if( m_app->m_editMode == EditMode::Edge )
-	//	{
-	//		if( checkCursorHover() )
-	//		{
-	//			if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_center))
-	//			{
-	//				if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
-	//				{
-	//					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
-	//					{
-	//						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
-	//						{
-	//							if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
-	//							{
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//		else
-	//		{
-	//			//printf("a");
-	//			if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
-	//			{
-	//				if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
-	//				{
-	//					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
-	//					{
-	//						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
-	//						{
-	//							if( m_app->m_state_keyboard != AppState_keyboard::Alt && 
-	//								m_app->m_state_keyboard != AppState_keyboard::Ctrl )
-	//								m_app->m_current_scene3D->deselectAll();
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//	else if( m_app->m_editMode == EditMode::Polygon )
-	//	{
-	//		m_app->m_current_scene3D->selectPolygons(&m_cursorRay->m_center);
-	//	}
-	//}
+	else if( m_app->m_editMode == EditMode::Edge )
+	{
+		if(g_mouseState.LMB_UP 
+			&& m_app->m_state_app != AppState_main::Gizmo
+			&& m_app->m_state_app != AppState_main::GuiInput
+			&& g_mouseState.IsFirstClickLMB )
+		{
+			if( checkCursorHover() )
+			{
+				if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_center))
+				{
+					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
+					{
+						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
+						{
+							if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
+							{
+								if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
+								{
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
+				{
+					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
+					{
+						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
+						{
+							if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
+							{
+								if( m_app->m_state_keyboard != AppState_keyboard::Alt && 
+									m_app->m_state_keyboard != AppState_keyboard::Ctrl )
+									m_app->m_current_scene3D->deselectAll();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if( m_app->m_editMode == EditMode::Polygon )
+	{
+		if(g_mouseState.LMB_UP 
+			&& m_app->m_state_app != AppState_main::Gizmo
+			&& m_app->m_state_app != AppState_main::GuiInput
+			&& g_mouseState.IsFirstClickLMB )
+		{
+			m_app->m_current_scene3D->selectPolygons(&m_cursorRay->m_center);
+		}
+	}
 	if( g_mouseState.LMB_HOLD )
 	{
 		if( !isGizmo && g_mouseState.IsMove && g_mouseState.IsFirstClickLMB && m_app->m_state_app != AppState_main::CancelTransformation )
@@ -1024,9 +1048,6 @@ void ViewportObject::drawScene(bool inFocus)
 						object->m_shaderParameter.m_diffuseTexture,
 						object->isSelected());
 					//// рисование самой модели
-					//m_vd.m_app->m_shader3DObjectDefault->m_diffuseColor = object->m_shaderParameter.m_diffuseColor;
-					//m_vd.m_app->m_shader3DObjectDefault->m_diffTex = object->m_shaderParameter.m_diffuseTexture;
-					//m_vd.m_gs->drawMesh(object->getHardwareModel(i2), object->GetMatrixWorld() , m_vd.m_app->m_shader3DObjectDefault.ptr() );
 				}
 			}
 
@@ -1256,16 +1277,6 @@ void Viewport::init(ViewportType type, ViewportLayoutType l_type, const v4f& ind
 
 void Viewport::updateInput(const v2f& mouseDelta)
 {
-	//g_mouseState.reset();
-	/*g_mouseState.LMB_DOWN = kkIsLmbDownOnce();
-	g_mouseState.LMB_HOLD = kkIsLmbDown();
-	g_mouseState.LMB_UP   = kkIsLmbUp();
-	g_mouseState.RMB_DOWN = kkIsRmbDownOnce();
-	g_mouseState.RMB_HOLD = kkIsRmbDown();
-	g_mouseState.RMB_UP   = kkIsRmbUp();
-	g_mouseState.MMB_DOWN = kkIsMmbDownOnce();
-	g_mouseState.MMB_HOLD = kkIsMmbDown();
-	g_mouseState.MMB_UP   = kkIsMmbUp();*/
 	if(m_viewports)
 	{
 		auto end = m_viewports->m_left;

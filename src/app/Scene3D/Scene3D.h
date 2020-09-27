@@ -48,6 +48,7 @@ class Scene3D : public kkScene3D
 	kkAabb m_sceneAabb;
 	kkAabb m_selectionAabb;
 
+	void _setDefaultSelectionAabb();
 	void _updateSelectionAabb_object();
 	void _updateSelectionAabb_vertex();
 	void _updateSelectionAabb_edge();

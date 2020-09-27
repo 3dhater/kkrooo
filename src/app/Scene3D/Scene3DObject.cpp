@@ -165,6 +165,15 @@ void Scene3DObject::_createSoftwareModel_polys()
 	for(u64 i = 0; i < m_polyModel->m_polygonsCount; ++i)
 	{
 		kkVertex * base_vertex = current_polygon->m_verts->m_element;
+		v4f color(1.f,1.f,1.f,1.f);
+		if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Polygon )
+		{
+			if( current_polygon->m_flags & current_polygon->EF_SELECTED )
+			{
+				m_isObjectHaveSelectedPolys = true;
+				color.set(0.8f, 0.f, 0.f, 2.f);
+			}
+		}
 		auto v_node1 = current_polygon->m_verts->m_right;
 		auto v_node2 = v_node1->m_right;
 		for( u64 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
@@ -181,6 +190,9 @@ void Scene3DObject::_createSoftwareModel_polys()
 				index = 0;
 			}
 			
+			
+
+			verts_ptr->Color = color;
 			verts_ptr->Position.x = base_vertex->m_position._f32[0];
 			verts_ptr->Position.y = base_vertex->m_position._f32[1];
 			verts_ptr->Position.z = base_vertex->m_position._f32[2];
@@ -200,6 +212,7 @@ void Scene3DObject::_createSoftwareModel_polys()
 			++inds_ptr;
 			++verts_ptr;
 
+			verts_ptr->Color = color;
 			verts_ptr->Position.x = vertex2->m_position._f32[0];
 			verts_ptr->Position.y = vertex2->m_position._f32[1];
 			verts_ptr->Position.z = vertex2->m_position._f32[2];
@@ -219,6 +232,7 @@ void Scene3DObject::_createSoftwareModel_polys()
 			++inds_ptr;
 			++verts_ptr;
 
+			verts_ptr->Color = color;
 			verts_ptr->Position.x = vertex3->m_position._f32[0];
 			verts_ptr->Position.y = vertex3->m_position._f32[1];
 			verts_ptr->Position.z = vertex3->m_position._f32[2];
@@ -251,81 +265,6 @@ void Scene3DObject::_createSoftwareModel_polys()
 		}
 		current_polygon = current_polygon->m_mainNext;
 	}
-
-	//		v4f color(1.f,1.f,1.f,1.f);
-	//		if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Polygon )
-	//		{
-	//			if( polygon->m_isSelected )
-	//			{
-	//				color.set(0.8f, 0.f, 0.f, 2.f);
-	//			}
-	//		}
-
-	//		verts_ptr->Color = color;
-
-	//		verts_ptr->UV.x = vertex1->m_UV._f32[0];
-	//		verts_ptr->UV.y = vertex1->m_UV._f32[1];
-	//		
-	//		m_aabbOriginal.add( vertex1->m_Position );
-
-	//		vertex1->m_vertexIndexForSoftware.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
-	//		*inds_ptr = index; 
-	//		++index;
-	//		++inds_ptr;
-	//		++verts_ptr;
-
-	//		verts_ptr->Position.x = vertex2->m_Position._f32[0];
-	//		verts_ptr->Position.y = vertex2->m_Position._f32[1];
-	//		verts_ptr->Position.z = vertex2->m_Position._f32[2];
-	//		
-	//		verts_ptr->Normal.x = vertex2->m_Normal._f32[0];
-	//		verts_ptr->Normal.y = vertex2->m_Normal._f32[1];
-	//		verts_ptr->Normal.z = vertex2->m_Normal._f32[2];
-	//		verts_ptr->Color = color;
-
-	//		verts_ptr->UV.x = vertex2->m_UV._f32[0];
-	//		verts_ptr->UV.y = vertex2->m_UV._f32[1];
-
-	//		m_aabbOriginal.add( vertex2->m_Position );
-
-	//		vertex2->m_vertexIndexForSoftware.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
-	//		*inds_ptr = index; 
-	//		++index;
-	//		++inds_ptr;
-	//		++verts_ptr;
-
-	//		verts_ptr->Position.x = vertex3->m_Position._f32[0];
-	//		verts_ptr->Position.y = vertex3->m_Position._f32[1];
-	//		verts_ptr->Position.z = vertex3->m_Position._f32[2];
-
-	//		verts_ptr->Normal.x = vertex3->m_Normal._f32[0];
-	//		verts_ptr->Normal.y = vertex3->m_Normal._f32[1];
-	//		verts_ptr->Normal.z = vertex3->m_Normal._f32[2];
-	//		verts_ptr->Color = color;
-	//		
-	//		verts_ptr->UV.x = vertex3->m_UV._f32[0];
-	//		verts_ptr->UV.y = vertex3->m_UV._f32[1];
-
-	//		m_aabbOriginal.add( vertex3->m_Position );
-
-	//		vertex3->m_vertexIndexForSoftware.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
-	//		*inds_ptr = index;
-
-	//		++index;
-	//		++inds_ptr;
-	//		++verts_ptr;
-
-	//		softwareModel->m_vCount += 3;
-	//		softwareModel->m_iCount += 3;
-
-
-	//		++triangleCount;
-	//		if( triangleCount == m_triLimit )
-	//		{
-	//			triangleCount = 0;
-	//		}
-	//	}
-	//}
 }
 
 void        Scene3DObject::updateModelPointsColors()
@@ -437,12 +376,20 @@ void Scene3DObject::_createSoftwareModel_edges()
 		verts_ptr->_position.z  = E->m_v1->m_position.KK_Z;
 
 		v4f color(1.f,1.f,1.f,1.f);
+		if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Edge )
+		{
+			if(E->m_flags & E->EF_SELECTED)
+			{
+				color = v4f(1.f,0.f,0.f,1.f);
+				this->m_isObjectHaveSelectedEdges = true;
+			}
+		}
 		// ********************
 
 		verts_ptr->_color = color;
 		*inds_ptr = index;
 		
-		// E->m_v1->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+		E->m_v1->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
 
 		++verts_ptr;
 		++inds_ptr;
@@ -454,7 +401,7 @@ void Scene3DObject::_createSoftwareModel_edges()
 		verts_ptr->_color = color;
 		*inds_ptr = index;
 		
-		// E->m_v2->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+		E->m_v2->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
 
 		++verts_ptr;
 		++inds_ptr;
@@ -467,98 +414,6 @@ void Scene3DObject::_createSoftwareModel_edges()
 
 		E = E->m_mainNext;
 	}
-
-	//for(u64 i = 0, sz = m_PolyModel->m_verts.size(); i < sz; ++i )
-	//	((Vertex*)m_PolyModel->m_verts[ i ])->m_vertexIndexForSoftware_lines.clear();
-
-	//u32 softwareModelIndex = 0;
-	//std::unordered_map<u64, u64> map;     // 2 объединённых адреса как ключ и индекс на сам массив хранящий Edge
-
-	//for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//{
-	//	polygon = (Polygon3D *)m_PolyModel->m_polygons[i];
-
-	//	for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
-	//	{
-	//		u64 o2 = o + 1;
-	//		if(o2 == sz2) o2=0;
-	//		auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
-	//		auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
-	//		
-	//		// нужно определить контрольную вершину с адресом, значение которого меньше чем у другой вершины
-	//		ControlVertex* cv_first  = cv1;
-	//		ControlVertex* cv_second = cv2;
-	//		if( cv2 < cv1 )
-	//		{
-	//			cv_first   = cv2;
-	//			cv_second  = cv1;
-	//		}
-
-	//		u64 key_val = (u64)cv_first;
-	//		key_val <<= 32;
-	//		key_val |= ((u64)cv_second & 0x00000000FFFFFFFF);
-
-	//		if( map.find(key_val) == map.end() )
-	//		{
-	//			map[key_val] = 0;
-	//			if( lineCount == 0 )
-	//			{
-	//				softwareModel = _createNewSoftwareModel(_NEW_SOFTWARE_MODEL_TYPE::ENSMT_LINES);
-	//				verts_ptr     = (LineModelVertex*)softwareModel->m_vertices;
-	//				inds_ptr      = softwareModel->m_indices;
-	//				m_SoftwareModels_edges.push_back(softwareModel);
-	//				softwareModelIndex = (u32)m_SoftwareModels_edges.size() - 1;
-	//				index = 0;
-	//			}
-	//			
-	//			verts_ptr->_position.x  = ((Vertex*)cv_first->m_verts[0])->m_Position.KK_X;
-	//			verts_ptr->_position.y  = ((Vertex*)cv_first->m_verts[0])->m_Position.KK_Y;
-	//			verts_ptr->_position.z  = ((Vertex*)cv_first->m_verts[0])->m_Position.KK_Z;
-	//			
-	//			v4f color(1.f,1.f,1.f,1.f);
-	//			if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Edge )
-	//			{
-	//				if( cv_first->m_edgeWith.size() )
-	//				{
-	//					if( std::find(cv_first->m_edgeWith.begin(), cv_first->m_edgeWith.end(), cv_second ) != cv_first->m_edgeWith.end() )
-	//					{
-	//						color = v4f(1.f,0.f,0.f,1.f);
-	//					}
-	//				}
-	//			}
-
-	//			verts_ptr->_color = color;
-	//			*inds_ptr = index;
-	//			
-	//			((Vertex*)cv_first->m_verts[0])->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
-
-	//			++verts_ptr;
-	//			++inds_ptr;
-	//			++index;
-
-	//			verts_ptr->_position.x  = ((Vertex*)cv_second->m_verts[0])->m_Position.KK_X;
-	//			verts_ptr->_position.y  = ((Vertex*)cv_second->m_verts[0])->m_Position.KK_Y;
-	//			verts_ptr->_position.z  = ((Vertex*)cv_second->m_verts[0])->m_Position.KK_Z;
-	//			verts_ptr->_color = color;
-	//			*inds_ptr = index;
-	//			
-	//			((Vertex*)cv_second->m_verts[0])->m_vertexIndexForSoftware_lines.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
-
-	//			++verts_ptr;
-	//			++inds_ptr;
-	//			++index;
-
-	//			softwareModel->m_vCount += 2;
-	//			softwareModel->m_iCount += 2;
-
-	//			++lineCount;
-	//			if( lineCount == m_lineLimit )
-	//			{
-	//				lineCount = 0;
-	//			}
-	//		}
-	//	}
-	//}
 }
 
 bool Scene3DObject::init()
@@ -838,10 +693,6 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 {
 	if(!m_polyModel->m_polygonsCount)
 		return false;
-	auto viewport = kkGetActiveViewport();
-	auto camera   = viewport->m_activeCamera->getCamera();
-	auto frustum  = camera->getFrustum();
-	
 	bool ret = false;
 
 	kkRayTriangleIntersectionResultSimple iResult;
@@ -881,6 +732,7 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 					iResult.m_W = f4;
 					iResult.m_intersectionPoint = r.m_origin + r.m_direction * f1;
 					iResult.m_polygon = polygon;
+					result.push_back(iResult);
 					ret = true;
 				}
 				break;
@@ -893,6 +745,7 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 					iResult.m_W = f4;
 					iResult.m_intersectionPoint = r.m_origin + r.m_direction * f1;
 					iResult.m_polygon = polygon;
+					result.push_back(iResult);
 					ret = true;
 				}
 				break;

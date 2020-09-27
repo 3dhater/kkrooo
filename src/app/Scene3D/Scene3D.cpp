@@ -23,7 +23,6 @@
 #include <algorithm>
 
 const s32 g_edgeColorNumber = 62;
-//bool g_selectByFrame = false;
 const kkColor g_edgeColors[] = 
 {
 	kkColorAqua,
@@ -337,163 +336,137 @@ void Scene3D::_selectObjectsByFrame_object(
 			}
 		}
 	}
-	//g_selectByFrame = true;
 }
 
 void Scene3D::_selectObjectsByFrame_poly( const SelectionFrust& frust )
 {
-	//auto ks = m_app->getStateKeyboard();
-	//if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
-	//	deselectAll();
-
-	//for( auto * obj : m_objects_selected )
-	//{
-	//	obj->m_isObjectHaveSelectedPolys = false;
-
-	//	bool need_update = false;
-	//	for(u64 i = 0, sz = obj->m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//	{
-	//		auto polygon = (Polygon3D *)obj->m_PolyModel->m_polygons.at(i);
-	//		for( u64 o = 0, sz2 = polygon->m_verts.size(); o < sz2; ++o )
-	//		{
-	//			u64 o2 = o + 1;
-	//			if(o2 == sz2) o2=0;
-	//			auto cv1 = (ControlVertex*)((Vertex*)polygon->m_verts[o])->m_controlVertex;
-	//			auto cv2 = (ControlVertex*)((Vertex*)polygon->m_verts[o2])->m_controlVertex;
-
-	//			auto V1 = cv1->m_verts[0];
-	//			auto V2 = cv2->m_verts[0];
-
-	//			if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
-	//			{
-	//				need_update = true;
-
-	//				if( ks == AppState_keyboard::Alt )
-	//				{
-	//					polygon->Deselect();
-	//				}
-	//				else
-	//				{
-	//					obj->m_isObjectHaveSelectedPolys = true;
-	//					polygon->Select();
-	//				}
-	//				goto next_polygon;
-	//			}
-	//		}
-	//	next_polygon:;
-	//	}
-	//	if(!obj->m_isObjectHaveSelectedPolys)
-	//	{
-	//		for(u64 i = 0, sz = obj->m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//		{
-	//			auto polygon = (Polygon3D *)obj->m_PolyModel->m_polygons.at(i);
-	//			if(polygon->IsSelected())
-	//			{
-	//				obj->m_isObjectHaveSelectedPolys = true;
-	//				break;
-	//			}
-	//		}
-	//	}
-
-	//	// надо попробовать послать лучи по углам выделенной рамки
-	//	if(!need_update)
-	//	{
-	//		kkRay ray[4];
-	//		ray[0].m_origin = frust.m_top[0];
-	//		ray[0].m_end = frust.m_top[3];
-	//		ray[0].update();
-	//		ray[1].m_origin = frust.m_top[1];
-	//		ray[1].m_end = frust.m_top[2];
-	//		ray[1].update();
-	//		ray[2].m_origin = frust.m_bottom[0];
-	//		ray[2].m_end = frust.m_bottom[3];
-	//		ray[2].update();
-	//		ray[3].m_origin = frust.m_bottom[1];
-	//		ray[3].m_end = frust.m_bottom[2];
-	//		ray[3].update();
-	//		for(s32 i = 0; i < 4; ++i)
-	//		{
-	//			std::vector<kkRayTriangleIntersectionResultSimple> results;
-	//			if( obj->IsRayIntersectMany(ray[i], results) )
-	//			{
-	//				/*std::sort( result.begin(),result.end(),
-	//					[](const kkRayTriangleIntersectionResultSimple& first, const kkRayTriangleIntersectionResultSimple& second)
-	//				{
-	//					return first.m_T < second.m_T;
-	//				} );*/
-	//				
-	//				for( auto result : results )
-	//				{
-	//					auto polygon = (Polygon3D*)obj->m_PolyModel->m_polygons[result.m_polygonIndex];
-	//				
-	//					if( ks == AppState_keyboard::Alt )
-	//					{
-
-	//						polygon->Deselect();
-	//					}
-	//					else
-	//					{
-	//						obj->m_isObjectHaveSelectedPolys = true;
-	//						polygon->Select();
-	//					}
-	//				}
-
-	//				need_update = true;
-	//				break;
-	//			}
-	//		}
-	//	}
-
-	//	if( need_update )
-	//	{
-	//		obj->m_PolyModel->updateCVForPolygonSelect();
-	//		obj->updatePolygonModel();
-
-	//		_updateSelectionAabb_polygon();
-	//		updateObjectPolySelectList();
-	//	}
-	//}
-}
-
-void Scene3D::_selectObjectsByFrame_edge( const SelectionFrust& frust )
-{
-	/*auto ks = m_app->getStateKeyboard();
+	auto ks = m_app->getStateKeyboard();
 	if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
 		deselectAll();
 
 	for( auto * obj : m_objects_selected )
 	{
+		obj->m_isObjectHaveSelectedPolys = false;
+
 		bool need_update = false;
-		for(u64 i = 0, sz = obj->m_PolyModel->m_edges.size(); i < sz; ++i )
+		auto P = obj->m_polyModel->m_polygons;
+		for(u64 i = 0; i < obj->m_polyModel->m_polygonsCount; ++i )
 		{
-			auto E = obj->m_PolyModel->m_edges[i];
-			auto cv1 = E->m_firstPoint;
-			auto cv2 = E->m_secondPoint;
-			auto V1 = cv1->m_verts[0];
-			auto V2 = cv2->m_verts[0];
-			if( frust.lineInFrust( math::mul( V1->getPosition(), obj->GetMatrix()) + obj->GetPivot() , math::mul( V2->getPosition(), obj->GetMatrix()) + obj->GetPivot() ) )
+			auto PE = P->m_edges;
+			for( u64 o = 0; o < P->m_edgeCount; ++o )
+			{
+				if( frust.lineInFrust( 
+					math::mul( PE->m_element->m_v1->m_position, obj->GetMatrix()) + obj->GetPivot(), 
+					math::mul( PE->m_element->m_v2->m_position, obj->GetMatrix()) + obj->GetPivot() 
+				))
+				{
+					need_update = true;
+
+					if( ks == AppState_keyboard::Alt )
+					{
+						if( P->m_flags & P->EF_SELECTED )
+							P->m_flags ^= P->EF_SELECTED;
+					}
+					else
+					{
+						obj->m_isObjectHaveSelectedPolys = true;
+						P->m_flags |= P->EF_SELECTED;
+					}
+					goto next_polygon;
+				}
+				PE = PE->m_right;
+			}
+		next_polygon:;
+			P = P->m_mainNext;
+		}
+
+		// надо попробовать послать лучи по углам выделенной рамки
+		if(!need_update)
+		{
+			kkRay ray[4];
+			ray[0].m_origin = frust.m_top[0];
+			ray[0].m_end = frust.m_top[3];
+			ray[0].update();
+			ray[1].m_origin = frust.m_top[1];
+			ray[1].m_end = frust.m_top[2];
+			ray[1].update();
+			ray[2].m_origin = frust.m_bottom[0];
+			ray[2].m_end = frust.m_bottom[3];
+			ray[2].update();
+			ray[3].m_origin = frust.m_bottom[1];
+			ray[3].m_end = frust.m_bottom[2];
+			ray[3].update();
+			for(s32 i = 0; i < 4; ++i)
+			{
+				std::vector<kkRayTriangleIntersectionResultSimple> results;
+				if( obj->IsRayIntersectMany(ray[i], results) )
+				{					
+					for( auto result : results )
+					{					
+						if( ks == AppState_keyboard::Alt )
+						{
+							if(result.m_polygon->m_flags & result.m_polygon->EF_SELECTED)
+								result.m_polygon->m_flags ^= result.m_polygon->EF_SELECTED;
+						}
+						else
+						{
+							result.m_polygon->m_flags |= result.m_polygon->EF_SELECTED;
+						}
+					}
+					need_update = true;
+					break;
+				}
+			}
+		}
+
+		if( need_update )
+		{
+			obj->m_isObjectHaveSelectedPolys = false;
+			obj->updatePolygonModel();
+			_updateSelectionAabb_polygon();
+			updateObjectPolySelectList();
+		}
+	}
+}
+
+void Scene3D::_selectObjectsByFrame_edge( const SelectionFrust& frust )
+{
+	auto ks = m_app->getStateKeyboard();
+	if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
+		deselectAll();
+
+	for( auto * obj : m_objects_selected )
+	{
+		obj->m_isObjectHaveSelectedEdges = false;
+		bool need_update = false;
+		auto current_edge = obj->m_polyModel->m_edges;
+		for(u64 i = 0; i < obj->m_polyModel->m_edgesCount; ++i )
+		{
+			if( frust.lineInFrust( 
+				math::mul( current_edge->m_v1->m_position, obj->GetMatrix()) + obj->GetPivot(), 
+				math::mul( current_edge->m_v2->m_position, obj->GetMatrix()) + obj->GetPivot() 
+				))
 			{
 				need_update = true;
 				if( ks == AppState_keyboard::Alt )
 				{
-					E->m_isSelected = false;
+					if(current_edge->m_flags & current_edge->EF_SELECTED)
+						current_edge->m_flags ^= current_edge->EF_SELECTED;
 				}
 				else
 				{
-					E->m_isSelected = true;
+					current_edge->m_flags |= current_edge->EF_SELECTED;
 				}
 			}
+			current_edge = current_edge->m_mainNext;
 		}
 		if( need_update )
 		{
-			((Scene3DObject*)obj)->m_PolyModel->updateCVEdgeWith();
 			((Scene3DObject*)obj)->updateEdgeModel();
-			((Scene3DObject*)obj)->m_isObjectHaveSelectedEdges = true;
-
 			_updateSelectionAabb_edge();
 			updateObjectEdgeSelectList();
 		}
-	}*/
+	}
 }
 
 void Scene3D::_selectObjectsByFrame_vertex(  const SelectionFrust& frust )
@@ -632,37 +605,29 @@ void Scene3D::_selectAll_object()
 
 void Scene3D::_selectAll_edge(Scene3DObject* object)
 {
-	/*_deselectAll_edge(object);
-	for(u64 i = 0, sz = object->m_PolyModel->m_edges.size(); i < sz; ++i )
+	auto E = object->m_polyModel->m_edges;
+	for(u64 i = 0; i < object->m_polyModel->m_edgesCount; ++i )
 	{
-		auto E = object->m_PolyModel->m_edges[i];
-		E->m_isSelected = true;
+		E->m_flags |= E->EF_SELECTED;
+		E = E->m_mainNext;
 	}
-	object->m_isObjectHaveSelectedEdges = true;
-	object->m_PolyModel->updateCVEdgeWith();
 	object->updateEdgeModel();
 	_updateSelectionAabb_edge();
-	updateObjectEdgeSelectList();*/
+	updateObjectEdgeSelectList();
 }
 
 void Scene3D::_selectAll_poly(Scene3DObject* object)
 {
-	/*auto & cverts = object->GetControlVertexArray();
-		
-	auto & polys = object->GetPolygonArray();
-	for( u64 i = 0, sz = polys.size(); i < sz; ++i )
+	auto P = object->m_polyModel->m_polygons;
+	for( u64 i = 0; i < object->m_polyModel->m_polygonsCount; ++i )
 	{
-		auto P = polys[i];
-		P->Select();
-			
+		P->m_flags |= P->EF_SELECTED;
+		P = P->m_mainNext;
 	}
 
-	object->m_PolyModel->updateCVForPolygonSelect();
 	object->updatePolygonModel();
-	object->m_isObjectHaveSelectedPolys = true;
-
 	_updateSelectionAabb_polygon();
-	updateObjectPolySelectList();*/
+	updateObjectPolySelectList();
 }
 
 void Scene3D::_selectAll_vertex(Scene3DObject* object)
@@ -779,74 +744,62 @@ void Scene3D::_selectInvert_object()
 
 void Scene3D::_selectInvert_poly(Scene3DObject* object)
 {
-	//auto & cverts = object->GetControlVertexArray();
-
-	//// надо сохранить не выделенные полигоны
-	//std::vector<kkPolygon*> not_selected_polys;
-	//for( u64 i = 0, sz = object->m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//{
-	//	auto P = object->m_PolyModel->m_polygons[i];
-	//	if(!P->IsSelected())
-	//		not_selected_polys.emplace_back(P);
-	//}
-	//	
-	//_deselectAll_poly(object);	
-
-	//object->m_isObjectHaveSelectedPolys = false;
-	//for(auto P : not_selected_polys)
-	//{
-	//	object->m_isObjectHaveSelectedPolys = true;
-	//	P->Select();
-	//}
-
-	//object->m_PolyModel->updateCVForPolygonSelect();
-	//object->updatePolygonModel();
-	//
-
-	//_updateSelectionAabb_polygon();
-	//updateObjectPolySelectList();
+	auto P = object->m_polyModel->m_polygons;
+	for( u64 i = 0; i < object->m_polyModel->m_polygonsCount; ++i )
+	{
+		if(P->m_flags & P->EF_SELECTED)
+		{
+			P->m_flags ^= P->EF_SELECTED;
+		}
+		else
+		{
+			P->m_flags |= P->EF_SELECTED;
+		}
+		P = P->m_mainNext;
+	}
+	object->updatePolygonModel();
+	_updateSelectionAabb_polygon();
+	updateObjectPolySelectList();
 }
 
 void Scene3D::_selectInvert_edge(Scene3DObject* object)
 {
-	/*std::unordered_set<Edge*> edges_to_select;
-	for(u64 i = 0, sz = object->m_PolyModel->m_edges.size(); i < sz; ++i )
+	auto E = object->m_polyModel->m_edges;
+	for( u64 i = 0; i < object->m_polyModel->m_edgesCount; ++i )
 	{
-		auto E = object->m_PolyModel->m_edges[i];
-		if(!E->m_isSelected)
-			edges_to_select.insert(E);
+		if(E->m_flags & E->EF_SELECTED)
+		{
+			E->m_flags ^= E->EF_SELECTED;
+		}
+		else
+		{
+			E->m_flags |= E->EF_SELECTED;
+		}
+		E = E->m_mainNext;
 	}
-	_deselectAll_edge(object);
-	for(auto E : edges_to_select)
-	{
-		object->m_isObjectHaveSelectedEdges = true;
-		E->m_isSelected = true;
-	}
-	object->m_PolyModel->updateCVEdgeWith();
 	object->updateEdgeModel();
-
 	_updateSelectionAabb_edge();
-	updateObjectEdgeSelectList();*/
+	updateObjectEdgeSelectList();
 }
 
 void Scene3D::_selectInvert_vertex(Scene3DObject* object)
 {
-	/*object->m_isObjectHaveSelectedVerts = false;
-
-	for( u64 i = 0, sz = object->m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	auto V = object->m_polyModel->m_verts;
+	for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
 	{
-		if( object->m_PolyModel->m_controlVerts[ i ]->isSelected() )
-			object->m_PolyModel->m_controlVerts[ i ]->deselect();
+		if(V->m_flags & V->EF_SELECTED)
+		{
+			V->m_flags ^= V->EF_SELECTED;
+		}
 		else
 		{
-			object->m_PolyModel->m_controlVerts[ i ]->select();
-			object->m_isObjectHaveSelectedVerts = true;
+			V->m_flags |= V->EF_SELECTED;
 		}
+		V = V->m_mainNext;
 	}
 	object->updateModelPointsColors();
-
 	_updateSelectionAabb_vertex();
-	updateObjectVertexSelectList();*/
+	updateObjectVertexSelectList();
 }
 
 void Scene3D::selectInvert()
@@ -933,66 +886,54 @@ void Scene3D::_updateSelectionAabb_vertex()
 		}
 	}
 	if( nnn )
+		_setDefaultSelectionAabb();
+}
+void Scene3D::_setDefaultSelectionAabb()
+{
+	if( m_objects_selected.size() )
 	{
-		if( m_objects_selected.size() )
+		for( auto * o : m_objects_selected )
 		{
-			for( auto * o : m_objects_selected )
-			{
-				m_selectionAabb.add(o->Aabb());
-			}
-		}
-		else
-		{
-			m_selectionAabb = m_sceneAabb;
+			m_selectionAabb.add(o->Aabb());
 		}
 	}
+	else
+	{
+		m_selectionAabb = m_sceneAabb;
+	}
 }
-
 void Scene3D::_updateSelectionAabb_edge()
 {
-	/*if( !m_objects_selected.size() )
+	if( !m_objects_selected.size() )
 		return;
 
 	m_selectionAabb.reset();
 	bool nnn = true;
 	kkMatrix4 M;
 
-	for( auto * o : m_objects_selected )
+	for( auto * object : m_objects_selected )
 	{
-		M = o->m_matrix;
+		M = object->m_matrix;
 
-		for( u64 i = 0, sz = o->m_PolyModel->m_edges.size(); i < sz; ++i )
+		auto current_edge = object->m_polyModel->m_edges;
+		for( u64 i = 0; i < object->m_polyModel->m_edgesCount; ++i )
 		{
-			auto E = o->m_PolyModel->m_edges[i];
-			if(E->m_isSelected)
+			if(current_edge->m_flags & current_edge->EF_SELECTED)
 			{
 				nnn = false;
-				auto V = (Vertex*)E->m_firstPoint->m_verts[0];
-				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
-				V = (Vertex*)E->m_secondPoint->m_verts[0];
-				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
+				m_selectionAabb.add( math::mul( current_edge->m_v1->m_position, M ) + object->GetPivot() );
+				m_selectionAabb.add( math::mul( current_edge->m_v2->m_position, M ) + object->GetPivot() );
 			}
+			current_edge = current_edge->m_mainNext;
 		}
 	}
 	if( nnn )
-	{
-		if( m_objects_selected.size() )
-		{
-			for( auto * o : m_objects_selected )
-			{
-				m_selectionAabb.add(o->Aabb());
-			}
-		}
-		else
-		{
-			m_selectionAabb = m_sceneAabb;
-		}
-	}*/
+		_setDefaultSelectionAabb();
 }
 
 void Scene3D::_updateSelectionAabb_polygon()
 {
-	/*if( !m_objects_selected.size() )
+	if( !m_objects_selected.size() )
 		return;
 
 	m_selectionAabb.reset();
@@ -1003,33 +944,28 @@ void Scene3D::_updateSelectionAabb_polygon()
 	for( auto * o : m_objects_selected )
 	{
 		M = o->m_matrix;
-
-		for( u64 i = 0, sz = o->m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+		auto P = o->m_polyModel->m_polygons;
+		for( u64 i = 0; i < o->m_polyModel->m_polygonsCount; ++i )
 		{
-			auto CV = (ControlVertex*)o->m_PolyModel->m_controlVerts[ i ];
-
-			if( CV->isSelectedPoly())
+			if(P->m_flags & P->EF_SELECTED)
 			{
 				nnn = false;
-				auto V = (Vertex*)CV->m_verts[0];
-				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
+				auto PV = P->m_verts;
+				for( u64 i2 = 0; i2 < P->m_vertexCount; ++i2 )
+				{
+					m_selectionAabb.add( 
+						math::mul( 
+							PV->m_element->m_position, 
+							M ) + o->GetPivot() 
+					);
+					PV = PV->m_right;
+				}
 			}
+			P = P->m_mainNext;
 		}
 	}
 	if( nnn )
-	{
-		if( m_objects_selected.size() )
-		{
-			for( auto * o : m_objects_selected )
-			{
-				m_selectionAabb.add(o->Aabb());
-			}
-		}
-		else
-		{
-			m_selectionAabb = m_sceneAabb;
-		}
-	}*/
+		_setDefaultSelectionAabb();
 }
 
 void Scene3D::_deleteSelectedObjects_object()
@@ -1059,18 +995,14 @@ void Scene3D::_deleteSelectedObjects_object()
 void Scene3D::_deleteSelectedObjects_vertex(Scene3DObject* object)
 {
 	object->deleteSelectedVerts();
-	//object->UpdateScreenSpacePoints();
-	object->updateModelPointsColors();
-	
+	object->updateModelPointsColors();	
 	m_app->setNeedToSave(true);
-
 	_deselectAll_vertex(object);
 }
 
 void Scene3D::_deleteSelectedObjects_poly(Scene3DObject* object)
 {
 	object->deleteSelectedPolys();
-	//object->UpdateScreenSpacePoints();
 	object->updateModelPointsColors();
 	m_app->setNeedToSave(true);
 	_deselectAll_poly(object);
@@ -1079,11 +1011,8 @@ void Scene3D::_deleteSelectedObjects_poly(Scene3DObject* object)
 void Scene3D::_deleteSelectedObjects_edge(Scene3DObject* object)
 {
 	object->deleteSelectedEdges();
-	//object->UpdateScreenSpacePoints();
-	object->updateModelPointsColors();
-	
+	object->updateModelPointsColors();	
 	m_app->setNeedToSave(true);
-
 	_deselectAll_edge(object);
 }
 
@@ -1116,22 +1045,6 @@ void Scene3D::deleteSelectedObjects()
 	updateSceneAabb();
 	updateSelectionAabb();
 }
-
-//void Scene3D::updateObject2DPoints( std::basic_string<Scene3DObject*>& objects )
-//{
-//	for( auto o : objects )
-//	{
-//		o->UpdateScreenSpacePoints();
-//	}
-//}
-//
-//void Scene3D::updateObject2DPoints_selected()
-//{
-//	for( auto o : m_objects_selected )
-//	{
-//		o->UpdateScreenSpacePoints();
-//	}
-//}
 
 void Scene3D::unregisterObject( Scene3DObject* o )
 {
@@ -1344,21 +1257,17 @@ void Scene3D::rotateSelectedObjects(GizmoPart* gizmoPart,bool startStop, bool ca
 					auto & pivot  = o->GetPivot();
 					pivot = math::mul(pivotFix-C,M2)+C;
 				}
-
-//				o->updateMatrixPosition();
 				o->UpdateAabb();
 			}
-		}
-			break;
-		/*case EditMode::Vertex:
+		}break;
+		case EditMode::Vertex:
 		{
 			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
 			{
 				auto info = &m_objectsVertexSelectInfo[ i ];
 				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
 			}
-		}
-			break;
+		}break;
 		case EditMode::Edge:
 			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
 			{
@@ -1372,7 +1281,7 @@ void Scene3D::rotateSelectedObjects(GizmoPart* gizmoPart,bool startStop, bool ca
 				auto info = &m_objectsPolySelectInfo[ i ];
 				info->m_object->rotateVerts( M,info->m_verts, C - info->m_object->m_pivot );
 			}
-			break;*/
+			break;
 		default:
 			break;
 		}
@@ -1414,11 +1323,8 @@ void Scene3D::rotateSelectedObjects(GizmoPart* gizmoPart,bool startStop, bool ca
 					o->m_matrixFixed = o->m_matrix;
 					o->m_matrixOnlyRotationFixed = o->m_matrixOnlyRotation;
 				}
-			
-			//	updateObject2DPoints(o);
 			}
-		}
-			break;
+		}break;
 		case EditMode::Edge:
 		case EditMode::Vertex:
 		case EditMode::Polygon:
@@ -1434,14 +1340,8 @@ void Scene3D::rotateSelectedObjects(GizmoPart* gizmoPart,bool startStop, bool ca
 					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
 					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
 				}
-			//	updateObject2DPoints(o);
 			}
-		}
-			break;
-		//case EditMode::Edge:
-		//	break;
-		//case EditMode::Polygon:
-		//	break;
+		}break;
 		default:
 			break;
 		}
@@ -1573,17 +1473,15 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 				}
 				o->UpdateAabb();
 			}
-		}
-			break;
-		/*case EditMode::Vertex:
+		}break;
+		case EditMode::Vertex:
 		{
 			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
 			{
 				auto info = &m_objectsVertexSelectInfo[ i ];
 				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
 			}
-		}
-			break;
+		}break;
 		case EditMode::Edge:
 			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
 			{
@@ -1597,7 +1495,7 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 				auto info = &m_objectsPolySelectInfo[ i ];
 				info->m_object->scaleVerts( S,info->m_verts, C - info->m_object->m_pivot );
 			}
-			break;*/
+			break;
 		default:
 			break;
 		}
@@ -1653,10 +1551,6 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 				}
 			}
 			break;
-		//case EditMode::Edge:
-		//	break;
-		//case EditMode::Polygon:
-		//	break;
 		default:
 			break;
 		}
@@ -1801,20 +1695,20 @@ bool Scene3D::moveSelectedObjects(
 				info->m_object->moveVerts( V, info->m_verts);
 			}
 			break;
-		//case EditMode::Edge:
-		//	for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
-		//	{
-		//		info = &m_objectsEdgeSelectInfo[ i ];
-		//		info->m_object->moveVerts( V,info->m_verts);
-		//	}
-		//	break;
-		//case EditMode::Polygon:
-		//	for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
-		//	{
-		//		info = &m_objectsPolySelectInfo[ i ];
-		//		info->m_object->moveVerts( V,info->m_verts);
-		//	}
-		//	break;
+		case EditMode::Edge:
+			for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
+			{
+				info = &m_objectsEdgeSelectInfo[ i ];
+				info->m_object->moveVerts( V,info->m_verts);
+			}
+			break;
+		case EditMode::Polygon:
+			for( u64 i = 0, sz = m_objectsPolySelectInfo.size(); i < sz; ++i )
+			{
+				info = &m_objectsPolySelectInfo[ i ];
+				info->m_object->moveVerts( V,info->m_verts);
+			}
+			break;
 		default:
 			break;
 		}
@@ -1980,45 +1874,53 @@ void      Scene3D::updateObjectVertexSelectList()
 
 void      Scene3D::updateObjectPolySelectList()
 {
-	/*m_objectsPolySelectInfo.clear();
+	m_objectsPolySelectInfo.clear();
 	for( auto * o : m_objects_selected )
 	{
 		ObjectVertexSelectInfo info;
 		info.m_object = o;
+		auto P = o->m_polyModel->m_polygons;
 
-		for( size_t i2 = 0, sz2 = o->m_PolyModel->m_controlVerts.size(); i2 < sz2; ++i2 )
+		for( size_t i = 0; i < o->m_polyModel->m_polygonsCount; ++i )
 		{
-			if( o->m_PolyModel->m_controlVerts[ i2 ]->isSelectedPoly() )
+			if( P->m_flags & P->EF_SELECTED )
 			{
-				info.m_verts.insert( (ControlVertex*)o->m_PolyModel->m_controlVerts[ i2 ] );
+				auto PV = P->m_verts;
+				for( size_t i2 = 0; i2 < P->m_vertexCount; ++i2 )
+				{
+					info.m_verts.insert( PV->m_element );
+					PV = PV->m_right;
+				}
 			}
+			P = P->m_mainNext;
 		}
 
 		if( info.m_verts.size() )
 			m_objectsPolySelectInfo.push_back(info);
-	}*/
+	}
 }
 
 void      Scene3D::updateObjectEdgeSelectList()
 {
-	/*m_objectsEdgeSelectInfo.clear();
+	m_objectsEdgeSelectInfo.clear();
 	for( auto * o : m_objects_selected )
 	{
 		ObjectVertexSelectInfo info;
 		info.m_object = o;
-		for( size_t i2 = 0, sz2 = o->m_PolyModel->m_edges.size(); i2 < sz2; ++i2 )
+		auto E = o->m_polyModel->m_edges;
+		for( size_t i2 = 0; i2 < o->m_polyModel->m_edgesCount; ++i2 )
 		{
-			auto E = o->m_PolyModel->m_edges[i2];
-			if(E->m_isSelected)
+			if(E->m_flags & E->EF_SELECTED)
 			{
-				info.m_verts.insert( E->m_firstPoint );
-				info.m_verts.insert( E->m_secondPoint );
+				info.m_verts.insert( E->m_v1 );
+				info.m_verts.insert( E->m_v2 );
 			}
+			E = E->m_mainNext;
 		}
 
 		if( info.m_verts.size() )
 			m_objectsEdgeSelectInfo.push_back(info);
-	}*/
+	}
 }
 void Scene3D::applyMatrices()
 {
@@ -2049,142 +1951,113 @@ void Scene3D::deleteObject( kkScene3DObject* o )
 	deleteSelectedObjects();
 }
 
-bool Scene3D::selectEdges(/*CursorRay* cursorRay, */kkRay* ray/*, int depth*/)
+bool Scene3D::selectEdges(kkRay* ray)
 {
-	//if(!m_objects_selected.size()) return false;
-	//if( !ray ) return false;
+	if(!m_objects_selected.size()) return false;
+	if( !ray ) return false;
 
-	//std::vector<kkRayTriangleIntersectionResultSimple> results;
+	std::vector<kkRayTriangleIntersectionResultSimple> results;
 
-	//for( auto * o : m_objects_selected )
-	//{
-	//	o->IsRayIntersectMany(*ray, results);
-	//}
+	for( auto * o : m_objects_selected )
+	{
+		o->IsRayIntersectMany(*ray, results);
+	}
 
-	//if(!results.size())return false;
+	if(!results.size())return false;
 
-	//std::sort( results.begin(),results.end(),
-	//	[](const kkRayTriangleIntersectionResultSimple& first, const kkRayTriangleIntersectionResultSimple& second)
-	//{
-	//	return first.m_T < second.m_T;
-	//} );
+	std::sort( results.begin(),results.end(),
+		[](const kkRayTriangleIntersectionResultSimple& first, const kkRayTriangleIntersectionResultSimple& second)
+	{
+		return first.m_T < second.m_T;
+	} );
 
-	//auto ks = m_app->getStateKeyboard();
+	auto ks = m_app->getStateKeyboard();
 
-	//if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
-	//	deselectAll();
+	if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
+		deselectAll();
 
-	//for( u64 o = 0, osz = results.size(); o < osz; ++o )
-	//{
-	//	auto & result = results[o];
-	//	auto & verts = result.m_object->GetVertexArray();
-	//	auto & cverts = result.m_object->GetControlVertexArray();
-	//	auto firstPolygon = result.m_object->GetPolygon( result.m_polygonIndex );
-	//	auto & Pvs = firstPolygon->GetVerts();
-	//	auto pivot = result.m_object->GetPivot();
-	//	auto & M = result.m_object->GetMatrix();
+	for( u64 o = 0, osz = results.size(); o < osz; ++o )
+	{
+		auto & result = results[o];
+		//auto scene3dobject = (Scene3DObject*)result.m_object;
+		auto EN = result.m_polygon->m_edges;
+		auto & M = result.m_object->GetMatrix();
+		auto pivot = result.m_object->GetPivot();
+		auto scene3dobject = (Scene3DObject*)result.m_object;
+		scene3dobject->m_isObjectHaveSelectedEdges = false;
+		for(u32 i = 0; i < result.m_polygon->m_edgeCount; ++i )
+		{
+			auto E = EN->m_element;
 
-	//	auto scene3dobject = (Scene3DObject*)result.m_object;
+			auto d = ray->distanceToLine( 
+				math::mul( E->m_v1->m_position, M) + pivot, 
+				math::mul( E->m_v2->m_position, M ) + pivot 
+			);
+			d = d / (1.f * (result.m_T+1.f));
+			if( d < 0.005f )
+			{
+				if( ks == AppState_keyboard::Alt )
+				{
+					if(E->m_flags & E->EF_SELECTED)
+						E->m_flags ^= E->EF_SELECTED;
+				}
+				else
+				{
+					E->m_flags |= E->EF_SELECTED;
+				}
 
-	//	for( u64 i = 0, sz = Pvs.size(); i < sz; ++i )
-	//	{
-	//		u64 i2 = i + 1;
-	//		if(i2 == sz) i2=0;
+				// m_isObjectHaveSelectedEdges = true; внутри след. метода
+				scene3dobject->updateEdgeModel();
+				
+				_updateSelectionAabb_edge();
+				updateObjectEdgeSelectList();
+				return true;
+			}
 
-	//		auto v1 = (Vertex*)Pvs[i];
-	//		auto v2 = (Vertex*)Pvs[i2];
-
-	//		auto d = ray->distanceToLine( math::mul( v1->m_Position, M) + pivot, math::mul( v2->m_Position, M ) + pivot );
-
-	//		// тут просто шаманизм
-	//		d = d / (1.f * (result.m_T+1.f));
-
-	//		scene3dobject->m_isObjectHaveSelectedEdges = false;
-
-	//		if( d < 0.005f )
-	//		{
-	//			auto cv1 = v1->m_controlVertex;
-	//			auto cv2 = v2->m_controlVertex;
-	//			Edge* find_edge = nullptr;
-	//			for(auto e : scene3dobject->m_PolyModel->m_edges)
-	//			{
-	//				if((e->m_firstPoint == cv1 && e->m_secondPoint == cv2)
-	//					|| (e->m_firstPoint == cv2 && e->m_secondPoint == cv1))
-	//				{
-	//					find_edge = e;
-	//					break;
-	//				}
-	//			}
-	//			if(!find_edge)
-	//				continue;
-
-	//			if( ks == AppState_keyboard::Alt )
-	//			{
-	//				find_edge->m_isSelected = false;
-	//			}
-	//			else
-	//			{
-	//				find_edge->m_isSelected = true;
-	//				//if( find_edge->m_firstPoint->m_onEdge && find_edge->m_secondPoint->m_onEdge )
-	//				if(!find_edge->m_secondPolygon)
-	//					printf("E");
-	//				scene3dobject->m_isObjectHaveSelectedEdges = true;
-	//			}
-
-	//			scene3dobject->m_PolyModel->updateCVEdgeWith();
-	//			scene3dobject->updateEdgeModel();
-
-	//			_updateSelectionAabb_edge();
-	//			updateObjectEdgeSelectList();
-	//			return true;
-	//		}
-	//	}
-	//}
-
-	//if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
-	//{
-	//	deselectAll();
-	//}
-
+			EN = EN->m_right;
+		}
+	}
+	if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
+	{
+		deselectAll();
+	}
 	return false;
 }
 
 void Scene3D::_deselectAll_poly(Scene3DObject* object)
 {
-	/*auto & cverts = object->GetControlVertexArray();
-	auto & polys = object->GetPolygonArray();
-	for( u64 i = 0, sz = polys.size(); i < sz; ++i )
+	auto P = object->m_polyModel->m_polygons;
+	for( u64 i = 0; i < object->m_polyModel->m_polygonsCount; ++i )
 	{
-		polys[i]->Deselect();
+		if(P->m_flags & P->EF_SELECTED)
+			P->m_flags ^= P->EF_SELECTED;
+		P = P->m_mainNext;
 	}
-	object->m_PolyModel->updateCVForPolygonSelect();
 
 	object->updatePolygonModel();
 	object->m_isObjectHaveSelectedPolys = false;
-
 	_updateSelectionAabb_polygon();
-	updateObjectPolySelectList();*/
+	updateObjectPolySelectList();
 }
 
 void Scene3D::_deselectAll_edge(Scene3DObject* object)
 {
-	/*object->m_isObjectHaveSelectedEdges = false;
-	auto & cverts = object->GetControlVertexArray();
-	for( u64 i = 0, sz = object->m_PolyModel->m_edges.size(); i < sz; ++i )
+	auto current_edge = object->m_polyModel->m_edges;
+	for( u64 i = 0; i < object->m_polyModel->m_edgesCount; ++i )
 	{
-		auto E = object->m_PolyModel->m_edges[i];
-		E->m_isSelected = false;
+		if(current_edge->m_flags & current_edge->EF_SELECTED)
+			current_edge->m_flags ^= current_edge->EF_SELECTED;
+		current_edge = current_edge->m_mainNext;
 	}
-	((Scene3DObject*)object)->m_PolyModel->updateCVEdgeWith();
+	object->m_isObjectHaveSelectedEdges = false;
 	object->updateEdgeModel();
-
 	_updateSelectionAabb_edge();
-	updateObjectEdgeSelectList();*/
+	updateObjectEdgeSelectList();
 }
 
 void Scene3D::selectPolygons(kkRay* ray)
 {
-	/*if(!m_objects_selected.size()) return;
+	if(!m_objects_selected.size()) return;
 	if( !ray ) return;
 
 	std::vector<kkRayTriangleIntersectionResultSimple> result;
@@ -2215,30 +2088,19 @@ void Scene3D::selectPolygons(kkRay* ray)
 		deselectAll();
 
 	auto object = (Scene3DObject*)result[0].m_object;
-	auto firstPolygon = object->GetPolygon( result[0].m_polygonIndex );
-	auto & Pvs = firstPolygon->GetVerts();
-	auto & cverts  = result[0].m_object->GetControlVertexArray();
-
+	auto P = result[0].m_polygon;
 	if( ks == AppState_keyboard::Alt )
 	{
-		firstPolygon->Deselect();
+		if(P->m_flags & P->EF_SELECTED)
+			P->m_flags ^= P->EF_SELECTED;
 	}
 	else
 	{
-		firstPolygon->Select();
+		P->m_flags |= P->EF_SELECTED;
 	}
 	object->m_isObjectHaveSelectedPolys = false;
-	for(auto P : object->m_PolyModel->m_polygons)
-	{
-		if(P->IsSelected())
-		{
-			object->m_isObjectHaveSelectedPolys = true;
-			break;
-		}
-	}
-	object->m_PolyModel->updateCVForPolygonSelect();
 	((Scene3DObject*)result[0].m_object)->updatePolygonModel();
 	
 	_updateSelectionAabb_polygon();
-	updateObjectPolySelectList();*/
+	updateObjectPolySelectList();
 }
