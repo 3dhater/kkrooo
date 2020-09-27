@@ -23,6 +23,7 @@ struct SelectionFrust;
 struct ObjectVertexSelectInfo
 {
 	Scene3DObject* m_object = nullptr;
+	std::unordered_set<kkVertex*> m_verts;
 };
 
 class Scene3D : public kkScene3D
@@ -31,11 +32,8 @@ class Scene3D : public kkScene3D
 	Gizmo * m_gizmo = nullptr;
 	kkGraphicsSystem * m_gs = nullptr;
 
-	//std::basic_string<Scene3DObject*> m_objects_inFrustum_unsorted;
-	//std::basic_string<Scene3DObject*> m_objects_inFrustum_sorted;
 	std::basic_string<Scene3DObject*> m_objects;
 	std::basic_string<Scene3DObject*> m_objects_selected;
-	//std::basic_string<Scene3DObject*> m_objects_mouseHover;
 
 	kkArray<ObjectVertexSelectInfo>   m_objectsVertexSelectInfo;
 	kkArray<ObjectVertexSelectInfo>   m_objectsEdgeSelectInfo;
@@ -100,6 +98,7 @@ class Scene3D : public kkScene3D
 	//bool m_cursorInViewport = false;
 	//CursorRay* m_cursorRay = nullptr;
 	friend class ViewportObject;
+	friend class Viewport;
 
 public:
 	Scene3D();

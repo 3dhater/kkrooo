@@ -481,20 +481,21 @@ void Application::run()
 		//	e.mouseEvent.state = kkEventMouse::MS_RMB_UP;
 		//	m_main_system->addEvent(e);
 		//}
-		//if(m_KrGuiSystem->m_mouseIsLMB_up)
-		//{
-		//	kkEvent e;
-		//	e.type = kkEventType::Mouse;
-		//	e.mouseEvent.state = kkEventMouse::MS_LMB_UP;
-		//	m_main_system->addEvent(e);
-		//}
-		//if(m_KrGuiSystem->m_mouseIsMMB_up)
-		//{
-		//	kkEvent e;
-		//	e.type = kkEventType::Mouse;
-		//	e.mouseEvent.state = kkEventMouse::MS_MMB_UP;
-		//	m_main_system->addEvent(e);
-		//}
+		if(m_KrGuiSystem->m_mouseIsLMB_up)
+		{
+			m_event_consumer->m_lmb_up = true;
+			m_event_consumer->m_lmb_down = false;
+			m_event_consumer->m_lmb_once = false;
+			m_event_consumer->m_lmb_once_state = false;
+		}
+		if(m_KrGuiSystem->m_mouseIsMMB_up)
+		{
+			//printf("u");
+			m_event_consumer->m_mmb_up = true;
+			m_event_consumer->m_mmb_down = false;
+			m_event_consumer->m_mmb_once = false;
+			m_event_consumer->m_mmb_once_state = false;
+		}
 
 		//printf("m_mouseWheel %f\n",m_mouseWheel);
 
@@ -527,7 +528,11 @@ void Application::run()
 				m_shortcutManager->onFrame();
 			}
 			
-			kkCursorInViewport(false);
+			if(!m_mainViewport->cursorInViewport())
+			{
+				m_cursorInGUI = true;
+			}
+
 			if(m_event_consumer)
 			{
 				if( m_event_consumer->m_input_update )
@@ -541,10 +546,6 @@ void Application::run()
 			{
 				drawAll(false);
 			}
-			if(!kkIsCursorInViewport())
-			{
-				m_cursorInGUI = true;
-			}
 			/*if(m_active_viewport)
 			{
 				m_active_viewport->onFrame();
@@ -557,7 +558,6 @@ void Application::run()
 				kkDrawAll();
 		}
 		//printf("Time: %f \n", (work_time + sleep_time).count());
-		m_event_consumer->_reset();
 	}
 }
 
@@ -758,10 +758,18 @@ void Application::quit()
 		m_renderManager->stopRender();
 	}
 	// Спросить о сохранении если нужно
-	if( m_need_to_save )
+	if( m_need_to_save && m_mainWindow.ptr() )
 	{
-		if( m_materialEditorWindow->isVisible() ) showMaterialEditor(false);
-		if( m_renderWindow->isVisible() ) showRenderWindow(false);
+		if(m_materialEditorWindow.ptr())
+		{
+			if( m_materialEditorWindow->isVisible() ) 
+				showMaterialEditor(false);
+		}
+		if(m_renderWindow.ptr())
+		{
+			if( m_renderWindow->isVisible() ) 
+				showRenderWindow(false);
+		}
 		
 		auto result = MessageBoxW( (HWND)m_mainWindow->getHandle(), L"Do you want to save current scene?", L"Attention!", MB_YESNOCANCEL | MB_ICONQUESTION );
 		if( result == IDNO)
@@ -842,7 +850,10 @@ void Application::updateInput()
 		if( !m_cursorInGUI 
 			|| m_state_app == AppState_main::Gizmo
 			|| m_state_app == AppState_main::CameraTransformation
-			|| m_state_app == AppState_main::SelectRectangle )
+			|| m_state_app == AppState_main::SelectRectangle
+			|| m_KrGuiSystem->m_mouseIsLMB_up 
+			|| m_KrGuiSystem->m_mouseIsMMB_up 
+			|| m_KrGuiSystem->m_mouseIsRMB_up )
 		{
 			if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
 			{
@@ -1842,20 +1853,28 @@ void Application::_onEndFrame()
 		m_appEvents[1].pop_front();
 	}
 
-	if(m_event_consumer->isLmbUp() || m_event_consumer->isRmbUp() || m_event_consumer->isMmbUp())
+	auto isEscape = m_event_consumer->isKeyUp(kkKey::K_ESCAPE, false);
+	if(m_event_consumer->isLmbUp() 
+		|| m_event_consumer->isRmbUp() 
+		|| m_event_consumer->isMmbUp()
+		|| isEscape)
 	{
+		bool cancel = m_event_consumer->isRmbUp();
+		if(!cancel)
+			cancel = isEscape;
+
 	    // если перемещали объект то этот вызов должен применить изменения
 	    if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)
 	    {
-	        m_current_scene3D->moveSelectedObjects( &m_currentGizmoEvent.part, false, m_event_consumer->isRmbUp(), false );
+	        m_current_scene3D->moveSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
 
 	    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale )
 	    {
-	        m_current_scene3D->scaleSelectedObjects( &m_currentGizmoEvent.part, false, m_event_consumer->isRmbUp(), false );
+	        m_current_scene3D->scaleSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
 
 	    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate )
 	    {
-	        m_current_scene3D->rotateSelectedObjects( &m_currentGizmoEvent.part, false, m_event_consumer->isRmbUp(), false );
+	        m_current_scene3D->rotateSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
 	    }
 
 	    if( m_state_app != AppState_main::CancelTransformation )

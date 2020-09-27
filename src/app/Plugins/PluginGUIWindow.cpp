@@ -408,6 +408,7 @@ void PluginGUIWindow::draw()
                     if( m_app->m_KrGuiSystem->addRangeSlider( item->m_minimum, item->m_maximum, item->m_float_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
                         item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
                     {
+		                m_app->m_state_app = AppState_main::GuiInput;
                         if(item->m_callback)
                         {
 	                        kkDrawAll();
@@ -423,6 +424,7 @@ void PluginGUIWindow::draw()
                     if( m_app->m_KrGuiSystem->addRangeSliderInt( item->m_minimum_int, item->m_maximum_int, item->m_int_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
                         item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
                     {
+		                m_app->m_state_app = AppState_main::GuiInput;
                         if(item->m_callback)
                         {
 	                        kkDrawAll();
@@ -455,6 +457,7 @@ void PluginGUIWindow::draw()
                         item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
                     {
 
+		                m_app->m_state_app = AppState_main::GuiInput;
                         if(item->m_callback)
                         {
 	                         kkDrawAll();
@@ -479,7 +482,7 @@ void PluginGUIWindow::draw()
                     if( m_app->m_KrGuiSystem->addValueSelectorLimit( item->m_minimum, item->m_maximum, item->m_float_ptr, Kr::Gui::Vec2f(item->m_size.x,item->m_size.y), 
                         item->m_horizontal, item->m_speed, 0, Kr::Gui::Vec4f(3.f, 3.f, 3.f, 3.f) ) )
                     {
-
+		                m_app->m_state_app = AppState_main::GuiInput;
                         if(item->m_callback)
                         {
 	                        kkDrawAll();

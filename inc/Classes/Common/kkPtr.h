@@ -17,6 +17,7 @@ public:
 		if( m_ptr )
 		{
 			kkDestroy( m_ptr );
+			m_ptr = nullptr;
 		}
 	}
 

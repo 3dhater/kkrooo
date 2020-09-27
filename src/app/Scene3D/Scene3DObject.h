@@ -327,6 +327,7 @@ class Scene3DObject : public Scene3DObjectCommon
 	friend class MaterialEditor;
 	friend class Scene3D;
 	friend class ViewportObject;
+	friend class Viewport;
 	friend class Application;
 	friend void Scene3DObject_isRayIntersect( 
 		int* out_result,

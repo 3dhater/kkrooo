@@ -9,20 +9,6 @@ class EventConsumer : public kkEventConsumer
 {
 	v2f m_cursor_coords_old;
 
-	bool m_lmb_down = false;
-	bool m_lmb_once = false;
-	bool m_lmb_once_state = false;
-	bool m_lmb_up = false;
-
-	bool m_rmb_down = false;
-	bool m_rmb_once = false;
-	bool m_rmb_once_state = false;
-	bool m_rmb_up = false;
-
-	bool m_mmb_down = false;
-	bool m_mmb_once = false;
-	bool m_mmb_once_state = false;
-	bool m_mmb_up = false;
 
 
 	bool m_isLastKeyDownOnce = false;
@@ -37,7 +23,7 @@ public:
 	
 	bool isKeyDown( kkKey k );
 	bool isKeyDownOnce( kkKey k );
-	bool isKeyUp( kkKey k );
+	bool isKeyUp( kkKey k, bool reset );
 
 	// если предыдущий isKeyDownOnce( kkKey k ) правда, но его не нужно было использовать (он нужен в другом месте), то
 	// этот метод должен вернуть состояние.
@@ -62,6 +48,20 @@ public:
 
 	/// Нажали - символ печатается непрерывно
 	s8 m_keys_down[ 256 ];
+	bool m_lmb_down = false;
+	bool m_lmb_once = false;
+	bool m_lmb_once_state = false;
+	bool m_lmb_up = false;
+
+	bool m_rmb_down = false;
+	bool m_rmb_once = false;
+	bool m_rmb_once_state = false;
+	bool m_rmb_up = false;
+
+	bool m_mmb_down = false;
+	bool m_mmb_once = false;
+	bool m_mmb_once_state = false;
+	bool m_mmb_up = false;
 
 	/// Нажали - символ печатается 1 раз
 	s8 m_keys_down_once[ 256 ];

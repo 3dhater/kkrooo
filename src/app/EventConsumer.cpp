@@ -68,10 +68,11 @@ void EventConsumer::restoreLastKeyDownOnce()
 }
 
 
-bool EventConsumer::isKeyUp( kkKey k )
+bool EventConsumer::isKeyUp( kkKey k, bool reset )
 {
 	bool r = m_keys_up[(s32)k]==1 ? true : false;
-	m_keys_up[(s32)k] = 0;
+	if(reset)
+		m_keys_up[(s32)k] = 0;
 	return r;
 }
 
@@ -86,7 +87,7 @@ void EventConsumer::processEvent( const kkEvent& ev )
 		case kkEventSystemAction::Timer:
 			break;
 		case kkEventSystemAction::BeginEventLoop:
-			//_reset();
+			_reset();
 			break;
 		case kkEventSystemAction::EndEventLoop:
 			break;

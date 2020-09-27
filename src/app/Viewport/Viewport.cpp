@@ -18,6 +18,7 @@
 #include "../Gizmo.h"
 
 SelectionFrust g_cursorSelFrust;
+SelectionFrust g_hoverSelFrust;
 ViewportMouseState g_mouseState;
 kkGraphicsSystem* g_GS = nullptr;
 Kr::Gui::GuiSystem* g_GUI = nullptr;
@@ -259,8 +260,6 @@ void ViewportObject::updateCursorRay()
 		m_rect_modified.getWidthAndHeight(),
 		m_activeCamera->getCamera()->getViewProjectionInvertMatrix() );
 	m_cursorRay->m_center.update();
-	
-	//m_rayOnClick = m_cursorRay->m_center
 
 	const s32 rayOffset = 10;
 	kkrooo::getRay(m_cursorRay->m_N, m_app->m_cursor_position + v2i(0, -rayOffset), m_rect_modified, m_rect_modified.getWidthAndHeight(),m_activeCamera->getCamera()->getViewProjectionInvertMatrix() );
@@ -297,29 +296,16 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	bool res = false;
 	_update_frame(mouseDelta);
 	update(windowSize);
-	updateCursorRay();
-	bool isGizmo = (m_app->m_state_app == AppState_main::Gizmo);
-	// когда крутим объект, и нажимаем RMB для отмены, отжатие LMB не должно снять выделение
-	static bool skipLMBHold = false;
-	if( g_mouseState.RMB_DOWN )
-		skipLMBHold = true; 
-	if( g_mouseState.LMB_DOWN )
-		skipLMBHold = false; 
+	
+	g_mouseState.IsMove = false;
 	m_cursorInRect = false;
 	if( kkrooo::pointInRect( m_app->m_cursor_position, m_rect_modified ))
 	{
-		kkCursorInViewport(true);
 		m_cursorInRect = true;
 		// определяю если курсор двигается
-		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f || Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
+		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f 
+			|| Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
 			g_mouseState.IsMove = true;
-	}
-	if( g_mouseState.LMB_UP && m_app->m_state_app == AppState_main::CancelTransformation )
-		kkSetAppStateMain(AppState_main::Idle);
-	if( g_mouseState.LMB_HOLD )
-	{
-		if( !isGizmo && g_mouseState.IsMove && g_mouseState.IsFirstClickLMB && m_app->m_state_app != AppState_main::CancelTransformation )
-			g_mouseState.IsSelectByRect = true;
 	}
 	if( g_mouseState.RMB_DOWN && m_cursorInRect )
 	{
@@ -344,195 +330,250 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			res = true;
 			g_mouseState.IsFirstClickLMB = true;
 			m_mouse_first_click_coords = m_app->m_cursor_position;
-			m_rayOnClick = m_cursorRay->m_center;
 		}
 	}
+
+	if( m_app->m_editMode == EditMode::Vertex )
+	{
+		if(g_mouseState.IsMove)
+		{
+			const s32 vertex_selection_area_val = 4;
+			g_hoverSelFrust.createWithFrame(v4i(m_app->m_cursor_position.x - vertex_selection_area_val, m_app->m_cursor_position.y - vertex_selection_area_val,
+				m_app->m_cursor_position.x + vertex_selection_area_val, m_app->m_cursor_position.y + vertex_selection_area_val), 
+				m_rect_modified, m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
+		}
+		if( m_app->m_current_scene3D->isVertexHover(g_hoverSelFrust) )
+		{
+			m_drawEditMode_hoverMark = true;
+		}
+		else
+		{
+			m_drawEditMode_hoverMark = false;
+		}
+	}
+
+	if(m_cursorInRect)
+	{
+		if( m_app->m_mouseWheel > 0 )
+		{
+			m_activeCamera->zoomIn( m_app->m_state_keyboard, (s32)m_app->m_mouseWheel );
+			updateCursorRay();
+			kkDrawAll();
+		}
+		else if( m_app->m_mouseWheel < 0 )
+		{
+			m_activeCamera->zoomOut( m_app->m_state_keyboard, (s32)m_app->m_mouseWheel );
+			updateCursorRay();
+			kkDrawAll();
+		}
+	}
+
 	if(!inFocus)
 		return res;
-	if( m_cursorInRect || inFocus )
+
+	updateCursorRay();
+	//g_mouseState.reset();
+	g_mouseState.LMB_DOWN = m_app->m_event_consumer->isLmbDownOnce();
+	if(g_mouseState.LMB_DOWN)
+		m_rayOnClick = m_cursorRay->m_center;
+	g_mouseState.LMB_HOLD = m_app->m_event_consumer->isLmbDown();
+	g_mouseState.LMB_UP   = m_app->m_event_consumer->isLmbUp();
+	g_mouseState.RMB_DOWN = m_app->m_event_consumer->isRmbDownOnce();
+	g_mouseState.RMB_HOLD = m_app->m_event_consumer->isRmbDown();
+	g_mouseState.RMB_UP   = m_app->m_event_consumer->isRmbUp();
+	g_mouseState.MMB_DOWN = m_app->m_event_consumer->isMmbDownOnce();
+	g_mouseState.MMB_HOLD = m_app->m_event_consumer->isMmbDown();
+	g_mouseState.MMB_UP   = m_app->m_event_consumer->isMmbUp();
+
+	bool isGizmo = (m_app->m_state_app == AppState_main::Gizmo);
+
+	if( m_app->m_state_app == AppState_main::Idle )
 	{
-		if( m_app->m_editMode == EditMode::Vertex )
-		{
-			if(g_mouseState.IsMove)
-			{
-				const s32 vertex_selection_area_val = 4;
-				g_cursorSelFrust.createWithFrame(v4i(m_app->m_cursor_position.x - vertex_selection_area_val, m_app->m_cursor_position.y - vertex_selection_area_val,
-					m_app->m_cursor_position.x + vertex_selection_area_val, m_app->m_cursor_position.y + vertex_selection_area_val), 
-					m_rect_modified, m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-			}
-			if( m_app->m_current_scene3D->isVertexHover(g_cursorSelFrust) )
-				m_drawEditMode_hoverMark = true;
-			else
-				m_drawEditMode_hoverMark = false;
-		}
-
-		g_mouseState.InViewport = true;
-		if( Kr::Gui::GuiSystem::m_wheel_delta > 0 )
-		{
-			m_activeCamera->zoomIn( m_app->m_state_keyboard, Kr::Gui::GuiSystem::m_wheel_delta );
+		// если курсор движется, то беру луч
+		if( g_mouseState.IsMove && !g_mouseState.MMB_HOLD )
 			updateCursorRay();
-			kkDrawAll();
-		}
-		else if( Kr::Gui::GuiSystem::m_wheel_delta < 0 )
-		{
-			m_activeCamera->zoomOut( m_app->m_state_keyboard, Kr::Gui::GuiSystem::m_wheel_delta );
-			updateCursorRay();
-			kkDrawAll();
-		}
+	}
 
-		if( m_app->m_state_app == AppState_main::Idle )
-		{
-			// если курсор движется, то беру луч
-			if( g_mouseState.IsMove && !g_mouseState.MMB_HOLD )
-				updateCursorRay();
+	if( (g_mouseState.MMB_HOLD  && g_mouseState.IsFirstClickMMB) 
+		|| m_app->m_event_consumer->isKeyDown( kkKey::K_SPACE )
+		)
+	{
+		if( m_app->m_state_keyboard == AppState_keyboard::Alt )
+			_rotate();
+		else
+			_panMove();
+		m_app->m_state_app = AppState_main::CameraTransformation;
+	}
 
-			if( (g_mouseState.MMB_HOLD  && g_mouseState.IsFirstClickMMB) || m_app->m_event_consumer->isKeyDown( kkKey::K_SPACE )  )
+	//if( g_mouseState.LMB_UP && !isGizmo && g_mouseState.IsFirstClickLMB )
+	//{
+	//	auto checkCursorHover = [&]()->bool
+	//	{
+	//		for( size_t i = 0; i < m_drawObjects.size(); ++i )
+	//		{
+	//			auto object = m_drawObjects[i];
+	//			auto & obb = object->Obb();
+	//			if( kkrooo::rayIntersection_obb(m_cursorRay->m_center, obb) )
+	//			{
+	//				// далее проверка на пересечение луч-треугольник
+	//				kkRayTriangleIntersectionResultSimple intersectionResult;
+	//				if( object->IsRayIntersect(m_cursorRay->m_center, intersectionResult) )
+	//					return true;
+	//			}
+	//		}
+	//		return false;
+	//	};
+
+	if(m_app->m_state_app == AppState_main::CancelTransformation)
+	{
+		g_mouseState.IsFirstClickLMB = false;
+		m_app->m_state_app = AppState_main::Idle;
+	}
+
+	//printf("[%i] [%i] [%i]\n", (s32)g_mouseState.LMB_UP, (s32)g_mouseState.IsFirstClickLMB,
+	//	(s32)g_mouseState.IsSelectByRect);
+
+	if( m_app->m_editMode == EditMode::Object )
+	{
+		if(g_mouseState.LMB_UP 
+			&& m_app->m_state_app != AppState_main::Gizmo
+			&& m_app->m_state_app != AppState_main::GuiInput
+			&& g_mouseState.IsFirstClickLMB )
+		{
+			if( m_hoveredObjects.size() )
 			{
-				//ignore_disabling_mouseInFocus = true;
-				//m_activeViewport->m_is_mouse_focus = true;
-				if( m_app->m_state_keyboard == AppState_keyboard::Alt )
-					_rotate();
-				else
-					_panMove();
-			}
-		}
-
-		if( g_mouseState.LMB_UP && !isGizmo && !skipLMBHold && g_mouseState.IsFirstClickLMB )
-		{
-			res = true;
-			auto checkCursorHover = [&]()->bool
-			{
-				for( size_t i = 0; i < m_drawObjects.size(); ++i )
+				if( m_hoveredObjects[m_hoveredObjects.size()-1]->isSelected() )
 				{
-					auto object = m_drawObjects[i];
-					auto & obb = object->Obb();
-
-					if( kkrooo::rayIntersection_obb(m_cursorRay->m_center, obb) )
-					{
-						// далее проверка на пересечение луч-треугольник
-						kkRayTriangleIntersectionResultSimple intersectionResult;
-						if( object->IsRayIntersect(m_cursorRay->m_center, intersectionResult) )
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			};
-
-			if( m_app->m_editMode == EditMode::Object )
-			{
-				if( m_hoveredObjects.size() )
-				{
-					if( m_hoveredObjects[m_hoveredObjects.size()-1]->isSelected() )
-					{
-						if( m_app->m_state_keyboard != AppState_keyboard::Ctrl && m_app->m_state_keyboard != AppState_keyboard::Alt )
-							m_app->m_current_scene3D->deselectAll();
-						else
-							m_app->m_current_scene3D->deselectObject( m_hoveredObjects[m_hoveredObjects.size()-1] );
-					}
+					if( m_app->m_state_keyboard != AppState_keyboard::Ctrl && m_app->m_state_keyboard != AppState_keyboard::Alt )
+						m_app->m_current_scene3D->deselectAll();
 					else
-					{
-						if( m_app->m_state_keyboard != AppState_keyboard::Ctrl )
-							m_app->m_current_scene3D->deselectAll();
-						m_app->m_current_scene3D->selectObject( m_hoveredObjects[m_hoveredObjects.size()-1] );
-					}
+						m_app->m_current_scene3D->deselectObject( m_hoveredObjects[m_hoveredObjects.size()-1] );
 				}
-				else if(!g_mouseState.IsSelectByRect)
+				else
+				{
+					if( m_app->m_state_keyboard != AppState_keyboard::Ctrl )
+						m_app->m_current_scene3D->deselectAll();
+					m_app->m_current_scene3D->selectObject( m_hoveredObjects[m_hoveredObjects.size()-1] );
+				}
+			}
+			else if(!g_mouseState.IsSelectByFrame)
+				m_app->m_current_scene3D->deselectAll();
+		}
+	}
+	else if( m_app->m_editMode == EditMode::Vertex )
+	{
+		if(g_mouseState.LMB_UP 
+			&& m_app->m_state_app != AppState_main::Gizmo
+			&& m_app->m_state_app != AppState_main::GuiInput
+			&& g_mouseState.IsFirstClickLMB )
+		{
+			if( m_drawEditMode_hoverMark )
+			{
+				// все выделения и т.д. лучше произвести внутри 
+				m_app->m_current_scene3D->doSelectVertexHover(g_hoverSelFrust, m_activeCamera);
+			}else if( m_app->m_state_keyboard != AppState_keyboard::Ctrl ) // если объекты выделены то их не надо терять
+			{
+					// если объектов под курсором нет то нужно снять выделение со всего
+				if( /*g_mouseState.InViewport &&*/ m_app->m_state_keyboard != AppState_keyboard::Alt )
 					m_app->m_current_scene3D->deselectAll();
 			}
-			else if( m_app->m_editMode == EditMode::Vertex )
-			{
-				if( m_drawEditMode_hoverMark )
-				{
-					// все выделения и т.д. лучше произвести внутри 
-					m_app->m_current_scene3D->doSelectVertexHover(g_cursorSelFrust, m_activeCamera);
-				}else if( m_app->m_state_keyboard != AppState_keyboard::Ctrl ) // если объекты выделены то их не надо терять
-				{
-						// если объектов под курсором нет то нужно снять выделение со всего
-					if( g_mouseState.InViewport && m_app->m_state_keyboard != AppState_keyboard::Alt )
-					{
-						m_app->m_current_scene3D->deselectAll(); //printf("d3\n");
-					}
-				}
-			}
-			else if( m_app->m_editMode == EditMode::Edge )
-			{
-				if( checkCursorHover() )
-				{
-					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_center))
-					{
-						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
-						{
-							if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
-							{
-								if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
-								{
-									if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
-									{
-									}
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					//printf("a");
-					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
-					{
-						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
-						{
-							if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
-							{
-								if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
-								{
-									if( m_app->m_state_keyboard != AppState_keyboard::Alt && 
-										m_app->m_state_keyboard != AppState_keyboard::Ctrl )
-										m_app->m_current_scene3D->deselectAll();
-								}
-							}
-						}
-					}
-				}
-
-				//printf("try edge\n");
-			}
-			else if( m_app->m_editMode == EditMode::Polygon )
-			{
-				//if( checkCursorHover() )
-					m_app->m_current_scene3D->selectPolygons(&m_cursorRay->m_center);
-				/*else
-				{
-				}*/
-			}
-		}
-
-		if( g_mouseState.RMB_UP )
-		{
-			res = true;
-			g_mouseState.IsSelectByRect = false;
-			if(!isGizmo)
-			{
-				m_hoveredObjects_savedCopy.clear();
-				for( auto o : m_hoveredObjects )
-				{
-					m_hoveredObjects_savedCopy.push_back( o );
-				}
-			}
 		}
 	}
-	if( g_mouseState.IsSelectByRect && g_mouseState.LMB_UP )
+	//	else if( m_app->m_editMode == EditMode::Edge )
+	//	{
+	//		if( checkCursorHover() )
+	//		{
+	//			if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_center))
+	//			{
+	//				if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
+	//				{
+	//					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
+	//					{
+	//						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
+	//						{
+	//							if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
+	//							{
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//		else
+	//		{
+	//			//printf("a");
+	//			if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_N))
+	//			{
+	//				if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_E))
+	//				{
+	//					if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_S))
+	//					{
+	//						if(!m_app->m_current_scene3D->selectEdges(&m_cursorRay->m_W))
+	//						{
+	//							if( m_app->m_state_keyboard != AppState_keyboard::Alt && 
+	//								m_app->m_state_keyboard != AppState_keyboard::Ctrl )
+	//								m_app->m_current_scene3D->deselectAll();
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else if( m_app->m_editMode == EditMode::Polygon )
+	//	{
+	//		m_app->m_current_scene3D->selectPolygons(&m_cursorRay->m_center);
+	//	}
+	//}
+	if( g_mouseState.LMB_HOLD )
 	{
-		m_app->m_current_scene3D->selectObjectsByFrame( 
-			m_hoveredObjects, 
-			m_drawObjects, 
-			m_selectionFrame,
-			g_cursorSelFrust
-		);
-		kkDrawAll();
-		g_mouseState.IsSelectByRect = false;
+		if( !isGizmo && g_mouseState.IsMove && g_mouseState.IsFirstClickLMB && m_app->m_state_app != AppState_main::CancelTransformation )
+		{
+			g_mouseState.IsSelectByFrame = true;
+		}
 	}
+	if(g_mouseState.LMB_UP)
+	{
+		if(m_app->m_state_app == AppState_main::GuiInput)
+			m_app->m_state_app = AppState_main::Idle;
+	}
+	if( g_mouseState.RMB_UP || m_app->m_event_consumer->isKeyUp(kkKey::K_ESCAPE, false) )
+	{
+		if(g_mouseState.IsSelectByFrame)
+		{
+			g_mouseState.IsSelectByFrame = false;
+			g_mouseState.IsFirstClickLMB = false;
+		}
+	}
+	if( g_mouseState.LMB_UP)
+	{
+		if(g_mouseState.IsSelectByFrame)
+		{
+			g_mouseState.IsSelectByFrame = false;
+			g_mouseState.IsFirstClickLMB = false;
+			//printf("SELECT BY FRAME\n");
+			m_app->m_current_scene3D->selectObjectsByFrame(
+				m_hoveredObjects, 
+				m_drawObjects, 
+				m_selectionFrame, 
+				g_cursorSelFrust);
+		}
+	}
+	if(!g_mouseState.LMB_HOLD)
+	{
+		g_mouseState.IsFirstClickLMB = false;
+	}
+	if(!g_mouseState.MMB_HOLD)
+	{
+		g_mouseState.IsFirstClickMMB = false;
+	}
+	if(!g_mouseState.RMB_HOLD)
+	{
+		g_mouseState.IsFirstClickRMB = false;
+	}
+
+	/*if( g_mouseState.LMB_DOWN && m_cursorInRect )
+	{
+	}*/
 	processShortcuts();
 
 	return res;
@@ -662,11 +703,23 @@ void ViewportObject::_update_frame(const v2f& mouseDelta)
 	}break;
 	}
 }
+void ViewportObject::drawEditMode_hoverMark()
+{
+	m_app->m_gs->useScissor(true);
+	m_app->m_gs->setViewport(0,0,m_app->m_window_client_size.x,m_app->m_window_client_size.y);
+	m_app->m_gs->setScissor((s32)m_gs_viewport.x,(s32)m_gs_viewport.y,(s32)m_gs_viewport.z,(s32)m_gs_viewport.w );
 
+	m_app->m_gs->drawCircle2D(m_app->m_cursor_position, 5, 2, kkColorGreenYellow );
+	m_app->m_gs->drawCircle2D(m_app->m_cursor_position, 6, 3, kkColorGreenYellow );
+	m_app->m_gs->drawCircle2D(m_app->m_cursor_position, 7, 4, kkColorGreenYellow );
+
+	m_app->m_gs->setScissor(0,0,m_app->m_window_client_size.x,m_app->m_window_client_size.y);
+	m_app->m_gs->useScissor(false);
+}
 void ViewportObject::drawBG(const v2i& windowSize, ColorTheme* colorTheme)
 {
 	//colorTheme->viewport_backgroung_color1.set(1.f,0.f,0.f,1.f);
-    g_GS->drawRectangle(
+	g_GS->drawRectangle(
 		v2i(0,0),
 		v2i(windowSize.x,windowSize.y),
 		colorTheme->viewport_backgroung_color1,
@@ -678,7 +731,7 @@ void ViewportObject::_drawGridXZ(f32 limits, f32 step, ColorTheme* colorTheme)
 	{
 		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f+i,1.f),kkVector4(limits,0.f,0.f+i,1.f),colorTheme->viewport_grid_color4);
 		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f-i,1.f),kkVector4(limits,0.f,0.f-i,1.f),colorTheme->viewport_grid_color4);
-        
+		
 		g_GS->drawLine3D(kkVector4(0.f+i,0.f,-limits,1.f),kkVector4(0.f+i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
 		g_GS->drawLine3D(kkVector4(0.f-i,0.f,-limits,1.f),kkVector4(0.f-i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
 	}
@@ -700,7 +753,7 @@ void ViewportObject::_drawGridXY(f32 limits, f32 step, ColorTheme* colorTheme)
 	{
 		g_GS->drawLine3D(kkVector4(-limits,0.f+i,0.f,1.f),kkVector4(limits,0.f+i,0.f,1.f),colorTheme->viewport_grid_color4);
 		g_GS->drawLine3D(kkVector4(-limits,0.f-i,0.f,1.f),kkVector4(limits,0.f-i,0.f,1.f),colorTheme->viewport_grid_color4);
-        
+		
 		g_GS->drawLine3D(kkVector4(0.f+i,-limits,0.f,1.f),kkVector4(0.f+i,limits,0.f,1.f),colorTheme->viewport_grid_color3);
 		g_GS->drawLine3D(kkVector4(0.f-i,-limits,0.f,1.f),kkVector4(0.f-i,limits,0.f,1.f),colorTheme->viewport_grid_color3);
 	}
@@ -722,7 +775,7 @@ void ViewportObject::_drawGridZY(f32 limits, f32 step, ColorTheme* colorTheme)
 	{
 		g_GS->drawLine3D(kkVector4(0.f,0.f+i,-limits,1.f),kkVector4(0.f,0.f+i,limits,1.f),colorTheme->viewport_grid_color4);
 		g_GS->drawLine3D(kkVector4(0.f,0.f-i,-limits,1.f),kkVector4(0.f,0.f-i,limits,1.f),colorTheme->viewport_grid_color4);
-        
+		
 		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f+i,1.f),kkVector4(0.f,limits,0.f+i,1.f),colorTheme->viewport_grid_color3);
 		g_GS->drawLine3D(kkVector4(0.f,-limits,0.f-i,1.f),kkVector4(0.f,limits,0.f-i,1.f),colorTheme->viewport_grid_color3);
 	}
@@ -745,7 +798,7 @@ void ViewportObject::_drawGrid_persp(ColorTheme* colorTheme)
 	{
 		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f+i,1.f),kkVector4(limits,0.f,0.f+i,1.f),colorTheme->viewport_grid_color3);
 		g_GS->drawLine3D(kkVector4(-limits,0.f,0.f-i,1.f),kkVector4(limits,0.f,0.f-i,1.f),colorTheme->viewport_grid_color3);
-        
+		
 		g_GS->drawLine3D(kkVector4(0.f+i,0.f,-limits,1.f),kkVector4(0.f+i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
 		g_GS->drawLine3D(kkVector4(0.f-i,0.f,-limits,1.f),kkVector4(0.f-i,0.f,limits,1.f),colorTheme->viewport_grid_color3);
 	}
@@ -760,7 +813,7 @@ void ViewportObject::_drawGrid_persp(ColorTheme* colorTheme)
 		g_GS->drawLine3D(kkVector4(0.f,0.f,-limits,1.f),kkVector4(0.f,0.f,limits,1.f),colorTheme->viewport_grid_color2);
 	}
 }
-void ViewportObject::drawSelectionRectangle(bool inFocus)
+void ViewportObject::drawSelectionFrame(bool inFocus)
 {
 	if(!inFocus)
 		return;
@@ -846,9 +899,9 @@ void ViewportObject::drawObjectPivot(bool inFocus)
 
 	f32 size = 0.f;
 	if( m_activeCamera->getType() != ViewportCameraType::Perspective )
-    {
-        size = 0.5f / m_activeCamera->getZoomOrt();
-    }
+	{
+		size = 0.5f / m_activeCamera->getZoomOrt();
+	}
 
 	kkVector4 point;
 	
@@ -910,7 +963,6 @@ void ViewportObject::drawObjectPivot(bool inFocus)
 					m_app->m_gizmo->drawScale(point, size, m_cursorRay->m_center);
 					break;
 				}
-			//	drawGizmo2D();
 				break;
 			}
 		}
@@ -1015,7 +1067,7 @@ void ViewportObject::drawScene(bool inFocus)
 			break;
 		}
 
-		if( fff && !m_app->m_event_consumer->isMmbDown() && m_app->m_state_app != AppState_main::Gizmo && !g_mouseState.IsSelectByRect
+		if( fff && !m_app->m_event_consumer->isMmbDown() && m_app->m_state_app != AppState_main::Gizmo && !g_mouseState.IsSelectByFrame
 			&& m_app->m_editMode == EditMode::Object )
 		{
 			if( kkrooo::pointInRect( m_app->m_cursor_position, m_rect_modified ) )
@@ -1204,8 +1256,8 @@ void Viewport::init(ViewportType type, ViewportLayoutType l_type, const v4f& ind
 
 void Viewport::updateInput(const v2f& mouseDelta)
 {
-	g_mouseState.reset();
-	g_mouseState.LMB_DOWN = kkIsLmbDownOnce();
+	//g_mouseState.reset();
+	/*g_mouseState.LMB_DOWN = kkIsLmbDownOnce();
 	g_mouseState.LMB_HOLD = kkIsLmbDown();
 	g_mouseState.LMB_UP   = kkIsLmbUp();
 	g_mouseState.RMB_DOWN = kkIsRmbDownOnce();
@@ -1213,7 +1265,7 @@ void Viewport::updateInput(const v2f& mouseDelta)
 	g_mouseState.RMB_UP   = kkIsRmbUp();
 	g_mouseState.MMB_DOWN = kkIsMmbDownOnce();
 	g_mouseState.MMB_HOLD = kkIsMmbDown();
-	g_mouseState.MMB_UP   = kkIsMmbUp();
+	g_mouseState.MMB_UP   = kkIsMmbUp();*/
 	if(m_viewports)
 	{
 		auto end = m_viewports->m_left;
@@ -1260,10 +1312,7 @@ void Viewport::draw(ColorTheme* colorTheme)
 		while(true)
 		{
 			bool inFocus = m_viewportInFocus == vp;
-			if( kkrooo::pointInRect( m_app->m_cursor_position, vp->m_rect_modified ))
-			{
-				kkCursorInViewport(true);
-			}
+			
 			auto next = vp->m_right;
 			kkGSSetDepth(false);
 			kkGSSetViewport((s32)vp->m_gs_viewport.x, (s32)vp->m_gs_viewport.y, (s32)vp->m_gs_viewport.z, (s32)vp->m_gs_viewport.w);
@@ -1281,9 +1330,20 @@ void Viewport::draw(ColorTheme* colorTheme)
 			vp->drawObjectPivot(inFocus);
 			kkGSSetViewport(0,0, m_windowSize.x, m_windowSize.y);
 			if(inFocus)
-				vp->drawGizmo2D();
-			if( g_mouseState.IsSelectByRect )
-				vp->drawSelectionRectangle(inFocus);
+			{
+				for( auto o : m_app->m_current_scene3D->m_objects_selected )
+				{
+					if( m_app->m_editMode == EditMode::Object 
+						|| (o->m_isObjectHaveSelectedVerts && m_app->m_editMode == EditMode::Vertex)
+						|| ( o->m_isObjectHaveSelectedEdges && m_app->m_editMode == EditMode::Edge)
+						|| ( o->m_isObjectHaveSelectedPolys && m_app->m_editMode == EditMode::Polygon) )
+					vp->drawGizmo2D();
+				}
+			}
+			if( vp->m_drawEditMode_hoverMark )
+				vp->drawEditMode_hoverMark();
+			if( g_mouseState.IsSelectByFrame )
+				vp->drawSelectionFrame(inFocus);
 			vp->drawName(inFocus);
 			kkGSSetDepth(true);
 
@@ -1292,4 +1352,25 @@ void Viewport::draw(ColorTheme* colorTheme)
 			vp = next;
 		}
 	}
+}
+
+bool Viewport::cursorInViewport()
+{
+	if(m_viewports)
+	{
+		auto end = m_viewports->m_left;
+		auto vp = m_viewports;
+		while(true)
+		{
+			auto next = vp->m_right;
+			if( kkrooo::pointInRect( m_app->m_cursor_position, vp->m_rect_modified ))
+			{
+				return true;
+			}
+			if(vp == end)
+				break;
+			vp = next;
+		}
+	}
+	return false;
 }

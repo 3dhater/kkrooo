@@ -1,8 +1,6 @@
 ﻿#ifndef __FUNCTIONS_H__
 #define __FUNCTIONS_H__
 
-void kkCursorInViewport(bool);
-bool kkIsCursorInViewport();
 Scene3D** kkGetScene3D();
 kkGraphicsSystem* kkGetGS();
 void kkGSSetDepth(bool);

@@ -118,6 +118,7 @@ void Application::_drawLeftToolBar()
 	m_KrGuiSystem->setDrawPosition(oldDrawPosition.x, m_window_client_size.y - m_bottomAreaHeight - 21.f);
 	if( m_KrGuiSystem->beginButtonGroup(kkrooo::getIconFontString(IconFontSymbol::Viewport), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 	{
+		m_state_app = AppState_main::GuiInput;
 		m_KrGuiSystem->setDrawPosition(oldDrawPosition.x + 23.f, m_window_client_size.y - m_bottomAreaHeight - 21.f);
 		if( m_KrGuiSystem->addButton(kkrooo::getIconFontString(IconFontSymbol::ViewportLY_full), &m_guiStyle_mainToolbarButtons, Gui::Vec2f(21.f,21.f), isGlobalInputBlocked() ? false : true) )
 		{

@@ -319,6 +319,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 			{
 				new_vertex = kkCreate<kkVertex>();
 				new_vertex->m_position.set(pos.x, pos.y, pos.z, 1.f);
+				new_vertex->m_positionFix = new_vertex->m_position;
 				m_weldMap[vh.str] = new_vertex;
 				_addVertexToList(new_vertex);
 			}
@@ -331,6 +332,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 		{
 			new_vertex = kkCreate<kkVertex>();
 			new_vertex->m_position.set(pos.x, pos.y, pos.z, 1.f);
+			new_vertex->m_positionFix = new_vertex->m_position;
 			_addVertexToList(new_vertex);
 		}
 		kkVertex_addPolygon(new_vertex, new_polygon);

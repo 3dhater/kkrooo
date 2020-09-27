@@ -667,16 +667,16 @@ void Scene3D::_selectAll_poly(Scene3DObject* object)
 
 void Scene3D::_selectAll_vertex(Scene3DObject* object)
 {
-	/*for( u64 i = 0, sz = object->m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	auto current_vertex = object->m_polyModel->m_verts;
+	for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
 	{
-		object->m_PolyModel->m_controlVerts[ i ]->select();
+		current_vertex->m_flags |= current_vertex->EF_SELECTED;
+		current_vertex = current_vertex->m_mainNext;
 	}
-
 	object->m_isObjectHaveSelectedVerts = true;
 	object->updateModelPointsColors();
-
 	_updateSelectionAabb_vertex();
-	updateObjectVertexSelectList();*/
+	updateObjectVertexSelectList();
 }
 
 void Scene3D::selectAll()
@@ -716,6 +716,7 @@ void Scene3D::_deselectAll_object(Scene3DObject* object)
 
 void Scene3D::_deselectAll_vertex(Scene3DObject* object)
 {
+	//printf("_deselectAll_vertex\n");
 	auto current_vertex = object->m_polyModel->m_verts;
 	for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
 	{
@@ -909,27 +910,26 @@ void Scene3D::_updateSelectionAabb_object()
 
 void Scene3D::_updateSelectionAabb_vertex()
 {
-	/*if( !m_objects_selected.size() )
+	if( !m_objects_selected.size() )
 		return;
 
 	m_selectionAabb.reset();
 	bool nnn = true;
 	kkMatrix4 M;
 
-	for( auto * o : m_objects_selected )
+	for( auto * object : m_objects_selected )
 	{
-		M = o->m_matrix;
+		M = object->m_matrix;
 
-		for( u64 i = 0, sz = o->m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+		auto current_vertex = object->m_polyModel->m_verts;
+		for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
 		{
-			auto CV = (ControlVertex*)o->m_PolyModel->m_controlVerts[ i ];
-
-			if( CV->isSelected())
+			if( current_vertex->m_flags & current_vertex->EF_SELECTED)
 			{
 				nnn = false;
-				auto V = (Vertex*)CV->m_verts[0];
-				m_selectionAabb.add( math::mul( V->m_Position, M ) + o->GetPivot() );
+				m_selectionAabb.add( math::mul( current_vertex->m_position, M ) + object->GetPivot() );
 			}
+			current_vertex = current_vertex->m_mainNext;
 		}
 	}
 	if( nnn )
@@ -945,7 +945,7 @@ void Scene3D::_updateSelectionAabb_vertex()
 		{
 			m_selectionAabb = m_sceneAabb;
 		}
-	}*/
+	}
 }
 
 void Scene3D::_updateSelectionAabb_edge()
@@ -1130,20 +1130,6 @@ void Scene3D::deleteSelectedObjects()
 //	for( auto o : m_objects_selected )
 //	{
 //		o->UpdateScreenSpacePoints();
-//	}
-//}
-//
-//void      Scene3D::updateObject2DPoints( kkScene3DObject* o )
-//{
-//	switch(m_app->getEditMode())
-//	{
-//	case EditMode::Object:
-//	default:
-//		o->UpdateScreenSpacePoints();
-//		break;
-//	case EditMode::Vertex:
-//		o->UpdateScreenSpacePoints();
-//		break;
 //	}
 //}
 
@@ -1394,6 +1380,10 @@ void Scene3D::rotateSelectedObjects(GizmoPart* gizmoPart,bool startStop, bool ca
 	}
 	else
 	{
+		if( cancel )
+		{
+			m_app->m_state_app = AppState_main::CancelTransformation;
+		}
 		switch (em)
 		{
 		case EditMode::Object:
@@ -1552,7 +1542,6 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 
 	kkMatrix4 S;
 	math::makeScaleMatrix(kkVector4(x,y,z,1.f),S);
-
 	////printf("%f\n", L );
 
 	kkMatrix4 M;
@@ -1568,9 +1557,7 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 			auto n = m_objects_selected.size();
 			for( auto * o : m_objects_selected )
 			{
-				//o->m_scaleMatrix = S;
 				o->m_matrix = S * o->m_matrixFixed;
-
 				// global
 				if( n == 1)
 				{
@@ -1584,9 +1571,6 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 					auto & pivot  = o->GetPivot();
 					pivot = math::mul(pivotFix-C,S)+C; // для глобал нужно C
 				}
-
-
-//				o->updateMatrixPosition();
 				o->UpdateAabb();
 			}
 		}
@@ -1621,6 +1605,10 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 	}
 	else
 	{
+		if( cancel )
+		{
+			m_app->m_state_app = AppState_main::CancelTransformation;
+		}
 		switch (em)
 		{
 		case EditMode::Object:
@@ -1635,8 +1623,6 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 					}
 
 					o->m_matrix      = o->m_matrixFixed;
-					//o->m_scaleMatrix = o->m_scaleMatrixFixed;
-//					o->updateMatrixPosition();
 					o->UpdateAabb();
 				}
 				else
@@ -1649,7 +1635,6 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 
 					o->m_matrixFixed = o->m_matrix;
 				}
-			//	updateObject2DPoints(o);
 			}
 			break;
 		case EditMode::Edge:
@@ -1664,10 +1649,8 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 				else
 				{
 					o->ApplyPosition(); // метод так-же обновит оригинальный AABB
-				//	o->generateNormals();
 					o->UpdateAabb(); // и в соответствии с новым AABB построятся остальные
 				}
-			//	updateObject2DPoints(o);
 			}
 			break;
 		//case EditMode::Edge:
@@ -1810,14 +1793,14 @@ bool Scene3D::moveSelectedObjects(
 				o->UpdateAabb();
 			}
 			break;
-		//case EditMode::Vertex:
-		//	//printf("%llu\n",m_objectsVertexSelectInfo.size());
-		//	for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
-		//	{
-		//		info = &m_objectsVertexSelectInfo[ i ];
-		//		info->m_object->moveVerts( V,info->m_verts);
-		//	}
-		//	break;
+		case EditMode::Vertex:
+			//printf("%llu\n",m_objectsVertexSelectInfo.size());
+			for( u64 i = 0, sz = m_objectsVertexSelectInfo.size(); i < sz; ++i )
+			{
+				info = &m_objectsVertexSelectInfo[ i ];
+				info->m_object->moveVerts( V, info->m_verts);
+			}
+			break;
 		//case EditMode::Edge:
 		//	for( u64 i = 0, sz = m_objectsEdgeSelectInfo.size(); i < sz; ++i )
 		//	{
@@ -1856,6 +1839,7 @@ bool Scene3D::moveSelectedObjects(
 				}
 				else
 				{
+
 					result = true;
 					o->ApplyPivot();
 				}
@@ -1875,10 +1859,6 @@ bool Scene3D::moveSelectedObjects(
 				}
 			}
 			break;
-		/*case EditMode::Edge:
-			break;*/
-		//case EditMode::Polygon:
-		//	break;
 		default:
 			break;
 		}
@@ -1893,114 +1873,109 @@ bool Scene3D::moveSelectedObjects(
 
 bool Scene3D::isVertexHover(const SelectionFrust& frust)
 {
-	//for( auto * object : m_objects_selected )
-	//{
-	//	auto & cverts = object->GetControlVertexArray();
-	//	auto & verts = object->GetVertexArray();
-	//	for( auto CV : cverts )
-	//	{
-	//		//auto & vert_inds = CV->getVertInds();
-	//		auto & verts = CV->getVerts();
-	//		auto V = verts[0];
-	//		if( frust.pointInFrust(math::mul(V->getPosition(), object->GetMatrix()) + object->GetPivot()) )
-	//		{
-	//			return true;
-	//		}
-	//	}
-	//}
+	for( auto * object : m_objects_selected )
+	{
+		auto current_vertex = object->m_polyModel->m_verts;
+		for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
+		{
+			if( frust.pointInFrust(math::mul(current_vertex->m_position, object->GetMatrix()) + object->GetPivot()) )
+				return true;
+			current_vertex = current_vertex->m_mainNext;
+		}
+	}
 	return false;
 }
 
 
 void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* camera)
 {
-	//std::basic_string<ControlVertex*> hovered_points;
-	//auto camera_position = camera->getPositionCamera();
+	std::basic_string<std::pair<kkVertex*,f32>> hovered_points;
+	auto camera_position = camera->getPositionCamera();
 
-	//for( auto * object : m_objects_selected )
-	//{
-	//	auto & cverts = object->GetControlVertexArray();
-	//	auto & verts = object->GetVertexArray();
-	//	for( auto CV : cverts )
-	//	{
-	//		//auto & vert_inds = CV->getVertInds();
-	//		auto & verts = CV->getVerts();
-	//		auto V = verts[0];
-	//		auto point3D = math::mul(V->getPosition(), object->GetMatrix()) + object->GetPivot();
-	//		if( frust.pointInFrust(point3D) )
-	//		{
-	//			((ControlVertex*)CV)->m_distanceToCamera = camera_position.distance(point3D);
-	//			hovered_points.push_back((ControlVertex*)CV);
-	//		}
-	//	}
-	//}
-	//if(hovered_points.size()>1)
-	//{
-	//	std::sort(hovered_points.begin(),hovered_points.end(),
-	//		[](ControlVertex* first, ControlVertex* second)
-	//		{
-	//			return first->m_distanceToCamera < second->m_distanceToCamera;
-	//		}
-	//	);
-	//}
+	for( auto * object : m_objects_selected )
+	{
+		auto current_vertex = object->m_polyModel->m_verts;
+		for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
+		{
+			auto point3D = math::mul(current_vertex->m_position, object->GetMatrix()) + object->GetPivot();
+			if( frust.pointInFrust(point3D) )
+			{
+				hovered_points.push_back(std::pair<kkVertex*,f32>(current_vertex,camera_position.distance(point3D)));
+			}
+			current_vertex = current_vertex->m_mainNext;
+		}
+	}
+	if(hovered_points.size()>1)
+	{
+		std::sort(hovered_points.begin(),hovered_points.end(),
+			[](const std::pair<kkVertex*,f32>& first, const std::pair<kkVertex*,f32>& second)
+			{
+				return first.second < second.second;
+			}
+		);
+	}
 
-	//auto ks = m_app->getStateKeyboard();
-	//if( hovered_points.size() )
-	//{
-	//	if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
-	//		deselectAll();
+	auto ks = m_app->getStateKeyboard();
+	if( hovered_points.size() )
+	{
+		if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
+			deselectAll();
 
-	//	hovered_points[ 0 ]->m_isSelected = true;
-	//	if( ks == AppState_keyboard::Alt )
-	//		hovered_points[ 0 ]->m_isSelected = false;
-	//}
-	//else
-	//{
-	//	if( ks != AppState_keyboard::Ctrl )
-	//		deselectAll();
-	//}
-	//
-	//for( auto * object : m_objects_selected )
-	//{
-	//	object->m_isObjectHaveSelectedVerts = false;
+		hovered_points[ 0 ].first->m_flags |= kkVertex::EF_SELECTED;
+		if( ks == AppState_keyboard::Alt )
+		{
+			if(hovered_points[ 0 ].first->m_flags & kkVertex::EF_SELECTED)
+				hovered_points[ 0 ].first->m_flags ^= kkVertex::EF_SELECTED;
+		}
+	}
+	else
+	{
+		if( ks != AppState_keyboard::Ctrl )
+			deselectAll();
+	}
+	
+	for( auto * object : m_objects_selected )
+	{
+		object->m_isObjectHaveSelectedVerts = false;
 
-	//	auto & cverts = object->GetControlVertexArray();
-	//	for( auto CV : cverts )
-	//	{
-	//		if(CV->isSelected())
-	//		{
-	//			object->m_isObjectHaveSelectedVerts = true;
-	//			//auto vvv = (Vertex*)(((ControlVertex*)CV)->m_verts[0]);
-	//			//printf("%f %f %f\n", vvv->m_Position._f32[0], vvv->m_Position._f32[1], vvv->m_Position._f32[2]);
-	//			break;
-	//		}
-	//	}
-	//	object->updateModelPointsColors();
-	//}
+		auto current_vertex = object->m_polyModel->m_verts;
+		for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
+		{
+			if(current_vertex->m_flags & kkVertex::EF_SELECTED)
+			{
+				object->m_isObjectHaveSelectedVerts = true;
+				break;
+			}
+			current_vertex = current_vertex->m_mainNext;
+		}
+		object->updateModelPointsColors();
+	}
 
-	//_updateSelectionAabb_vertex();
-	//updateObjectVertexSelectList();
+	_updateSelectionAabb_vertex();
+	updateObjectVertexSelectList();
 }
 
 void      Scene3D::updateObjectVertexSelectList()
 {
-	/*m_objectsVertexSelectInfo.clear();
-	for( auto * o : m_objects_selected )
+	m_objectsVertexSelectInfo.clear();
+	for( auto * object : m_objects_selected )
 	{
 		ObjectVertexSelectInfo info;
-		info.m_object = o;
+		info.m_object = object;
 
-		for( size_t i2 = 0, sz2 = o->m_PolyModel->m_controlVerts.size(); i2 < sz2; ++i2 )
+		auto current_vertex = object->m_polyModel->m_verts;
+		for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
 		{
-			if( o->m_PolyModel->m_controlVerts[ i2 ]->isSelected() )
+			if( current_vertex->m_flags & current_vertex->EF_SELECTED)
 			{
-				info.m_verts.insert( (ControlVertex*)o->m_PolyModel->m_controlVerts[ i2 ] );
+				info.m_verts.insert( current_vertex );
 			}
+			current_vertex = current_vertex->m_mainNext;
 		}
 
 		if( info.m_verts.size() )
 			m_objectsVertexSelectInfo.push_back(info);
-	}*/
+	}
 }
 
 void      Scene3D::updateObjectPolySelectList()

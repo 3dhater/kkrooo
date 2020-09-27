@@ -49,6 +49,7 @@ struct kkPolygon
 struct kkVertex
 {
 	kkVector4 m_position;
+	kkVector4 m_positionFix;
 	kkVector4 m_normal;
 
 	// предидущий\следующий в главном списке
@@ -64,6 +65,14 @@ struct kkVertex
 	// Индекс software модели для точек
 	u32 m_pointsModelIndex = 0;
 	u32 m_pointsVertexIndex = 0;
+
+	// при создании software модели нужно запомнить индекс вершины (в software буфере)
+	//   чтобы потом иметь возможно быстро найти нужную вершину
+	// значение устанавливается при перестройке модели
+	std::vector<std::pair<u32,u32>> m_vertexIndexForSoftware      ; // вершина полигона может создавать множество hardware точек
+	                                             // перед перестройкой модели нужно очищать список
+	                                             // индекс в мешбуфере, индекс софтваре модели
+	std::vector<std::pair<u32,u32>> m_vertexIndexForSoftware_lines;
 
 	enum _flags
 	{

@@ -22,14 +22,14 @@ struct ViewportMouseState
 	bool MMB_DOWN = false;
 	bool MMB_HOLD = false;
 
-	bool InViewport = false;
+	//bool InViewport = false;
 	bool IsMove = false;
-	bool IsSelectByRect = false;
+	bool IsSelectByFrame = false;
 	bool IsFirstClickLMB = false;
 	bool IsFirstClickMMB = false;
 	bool IsFirstClickRMB = false;
 
-	void reset()
+	/*void reset()
 	{
 		if( IsSelectByRect && LMB_HOLD )
 		{
@@ -54,7 +54,7 @@ struct ViewportMouseState
 		MMB_UP   = false;
 		MMB_DOWN = false;
 		MMB_HOLD = false;
-	}
+	}*/
 };
 
 enum class ViewportLayoutType
@@ -176,8 +176,9 @@ public:
 	void drawScene(bool inFocus);
 	void drawObjectPivot(bool inFocus);
 	void drawSelectedObjectFrame();
-	void drawSelectionRectangle(bool inFocus);
+	void drawSelectionFrame(bool inFocus);
 	void drawName(bool isActive);
+	void drawEditMode_hoverMark();
 	ViewportCamera * getActiveViewportCamera()
 	{
 		return m_activeCamera;
@@ -213,6 +214,8 @@ public:
 	void updateInput(const v2f& mouseDelta);
 
 	void init(ViewportType, ViewportLayoutType, const v4f& indent);
+
+	bool cursorInViewport();
 };
 
 

@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#include "common.h"
+﻿#include "common.h"
 
 template<>
 ParametersBox* kkSingleton<ParametersBox>::s_instance = nullptr;

@@ -28,14 +28,7 @@ struct verts_points
 	v4f _col;  
 };
 
-struct node_hash{
-	std::size_t operator()(const std::pair<kkMesh*,kkSMesh*>& _node) const {
-		kkStringA str;
-		str += (u64)_node.first;
-		str += (u64)_node.second;
-		return std::hash<std::string>()(str.data());
-	}
-};
+
 
 Scene3DObjectShaderParameter Scene3DObject::m_globalShaderParameter;
 
@@ -200,6 +193,8 @@ void Scene3DObject::_createSoftwareModel_polys()
 				verts_ptr->TCoords   = current_polygon->m_tcoords[0];
 			}
 			m_aabbOriginal.add( base_vertex->m_position );
+			base_vertex->m_vertexIndexForSoftware.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+
 			*inds_ptr = index; 
 			++index;
 			++inds_ptr;
@@ -217,6 +212,8 @@ void Scene3DObject::_createSoftwareModel_polys()
 				verts_ptr->TCoords   = current_polygon->m_tcoords[i2+2];
 			}
 			m_aabbOriginal.add( vertex2->m_position );
+			vertex2->m_vertexIndexForSoftware.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+
 			*inds_ptr = index; 
 			++index;
 			++inds_ptr;
@@ -234,6 +231,8 @@ void Scene3DObject::_createSoftwareModel_polys()
 				verts_ptr->TCoords   = current_polygon->m_tcoords[i2+1];
 			}
 			m_aabbOriginal.add( vertex3->m_position );
+			vertex3->m_vertexIndexForSoftware.push_back( std::pair<u32,u32>(index,softwareModelIndex) );
+
 			*inds_ptr = index; 
 			++index;
 			++inds_ptr;
@@ -910,14 +909,13 @@ bool Scene3DObject::IsRayIntersectMany( const kkRay& r, std::vector<kkRayTriangl
 
 void        Scene3DObject::updateAABB_vertex()
 {
-	//m_aabbOriginal.reset();
-	//for(auto P : m_polyModel->m_polygons )
-	//{
-	//	for(auto V : P->m_verts)
-	//	{
-	//		m_aabbOriginal.add( V->m_position );
-	//	}
-	//}
+	m_aabbOriginal.reset();
+	auto current_vertex = m_polyModel->m_verts;
+	for( u64 i = 0; i < m_polyModel->m_vertsCount; ++i )
+	{
+		m_aabbOriginal.add( current_vertex->m_position );
+		current_vertex = current_vertex->m_mainNext;
+	}
 }
 
 void Scene3DObject::applyMatrices()

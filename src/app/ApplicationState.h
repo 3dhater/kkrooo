@@ -16,7 +16,8 @@ enum class AppState_main : u32
 	SelectRectangle,
 
 	// когда нажали правую кнопку мыши в моменте когда объект трансформируется с помощью гизмо
-	CancelTransformation, /// вроде не нужно...
+	CancelTransformation, 
+	GuiInput, 
 
 };
 

@@ -262,7 +262,7 @@ extern "C"
 								}
 							}						
 
-							geometry_creator->EndPolygon( weld, importData->fix_flip_normals );
+							geometry_creator->EndPolygon( weld,  importData->fix_flip_normals );
 							weld = false;
 						}break;
 						case 'o':

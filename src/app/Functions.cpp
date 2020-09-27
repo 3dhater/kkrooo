@@ -14,15 +14,6 @@
 I am very tired of OOP style
 */
 
-bool g_cursorInViewport = false;
-void kkCursorInViewport(bool v)
-{
-	g_cursorInViewport = v;
-}
-bool kkIsCursorInViewport()
-{
-	return g_cursorInViewport;
-}
 void kkGSDrawModelPoint(kkMesh* mesh,const kkMatrix4& mat)
 {
     return kkSingleton<Application>::s_instance->GSDrawModelPoint(mesh, mat);
