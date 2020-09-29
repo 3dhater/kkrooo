@@ -1174,13 +1174,73 @@ void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertM
 {
 	if(!other)
 	{
-
+		kkLogWriteWarning("Attach model: `other` is null\n");
+		return;
 	}
 	auto TIM = matrix_other;
 	TIM.invert();
 	TIM.transpose();
 
+	auto other_polygon = other->m_polygons;
+	for( u64 i = 0; i < other->m_polygonsCount; ++i )
+	{
+		if(other_polygon->m_normals)
+		{
+			for( u64 i2 = 0; i2 < other_polygon->m_vertexCount; ++i2 )
+			{
+				other_polygon->m_normals[i2] = math::mul(other_polygon->m_normals[i2], TIM);
+			}
+		}
+		other_polygon = other_polygon->m_mainNext;
+	}
+	
+	auto other_vertex = other->m_verts;
+	for( u64 i = 0; i < other->m_vertsCount; ++i )
+	{
+		other_vertex->m_position	= math::mul(other_vertex->m_position, matrix_other)+ pivot_other - pivot;
+		other_vertex->m_position	= math::mul(other_vertex->m_position, invertMatrix) ;
+		other_vertex->m_positionFix = other_vertex->m_position;
+		other_vertex = other_vertex->m_mainNext;
+	}
 
+	other->_deleteEdges();
+
+	auto verts = other->m_verts;
+	auto polys = other->m_polygons;
+
+	{
+		auto begin_1 = verts;
+		auto end_1 = verts->m_mainPrev;
+
+		auto begin_2 = m_verts;
+		auto end_2 = m_verts->m_mainPrev;
+
+		end_2->m_mainNext = begin_1;
+		begin_1->m_mainPrev = end_2;
+
+		end_1->m_mainNext = begin_2;
+		begin_2->m_mainPrev = end_1;
+	}
+	{
+		auto begin_1 = polys;
+		auto end_1 = polys->m_mainPrev;
+
+		auto begin_2 = m_polygons;
+		auto end_2 = m_polygons->m_mainPrev;
+
+		end_2->m_mainNext = begin_1;
+		begin_1->m_mainPrev = end_2;
+
+		end_1->m_mainNext = begin_2;
+		begin_2->m_mainPrev = end_1;
+	}
+	m_polygonsCount += other->m_polygonsCount;
+	m_vertsCount += other->m_vertsCount;
+
+	other->m_polygons = nullptr;
+	other->m_polygonsCount = 0;
+	other->m_verts = nullptr;
+	other->m_vertsCount = 0;
 
 	// // // ///
 	/*auto old_size = m_verts.size();

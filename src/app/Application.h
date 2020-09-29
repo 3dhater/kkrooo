@@ -411,10 +411,10 @@ public:
 	void convertSelectedObjectToPolygonalObject();
 	bool isSelectedObjectNeedConvert();
 
-	void setObjectPickMode(void(*)(s32 id, void* data));
+	void setObjectPickMode(void(*callback)(s32 id, void* data));
 	kkScene3DObject* getPickedObject();
 	
-	void setVertexPickMode(void(*)(s32 id, void* data));
+	void setVertexPickMode(void(*callback)(s32 id, void* data));
 	kkVertex* getPickedVertex();
 
 	void setDrawPickLine(bool);

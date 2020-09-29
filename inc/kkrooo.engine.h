@@ -31,9 +31,6 @@
 void kkLogWriteInfo(const char*fmt,...);
 void kkLogWriteError(const char*fmt,...);
 void kkLogWriteWarning(const char*fmt,...);
-void kkLogWriteInfo(const char16_t*fmt,...);
-void kkLogWriteError(const char16_t*fmt,...);
-void kkLogWriteWarning(const char16_t*fmt,...);
 
 #include "MainSystem/kkMainSystem.h"
 

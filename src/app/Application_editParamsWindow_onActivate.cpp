@@ -66,7 +66,7 @@ void attach_pickObject_callback(s32 id, void* data)
     Scene3D* scene = *app->getScene3D();
     auto object = GetSelectedObject();
     auto pickedObject = app->getPickedObject();
-    if(object && pickedObject)
+    if((object && pickedObject) && (object != pickedObject))
     {
         object->applyMatrices();
         object->AttachObject(pickedObject);

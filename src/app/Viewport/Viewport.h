@@ -187,7 +187,8 @@ public:
 	void drawGizmo2D();
 
 	bool m_drawEditMode_hoverMark = false;
-	void _drawEditMode_hoverMark();
+
+	Scene3DObject* pickObject();
 };
 
 class Viewport

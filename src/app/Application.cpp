@@ -899,12 +899,12 @@ void Application::updateInput()
 		{
 			m_objectPickMode = false;
 			m_globalInputBlock = false;
-			/*auto pickobject = m_main_viewport->pickObject();
+			auto pickobject = m_activeViewport->pickObject();
 			if(pickobject && m_objectPickCallback)
 			{
 				m_objectPicked = pickobject;
 				m_objectPickCallback(0, this);
-			}*/
+			}
 		}
 
 

@@ -602,6 +602,45 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 
 	return res;
 }
+Scene3DObject* ViewportObject::pickObject()
+{
+	updateCursorRay();
+	Scene3DObject* result = nullptr;
+	std::vector<Scene3DObject*> objects;
+	for( size_t i = 0; i < m_drawObjects.size(); ++i )
+	{
+		Scene3DObject* object = m_drawObjects[i];
+
+		if(object->isSelected())
+			continue;
+
+		auto & obb = object->Obb();
+		if( kkrooo::rayIntersection_obb(m_cursorRay->m_center, obb) )
+		{
+			kkRayTriangleIntersectionResultSimple intersectionResult;
+			if( object->IsRayIntersect(m_cursorRay->m_center, intersectionResult) )
+			{
+				auto camera_position = m_activeCamera->getPositionCamera();
+
+				object->m_distanceToCamera = camera_position.distance(intersectionResult.m_intersectionPoint);
+				objects.push_back(object);
+			}
+		}
+	}
+	if(objects.size())
+	{
+
+		std::sort(objects.begin(),objects.end(),
+			[](Scene3DObject* first, Scene3DObject* second)
+			{
+				return first->getDistanceToCamera() > second->getDistanceToCamera();
+			}
+		);
+
+		result = objects[0];
+	}
+	return result;
+}
 void ViewportObject::update(const v2i& windowSize)
 {
 	/// чтобы вычислить m_resize_window_coef нужно взять текущий размер окна, вычислить область вьюпорта,
