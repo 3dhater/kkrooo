@@ -60,6 +60,7 @@
     <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_ddict.c" />
     <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_decompress.c" />
     <ClCompile Include="..\3rd\zstd\lib\decompress\zstd_decompress_block.c" />
+    <ClCompile Include="..\src\app\log.cpp" />
     <ClCompile Include="..\src\engine\EventSystem\kkEventSystemImpl.cpp" />
     <ClCompile Include="..\src\engine\FileSystem\kkFileSystemCommon.cpp" />
     <ClCompile Include="..\src\engine\FileSystem\kkFileSystemWin32.cpp" />

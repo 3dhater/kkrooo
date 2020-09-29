@@ -1,5 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
-#ifndef __KKROO_ERROR_H__
+﻿#ifndef __KKROO_ERROR_H__
 #define __KKROO_ERROR_H__
 
 #include "Common/kkEasyFunctions.h"
@@ -15,6 +14,7 @@
 #endif
 
 #include <cstdio>
-#define KK_PRINT_FAILED	printf( "Failed [%s][%s][%i]:(\n", KK_FILE, KK_FUNCTION, KK_LINE )
+#define KK_PRINT_FAILED	kkLogWriteError( "Failed [%s][%s][%i]:(\n", KK_FILE, KK_FUNCTION, KK_LINE )
+
 
 #endif

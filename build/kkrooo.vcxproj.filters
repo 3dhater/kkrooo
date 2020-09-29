@@ -36,6 +36,9 @@
     <Filter Include="src\zstd">
       <UniqueIdentifier>{2dd3db1b-a307-45f3-99ef-fdd06443becc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="log">
+      <UniqueIdentifier>{cb927443-ee32-4d1a-8497-ae3bd5b134b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\engine\main_kkrooo.cpp">
@@ -178,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="..\3rd\zstd\lib\common\fse_decompress.c">
       <Filter>src\zstd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\log.cpp">
+      <Filter>log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

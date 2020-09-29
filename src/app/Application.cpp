@@ -110,25 +110,36 @@ Application::~Application()
 
 	if( m_current_scene3D )
 	{
+		kkLogWriteInfo("Destroy current scene\n");
 		kkDestroy(m_current_scene3D);
 	}
 
 	for( auto * o : m_renderers )
 	{
+		kkLogWriteInfo("Destroy renderer [%s]\n", kkString( o->GetName() ).to_kkStringA().c_str());
 		kkDestroy(o);
 	}
 
 	if( m_KrGuiSystem )
+	{
+		kkLogWriteInfo("Destroy GUI\n");
 		delete m_KrGuiSystem;
+	}
 
 	//if( m_editPolygons_paramWindow )
 	   // kkDestroy(m_editPolygons_paramWindow);
 
 	if( m_pluginGUI )
+	{
+		kkLogWriteInfo("Destroy Plugin GUI\n");
 		kkDestroy(m_pluginGUI);
+	}
 
 	if( m_geomCreator )
+	{
+		kkLogWriteInfo("Destroy geometry creator\n");
 		kkDestroy(m_geomCreator);
+	}
 
 	/*if( m_main_viewport )
 	{
@@ -138,6 +149,7 @@ Application::~Application()
 
 void Application::_init_OS_Windows()
 {
+	kkLogWriteInfo("Init OS windows\n");
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	if( FAILED(hr) )
 	{
@@ -155,6 +167,7 @@ void Application::_init_OS_Windows()
 
 void Application::_init_events()
 {
+	kkLogWriteInfo("Init events\n");
 	m_event_consumer  = std::make_unique<EventConsumer>();
 	m_event_consumer->m_app = this;
 	m_event_system = m_main_system->getEventSystem();
@@ -163,11 +176,13 @@ void Application::_init_events()
 
 void Application::_init_scene()
 {
+	kkLogWriteInfo("Init scene\n");
 	m_scene_system = kkGetSceneSystem();
 }
 
 void Application::_init_shortcuts()
 {
+	kkLogWriteInfo("Init Shortcut Manager\n");
 	m_shortcutManager = kkCreate<ShortcutManager>();
 	if( !m_shortcutManager->init() )
 	{
@@ -182,6 +197,7 @@ void Application::_init_materialEditor(bool first)
 {
 	if( first )
 	{
+		kkLogWriteInfo("Create material editor window\n");
 		m_materialEditorWindow = m_main_system->createWindow( kk::window::style::resize | kk::window::style::center | kk::window::style::maximize,
 			v4i(0,0,1000,600), kk::window::state::hide, m_mainWindow.ptr(), E_WINDOW_ID::EWID_MATERIALEDITOR_WINDOW );
 		m_materialEditorWindow->set_onClose(window_onClose);
@@ -191,6 +207,7 @@ void Application::_init_materialEditor(bool first)
 	}
 	else
 	{
+		kkLogWriteInfo("Init material editor\n");
 		if( !m_materialEditor->init(m_gs.ptr(), m_KrGuiSystem, m_materialEditorWindow.ptr() ))
 		{
 			KK_PRINT_FAILED;
@@ -200,6 +217,7 @@ void Application::_init_materialEditor(bool first)
 }
 void Application::_init_shortcutEditor()
 {
+	kkLogWriteInfo("Init shortcut editor window\n");
 	m_shortcutEditorWindow = m_main_system->createWindow( kk::window::style::center,
 		v4i(0,0,400,280), kk::window::state::hide, m_mainWindow.ptr(), E_WINDOW_ID::EWID_SHORTCUTEDITOR_WINDOW );
 	m_shortcutEditorWindow->set_onClose(window_onClose);
@@ -210,6 +228,7 @@ void Application::_init_shortcutEditor()
 
 void Application::_init_plugins()
 {
+	kkLogWriteInfo("Init plugins\n");
 	m_pluginGUI  = kkCreate<PluginGUI>(this);
 	kkSingleton<PluginCommonInterface>::s_instance = kkCreate<PluginCommonInterface>();
 	m_plugin_interface = kkSingleton<PluginCommonInterface>::s_instance;
@@ -242,6 +261,7 @@ void Application::_init_plugins()
 
 void Application::_init_mainWindow()
 {
+	kkLogWriteInfo("Init main window\n");
 	m_mainWindow = m_main_system->createWindow( 
 		kk::window::style::resize | kk::window::style::center | kk::window::style::maximize | kk::window::style::size_limit, 
 		v4i(0,0,800,600), kk::window::state::hide, 0, E_WINDOW_ID::EWID_MAIN_WINDOW );
@@ -259,6 +279,7 @@ void Application::_init_mainWindow()
 
 void Application::_init_renderWindow()
 {
+	kkLogWriteInfo("Init render window\n");
 	m_renderWindow = m_main_system->createWindow(  
 		kk::window::style::resize | kk::window::style::center | kk::window::style::maximize, 
 		v4i(0,0,1000,600), 
@@ -272,6 +293,7 @@ void Application::_init_renderWindow()
 
 void Application::_init_gs()
 {
+	kkLogWriteInfo("Init GS\n");
 	m_gs = m_main_system->createGraphicsSystem( m_mainWindow.ptr(), m_mainWindow->getWindowRect().getWidthAndHeight(), 32 );
 	if( !m_gs.ptr() )
 	{
@@ -290,11 +312,13 @@ void Application::_init_gs()
 
 void Application::_init_input()
 {
+	kkLogWriteInfo("Init input\n");
 	m_input_system = m_main_system->getInputSystem();
 }
 
 void Application::_init_krgui()
 {
+	kkLogWriteInfo("Init GUI\n");
 	m_KrGuiSystem = Gui::CreateSystem(Gui::GraphicsSystemType::OpenGL3, "../res/fonts/noto/", "notosans.txt" );
 	if( !m_KrGuiSystem )
 	{
@@ -306,12 +330,14 @@ void Application::_init_krgui()
 
 void Application::_init_renderManager()
 {
+	kkLogWriteInfo("Init render manager\n");
 	m_renderManager = kkCreate<RenderManager>();
 	m_renderManager->init(m_gs.ptr(), m_KrGuiSystem, m_renderWindow.ptr());
 }
 
 void Application::_init_viewports(ViewportLayoutType lyt)
 {
+	kkLogWriteInfo("Init viewports\n");
 	v4f indent;
 	indent.x = m_leftToolBarWidth;
 	indent.y = m_mainMenuHeight + m_mainToolBarHeight;
@@ -326,6 +352,7 @@ void Application::_init_viewports(ViewportLayoutType lyt)
 
 void Application::init()
 {
+	kkLogWriteInfo("Init...\n");
 	m_main_system  = kkGetMainSystem();
 	m_deltaTime = m_main_system->getDeltaTime();
 	m_programName += u"Kkrooo";

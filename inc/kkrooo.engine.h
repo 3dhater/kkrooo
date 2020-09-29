@@ -28,6 +28,13 @@
 #include "Classes/Math/kkRay.h"
 #include "Events/kkEvent.h"
 
+void kkLogWriteInfo(const char*fmt,...);
+void kkLogWriteError(const char*fmt,...);
+void kkLogWriteWarning(const char*fmt,...);
+void kkLogWriteInfo(const char16_t*fmt,...);
+void kkLogWriteError(const char16_t*fmt,...);
+void kkLogWriteWarning(const char16_t*fmt,...);
+
 #include "MainSystem/kkMainSystem.h"
 
 #include "Common/kkForward.h"
@@ -56,7 +63,6 @@ struct kkCreator
 		if( kkStartEngine() == 0 )
 		{
 			KK_PRINT_FAILED;
-
 			throw std::runtime_error("kkStartEngine = failed");
 		}
 	}

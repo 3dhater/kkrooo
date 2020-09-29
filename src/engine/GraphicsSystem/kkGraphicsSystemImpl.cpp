@@ -76,9 +76,7 @@ bool kkGraphicsSystemImpl::initGS( kkWindow* output_window, const v2i& back_buff
 	}
 
 	setActive(output_window);
-
 	setCompFunc(m_compFunc);
-
 	return true;
 }
 

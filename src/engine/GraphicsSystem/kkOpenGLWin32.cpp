@@ -192,8 +192,8 @@ bool kkOpenGLWin32::init(kkWindow* output_window, const v2i& back_buffer_size, u
 	kkWindowWin32 * w = (kkWindowWin32*)output_window;
 	m_dc   = w->m_dc;
 
-	int v_maj = 3;
-	int v_min = 3;
+	int v_maj = 10;
+	int v_min = 10;
 	
 	BOOL result = TRUE;
 
@@ -226,8 +226,8 @@ bool kkOpenGLWin32::init(kkWindow* output_window, const v2i& back_buffer_size, u
 					break;
 				}
 
-				v_min = 3;
-				v_maj = 3;
+				v_min = 6;
+				--v_maj;
 			}
 		}
 	}
@@ -237,6 +237,7 @@ bool kkOpenGLWin32::init(kkWindow* output_window, const v2i& back_buffer_size, u
 		KK_PRINT_FAILED;
 		return false;
 	}
+	kkLogWriteInfo("Init OpenGL %i.%i\n", v_maj, v_min);
 
 	setActive();
 

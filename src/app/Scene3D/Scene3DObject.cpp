@@ -1346,17 +1346,14 @@ void Scene3DObject::SelecVertsBySub()
 
 void Scene3DObject::AttachObject(kkScene3DObject* object)
 {
-	/*if( object->GetType() == kkScene3DObjectType::PolygonObject )
+	if( object->GetType() == kkScene3DObjectType::PolygonObject )
 	{
 		auto MI = m_matrix;
 		MI.invert();
-		
 		auto polyObject = (Scene3DObject*)object;
-		m_PolyModel->attachModel(polyObject->m_PolyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
-
-		m_PolyModel->createControlPoints();
+		m_polyModel->attachModel(polyObject->m_polyModel, MI, polyObject->GetMatrix(), m_pivot, polyObject->GetPivot());
 		this->_rebuildModel();
-	}*/
+	}
 }
 
 void Scene3DObject::BreakVerts()

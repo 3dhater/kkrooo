@@ -1172,12 +1172,18 @@ void PolygonalModel::rayTest( std::vector<kkTriangleRayTestResult>& outTriangle,
 
 void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
 {
+	if(!other)
+	{
 
-	/*auto TIM = matrix_other;
+	}
+	auto TIM = matrix_other;
 	TIM.invert();
 	TIM.transpose();
 
-	auto old_size = m_verts.size();
+
+
+	// // // ///
+	/*auto old_size = m_verts.size();
 
 	m_verts.reserve(old_size + other->m_verts.size());
 	for( u64 i = 0, sz = other->m_verts.size(); i < sz; ++i )

@@ -67,6 +67,7 @@
     <ClCompile Include="..\src\app\GUI\DrawLeftToolBar.cpp" />
     <ClCompile Include="..\src\app\GUI\MainMenu_mainToolBar.cpp" />
     <ClCompile Include="..\src\app\GUI\MainMenu_objectCreatorCategories.cpp" />
+    <ClCompile Include="..\src\app\log.cpp" />
     <ClCompile Include="..\src\app\main_app.cpp" />
     <ClCompile Include="..\src\app\Materials\kkMaterialTypeImpl.cpp" />
     <ClCompile Include="..\src\app\Materials\MaterialEditor.cpp" />
