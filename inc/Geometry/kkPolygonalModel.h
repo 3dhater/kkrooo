@@ -48,6 +48,8 @@ struct kkPolygon
 	kkLoopNode<kkEdge> * m_edges = nullptr;
 	u64 m_edgeCount = 0;
 
+	kkVector4 m_facenormal;
+
 	v3f * m_normals = nullptr;
 	v2f * m_tcoords = nullptr;
 
@@ -63,6 +65,7 @@ struct kkVertex
 	kkVector4 m_position;
 	kkVector4 m_positionFix;
 	kkVector4 m_normal;
+	//kkVector4 m_normalFix;
 
 	// предидущий\следующий в главном списке
 	kkVertex* m_mainPrev = nullptr;

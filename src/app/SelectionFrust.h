@@ -2,6 +2,7 @@
 #define __SELECTION_FRUST_H__
 
 #include "Classes/Math/kkMatrix.h"
+#include "Classes/kkAABB.h"
 #include "Functions.h"
 
 // При выборе рамкой (просто когда зажимается ЛКМ и мышка тянется куда-то)
@@ -19,18 +20,95 @@ struct SelectionFrust
 	kkVector4 m_top[4];
 	kkVector4 m_right[4];
 	kkVector4 m_bottom[4];
+	kkVector4 m_front[4];
+	kkVector4 m_back[4];
 
 	// center
 	kkVector4 m_LC;
 	kkVector4 m_TC;
 	kkVector4 m_RC;
 	kkVector4 m_BC;
+	kkVector4 m_FrontC;
+	kkVector4 m_BackC;
 
 	// normal
 	kkVector4 m_LN;
 	kkVector4 m_TN;
 	kkVector4 m_RN;
 	kkVector4 m_BN;
+	kkVector4 m_FrontN;
+	kkVector4 m_BackN;
+
+	void createWithAabb(const kkAabb& aabb)
+	{
+		m_top[0].set(aabb.m_min._f32[0], aabb.m_max._f32[1], aabb.m_min._f32[2]);
+		m_top[1].set(aabb.m_max._f32[0], aabb.m_max._f32[1], aabb.m_min._f32[2]);
+		m_top[2].set(aabb.m_min._f32[0], aabb.m_max._f32[1], aabb.m_max._f32[2]);
+		m_top[3].set(aabb.m_max._f32[0], aabb.m_max._f32[1], aabb.m_max._f32[2]);
+
+		m_right[0].set(aabb.m_max._f32[0], aabb.m_max._f32[1], aabb.m_min._f32[2]);
+		m_right[1].set(aabb.m_max._f32[0], aabb.m_min._f32[1], aabb.m_min._f32[2]);
+		m_right[2].set(aabb.m_max._f32[0], aabb.m_max._f32[1], aabb.m_max._f32[2]);
+		m_right[3].set(aabb.m_max._f32[0], aabb.m_min._f32[1], aabb.m_max._f32[2]);
+
+		m_bottom[0].set(aabb.m_max._f32[0], aabb.m_min._f32[1], aabb.m_min._f32[2]);
+		m_bottom[1].set(aabb.m_min._f32[0], aabb.m_min._f32[1], aabb.m_min._f32[2]);
+		m_bottom[2].set(aabb.m_max._f32[0], aabb.m_min._f32[1], aabb.m_max._f32[2]);
+		m_bottom[3].set(aabb.m_min._f32[0], aabb.m_min._f32[1], aabb.m_max._f32[2]);
+
+		m_left[0].set(aabb.m_min._f32[0], aabb.m_min._f32[1], aabb.m_min._f32[2]);
+		m_left[1].set(aabb.m_min._f32[0], aabb.m_max._f32[1], aabb.m_min._f32[2]);
+		m_left[2].set(aabb.m_min._f32[0], aabb.m_min._f32[1], aabb.m_max._f32[2]);
+		m_left[3].set(aabb.m_min._f32[0], aabb.m_max._f32[1], aabb.m_max._f32[2]);
+
+		m_front[0].set(aabb.m_min._f32[0], aabb.m_min._f32[1], aabb.m_max._f32[2]);
+		m_front[1].set(aabb.m_min._f32[0], aabb.m_max._f32[1], aabb.m_max._f32[2]);
+		m_front[2].set(aabb.m_max._f32[0], aabb.m_min._f32[1], aabb.m_max._f32[2]);
+		m_front[3].set(aabb.m_max._f32[0], aabb.m_max._f32[1], aabb.m_max._f32[2]);
+
+		m_back[0].set(aabb.m_min._f32[0], aabb.m_min._f32[1], aabb.m_min._f32[2]);
+		m_back[1].set(aabb.m_min._f32[0], aabb.m_max._f32[1], aabb.m_min._f32[2]);
+		m_back[2].set(aabb.m_max._f32[0], aabb.m_min._f32[1], aabb.m_min._f32[2]);
+		m_back[3].set(aabb.m_max._f32[0], aabb.m_max._f32[1], aabb.m_min._f32[2]);
+
+		kkVector4 e1, e2;
+	
+		e1 = m_right[1] - m_right[0];
+		e2 = m_right[2] - m_right[0];
+		e1.cross(e2, m_RN);
+		m_RC = m_right[0] + m_right[1] + m_right[2] + m_right[3];
+		m_RC *= 0.25;
+
+		e1 = m_bottom[1] - m_bottom[0];
+		e2 = m_bottom[2] - m_bottom[0];
+		e1.cross(e2, m_BN);
+		m_BC = m_bottom[0] + m_bottom[1] + m_bottom[2] + m_bottom[3];
+		m_BC *= 0.25;
+
+		e1 = m_top[1] - m_top[0];
+		e2 = m_top[2] - m_top[0];
+		e1.cross(e2, m_TN);
+		m_TC = m_top[0] + m_top[1] + m_top[2] + m_top[3];
+		m_TC *= 0.25;
+
+		e1 = m_left[1] - m_left[0];
+		e2 = m_left[2] - m_left[0];
+		e1.cross(e2, m_LN);
+		m_LC = m_left[0] + m_left[1] + m_left[2] + m_left[3];
+		m_LC *= 0.25;
+
+		e1 = m_front[1] - m_front[0];
+		e2 = m_front[2] - m_front[0];
+		e1.cross(e2, m_FrontN);
+		m_FrontC = m_front[0] + m_front[1] + m_front[2] + m_front[3];
+		m_FrontC *= 0.25;
+
+		e1 = m_back[1] - m_back[0];
+		e2 = m_back[2] - m_back[0];
+		e1.cross(e2, m_BackN);
+		m_BackC = m_back[0] + m_back[1] + m_back[2] + m_back[3];
+		m_BackC *= 0.25;
+	}
 
 	void createWithFrame(const v4i& frame, const v4f& vp_rect, const kkMatrix4& VP_invert)
 	{

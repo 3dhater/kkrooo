@@ -588,11 +588,11 @@ void ShortcutManager::reset()
             node.title = _getKeyString(node.key);
         }break;
         case ShortcutCommand_Edit::SelectModeScale:{
-            node.key = kkKey::K_E;
+            node.key = kkKey::K_R;
             node.title = _getKeyString(node.key);
         }break;
         case ShortcutCommand_Edit::SelectModeRotate:{
-            node.key = kkKey::K_R;
+            node.key = kkKey::K_E;
             node.title = _getKeyString(node.key);
         }break;
         case ShortcutCommand_Edit::_End:break;

@@ -1499,7 +1499,6 @@ void Scene3D::scaleSelectedObjects(GizmoPart* gizmoPart, bool startStop, bool ca
 		default:
 			break;
 		}
-		
 	}
 	else
 	{

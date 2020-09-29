@@ -6,10 +6,13 @@
 
 #include "Renderer/kkRenderer.h"
 #include "GraphicsSystem/kkTexture.h"
+#include "../Scene3D/Scene3DObject.h"
 
 #include "../Functions.h"
 #include "../Application.h"
 #include "PolygonalModel.h"
+#include "../SelectionFrust.h"
+
 void kkVertex_addPolygon(kkVertex* v, kkPolygon* p)
 {
 	auto new_loop = kkCreate<kkLoopNode<kkPolygon>>();
@@ -166,6 +169,9 @@ void PolygonalModel::_removeVertexFromList(kkVertex* v)
 	{
 		v->m_mainPrev->m_mainNext = v->m_mainNext;
 		v->m_mainNext->m_mainPrev = v->m_mainPrev;
+
+		if(v == m_verts)
+			m_verts = m_verts->m_mainNext;
 	}
 }
 
@@ -197,6 +203,9 @@ void PolygonalModel::_removePolygonFromList(kkPolygon* p)
 	{
 		p->m_mainPrev->m_mainNext = p->m_mainNext;
 		p->m_mainNext->m_mainPrev = p->m_mainPrev;
+
+		if(p == m_polygons)
+			m_polygons = m_polygons->m_mainNext;
 	}
 }
 void PolygonalModel::_addEdgeToList(kkEdge* e)
@@ -388,7 +397,7 @@ void PolygonalModel::_deleteEdges()
 		V = V->m_mainNext;
 	}
 }
-void PolygonalModel::_createEdges()
+void PolygonalModel::updateEdges()
 {
 	if(m_edges)
 		_deleteEdges();
@@ -544,7 +553,7 @@ void PolygonalModel::weldByLen(f32 len)
 void PolygonalModel::onEndCreation()
 {
 	calculateTriangleCount();
-	_createEdges();
+	//updateEdges();
 	m_weldMap.clear();
 }
 
@@ -554,87 +563,90 @@ void PolygonalModel::generateBT()
 
 void PolygonalModel::generateNormals(bool flat)
 {
-	//// flat
-	//kkVertex* vertex1;
-	//kkVertex* vertex2;
-	//kkVertex* vertex3;
+	// flat
+	kkVector4 e1, e2, no;
 
-	//kkVector4 e1, e2, no;
+	auto current_polygon = m_polygons;
+	for( size_t i = 0; i < m_polygonsCount; ++i )
+	{
+		if(!current_polygon->m_normals)
+		{
+			current_polygon->m_normals = (v3f*)kkMemory::allocateAligned(sizeof(v3f)*current_polygon->m_vertexCount,4);
+		}
+		for( u64 i2 = 0; i2 < current_polygon->m_vertexCount; ++i2 )
+		{
+			current_polygon->m_normals[ i2 ].set( 0.f, 0.f, 0.f );
+		}
+		kkVertex * base_vertex = current_polygon->m_verts->m_element;
+		auto v_node1 = current_polygon->m_verts->m_right;
+		auto v_node2 = v_node1->m_right;
+		u64 index2, index3;
+		for( u64 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
+		{
+			kkVertex * vertex3 = v_node1->m_element;
+			kkVertex * vertex2 = v_node2->m_element;
 
-	//auto begin_it = m_polygons.begin();
-	//auto end_it = m_polygons.end();
-	//while(begin_it != end_it)
-	//{
-	//	kkPolygon* polygon     = *begin_it;
-	//	u64       num_of_verts = (u64)polygon->m_verts.size();
-	//	
-	//	for( u64 i2 = 0, sz2 = num_of_verts; i2 < sz2; ++i2 )
-	//	{
-	//		((kkVertex*)polygon->m_verts[ i2 ])->m_Normal.set( 0.f, 0.f, 0.f );
-	//	}
+			e1 = vertex2->m_position - base_vertex->m_position;
+			e2 = vertex3->m_position - base_vertex->m_position;
+			//no;
+			e1.cross(e2, no);
 
-	//	u64 index2, index3;
+			index2  = i2+1;
+			index3  = index2 + 1;
+			if( index3 == current_polygon->m_vertexCount )
+				index3 = 0;
 
-	//	for( u64 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
-	//	{
-	//		index2  = i2+1;
-	//		index3  = index2 + 1;
-	//		if( index3 == num_of_verts )
-	//			index3 = 0;
+			current_polygon->m_normals[ 0 ].x -= no._f32[0];
+			current_polygon->m_normals[ 0 ].y -= no._f32[1];
+			current_polygon->m_normals[ 0 ].z -= no._f32[2];
+			current_polygon->m_normals[ index2 ].x -= no._f32[0];
+			current_polygon->m_normals[ index2 ].y -= no._f32[1];
+			current_polygon->m_normals[ index2 ].z -= no._f32[2];
+			current_polygon->m_normals[ index3 ].x -= no._f32[0];
+			current_polygon->m_normals[ index3 ].y -= no._f32[1];
+			current_polygon->m_normals[ index3 ].z -= no._f32[2];
 
-	//		vertex2 = (Vertex*)polygon->m_verts[ 0 ];
-	//		vertex1 = (Vertex*)polygon->m_verts[ index2 ];
-	//		vertex3 = (Vertex*)polygon->m_verts[ index3 ];
+			base_vertex->m_normal -= no;
+			vertex2->m_normal -= no;
+			vertex3->m_normal -= no;
 
-	//		e1 = vertex2->m_Position - vertex1->m_Position;
-	//		e2 = vertex3->m_Position - vertex1->m_Position;
-	//		//no;
-	//		e1.cross(e2, no);
+			v_node1 = v_node2;
+			v_node2 = v_node2->m_right;
+		}
 
-	//		vertex1->m_Normal -= no;
-	//		vertex2->m_Normal -= no;
-	//		vertex3->m_Normal -= no;
-	//	}
+		for( u64 i2 = 0; i2 < current_polygon->m_vertexCount; ++i2 )
+		{
+			current_polygon->m_normals[i2].normalize2();
+		}
+		current_polygon->m_facenormal._f32[0] = current_polygon->m_normals[ 0 ].x;
+		current_polygon->m_facenormal._f32[1] = current_polygon->m_normals[ 0 ].y;
+		current_polygon->m_facenormal._f32[2] = current_polygon->m_normals[ 0 ].z;
+		current_polygon = current_polygon->m_mainNext;
+	}
 
-	//	for( u64 i2 = 0, sz2 = num_of_verts; i2 < sz2; ++i2 )
-	//	{
-	//		((Vertex*)polygon->m_verts[ i2 ])->m_Normal.normalize2();
-	//	}
-	//	polygon->m_facenormal = ((Vertex*)polygon->m_verts[ 0 ])->m_Normal;
-	//}
+	auto V = m_verts;
+	for( size_t i = 0; i < m_vertsCount; ++i )
+	{
+		V->m_normal = V->m_normal / (f32)V->m_polygonCount;
+		V->m_normal.normalize2();
+		V = V->m_mainNext;
+	}
 
+	if( flat )
+		return;
 
-	//if( flat )
-	//	return;
-
-	//// smooth
-	//ControlVertex* CV;
-	//u64 sz2;
-	//for( u64 i = 0, sz = m_controlVerts.size(); i < sz; ++i )
-	//{
-	//	CV = (ControlVertex*)m_controlVerts[ i ];
-	//	
-	//	sz2 = CV->m_verts.size();
-
-	//	kkVector4 N;
-
-	//	for( u64 i2 = 0; i2 < sz2; ++i2 )
-	//	{
-	//		auto vertex     = (Vertex*)CV->m_verts[i2];
-	//	
-	//		N += vertex->m_Normal;
-	//	}
-
-	//	N = N / (float)sz2;
-	//	N.normalize2();
-
-	//	for( u64 i2 = 0; i2 < sz2; ++i2 )
-	//	{
-	//		auto vertex     = (Vertex*)CV->m_verts[i2];
-	//	
-	//		vertex->m_Normal = N;
-	//	}
-	//}
+	// smooth
+	current_polygon = m_polygons;
+	for( size_t i = 0; i < m_polygonsCount; ++i )
+	{
+		auto V = current_polygon->m_verts;
+		for( u64 i2 = 0; i2 < current_polygon->m_vertexCount; ++i2 )
+		{
+			current_polygon->m_normals[i2] = V->m_element->m_normal;
+			V = V->m_right;
+		}
+		current_polygon = current_polygon->m_mainNext;
+	}
 }
 
 //void PolygonalModel::_createGridAccel(kkRenderInfo* ri)
@@ -769,265 +781,277 @@ void PolygonalModel::generateNormals(bool flat)
 //	}
 //}
 
-void PolygonalModel::prepareForRaytracing(const kkMatrix4& matrix, const kkVector4& pivot, kkRenderInfo* ri)
+void PolygonalModel::prepareForRaytracing(kkRenderInfo* ri)
 {
+	printf("Build raytracer accelerator...");
+	auto T1 = kkGetMainSystem()->getTime();
 	//kkCameraFrustum frust;
 	//frust.calculateFrustum(ri->P, ri->V);
 
-	//auto ms = kkGetMainSystem();
-	//auto t = ms->getTime();
+	auto ms = kkGetMainSystem();
+	auto t = ms->getTime();
 
-	//if( m_isPreparedForRaytracing )
-	//{
-	//	printf("WARNING! `prepareForRaytracing` called more than once! Now programm will call finishRaytracing...");
-	//	finishRaytracing();
-	//}
-	//
-	//calculateTriangleCount();
+	if( m_isPreparedForRaytracing )
+	{
+		printf("WARNING! `prepareForRaytracing` called more than once! Now programm will call finishRaytracing...");
+		finishRaytracing();
+	}
+	
+	calculateTriangleCount();
+	//_createGridAccel(ri);
 
-	////_createGridAccel(ri);
+	//printf("m_triangleCount %u\n",m_triangleCount);
+	m_trianglesForRendering.clear();
+	m_trianglesForRendering.reserve(m_triangleCount);
+	auto & matrix = m_object->GetMatrix();
+	auto & pivot = m_object->GetPivot();
+	auto  current_polygon = m_polygons;
+	u32 freeIndsCount = 0;
+	for(u64 i = 0; i < m_polygonsCount; ++i )
+	{
+		kkVertex * base_vertex = current_polygon->m_verts->m_element;
+		auto v_node1 = current_polygon->m_verts->m_right;
+		auto v_node2 = v_node1->m_right;
 
-	////printf("m_triangleCount %u\n",m_triangleCount);
-	//m_trianglesForRendering.clear();
-	//m_trianglesForRendering.reserve(m_triangleCount);
-	//Polygon3D * polygon;
-	//Vertex*     vertex1;
-	//Vertex*     vertex2;
-	//Vertex*     vertex3;
-	//u32       num_of_verts;
+		u64 index2, index3;
+		for( u64 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
+		{
+			
+			kkVertex * vertex3 = v_node1->m_element;
+			kkVertex * vertex2 = v_node2->m_element;
 
-	//u32 freeIndsCount = 0;
-	//for(u64 polygonI = 0, polygon_sz = m_polygons.size(); polygonI < polygon_sz; ++polygonI )
-	//{
-	//	polygon = (Polygon3D *)m_polygons.at(polygonI);
-	//	num_of_verts = (u32)polygon->m_verts.size();
-	//	u32 index2, index3;
-	//	for( u32 i2 = 0, sz2 = num_of_verts - 2; i2 < sz2; ++i2 )
-	//	{
-	//		index2  = i2+1;
-	//		index3  = index2 + 1;
-	//		if( index3 == num_of_verts )
-	//			index3 = 0;
-	//		vertex2 = (Vertex*)polygon->m_verts[ 0 ];
-	//		vertex1 = (Vertex*)polygon->m_verts[ index2 ];
-	//		vertex3 = (Vertex*)polygon->m_verts[ index3 ];
-	//		
-	//		kkVector4 e1( vertex2->m_Position._f32[0] - vertex1->m_Position._f32[0],
-	//			vertex2->m_Position._f32[1] - vertex1->m_Position._f32[1],
-	//			vertex2->m_Position._f32[2] - vertex1->m_Position._f32[2],
-	//			vertex2->m_Position._f32[3] - vertex1->m_Position._f32[3]);
-	//		
-	//		kkVector4 e2( vertex3->m_Position._f32[0] - vertex1->m_Position._f32[0],
-	//			vertex3->m_Position._f32[1] - vertex1->m_Position._f32[1],
-	//			vertex3->m_Position._f32[2] - vertex1->m_Position._f32[2],
-	//			vertex3->m_Position._f32[3] - vertex1->m_Position._f32[3]);
+			//auto e1 = vertex2->m_position - base_vertex->m_position;
+			//auto e2 = vertex3->m_position - base_vertex->m_position;
 
-	//		kkTriangleRayTestResult rtr;
-	//		rtr.triangle.v1 = math::mul( vertex1->m_Position, matrix) + pivot;
-	//		rtr.triangle.v2 = math::mul( vertex2->m_Position, matrix) + pivot;
-	//		rtr.triangle.v3 = math::mul( vertex3->m_Position, matrix) + pivot;
-	//		rtr.triangle.update();
-	//		/*rtr.triangle.e1 = e1;
-	//		rtr.triangle.e2 = e2;*/
+			kkTriangleRayTestResult rtr;
+			rtr.triangle.v1 = math::mul( base_vertex->m_position, matrix) + pivot;
+			rtr.triangle.v2 = math::mul( vertex2->m_position, matrix) + pivot;
+			rtr.triangle.v3 = math::mul( vertex3->m_position, matrix) + pivot;
+			rtr.triangle.update();
+			/*rtr.triangle.e1 = e1;
+			rtr.triangle.e2 = e2;*/
 
-	//		rtr.triangle.normal1 = vertex1->m_Normal;
-	//		rtr.triangle.normal2 = vertex2->m_Normal;
-	//		rtr.triangle.normal3 = vertex3->m_Normal;
-	//		rtr.triangle.t1 = vertex1->m_UV;
-	//		rtr.triangle.t2 = vertex2->m_UV;
-	//		rtr.triangle.t3 = vertex3->m_UV;
+			index2  = i2+1;
+			index3  = index2 + 1;
+			if( index3 == current_polygon->m_vertexCount )
+				index3 = 0;
 
-	//		kkAabb taabb;
-	//		taabb.add(rtr.triangle.v1);
-	//		taabb.add(rtr.triangle.v2);
-	//		taabb.add(rtr.triangle.v3);
-	//		kkVector4 triCnter;
-	//		taabb.center(triCnter);
+			if(current_polygon->m_normals)
+			{
+				rtr.triangle.normal1._f32[0] = current_polygon->m_normals[ 0 ].x;
+				rtr.triangle.normal1._f32[1] = current_polygon->m_normals[ 0 ].y;
+				rtr.triangle.normal1._f32[2] = current_polygon->m_normals[ 0 ].z;
+				rtr.triangle.normal2._f32[0] = current_polygon->m_normals[ index2 ].x;
+				rtr.triangle.normal2._f32[1] = current_polygon->m_normals[ index2 ].y;
+				rtr.triangle.normal2._f32[2] = current_polygon->m_normals[ index2 ].z;
+				rtr.triangle.normal3._f32[0] = current_polygon->m_normals[ index3 ].x;
+				rtr.triangle.normal3._f32[1] = current_polygon->m_normals[ index3 ].y;
+				rtr.triangle.normal3._f32[2] = current_polygon->m_normals[ index3 ].z;
+			}
+			if(current_polygon->m_tcoords)
+			{
+				rtr.triangle.t1._f32[0] = current_polygon->m_tcoords[ 0 ].x;
+				rtr.triangle.t1._f32[1] = current_polygon->m_tcoords[ 0 ].y;
+				rtr.triangle.t2._f32[0] = current_polygon->m_tcoords[ index2 ].x;
+				rtr.triangle.t2._f32[1] = current_polygon->m_tcoords[ index2 ].y;
+				rtr.triangle.t3._f32[0] = current_polygon->m_tcoords[ index3 ].x;
+				rtr.triangle.t3._f32[1] = current_polygon->m_tcoords[ index3 ].y;
+			}
 
-	//		/*if( kkrooo::pointOnFrontSideCamera( rtr.triangle.v1, ri->VP )
-	//			|| kkrooo::pointOnFrontSideCamera( rtr.triangle.v2, ri->VP )
-	//			|| kkrooo::pointOnFrontSideCamera( rtr.triangle.v3, ri->VP ) )
-	//		{
-	//			m_trianglesForRendering.push_back(rtr);
-	//			_addTriangleToGrid(ri, &rtr.triangle, freeIndsCount);
-	//			
-	//			m_BVH_root.m_inds.push_back(freeIndsCount++);
-	//			m_BVH_root.m_aabb.add(rtr.triangle.v1);
-	//			m_BVH_root.m_aabb.add(rtr.triangle.v2);
-	//			m_BVH_root.m_aabb.add(rtr.triangle.v3);
-	//		}*/
+			kkAabb taabb;
+			taabb.add(rtr.triangle.v1);
+			taabb.add(rtr.triangle.v2);
+			taabb.add(rtr.triangle.v3);
+			kkVector4 triCnter;
+			taabb.center(triCnter);
 
-	//		if( frust.sphereInFrustum(taabb.radius(triCnter), triCnter) )
-	//		{
-	//			m_trianglesForRendering.push_back(rtr);
-	//			_addTriangleToGrid(ri, &rtr.triangle, freeIndsCount);
-	//			
-	//			m_BVH_root.m_inds.push_back(freeIndsCount++);
-	//			m_BVH_root.m_aabb.add(rtr.triangle.v1);
-	//			m_BVH_root.m_aabb.add(rtr.triangle.v2);
-	//			m_BVH_root.m_aabb.add(rtr.triangle.v3);
-	//		}
-	//	}
-	//}
+			/*if( kkrooo::pointOnFrontSideCamera( rtr.triangle.v1, ri->VP )
+				|| kkrooo::pointOnFrontSideCamera( rtr.triangle.v2, ri->VP )
+				|| kkrooo::pointOnFrontSideCamera( rtr.triangle.v3, ri->VP ) )
+			{
+				m_trianglesForRendering.push_back(rtr);
+				_addTriangleToGrid(ri, &rtr.triangle, freeIndsCount);
+				
+				m_BVH_root.m_inds.push_back(freeIndsCount++);
+				m_BVH_root.m_aabb.add(rtr.triangle.v1);
+				m_BVH_root.m_aabb.add(rtr.triangle.v2);
+				m_BVH_root.m_aabb.add(rtr.triangle.v3);
+			}*/
 
-	///*printf("Grid rows: [%llu]\n", m_gridAccelRows.size());
-	//for( u64 i = 0; i < m_gridAccelRows.size(); ++i )
-	//{
-	//	printf("   Row [%llu]:\t\t[%llu] cells\n", i, m_gridAccelRows[i]->m_cells.size());
-	//	for( u64 j = 0; j < m_gridAccelRows[i]->m_cells.size(); ++j )
-	//	{
-	//		printf("   \t Cell [%llu]:\t\t[%llu] tris\n", j, m_gridAccelRows[i]->m_cells[j]->m_inds.size());
-	//	}
-	//}*/
-	//// бокс целой модели
-	//m_aabbRayTestAabb.reset();
-	//m_aabbRayTestAabb.add(m_BVH_root.m_aabb);
+			//if( frust.sphereInFrustum(taabb.radius(triCnter), triCnter) )
+			{
+			//	_addTriangleToGrid(ri, &rtr.triangle, freeIndsCount);
+				m_trianglesForRendering.push_back(rtr);
+				m_BVH_root.m_inds.push_back(freeIndsCount++);
+				m_BVH_root.m_aabb.add(rtr.triangle.v1);
+				m_BVH_root.m_aabb.add(rtr.triangle.v2);
+				m_BVH_root.m_aabb.add(rtr.triangle.v3);
+			}
 
-	//// РАЗБИЕНИЕ
-	//// m_BVH_root.m_inds содержит индексы всех треугольников
-	//// разбивая, нужно передать индексы новым узлам, и потом удалить m_inds
-	//if( m_triangleCount > numOfIndsPerBVHNode )
-	//{
-	//	kkArray<BVH_node*> node_buffer = kkArray<BVH_node*>(0xffff); // замена рекурсии
-	//	node_buffer.push_back(&m_BVH_root);
-	//	bool ignorenext = false;
-	//	for( size_t i = 0; i < node_buffer.size(); ++i )
-	//	{
-	//		if( ignorenext )
-	//		{
-	//			ignorenext = false;
-	//			continue;
-	//		}
-	//		auto new_node = node_buffer[i];
+			v_node1 = v_node2;
+			v_node2 = v_node2->m_right;
+		}
+		current_polygon = current_polygon->m_mainNext;
+	}
 
-	//		// сначала нужно понять, надо ли разбивать часть
-	//		if( new_node->m_inds.size() > numOfIndsPerBVHNode )
-	//		{
-	//		// если надо, создаю две новые части, и передаю в них нужные m_freeInds
-	//			BVH_node * first_bvh  = nullptr;
-	//			BVH_node * second_bvh = nullptr;
-	//			
-	//			kkVector4 aabbCenter;
-	//			new_node->m_aabb.center(aabbCenter);
+	/*printf("Grid rows: [%llu]\n", m_gridAccelRows.size());
+	for( u64 i = 0; i < m_gridAccelRows.size(); ++i )
+	{
+		printf("   Row [%llu]:\t\t[%llu] cells\n", i, m_gridAccelRows[i]->m_cells.size());
+		for( u64 j = 0; j < m_gridAccelRows[i]->m_cells.size(); ++j )
+		{
+			printf("   \t Cell [%llu]:\t\t[%llu] tris\n", j, m_gridAccelRows[i]->m_cells[j]->m_inds.size());
+		}
+	}*/
+	// бокс целой модели
+	m_aabbRayTestAabb.reset();
+	m_aabbRayTestAabb.add(m_BVH_root.m_aabb);
 
-	//			// узнаю, в каком месте у бокса больше скопления вершин
-	//			int trisCount_Xp = 0;
-	//			int trisCount_Xn = 0;
-	//			int trisCount_Yp = 0;
-	//			int trisCount_Yn = 0;
-	//			int trisCount_Zp = 0;
-	//			int trisCount_Zn = 0;
-	//			for( u64 o = 0, osz = new_node->m_inds.size(); o < osz; ++o )
-	//			{
-	//				auto & triangle = m_trianglesForRendering[new_node->m_inds.at(o)];
-	//				kkVector4 triangleCenter;
-	//				triangle.triangle.center(triangleCenter);
-	//				if( triangleCenter.KK_X < aabbCenter.KK_X ) ++trisCount_Xn; else ++trisCount_Xp;
-	//				if( triangleCenter.KK_Y < aabbCenter.KK_Y ) ++trisCount_Yn; else ++trisCount_Yp;
-	//				if( triangleCenter.KK_Z < aabbCenter.KK_Z ) ++trisCount_Zn; else ++trisCount_Zp;
-	//			}
+	// РАЗБИЕНИЕ
+	// m_BVH_root.m_inds содержит индексы всех треугольников
+	// разбивая, нужно передать индексы новым узлам, и потом удалить m_inds
+	if( m_triangleCount > numOfIndsPerBVHNode )
+	{
+		kkArray<BVH_node*> node_buffer = kkArray<BVH_node*>(0xffff); // замена рекурсии
+		node_buffer.push_back(&m_BVH_root);
+		bool ignorenext = false;
+		for( size_t i = 0; i < node_buffer.size(); ++i )
+		{
+			if( ignorenext )
+			{
+				ignorenext = false;
+				continue;
+			}
+			auto new_node = node_buffer[i];
 
-	//			// разница
-	//			auto trisDiffX = std::abs(trisCount_Xp-trisCount_Xn);
-	//			auto trisDiffY = std::abs(trisCount_Yp-trisCount_Yn);
-	//			auto trisDiffZ = std::abs(trisCount_Zp-trisCount_Zn);
-	//			
-	//			// сторона для разделения
-	//			enum class _side{side_X, side_Y, side_Z};
-	//			_side _side_ = _side::side_X;
-	//			
-	//			// нужно использовать ту сторону, в которой наименьшая разница
-	//			if( trisDiffY < trisDiffX )
-	//			{
-	//				_side_ = _side::side_Y;
-	//				if( trisDiffZ < trisDiffY ) 
-	//					_side_ = _side::side_Z;
-	//			}
-	//			else if( trisDiffZ < trisDiffX )
-	//			{
-	//				_side_ = _side::side_Z;
-	//				if( trisDiffY < trisDiffZ ) 
-	//					_side_ = _side::side_Y;
-	//			}
+			// сначала нужно понять, надо ли разбивать часть
+			if( new_node->m_inds.size() > numOfIndsPerBVHNode )
+			{
+			// если надо, создаю две новые части, и передаю в них нужные m_freeInds
+				BVH_node * first_bvh  = nullptr;
+				BVH_node * second_bvh = nullptr;
+				
+				kkVector4 aabbCenter;
+				new_node->m_aabb.center(aabbCenter);
 
-	//			int vectorComponent = 0;
-	//			switch (_side_)
-	//			{
-	//			case _side::side_Y:
-	//				vectorComponent = 1;
-	//				break;
-	//			case _side::side_Z:
-	//				vectorComponent = 2;
-	//				break;
-	//			case _side::side_X:
-	//			default:
-	//				break;
-	//			}
+				// узнаю, в каком месте у бокса больше скопления вершин
+				int trisCount_Xp = 0;
+				int trisCount_Xn = 0;
+				int trisCount_Yp = 0;
+				int trisCount_Yn = 0;
+				int trisCount_Zp = 0;
+				int trisCount_Zn = 0;
+				for( u64 o = 0, osz = new_node->m_inds.size(); o < osz; ++o )
+				{
+					auto & triangle = m_trianglesForRendering[new_node->m_inds.at(o)];
+					kkVector4 triangleCenter;
+					triangle.triangle.center(triangleCenter);
+					if( triangleCenter.KK_X < aabbCenter.KK_X ) ++trisCount_Xn; else ++trisCount_Xp;
+					if( triangleCenter.KK_Y < aabbCenter.KK_Y ) ++trisCount_Yn; else ++trisCount_Yp;
+					if( triangleCenter.KK_Z < aabbCenter.KK_Z ) ++trisCount_Zn; else ++trisCount_Zp;
+				}
 
-	//			for( u64 o = 0, osz = new_node->m_inds.size(); o < osz; ++o )
-	//			{
-	//				auto index = new_node->m_inds.at(o);
-	//				auto & triangle = m_trianglesForRendering[index];
+				// разница
+				auto trisDiffX = std::abs(trisCount_Xp-trisCount_Xn);
+				auto trisDiffY = std::abs(trisCount_Yp-trisCount_Yn);
+				auto trisDiffZ = std::abs(trisCount_Zp-trisCount_Zn);
+				
+				// сторона для разделения
+				enum class _side{side_X, side_Y, side_Z};
+				_side _side_ = _side::side_X;
+				
+				// нужно использовать ту сторону, в которой наименьшая разница
+				if( trisDiffY < trisDiffX )
+				{
+					_side_ = _side::side_Y;
+					if( trisDiffZ < trisDiffY ) 
+						_side_ = _side::side_Z;
+				}
+				else if( trisDiffZ < trisDiffX )
+				{
+					_side_ = _side::side_Z;
+					if( trisDiffY < trisDiffZ ) 
+						_side_ = _side::side_Y;
+				}
 
-	//				bool add_to_first = false;
+				int vectorComponent = 0;
+				switch (_side_)
+				{
+				case _side::side_Y:
+					vectorComponent = 1;
+					break;
+				case _side::side_Z:
+					vectorComponent = 2;
+					break;
+				case _side::side_X:
+				default:
+					break;
+				}
 
+				for( u64 o = 0, osz = new_node->m_inds.size(); o < osz; ++o )
+				{
+					auto index = new_node->m_inds.at(o);
+					auto & triangle = m_trianglesForRendering[index];
 
-	//				kkVector4 triangleCenter;
-	//				triangle.triangle.center(triangleCenter);
-	//				if( triangleCenter._f32[vectorComponent] > aabbCenter._f32[vectorComponent] )
-	//					add_to_first = true;
-
-	//				BVH_node * node_to_add = nullptr;
-
-	//				if( add_to_first )
-	//				{
-	//					if( !first_bvh )
-	//					{
-	//						first_bvh  = new BVH_node;
-	//						//first_bvh->m_inds = new kkArray<u32>(0xff);
-	//					}
-
-	//					node_to_add = first_bvh;
-	//				}
-	//				else
-	//				{
-	//					if( !second_bvh )
-	//					{
-	//						second_bvh  = new BVH_node;
-	//						//second_bvh->m_inds = new kkArray<u32>(0xff);
-	//					}
-	//					node_to_add = second_bvh;
-	//				}
-
-	//				node_to_add->m_inds.push_back(index);
-	//				node_to_add->m_aabb.add(triangle.triangle.v1);
-	//				node_to_add->m_aabb.add(triangle.triangle.v2);
-	//				node_to_add->m_aabb.add(triangle.triangle.v3);
-
-	//			}
+					bool add_to_first = false;
 
 
-	//			// если нет какого-то узла, это значит что все индексы были добавлены в один узел
-	//			// значит нужно будет уметь игнорировать эту ноду при дальнейшем разбиении
-	//			if( !first_bvh || !second_bvh )
-	//			{
-	//				ignorenext = true;
-	//			}
+					kkVector4 triangleCenter;
+					triangle.triangle.center(triangleCenter);
+					if( triangleCenter._f32[vectorComponent] > aabbCenter._f32[vectorComponent] )
+						add_to_first = true;
 
-	//			if( first_bvh )
-	//				node_buffer.push_back(first_bvh);
+					BVH_node * node_to_add = nullptr;
 
-	//			if( second_bvh )
-	//				node_buffer.push_back(second_bvh);
+					if( add_to_first )
+					{
+						if( !first_bvh )
+						{
+							first_bvh  = new BVH_node;
+							//first_bvh->m_inds = new kkArray<u32>(0xff);
+						}
 
-	//			new_node->first  = first_bvh;
-	//			new_node->second = second_bvh;
-	//		}
-	//	}
-	//}
+						node_to_add = first_bvh;
+					}
+					else
+					{
+						if( !second_bvh )
+						{
+							second_bvh  = new BVH_node;
+							//second_bvh->m_inds = new kkArray<u32>(0xff);
+						}
+						node_to_add = second_bvh;
+					}
 
-	//m_isPreparedForRaytracing = true;
-	////printf("SPLIT TIME: [%llu]\n",ms->getTime()-t);
+					node_to_add->m_inds.push_back(index);
+					node_to_add->m_aabb.add(triangle.triangle.v1);
+					node_to_add->m_aabb.add(triangle.triangle.v2);
+					node_to_add->m_aabb.add(triangle.triangle.v3);
+
+				}
+
+
+				// если нет какого-то узла, это значит что все индексы были добавлены в один узел
+				// значит нужно будет уметь игнорировать эту ноду при дальнейшем разбиении
+				if( !first_bvh || !second_bvh )
+				{
+					ignorenext = true;
+				}
+
+				if( first_bvh )
+					node_buffer.push_back(first_bvh);
+
+				if( second_bvh )
+					node_buffer.push_back(second_bvh);
+
+				new_node->first  = first_bvh;
+				new_node->second = second_bvh;
+			}
+		}
+	}
+
+	m_isPreparedForRaytracing = true;
+	printf("[%llu]\n", kkGetMainSystem()->getTime() - T1);
 }
 
 //void PolygonalModel::_deleteGridAccel()
@@ -1041,13 +1065,13 @@ void PolygonalModel::prepareForRaytracing(const kkMatrix4& matrix, const kkVecto
 
 void PolygonalModel::finishRaytracing()
 {
-	/*if( m_isPreparedForRaytracing )
+	if( m_isPreparedForRaytracing )
 	{
-		_deleteGridAccel();
+		//_deleteGridAccel();
 		m_BVH_root.clear();
 		m_trianglesForRendering.clear();
 		m_isPreparedForRaytracing = false;
-	}*/
+	}
 }
 
 bool PolygonalModel::_intersectBVHNode(BVH_node* node, const kkRay& ray)

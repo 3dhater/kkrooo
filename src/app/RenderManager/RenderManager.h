@@ -1,7 +1,6 @@
 ﻿#ifndef __RENDER_MANAGER_H__
 #define __RENDER_MANAGER_H__
 
-//class Viewport;
 class Scene3D;
 class Application;
 class RenderManager
@@ -10,7 +9,7 @@ class RenderManager
 	kkGraphicsSystem * m_gs   = nullptr;
 	kkWindow * m_renderWindow = nullptr;
 	Scene3D *  m_currentScene = nullptr;
-	//Viewport * m_activeViewport = nullptr;
+	ViewportObject* m_activeViewport = nullptr;
 
 	kkImage *   m_image   = nullptr;
 	kkTexture * m_texture = nullptr;

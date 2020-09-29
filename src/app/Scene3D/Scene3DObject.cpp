@@ -42,6 +42,7 @@ Scene3DObject::Scene3DObject(kkScene3DObjectType t, PolygonalModel * m)
 	m_scene3DObjectType = t;
 	m_GS = kkGetGS();
 	this->SetMaterialImplementation((kkMaterialImplementation*)g_defaultMaterial);
+	m_polyModel->m_object = this;
 }
 
 Scene3DObject::~Scene3DObject()
@@ -69,16 +70,6 @@ bool Scene3DObject::_rebuildModel()
 		break;
 	}
 	return false;
-}
-
-void Scene3DObject::_countNumOfLines()
-{
-	m_numOfLines = 0;
-	/*for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	{
-		Polygon3D * p = (Polygon3D *)m_PolyModel->m_polygons[i];
-		m_numOfLines += (u32)p->m_verts.size();
-	}*/
 }
 
 void Scene3DObject::updatePolygonModel()
@@ -127,8 +118,6 @@ bool Scene3DObject::_buildModel_polymodel()
 
 	m_aabbOriginal.reset();
 
-	_countNumOfLines();
-	
 	_createSoftwareModel_points();
 	for(u64 i = 0, sz = m_SoftwareModels_points.size(); i < sz; ++i )
 	{
@@ -137,6 +126,7 @@ bool Scene3DObject::_buildModel_polymodel()
 		m_HardwareModels_points.push_back(hm);
 	}
 	
+	m_polyModel->updateEdges();
 	_createSoftwareModel_edges();
 	if( !_createHardwareModel_edges() )
 		return false;
@@ -155,6 +145,12 @@ void Scene3DObject::_createSoftwareModel_polys()
 {
 	if(!m_polyModel->m_polygons)
 		return;
+	auto V = m_polyModel->m_verts;
+	for(u64 i = 0; i < m_polyModel->m_vertsCount; ++i)
+	{
+		V->m_vertexIndexForSoftware.clear();
+		V = V->m_mainNext;
+	}
 	auto current_polygon = m_polyModel->m_polygons;
 	u32 triangleCount = 0;
 	kkSMesh*     softwareModel = nullptr;
@@ -352,6 +348,12 @@ void Scene3DObject::_createSoftwareModel_edges()
 {
 	if(!m_polyModel->m_edges)
 		return;
+	auto V = m_polyModel->m_verts;
+	for(u64 i = 0; i < m_polyModel->m_vertsCount; ++i)
+	{
+		V->m_vertexIndexForSoftware_lines.clear();
+		V = V->m_mainNext;
+	}
 	u32 lineCount = 0;
 	kkSMesh*      softwareModel = nullptr;
 	LineModelVertex*  verts_ptr     = nullptr;
@@ -773,33 +775,33 @@ void        Scene3DObject::updateAABB_vertex()
 
 void Scene3DObject::applyMatrices()
 {
-	//auto TIM = m_matrix;
-	//TIM.invert();
-	//TIM.transpose();
+	auto TIM = m_matrix;
+	TIM.invert();
+	TIM.transpose();
 
-	//for( size_t i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
-	//{
-	//	ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlVerts[ i ];
-
-	//	for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
-	//	{
-	//		//auto V_id    = cv->m_vertexIndex[i2];
-	//		//auto vertex  = (Vertex*)m_PolyModel->m_verts[ V_id ];
-	//		auto vertex  = (Vertex*)cv->m_verts[i2];
-	//	
-	//		vertex->m_Position = math::mul(vertex->m_Position_fix,m_matrix);
-	//		vertex->m_Position_fix = vertex->m_Position;
-
-	//		vertex->m_Normal = math::mul(vertex->m_Normal_fix, TIM);
-	//		vertex->m_Normal_fix = vertex->m_Normal;
-	//	}
-	//}
-
-	//resetMatrices();
-	////updateMatrixPosition();
-	//
-	//_rebuildModel();
-	//UpdateAabb();
+	auto V = m_polyModel->m_verts;
+	for( size_t i = 0; i < m_polyModel->m_vertsCount; ++i )
+	{
+		V->m_position = math::mul(V->m_positionFix,m_matrix);
+		V->m_positionFix = V->m_position;
+		V = V->m_mainNext;
+	}
+	auto P = m_polyModel->m_polygons;
+	if(P->m_normals)
+	{
+		for( size_t i = 0; i < m_polyModel->m_polygonsCount; ++i )
+		{
+			auto PN = P->m_normals;
+			for( size_t i2 = 0; i2 < P->m_vertexCount; ++i2 )
+			{
+				PN[i2] = math::mul(PN[i2], TIM);
+			}
+			P = P->m_mainNext;
+		}
+	}
+	resetMatrices();
+	_rebuildModel();
+	UpdateAabb();
 }
 
 void Scene3DObject::resetMatrices()
@@ -814,8 +816,6 @@ void Scene3DObject::resetMatrices()
 	r.set(0.f,0.f,0.f,0.f);
 	r = GetRotationPitchYawRoll();
 	r.set(0.f,0.f,0.f,0.f);
-
-	//updateMatrixPosition();
 	UpdateAabb();
 }
 
@@ -827,83 +827,112 @@ void Scene3DObject::generateNormals()
 
 void Scene3DObject::deleteSelectedPolys()
 {
-	/*bool need_delete = false;
-	for(u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
+	u64 size = 0;
+	auto P = m_polyModel->m_polygons;
+	for( size_t i = 0; i < m_polyModel->m_polygonsCount; ++i )
 	{
-		auto polygon = (Polygon3D *)m_PolyModel->m_polygons.at(i);
-		if(polygon->m_isSelected)
+		if(P->m_flags & P->EF_SELECTED)
 		{
-			polygon->MarkToDelete();
-			need_delete = true;
+			++size;
 		}
+		P = P->m_mainNext;
 	}
-
-	if( need_delete )
+	if(size)
 	{
-		m_PolyModel->deleteMarkedPolygons();
-		m_PolyModel->createControlPoints();
+		std::unordered_set<kkPolygon*> polys;
+		polys.reserve(size);
+		P = m_polyModel->m_polygons;
+		for( size_t i = 0; i < m_polyModel->m_polygonsCount; ++i )
+		{
+			if(P->m_flags & P->EF_SELECTED)
+			{
+				polys.insert(P);
+			}
+			P = P->m_mainNext;
+		}
+		for(auto P : polys)
+		{
+			m_polyModel->DeletePolygon(P);
+		}
 		_rebuildModel();
-		updatePolygonModel();
 		UpdateAabb();
-	}*/
+	}
 }
 
 void Scene3DObject::deleteSelectedEdges()
 {
-	/*bool need_delete = false;
-	for(u64 i = 0, sz = m_PolyModel->m_edges.size(); i < sz; ++i )
+	u64 size = 0;
+	auto E = m_polyModel->m_edges;
+	for( size_t i = 0; i < m_polyModel->m_edgesCount; ++i )
 	{
-		auto E = m_PolyModel->m_edges[i];
-		
-		for( auto ECV : E->m_firstPoint->m_edgeWith )
+		if(E->m_flags & E->EF_SELECTED)
 		{
-			if( ECV == E->m_secondPoint )
-			{
-				E->m_firstPolygon->MarkToDelete();
-				if(E->m_secondPolygon)
-					E->m_secondPolygon->MarkToDelete();
-				need_delete = true;
-				break;
-			}
+			size += 2;
 		}
-		
+		E = E->m_mainNext;
 	}
-	
-	if( need_delete )
+	if(size)
 	{
-		m_PolyModel->deleteMarkedPolygons();
-		m_PolyModel->createControlPoints();
+		std::unordered_set<kkPolygon*> polys;
+		polys.reserve(size);
+		E = m_polyModel->m_edges;
+		for( size_t i = 0; i < m_polyModel->m_edgesCount; ++i )
+		{
+			if(E->m_flags & E->EF_SELECTED)
+			{
+				if( E->m_p1 )
+					polys.insert(E->m_p1);
+				if( E->m_p2 )
+					polys.insert(E->m_p2);
+			}
+			E = E->m_mainNext;
+		}
+		for(auto P : polys)
+		{
+			m_polyModel->DeletePolygon(P);
+		}
 		_rebuildModel();
-		updateEdgeModel();
 		UpdateAabb();
-	}*/
+	}
 }
 
 void Scene3DObject::deleteSelectedVerts()
 {
-	/*bool need_delete = false;
-	for( size_t i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	u64 size = 0;
+	auto V = m_polyModel->m_verts;
+	for( size_t i = 0; i < m_polyModel->m_vertsCount; ++i )
 	{
-		auto cv = (ControlVertex*)m_PolyModel->m_controlVerts[ i ];
-		if( cv->m_isSelected )
+		if(V->m_flags & V->EF_SELECTED)
 		{
-			for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
-			{
-				auto vertex = (Vertex*)cv->m_verts[i2];
-
-				vertex->m_parentPolygon->MarkToDelete();
-				need_delete = true;
-			}
+			size += V->m_polygonCount;
 		}
+		V = V->m_mainNext;
 	}
-
-	if( need_delete )
+	if(size)
 	{
-		m_PolyModel->deleteMarkedPolygons();
-		m_PolyModel->createControlPoints();
+		std::unordered_set<kkPolygon*> polys;
+		polys.reserve(size);
+		V = m_polyModel->m_verts;
+		for( size_t i = 0; i < m_polyModel->m_vertsCount; ++i )
+		{
+			if(V->m_flags & V->EF_SELECTED)
+			{
+				auto VP = V->m_polygons;
+				for( size_t i2 = 0; i2 < V->m_polygonCount; ++i2 )
+				{
+					polys.insert(VP->m_element);
+					VP = VP->m_right;
+				}
+			}
+			V = V->m_mainNext;
+		}
+		for(auto P : polys)
+		{
+			m_polyModel->DeletePolygon(P);
+		}
 		_rebuildModel();
 		UpdateAabb();
-	}*/
+	}
 }
 
 kkPluginGUIWindow* Scene3DObject::GetPluginGUIWindow()
@@ -918,7 +947,7 @@ void Scene3DObject::SetPluginGUIWindow( kkPluginGUIWindow* w )
 
 void Scene3DObject::PrepareForRaytracing(kkRenderInfo* ri)
 {
-	m_polyModel->prepareForRaytracing(m_matrix, m_pivot, ri );
+	m_polyModel->prepareForRaytracing(ri );
 }
 
 void Scene3DObject::FinishRaytracing()

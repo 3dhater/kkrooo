@@ -151,7 +151,7 @@ struct VertexHash
 //    return hasher(b.bytes);
 //}
 
-constexpr u32 numOfIndsPerBVHNode = 5;
+constexpr u32 numOfIndsPerBVHNode = 15;
 struct BVH_node
 {
 	BVH_node(){}
@@ -162,8 +162,8 @@ struct BVH_node
 		//if( m_inds ){ m_inds->clear(); delete m_inds; }
 	}
 
-	//kkArray<u32> m_inds = kkArray<u32>(0xff);
-	std::vector<u32> m_inds;
+	kkArray<u32> m_inds = kkArray<u32>(0xff);
+	//std::vector<u32> m_inds;
 
 	BVH_node * first = nullptr;
 	BVH_node * second = nullptr;
@@ -200,19 +200,15 @@ struct GridAcceleratorRow
 	GridAcceleratorRow(){}
 	~GridAcceleratorRow()
 	{
-		/*if( m_cells )
-		{
-			delete[] m_cells;
-		}*/
 		for( u64 i = 0, sz = m_cells.size(); i < sz; ++i )
 		{
 			delete m_cells[i];
 		}
 		m_cells.clear();
 	}
-	//GridAcceleratorCell * m_cells = nullptr;
 	kkArray<GridAcceleratorCell*> m_cells;
 };
+
 
 struct kkRenderInfo;
 class PolygonalModel : public kkPolygonalModel
@@ -242,7 +238,6 @@ class PolygonalModel : public kkPolygonalModel
 	void _addEdgeToList(kkEdge*);
 	void _removeEdgeFromList(kkEdge*);
 
-	void _createEdges();
 	void _deleteEdges();
 public:
 	PolygonalModel();
@@ -262,7 +257,7 @@ public:
 
 	std::vector<kkTriangleRayTestResult> m_trianglesForRendering;
 	
-	void prepareForRaytracing(const kkMatrix4& matrix, const kkVector4& pivot, kkRenderInfo* );
+	void prepareForRaytracing(kkRenderInfo* );
 	void finishRaytracing();
 	bool m_isPreparedForRaytracing = false;
 
@@ -280,6 +275,10 @@ public:
 	u64 m_polygonsCount = 0;
 	u64 m_vertsCount    = 0;
 	u64 m_edgesCount    = 0;
+	
+	void updateEdges();
+
+	Scene3DObject* m_object = nullptr;
 };
 
 #endif

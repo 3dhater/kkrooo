@@ -13,6 +13,7 @@
 #include "../Scene3D/Scene3D.h"
 #include "../Scene3D/Scene3DObject.h"
 #include "../Viewport/Viewport.h"
+#include "../Viewport/ViewportCamera.h"
 #include "../Viewport/ViewportOptimizations.h"
 #include "../Functions.h" 
 
@@ -189,44 +190,34 @@ void RenderManager::_startRender()
 	m_buttonStop   = true;
 
 	m_currentScene = *m_app->getScene3D();
-	//m_activeViewport = m_app->getActiveViewport();
+	m_activeViewport = m_app->GetActiveViewport();
 	m_activeRenderer = m_app->getActiveRenderer();
 
-	//auto kkcamera = m_activeViewport->getCamera();
-	//auto camera_position = kkcamera->getPositionInSpace();
-	//auto frust = kkcamera->getFrustum();
+	auto kkcamera = m_activeViewport->m_activeCamera->getCamera();
+	auto camera_position = kkcamera->getPositionInSpace();
+	auto frust = kkcamera->getFrustum();
 
 	kkVector4 center;
 
 	m_renderInfo.image   = m_image;
+	
+	auto oldAspectRation = kkcamera->getAspect();
 
-	//auto oldAspectRation = kkcamera->getAspect();
+	kkcamera->setAspect(m_outSize.x / m_outSize.y);
+	kkcamera->update();
+	m_renderInfo.VPInvert = kkcamera->getViewProjectionInvertMatrix();
+	m_renderInfo.VP       = kkcamera->getViewProjectionMatrix();
+	m_renderInfo.V        = kkcamera->getViewMatrix();
+	m_renderInfo.P        = kkcamera->getProjectionMatrix();
 
-	//kkcamera->setAspect(m_outSize.x / m_outSize.y);
-	//kkcamera->update();
-	//m_renderInfo.VPInvert = kkcamera->getViewProjectionInvertMatrix();
-	//m_renderInfo.VP       = kkcamera->getViewProjectionMatrix();
-	//m_renderInfo.V        = kkcamera->getViewMatrix();
-	//m_renderInfo.P        = kkcamera->getProjectionMatrix();
-
-	//kkcamera->setAspect(oldAspectRation);
+	kkcamera->setAspect(oldAspectRation);
 
 	m_objectsForRender.clear();
 
 	auto & all_objects = m_currentScene->getObjects();
 	for( auto o : all_objects )
 	{
-		/*kkVector4 center;
-		kkAabb    aabb;
-		kkObb     obb;
-		aabb = o->Aabb();
-		aabb.center(center);
-		o->m_distanceToCamera = camera_position.distance(center);
-
-		if( OBBInFrustum( obb, frust ) )*/
-		//{
-			m_objectsForRender.push_back(o);
-		//}
+		m_objectsForRender.push_back(o);
 	}
 
 	m_renderInfo.objects = &m_objectsForRender;

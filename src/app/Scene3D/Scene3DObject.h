@@ -298,10 +298,6 @@ class Scene3DObject : public Scene3DObjectCommon
 	void       _destroySoftwareModels_polys();
 	kkSMesh *  _createNewSoftwareModel( _NEW_SOFTWARE_MODEL_TYPE );
 
-	// надо подсчитать сколько отрезков линий нужно чтобы нарисовать рёбра полигона
-	void _countNumOfLines();
-	u32 m_numOfLines = 0;
-
 	void _createSoftwareModel_polys();
 	void _createSoftwareModel_edges();
 	void _createSoftwareModel_points();
