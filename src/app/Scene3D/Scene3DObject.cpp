@@ -1375,6 +1375,10 @@ void Scene3DObject::AttachObject(kkScene3DObject* object)
 
 void Scene3DObject::BreakVerts()
 {
+	if( m_polyModel->breakVerts() )
+		_rebuildModel();
+
+	
 	/*for( u64 i2 = 0, sz2 = m_PolyModel->m_controlVerts.size(); i2 < sz2; ++i2 )
 	{
 		ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlVerts[i2];

@@ -277,6 +277,8 @@ public:
 	u64 m_edgesCount    = 0;
 	
 	void updateEdges();
+	bool breakVerts();
+
 
 	Scene3DObject* m_object = nullptr;
 };

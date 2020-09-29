@@ -13,6 +13,36 @@
 #include "PolygonalModel.h"
 #include "../SelectionFrust.h"
 
+void kkPolygon_replaceVertex(kkVertex* old_vertex, kkVertex* new_vertex, kkPolygon* p)
+{
+	auto vertex = p->m_verts;
+	for(u32 i = 0; i < p->m_vertexCount; ++i)
+	{
+		if(vertex->m_element == old_vertex)
+		{
+			vertex->m_element = new_vertex;
+			return;
+		}
+		vertex = vertex->m_right;
+	}
+}
+// полигоны всё ещё будут содержать данную вершину
+void kkVertex_removeOtherPolygons(kkVertex* v)
+{
+	if(v->m_polygonCount>1)
+	{
+		auto P = v->m_polygons->m_right;
+		for(u32 i = 1; i < v->m_polygonCount; ++i)
+		{
+			auto next = P->m_right;
+			kkDestroy(P);
+			P = next;
+		}
+		v->m_polygonCount = 1;
+		v->m_polygons->m_left  = v->m_polygons;
+		v->m_polygons->m_right = v->m_polygons;
+	}
+}
 void kkVertex_addPolygon(kkVertex* v, kkPolygon* p)
 {
 	auto new_loop = kkCreate<kkLoopNode<kkPolygon>>();
@@ -1201,3 +1231,41 @@ void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertM
 	other->m_vertsCount = 0;
 }
 
+bool PolygonalModel::breakVerts()
+{
+	std::vector<kkVertex*> newVerts;
+	auto vertex = m_verts;
+	for( u64 i = 0; i < m_vertsCount; ++i )
+	{
+		if(vertex->m_flags & vertex->EF_SELECTED)
+		{
+			if(vertex->m_polygonCount > 1)
+			{
+				auto polygon = vertex->m_polygons->m_right;
+				for(u32 i2 = 1; i2 < vertex->m_polygonCount; ++i2)
+				{
+					kkVertex * new_vertex = nullptr;
+					new_vertex = kkCreate<kkVertex>();
+					new_vertex->m_position = vertex->m_position;
+					new_vertex->m_positionFix = vertex->m_position;
+					new_vertex->m_normal = vertex->m_normal;
+					newVerts.push_back(new_vertex);
+
+					kkVertex_addPolygon(new_vertex, polygon->m_element);
+
+					kkPolygon_replaceVertex(vertex, new_vertex, polygon->m_element);
+
+					polygon = polygon->m_right;
+				}
+
+				kkVertex_removeOtherPolygons(vertex);
+			}
+		}
+		vertex = vertex->m_mainNext;
+	}
+	for( size_t i = 0, sz = newVerts.size(); i < sz; ++i )
+	{
+		_addVertexToList(newVerts[i]);
+	}
+	return newVerts.size() != 0;
+}

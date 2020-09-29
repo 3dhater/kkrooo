@@ -94,6 +94,7 @@ struct kkVertex
 		EF_SELECTED = 1
 	};
 	u32 m_flags = 0;
+
 };
 
 struct kkTriangle
