@@ -1172,6 +1172,7 @@ void PolygonalModel::rayTest( std::vector<kkTriangleRayTestResult>& outTriangle,
 
 void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
 {
+
 	/*auto TIM = matrix_other;
 	TIM.invert();
 	TIM.transpose();
