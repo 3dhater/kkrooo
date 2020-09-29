@@ -126,6 +126,8 @@ kkScene3DObject* Scene3D::getSelectedObject( u32 i )
 
 void Scene3D::clearScene()
 {
+	kkLogWriteInfo("Clear scene.\n");
+
 	deselectAll();
 
 	for(size_t i = 0, sz = m_objects.size(); i < sz; ++i )
@@ -1923,6 +1925,7 @@ void      Scene3D::updateObjectEdgeSelectList()
 }
 void Scene3D::applyMatrices()
 {
+	kkLogWriteInfo("Apply matrices.\n");
 	for( u64 i = 0, sz = m_objects_selected.size(); i < sz; ++i )
 	{
 		m_objects_selected[i]->applyMatrices();
@@ -1933,6 +1936,7 @@ void Scene3D::applyMatrices()
 
 void Scene3D::resetMatrices()
 {
+	kkLogWriteInfo("Reset matrices.\n");
 	for( auto * o : m_objects_selected )
 	{
 		o->resetMatrices();

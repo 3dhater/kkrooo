@@ -115,7 +115,7 @@ void kkVertex_removePolygon(kkVertex* v, kkPolygon* p)
 	}
 	if(!pn)
 	{
-		fprintf(stderr, "`kkVertex_removePolygon` - curr is null.\n");
+		kkLogWriteWarning("`kkVertex_removePolygon` - curr is null.\n");
 		return;
 	}
 	pn->m_left->m_right = pn->m_right;
@@ -247,7 +247,7 @@ void PolygonalModel::DeletePolygon(kkPolygon* p)
 	assert(p);
 	if(!p)
 	{
-		fprintf(stderr, "`DeletePolygon` - p is null.\n");
+		kkLogWriteWarning("`DeletePolygon` - p is null.\n");
 		return;
 	}
 
@@ -284,7 +284,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 {
 	if(!gi)
 	{
-		fprintf(stderr, "`AddPolygon` - GeometryInformation is null.\n");
+		kkLogWriteWarning("`AddPolygon` - GeometryInformation is null.\n");
 		return;
 	}
 	kkPolygon* new_polygon = kkCreate<kkPolygon>();
@@ -461,50 +461,6 @@ void PolygonalModel::updateEdges()
 		polygon = polygon->m_mainNext;
 	}
 }
-//void PolygonalModel::_findNeighbors()
-//{
-//	// добавляю соседей
-//	// позиция, все_полигоны_имеющие_вершину_с_данной_позицией
-//	m_neighbor_map.clear();
-//	ControlVertexHash h;
-//	for( u64 o = 0, osz = m_polygons.size(); o < osz; ++o )
-//	{
-//		auto P = (Polygon3D*)m_polygons[o];
-//		P->m_neighbors.clear();
-//		for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
-//		{
-//			Vertex* V = (Vertex*)P->m_verts[i];
-//			if(!V->m_weld)
-//			{
-//				//printf("Not weld\n");
-//				continue;
-//			}
-//
-//			h.set(&V->m_Position);
-//			if( m_neighbor_map.find(h.str) == m_neighbor_map.end() ) // not found
-//			{
-//				m_neighbor_map[ h.str ] = kkArray<Polygon3D*>(4);
-//			}
-//			auto & arr = m_neighbor_map[ h.str ];
-//			arr.push_back(P);
-//		}
-//	}
-//	for(auto & N : m_neighbor_map)
-//	{
-//		for( u64 i = 0, sz = N.second.size(); i < sz; ++i )
-//		{
-//			Polygon3D* current_polygon = N.second[i];
-//			for( u64 i2 = 0; i2 < sz; ++i2 )
-//			{
-//				Polygon3D* P = N.second[i2];
-//				if(P==current_polygon)
-//					continue;
-//
-//				P->m_neighbors.insert(current_polygon);
-//			}
-//		}
-//	}
-//}
 
 u64 PolygonalModel::GetPolygonsCount()
 {
@@ -563,6 +519,7 @@ void PolygonalModel::generateBT()
 
 void PolygonalModel::generateNormals(bool flat)
 {
+	kkLogWriteInfo("Generate normals.\n");
 	// flat
 	kkVector4 e1, e2, no;
 
@@ -783,7 +740,7 @@ void PolygonalModel::generateNormals(bool flat)
 
 void PolygonalModel::prepareForRaytracing(kkRenderInfo* ri)
 {
-	printf("Build raytracer accelerator...");
+	kkLogWriteInfo("Build raytracer accelerator...\n");
 	auto T1 = kkGetMainSystem()->getTime();
 	//kkCameraFrustum frust;
 	//frust.calculateFrustum(ri->P, ri->V);
@@ -793,7 +750,7 @@ void PolygonalModel::prepareForRaytracing(kkRenderInfo* ri)
 
 	if( m_isPreparedForRaytracing )
 	{
-		printf("WARNING! `prepareForRaytracing` called more than once! Now programm will call finishRaytracing...");
+		kkLogWriteWarning("`prepareForRaytracing` called more than once! Now programm will call finishRaytracing...\n");
 		finishRaytracing();
 	}
 	
@@ -1051,7 +1008,7 @@ void PolygonalModel::prepareForRaytracing(kkRenderInfo* ri)
 	}
 
 	m_isPreparedForRaytracing = true;
-	printf("[%llu]\n", kkGetMainSystem()->getTime() - T1);
+	kkLogWriteInfo("[%llu]\n", kkGetMainSystem()->getTime() - T1);
 }
 
 //void PolygonalModel::_deleteGridAccel()
@@ -1172,6 +1129,7 @@ void PolygonalModel::rayTest( std::vector<kkTriangleRayTestResult>& outTriangle,
 
 void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertMatrix, const kkMatrix4& matrix_other, const kkVector4& pivot, const kkVector4& pivot_other)
 {
+	kkLogWriteInfo("Attach model\n");
 	if(!other)
 	{
 		kkLogWriteWarning("Attach model: `other` is null\n");
@@ -1241,34 +1199,5 @@ void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertM
 	other->m_polygonsCount = 0;
 	other->m_verts = nullptr;
 	other->m_vertsCount = 0;
-
-	// // // ///
-	/*auto old_size = m_verts.size();
-
-	m_verts.reserve(old_size + other->m_verts.size());
-	for( u64 i = 0, sz = other->m_verts.size(); i < sz; ++i )
-	{
-		m_verts.push_back(other->m_verts[i]);
-	}
-	
-	for( auto P : other->m_polygons )
-	{
-		auto polygon = (Polygon3D*)P;
-		for( size_t i = 0, sz = polygon->m_verts.size(); i < sz; ++i )
-		{
-			auto V = (Vertex*)polygon->m_verts[i];
-
-			V->m_Normal		= math::mul(V->m_Normal_fix, TIM);
-			V->m_Normal_fix = V->m_Normal;
-
-			V->m_Position	= math::mul(V->m_Position, matrix_other)+ pivot_other - pivot;
-			V->m_Position	= math::mul(V->m_Position, invertMatrix) ;
-			V->m_Position_fix = V->m_Position;
-			V->m_controlVertex = nullptr;
-		}
-		m_polygons.push_back(polygon);
-	}
-	other->m_verts.clear();
-	other->m_polygons.clear();*/
 }
 

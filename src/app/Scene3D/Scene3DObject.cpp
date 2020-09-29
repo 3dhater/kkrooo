@@ -979,26 +979,22 @@ void Scene3DObject::setShaderParameter_diffuseTexture( kkImageContainerNode* t )
 
 void Scene3DObject::ChangePivotPosition(const kkVector4& position)
 {
-	/*auto V = m_pivotFixed - position;
+	auto V = m_pivotFixed - position;
 	auto M = m_matrix;
 	M.invert();
 	V.KK_W = 1.f;
 	V = math::mul(V,M);
-	for( size_t i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	auto vertex = m_polyModel->m_verts;
+	for( size_t i = 0; i < m_polyModel->m_vertsCount; ++i )
 	{
-		ControlVertex * cv = (ControlVertex*)m_PolyModel->m_controlVerts[ i ];
-
-		for( size_t i2 = 0, sz2 = cv->m_verts.size(); i2 < sz2; ++i2 )
-		{
-			auto vertex  = (Vertex*)cv->m_verts[i2];
-			vertex->m_Position = vertex->m_Position_fix + V;
-			vertex->m_Position_fix = vertex->m_Position;
-		}
+		vertex->m_position = vertex->m_positionFix + V;
+		vertex->m_positionFix = vertex->m_position;
+		vertex = vertex->m_mainNext;
 	}
 	_rebuildModel();
 
 	ApplyPivot();
-	UpdateAabb();*/
+	UpdateAabb();
 }
 void Scene3DObject::SelecEdgesBySub()
 {
