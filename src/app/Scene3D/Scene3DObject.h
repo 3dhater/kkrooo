@@ -100,6 +100,7 @@ protected:
 	const char16_t* m_materialName = nullptr;
 
 	kkColor m_edgeColor = kkColorWhite;
+	f32 m_distanceToCamera = 0.f;
 public:
 	Scene3DObjectCommon(){
 		m_scale.set(1.f,1.f,1.f,1.f);
@@ -112,6 +113,9 @@ public:
 			m_parameterWindowData = nullptr;
 		}
 	}
+
+	f32 GetDistanceToCamera(){return m_distanceToCamera;}
+	void SetDistanceToCamera(f32 v){m_distanceToCamera = v;}
 
 	const char16_t* GetName(){		return m_name.c_str();	}
 	void SetMatrix(const kkMatrix4& m){ 	m_matrix = m; 	}
@@ -312,7 +316,6 @@ class Scene3DObject : public Scene3DObjectCommon
 	const u32 m_lineLimit = 1500;
 	const u32 m_pointLimit = 1500;
 
-	f32 m_distanceToCamera = 0.f;
 
 	kkGraphicsSystem * m_GS       = nullptr;
 	Scene3D *          m_scene3D  = nullptr;
@@ -364,7 +367,6 @@ public:
 
 	// ========================
 	bool init();
-	f32 getDistanceToCamera() const { return m_distanceToCamera; }
 	void moveVerts(const kkVector4&, std::unordered_set<kkVertex*>& );
 	void rotateVerts(const kkMatrix4&, std::unordered_set<kkVertex*>&, const kkVector4& selectionCenter );
 	void scaleVerts(const kkMatrix4&, std::unordered_set<kkVertex*>&, const kkVector4& selectionCenter );

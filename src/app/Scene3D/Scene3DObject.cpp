@@ -1423,6 +1423,7 @@ void Scene3DObject::BreakVerts()
 
 void Scene3DObject::Weld(kkVertex* V1, kkVertex* V2)
 {
+	printf("Weld\n");
 	//ControlVertex* cv1 = (ControlVertex*)CV1;
 	//ControlVertex* cv2 = (ControlVertex*)CV2;
 

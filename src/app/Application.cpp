@@ -880,14 +880,13 @@ void Application::updateInput()
 			|| m_state_app == AppState_main::SelectRectangle
 			|| m_KrGuiSystem->m_mouseIsLMB_up 
 			|| m_KrGuiSystem->m_mouseIsMMB_up 
-			|| m_KrGuiSystem->m_mouseIsRMB_up )
+			|| m_KrGuiSystem->m_mouseIsRMB_up)
 		{
 			if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
 			{
+				m_mainViewport->updateInputCamera();
 				auto md = Kr::Gui::GuiSystem::m_mouseDelta;
-				//m_current_scene3D->updateInput();
 				m_mainViewport->updateInput(v2f(md.x,md.y));
-				//m_mainViewport->updateInputCamera(v2f(md.x,md.y));
 			}
 		}
 		else
@@ -910,17 +909,17 @@ void Application::updateInput()
 
 		if(m_vertexPickMode)
 		{
-			//m_main_viewport->updateInputCamera();
+			m_mainViewport->updateInputCamera();
 		}
 		if(m_vertexPickMode && m_event_consumer->isLmbDownOnce() && !m_cursorInGUI)
 		{
 			// данный код должен вызываться изначально с выбранной полигональной моделью
-			/*auto pickVertex = m_main_viewport->pickVertex((Scene3DObject*)m_current_scene3D->getSelectedObject(0));
+			auto pickVertex = m_activeViewport->pickVertex(&m_objectPicked);
 			if(pickVertex && m_vertexPickCallback)
 			{
 				m_vertexPicked = pickVertex;
 				m_vertexPickCallback(0, this);
-			}*/
+			}
 		}
 
 		// обработка тех горячих клавиш, действие команд которых более шире чем у например узкоспециализированных типа вьюпорта
@@ -937,7 +936,7 @@ void Application::updateInput()
 void Application::setDrawPickLine(bool v)
 {
 	//m_drawPickLine = v;
-   // m_active_viewport->setDrawPickLine(v);
+    m_activeViewport->setDrawPickLine(v);
 }
 
 void Application::_deleteSelectedObjects()
@@ -1502,6 +1501,7 @@ void Application::setVertexPickMode(void(*callback)(s32 id, void* data))
 {
 	m_vertexPickMode = true;
 	m_vertexPicked = nullptr;
+	m_objectPicked = nullptr;
 	m_globalInputBlock = true;
 	m_vertexPickCallback = callback;
 }

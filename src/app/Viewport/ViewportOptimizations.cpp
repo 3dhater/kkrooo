@@ -172,7 +172,7 @@ void sortObjectsInFrustum( std::basic_string<Scene3DObject*>& sortedObjects )
 	std::sort(sortedObjects.begin(),sortedObjects.end(),
 		[](Scene3DObject* first, Scene3DObject* second)
 		{
-			return first->getDistanceToCamera() > second->getDistanceToCamera();
+			return first->GetDistanceToCamera() > second->GetDistanceToCamera();
 		}
 	);
 }
@@ -182,7 +182,7 @@ void sortMouseHoverObjects( std::basic_string<Scene3DObject*>& sortedObjects )
 	std::sort(sortedObjects.begin(),sortedObjects.end(),
 		[](Scene3DObject* first, Scene3DObject* second)
 		{
-			return first->getDistanceToCamera() > second->getDistanceToCamera();
+			return first->GetDistanceToCamera() > second->GetDistanceToCamera();
 		}
 	);
 }

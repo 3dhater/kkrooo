@@ -1782,9 +1782,21 @@ bool Scene3D::isVertexHover(const SelectionFrust& frust)
 }
 
 
-void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* camera)
+struct _hover_result
 {
-	std::basic_string<std::pair<kkVertex*,f32>> hovered_points;
+	kkVertex* vertex = nullptr;
+	kkScene3DObject* object = nullptr;
+	f32 distance = 0.f;
+};
+
+kkVertex* Scene3D::doSelectVertexHover(
+	const SelectionFrust& frust,
+	ViewportCamera* camera,
+	bool select, 
+	kkScene3DObject** out_object)
+{
+	kkVertex* selected_vertex = nullptr;
+	std::vector<_hover_result> hovered_points;
 	auto camera_position = camera->getPositionCamera();
 
 	for( auto * object : m_objects_selected )
@@ -1795,7 +1807,11 @@ void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* ca
 			auto point3D = math::mul(current_vertex->m_position, object->GetMatrix()) + object->GetPivot();
 			if( frust.pointInFrust(point3D) )
 			{
-				hovered_points.push_back(std::pair<kkVertex*,f32>(current_vertex,camera_position.distance(point3D)));
+				_hover_result res;
+				res.vertex = current_vertex;
+				res.distance = camera_position.distance(point3D);
+				res.object = object;
+				hovered_points.push_back(res);
 			}
 			current_vertex = current_vertex->m_mainNext;
 		}
@@ -1803,9 +1819,9 @@ void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* ca
 	if(hovered_points.size()>1)
 	{
 		std::sort(hovered_points.begin(),hovered_points.end(),
-			[](const std::pair<kkVertex*,f32>& first, const std::pair<kkVertex*,f32>& second)
+			[](const _hover_result& first, const _hover_result& second)
 			{
-				return first.second < second.second;
+				return first.distance < second.distance;
 			}
 		);
 	}
@@ -1813,41 +1829,61 @@ void Scene3D::doSelectVertexHover(const SelectionFrust& frust,ViewportCamera* ca
 	auto ks = m_app->getStateKeyboard();
 	if( hovered_points.size() )
 	{
-		if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
-			deselectAll();
+		if(select)
+		{
+			if( ks != AppState_keyboard::Alt && ks != AppState_keyboard::Ctrl )
+				deselectAll();
+		}
 
-		hovered_points[ 0 ].first->m_flags |= kkVertex::EF_SELECTED;
 		if( ks == AppState_keyboard::Alt )
 		{
-			if(hovered_points[ 0 ].first->m_flags & kkVertex::EF_SELECTED)
-				hovered_points[ 0 ].first->m_flags ^= kkVertex::EF_SELECTED;
+			if(select)
+			{
+				if(hovered_points[ 0 ].vertex->m_flags & kkVertex::EF_SELECTED)
+					hovered_points[ 0 ].vertex->m_flags ^= kkVertex::EF_SELECTED;
+			}
+		}
+		else
+		{
+			if(select)
+				hovered_points[ 0 ].vertex->m_flags |= kkVertex::EF_SELECTED;
+			selected_vertex = hovered_points[ 0 ].vertex;
+			if(out_object)
+			{
+				*out_object = hovered_points[ 0 ].object;
+			}
 		}
 	}
 	else
 	{
-		if( ks != AppState_keyboard::Ctrl )
+		if( ks != AppState_keyboard::Ctrl && select)
 			deselectAll();
 	}
 	
-	for( auto * object : m_objects_selected )
+	if(select)
 	{
-		object->m_isObjectHaveSelectedVerts = false;
-
-		auto current_vertex = object->m_polyModel->m_verts;
-		for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
+		for( auto * object : m_objects_selected )
 		{
-			if(current_vertex->m_flags & kkVertex::EF_SELECTED)
+			object->m_isObjectHaveSelectedVerts = false;
+
+			auto current_vertex = object->m_polyModel->m_verts;
+			for( u64 i = 0; i < object->m_polyModel->m_vertsCount; ++i )
 			{
-				object->m_isObjectHaveSelectedVerts = true;
-				break;
+				if(current_vertex->m_flags & kkVertex::EF_SELECTED)
+				{
+					object->m_isObjectHaveSelectedVerts = true;
+					break;
+				}
+				current_vertex = current_vertex->m_mainNext;
 			}
-			current_vertex = current_vertex->m_mainNext;
+			object->updateModelPointsColors();
 		}
-		object->updateModelPointsColors();
+
+		_updateSelectionAabb_vertex();
+		updateObjectVertexSelectList();
 	}
 
-	_updateSelectionAabb_vertex();
-	updateObjectVertexSelectList();
+	return selected_vertex;
 }
 
 void      Scene3D::updateObjectVertexSelectList()

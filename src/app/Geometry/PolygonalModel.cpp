@@ -1252,7 +1252,6 @@ bool PolygonalModel::breakVerts()
 					newVerts.push_back(new_vertex);
 
 					kkVertex_addPolygon(new_vertex, polygon->m_element);
-
 					kkPolygon_replaceVertex(vertex, new_vertex, polygon->m_element);
 
 					polygon = polygon->m_right;

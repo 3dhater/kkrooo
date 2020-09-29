@@ -65,6 +65,8 @@ public:
 	kkScene3DObject(){}
 	virtual ~kkScene3DObject(){}
 
+	virtual f32 GetDistanceToCamera() = 0;
+
 	virtual void  SetName( const char16_t * ) = 0;
 	virtual const char16_t* GetName() = 0;
 	virtual void AttachObject(kkScene3DObject*) = 0;

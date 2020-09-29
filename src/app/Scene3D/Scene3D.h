@@ -168,7 +168,7 @@ public:
 
 	//bool isVertexHover(v2i*);
 	bool isVertexHover(const SelectionFrust&);
-	void doSelectVertexHover(const SelectionFrust& sfrust,ViewportCamera* camera);
+	kkVertex* doSelectVertexHover(const SelectionFrust& sfrust,ViewportCamera* camera, bool select, kkScene3DObject** );
 	//void selectEdges(kkRay* ray);
 	bool selectEdges(/*CursorRay* cursorRay, */kkRay* currentRay/*, int depth*/);
 	void selectPolygons(kkRay* ray);

@@ -1,5 +1,6 @@
 ﻿#include "kkrooo.engine.h"
 #include "GraphicsSystem/kkTexture.h"
+#include "Geometry/kkPolygonalModel.h"
 #include "KrGui.h"
 #include "../Common.h"
 #include "Viewport.h"
@@ -10,6 +11,7 @@
 #include "../ApplicationState.h"
 #include "../CursorRay.h"
 #include "../ShortcutManager.h"
+#include "../Geometry/PolygonalModel.h"
 #include "../Scene3D/Scene3D.h"
 #include "../Scene3D/Scene3DObject.h"
 #include "../SelectionFrust.h"
@@ -290,70 +292,38 @@ void ViewportObject::_rotate()
 	if( m_activeCamera != m_cameraPersp.ptr() )
 		m_activeCamera->m_isRotated = true;
 }
-// return true if this viewport set focus
-bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, bool inFocus)
+bool ViewportObject::updateInputCamera(bool inFocus)
 {
 	bool res = false;
-	_update_frame(mouseDelta);
-	update(windowSize);
-	
-	g_mouseState.IsMove = false;
-	m_cursorInRect = false;
-	if( kkrooo::pointInRect( m_app->m_cursor_position, m_rect_modified ))
+	auto inRect = kkrooo::pointInRect( m_app->m_cursor_position, m_rect_modified + v4f(0.f,m_app->m_mainMenuStyle.menuBarHeight,0.f) );
+	if(inRect)
 	{
-		m_cursorInRect = true;
-		// определяю если курсор двигается
-		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f 
-			|| Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
-			g_mouseState.IsMove = true;
-	}
-	if( g_mouseState.RMB_DOWN && m_cursorInRect )
-	{
-		if( !g_mouseState.IsFirstClickRMB )
+		if( g_mouseState.RMB_DOWN )
 		{
-			res = true;
-			g_mouseState.IsFirstClickRMB = true;
+			if( !g_mouseState.IsFirstClickRMB )
+			{
+				res = true;
+				g_mouseState.IsFirstClickRMB = true;
+			}
 		}
-	}
-	if( g_mouseState.MMB_DOWN && m_cursorInRect )
-	{
-		if( !g_mouseState.IsFirstClickMMB )
+		if( g_mouseState.MMB_DOWN )
 		{
-			res = true;
-			g_mouseState.IsFirstClickMMB = true;
+			if( !g_mouseState.IsFirstClickMMB )
+			{
+				res = true;
+				g_mouseState.IsFirstClickMMB = true;
+			}
 		}
-	}
-	if( g_mouseState.LMB_DOWN && m_cursorInRect )
-	{
-		if( !g_mouseState.IsFirstClickLMB )
+		if( g_mouseState.LMB_DOWN )
 		{
-			res = true;
-			g_mouseState.IsFirstClickLMB = true;
-			m_mouse_first_click_coords = m_app->m_cursor_position;
+			if( !g_mouseState.IsFirstClickLMB )
+			{
+				res = true;
+				g_mouseState.IsFirstClickLMB = true;
+				m_mouse_first_click_coords = m_app->m_cursor_position;
+			}
 		}
-	}
 
-	if( m_app->m_editMode == EditMode::Vertex )
-	{
-		if(g_mouseState.IsMove)
-		{
-			const s32 vertex_selection_area_val = 4;
-			g_hoverSelFrust.createWithFrame(v4i(m_app->m_cursor_position.x - vertex_selection_area_val, m_app->m_cursor_position.y - vertex_selection_area_val,
-				m_app->m_cursor_position.x + vertex_selection_area_val, m_app->m_cursor_position.y + vertex_selection_area_val), 
-				m_rect_modified, m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
-		}
-		if( m_app->m_current_scene3D->isVertexHover(g_hoverSelFrust) )
-		{
-			m_drawEditMode_hoverMark = true;
-		}
-		else
-		{
-			m_drawEditMode_hoverMark = false;
-		}
-	}
-
-	if(m_cursorInRect)
-	{
 		if( m_app->m_mouseWheel > 0 )
 		{
 			m_activeCamera->zoomIn( m_app->m_state_keyboard, (s32)m_app->m_mouseWheel );
@@ -372,7 +342,6 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 		return res;
 
 	updateCursorRay();
-	//g_mouseState.reset();
 	g_mouseState.LMB_DOWN = m_app->m_event_consumer->isLmbDownOnce();
 	if(g_mouseState.LMB_DOWN)
 		m_rayOnClick = m_cursorRay->m_center;
@@ -385,8 +354,71 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	g_mouseState.MMB_HOLD = m_app->m_event_consumer->isMmbDown();
 	g_mouseState.MMB_UP   = m_app->m_event_consumer->isMmbUp();
 
-	bool isGizmo = (m_app->m_state_app == AppState_main::Gizmo);
+	if(  inRect || m_app->m_state_app == AppState_main::CameraTransformation)
+	{
+		if( (m_app->m_event_consumer->isMmbDown()  && g_mouseState.IsFirstClickMMB) 
+			|| m_app->m_event_consumer->isKeyDown( kkKey::K_SPACE )
+			)
+		{
+			if( m_app->m_state_keyboard == AppState_keyboard::Alt )
+				_rotate();
+			else
+				_panMove();
+			m_app->m_state_app = AppState_main::CameraTransformation;
+		}
+	}
+	if(inRect)
+	{
+		if( m_app->m_editMode == EditMode::Vertex )
+		{
+			if(Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f 
+			|| Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f)
+			{
+				const s32 vertex_selection_area_val = 4;
+				g_hoverSelFrust.createWithFrame(v4i(m_app->m_cursor_position.x - vertex_selection_area_val, m_app->m_cursor_position.y - vertex_selection_area_val,
+					m_app->m_cursor_position.x + vertex_selection_area_val, m_app->m_cursor_position.y + vertex_selection_area_val), 
+					m_rect_modified, m_activeCamera->getCamera()->getViewProjectionInvertMatrix());
+			}
+			if( m_app->m_current_scene3D->isVertexHover(g_hoverSelFrust) )
+			{
+				m_drawEditMode_hoverMark = true;
+			}
+			else
+			{
+				m_drawEditMode_hoverMark = false;
+			}
+		}
+	}
+	return res;
+}
+// return true if this viewport set focus
+void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, bool inFocus)
+{
+	_update_frame(mouseDelta);
+	update(windowSize);
+	
+	g_mouseState.IsMove = false;
+	g_mouseState.IsMove2 = false;
+	m_cursorInRect = false;
+	if( kkrooo::pointInRect( m_app->m_cursor_position, m_rect_modified ))
+	{
+		m_cursorInRect = true;
+		// определяю если курсор двигается
+		if( Kr::Gui::GuiSystem::m_mouseDelta.x != 0.f 
+			|| Kr::Gui::GuiSystem::m_mouseDelta.y != 0.f )
+			g_mouseState.IsMove = true;
 
+		if( Kr::Gui::GuiSystem::m_mouseDelta.x > 1.f 
+			|| Kr::Gui::GuiSystem::m_mouseDelta.y > 1.f
+			|| Kr::Gui::GuiSystem::m_mouseDelta.x < -1.f 
+			|| Kr::Gui::GuiSystem::m_mouseDelta.y < -1.f)
+			g_mouseState.IsMove2 = true;
+	}
+	
+	if(!inFocus)
+		return;
+
+	bool isGizmo = (m_app->m_state_app == AppState_main::Gizmo);
 	if( m_app->m_state_app == AppState_main::Idle )
 	{
 		// если курсор движется, то беру луч
@@ -394,16 +426,6 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			updateCursorRay();
 	}
 
-	if( (g_mouseState.MMB_HOLD  && g_mouseState.IsFirstClickMMB) 
-		|| m_app->m_event_consumer->isKeyDown( kkKey::K_SPACE )
-		)
-	{
-		if( m_app->m_state_keyboard == AppState_keyboard::Alt )
-			_rotate();
-		else
-			_panMove();
-		m_app->m_state_app = AppState_main::CameraTransformation;
-	}
 
 	auto checkCursorHover = [&]()->bool
 	{
@@ -484,7 +506,10 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			if( m_drawEditMode_hoverMark )
 			{
 				// все выделения и т.д. лучше произвести внутри 
-				m_app->m_current_scene3D->doSelectVertexHover(g_hoverSelFrust, m_activeCamera);
+				m_app->m_current_scene3D->doSelectVertexHover(
+					g_hoverSelFrust, 
+					m_activeCamera,
+					true, nullptr);
 			}else if( m_app->m_state_keyboard != AppState_keyboard::Ctrl ) // если объекты выделены то их не надо терять
 			{
 					// если объектов под курсором нет то нужно снять выделение со всего
@@ -550,7 +575,7 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	}
 	if( g_mouseState.LMB_HOLD )
 	{
-		if( !isGizmo && g_mouseState.IsMove && g_mouseState.IsFirstClickLMB && m_app->m_state_app != AppState_main::CancelTransformation )
+		if( !isGizmo && g_mouseState.IsMove2 && g_mouseState.IsFirstClickLMB && m_app->m_state_app != AppState_main::CancelTransformation )
 		{
 			g_mouseState.IsSelectByFrame = true;
 		}
@@ -599,14 +624,31 @@ bool ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	{
 	}*/
 	processShortcuts();
-
-	return res;
 }
-Scene3DObject* ViewportObject::pickObject()
+
+kkVertex* ViewportObject::pickVertex(kkScene3DObject** object)
+{
+
+	kkScene3DObject* hover_object = nullptr;
+	auto vertex = m_app->m_current_scene3D->doSelectVertexHover(
+		g_hoverSelFrust, 
+		m_activeCamera,
+		false, &hover_object);
+	if( vertex && hover_object )
+	{
+		if(hover_object->GetType() == kkScene3DObjectType::PolygonObject)
+		{
+			*object = hover_object;
+			return vertex;
+		}
+	}
+	return nullptr;
+}
+kkScene3DObject* ViewportObject::pickObject()
 {
 	updateCursorRay();
-	Scene3DObject* result = nullptr;
-	std::vector<Scene3DObject*> objects;
+	kkScene3DObject* result = nullptr;
+	std::vector<kkScene3DObject*> objects;
 	for( size_t i = 0; i < m_drawObjects.size(); ++i )
 	{
 		Scene3DObject* object = m_drawObjects[i];
@@ -622,7 +664,7 @@ Scene3DObject* ViewportObject::pickObject()
 			{
 				auto camera_position = m_activeCamera->getPositionCamera();
 
-				object->m_distanceToCamera = camera_position.distance(intersectionResult.m_intersectionPoint);
+				object->SetDistanceToCamera(camera_position.distance(intersectionResult.m_intersectionPoint));
 				objects.push_back(object);
 			}
 		}
@@ -631,9 +673,9 @@ Scene3DObject* ViewportObject::pickObject()
 	{
 
 		std::sort(objects.begin(),objects.end(),
-			[](Scene3DObject* first, Scene3DObject* second)
+			[](kkScene3DObject* first, kkScene3DObject* second)
 			{
-				return first->getDistanceToCamera() > second->getDistanceToCamera();
+				return first->GetDistanceToCamera() > second->GetDistanceToCamera();
 			}
 		);
 
@@ -689,6 +731,17 @@ void ViewportObject::beginDraw()
 {
 	g_GS->setActiveCamera(m_activeCamera->getCamera());
 	m_activeCamera->update();
+}
+void ViewportObject::setDrawPickLine(bool v)
+{
+	m_drawPickLine = v;
+	m_drawPickLineP1 = m_app->m_cursor_position;
+}
+void ViewportObject::drawPickLine()
+{
+	kkGSSetScissor(true, v4i((s32)m_gs_viewport.x, (s32)m_gs_viewport.y, (s32)m_gs_viewport.z, (s32)m_gs_viewport.w));
+	m_app->m_gs->drawLine2D(m_drawPickLineP1, m_app->m_cursor_position, kkColorWhite);
+	kkGSSetScissor(false,v4i());
 }
 void ViewportObject::_update_frame(const v2f& mouseDelta)
 {
@@ -1323,7 +1376,23 @@ void Viewport::updateInput(const v2f& mouseDelta)
 		while(true)
 		{
 			auto next = vp->m_right;
-			if( vp->updateInput(m_windowSize, mouseDelta, m_viewportInFocus == vp) )
+			vp->updateInput(m_windowSize, mouseDelta, m_viewportInFocus == vp);
+			if(vp == end)
+				break;
+			vp = next;
+		}
+	}
+}
+void Viewport::updateInputCamera()
+{
+	if(m_viewports)
+	{
+		auto end = m_viewports->m_left;
+		auto vp = m_viewports;
+		while(true)
+		{
+			auto next = vp->m_right;
+			if( vp->updateInputCamera(m_viewportInFocus == vp) )
 			{
 				m_viewportInFocus = vp;
 				kkSetActiveViewport(m_viewportInFocus);
@@ -1334,7 +1403,6 @@ void Viewport::updateInput(const v2f& mouseDelta)
 		}
 	}
 }
-
 void Viewport::update()
 {
 	m_windowSize = m_window->getClientRect().getWidthAndHeight();
@@ -1394,6 +1462,8 @@ void Viewport::draw(ColorTheme* colorTheme)
 				vp->drawEditMode_hoverMark();
 			if( g_mouseState.IsSelectByFrame )
 				vp->drawSelectionFrame(inFocus);
+			if(vp->m_drawPickLine)
+				vp->drawPickLine();
 			vp->drawName(inFocus);
 			kkGSSetDepth(true);
 

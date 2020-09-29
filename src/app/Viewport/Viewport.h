@@ -24,6 +24,7 @@ struct ViewportMouseState
 
 	//bool InViewport = false;
 	bool IsMove = false;
+	bool IsMove2 = false;
 	bool IsSelectByFrame = false;
 	bool IsFirstClickLMB = false;
 	bool IsFirstClickMMB = false;
@@ -94,7 +95,7 @@ public:
 	
 	void init(const v4f& indent, ViewportLayoutType lt);
 	void update(const v2i& windowSize);
-	bool updateInput(const v2i& windowSize, const v2f& mouseDelta, bool inFocus);
+	void updateInput(const v2i& windowSize, const v2f& mouseDelta, bool inFocus);
 	//void updateInputCamera(const v2f& mouseDelta, bool inFocus);
 	void updateCursorRay();
 	void resetCamera();
@@ -188,7 +189,15 @@ public:
 
 	bool m_drawEditMode_hoverMark = false;
 
-	Scene3DObject* pickObject();
+	bool updateInputCamera(bool inFocus);
+
+	kkScene3DObject* pickObject();
+	kkVertex* pickVertex(kkScene3DObject** object);
+	
+	bool m_drawPickLine = false;
+	v2i  m_drawPickLineP1;
+	void setDrawPickLine(bool v);
+	void drawPickLine();
 };
 
 class Viewport
@@ -213,6 +222,7 @@ public:
 	void draw(ColorTheme* colorTheme);
 	void update();
 	void updateInput(const v2f& mouseDelta);
+	void updateInputCamera();
 
 	void init(ViewportType, ViewportLayoutType, const v4f& indent);
 
