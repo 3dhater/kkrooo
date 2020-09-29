@@ -1278,66 +1278,87 @@ void Scene3DObject::SelecPolygonsByAdd()
 
 void Scene3DObject::SelecVertsByAdd()
 {
-	/*m_isObjectHaveSelectedVerts = false;
-	std::vector<ControlVertex*> vertsToSelect;
-	for( size_t i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	m_isObjectHaveSelectedVerts = false;
+	std::vector<kkVertex*> vertsToSelect;
+	auto vertex = m_polyModel->m_verts;
+	for( u64 i = 0; i < m_polyModel->m_vertsCount; ++i )
 	{
-		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlVerts[ i ];
-		if(cv->m_isSelected)
+		if(!(vertex->m_flags & vertex->EF_SELECTED))
 		{
-			m_isObjectHaveSelectedVerts = true;
-
-			for( auto c : cv->m_edges )
+			auto edge = vertex->m_edges;
+			for(u32 i2 = 0; i2 < vertex->m_edgeCount; ++i2)
 			{
-				if( !c->m_firstPoint->m_isSelected )
-					vertsToSelect.emplace_back(c->m_firstPoint);
-				if( !c->m_secondPoint->m_isSelected )
-					vertsToSelect.emplace_back(c->m_secondPoint);
+				if(edge->m_element->m_v1->m_flags & kkVertex::EF_SELECTED)
+				{
+					vertsToSelect.push_back(vertex);
+					m_isObjectHaveSelectedVerts = true;
+					goto next_vertex;
+				}
+				if(edge->m_element->m_v2->m_flags & kkVertex::EF_SELECTED)
+				{
+					vertsToSelect.push_back(vertex);
+					m_isObjectHaveSelectedVerts = true;
+					goto next_vertex;
+				}
+				edge = edge->m_right;
 			}
 		}
+		else
+			m_isObjectHaveSelectedVerts = true;
+		next_vertex:;
+		vertex = vertex->m_mainNext;
 	}
-	for( auto c : vertsToSelect )
+	for( auto v : vertsToSelect )
 	{
-		c->select();
+		v->m_flags |= v->EF_SELECTED;
 	}
-
 	if(m_isObjectHaveSelectedVerts)
-		updateModelPointsColors();*/
+		updateModelPointsColors();
 }
 
 void Scene3DObject::SelecVertsBySub()
 {
-	/*std::vector<ControlVertex*> vertsToDeselect;
-	for( size_t i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	m_isObjectHaveSelectedVerts = false;
+	std::vector<kkVertex*> vertsToDeselect;
+	auto vertex = m_polyModel->m_verts;
+	for( u64 i = 0; i < m_polyModel->m_vertsCount; ++i )
 	{
-		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlVerts[ i ];
-		if(!cv->m_isSelected)
+		if(vertex->m_flags & vertex->EF_SELECTED)
 		{
-			for( auto c : cv->m_edges )
+			auto edge = vertex->m_edges;
+			for(u32 i2 = 0; i2 < vertex->m_edgeCount; ++i2)
 			{
-				if( c->m_firstPoint->m_isSelected )
-					vertsToDeselect.emplace_back(c->m_firstPoint);
-				if( c->m_secondPoint->m_isSelected )
-					vertsToDeselect.emplace_back(c->m_secondPoint);
+				if(!(edge->m_element->m_v1->m_flags & kkVertex::EF_SELECTED))
+				{
+					vertsToDeselect.push_back(vertex);
+					goto next_vertex;
+				}
+				if(!(edge->m_element->m_v2->m_flags & kkVertex::EF_SELECTED))
+				{
+					vertsToDeselect.push_back(vertex);
+					goto next_vertex;
+				}
+				edge = edge->m_right;
 			}
 		}
+		next_vertex:;
+		vertex = vertex->m_mainNext;
 	}
-	for( auto c : vertsToDeselect )
+	for( auto v : vertsToDeselect )
 	{
-		c->deselect();
+		v->m_flags ^= v->EF_SELECTED;
 	}
-
-	m_isObjectHaveSelectedVerts = false;
-	for( size_t i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
+	vertex = m_polyModel->m_verts;
+	for( u64 i = 0; i < m_polyModel->m_vertsCount; ++i )
 	{
-		ControlVertex* cv = (ControlVertex*)m_PolyModel->m_controlVerts[ i ];
-		if(cv->m_isSelected)
+		if(vertex->m_flags & vertex->EF_SELECTED)
 		{
 			m_isObjectHaveSelectedVerts = true;
 			break;
 		}
+		vertex = vertex->m_mainNext;
 	}
-	updateModelPointsColors();*/
+	updateModelPointsColors();
 }
 
 void Scene3DObject::AttachObject(kkScene3DObject* object)
