@@ -278,7 +278,9 @@ public:
 	
 	void updateEdges();
 	bool breakVerts();
-
+	bool weld(kkVertex* V1, kkVertex* V2);
+	kkEdge* isEdge(kkVertex* V1, kkVertex* V2);
+	bool isOnEdge(kkVertex* V);
 
 	Scene3DObject* m_object = nullptr;
 };

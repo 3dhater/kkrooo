@@ -192,11 +192,11 @@ void Scene3DObject::_createSoftwareModel_polys()
 			verts_ptr->Position.x = base_vertex->m_position._f32[0];
 			verts_ptr->Position.y = base_vertex->m_position._f32[1];
 			verts_ptr->Position.z = base_vertex->m_position._f32[2];
-			if(current_polygon->m_normals)
+			if(current_polygon->m_normals.size())
 			{
 				verts_ptr->Normal   = current_polygon->m_normals[0];
 			}
-			if(current_polygon->m_tcoords)
+			if(current_polygon->m_tcoords.size())
 			{
 				verts_ptr->TCoords   = current_polygon->m_tcoords[0];
 			}
@@ -212,11 +212,11 @@ void Scene3DObject::_createSoftwareModel_polys()
 			verts_ptr->Position.x = vertex2->m_position._f32[0];
 			verts_ptr->Position.y = vertex2->m_position._f32[1];
 			verts_ptr->Position.z = vertex2->m_position._f32[2];
-			if(current_polygon->m_normals)
+			if(current_polygon->m_normals.size())
 			{
 				verts_ptr->Normal   = current_polygon->m_normals[i2+2];
 			}
-			if(current_polygon->m_tcoords)
+			if(current_polygon->m_tcoords.size())
 			{
 				verts_ptr->TCoords   = current_polygon->m_tcoords[i2+2];
 			}
@@ -232,11 +232,11 @@ void Scene3DObject::_createSoftwareModel_polys()
 			verts_ptr->Position.x = vertex3->m_position._f32[0];
 			verts_ptr->Position.y = vertex3->m_position._f32[1];
 			verts_ptr->Position.z = vertex3->m_position._f32[2];
-			if(current_polygon->m_normals)
+			if(current_polygon->m_normals.size())
 			{
 				verts_ptr->Normal   = current_polygon->m_normals[i2+1];
 			}
-			if(current_polygon->m_tcoords)
+			if(current_polygon->m_tcoords.size())
 			{
 				verts_ptr->TCoords   = current_polygon->m_tcoords[i2+1];
 			}
@@ -787,14 +787,14 @@ void Scene3DObject::applyMatrices()
 		V = V->m_mainNext;
 	}
 	auto P = m_polyModel->m_polygons;
-	if(P->m_normals)
+	if(P->m_normals.size())
 	{
 		for( size_t i = 0; i < m_polyModel->m_polygonsCount; ++i )
 		{
-			auto PN = P->m_normals;
+			//auto PN = P->m_normals;
 			for( size_t i2 = 0; i2 < P->m_vertexCount; ++i2 )
 			{
-				PN[i2] = math::mul(PN[i2], TIM);
+				P->m_normals[i2] = math::mul(P->m_normals[i2], TIM);
 			}
 			P = P->m_mainNext;
 		}
@@ -1423,206 +1423,13 @@ void Scene3DObject::BreakVerts()
 
 void Scene3DObject::Weld(kkVertex* V1, kkVertex* V2)
 {
-	printf("Weld\n");
-	//ControlVertex* cv1 = (ControlVertex*)CV1;
-	//ControlVertex* cv2 = (ControlVertex*)CV2;
-
-	//bool is_edge = false;
-	//Edge * edge = nullptr;
-	//for( auto e : cv1->m_edges )
-	//{
-	//	edge = e;
-	//	if(e->m_firstPoint == cv2 || e->m_secondPoint == cv2)
-	//	{
-	//		is_edge = true;
-	//		break;
-	//	}
-	//}
-
-
-	//// есть 2 случая, когда надо делать weld
-	//// 1. когда точки образуют ребро
-	//// 2. когда хоть 1 ребро у каждой точки имеет только 1 полигон на стороне (то есть точка как бы снаружи)
-
-	//// сначала перемещу нужную вершину к другой вершине
-	//// потом, нахожу 1 или 2 полигона
-	//// из полигонов удаляю вершину, если вершины три то удаляю сам полигон
-	//// удаляю вершины из главного массива с вершинами m_verts, 
-	//Vertex* targetVertex = (Vertex*)cv2->m_verts[0];
-	//Vertex* pickVertex = (Vertex*)cv1->m_verts[0];
-	//bool onEdge = false;
-	//for(auto cvedge : cv1->m_edges)
-	//{
-	//	if( cvedge->m_secondPolygon )
-	//	{
-	//		onEdge = true;
-	//		break;
-	//	}
-	//}
-	//if(!onEdge)
-	//{
-	//	for(auto cvedge : cv2->m_edges)
-	//	{
-	//		if( cvedge->m_secondPolygon )
-	//		{
-	//			onEdge = true;
-	//			break;
-	//		}
-	//	}
-	//}
-
-	//if(is_edge || onEdge)
-	//{
-	//	auto half = (targetVertex->m_Position - pickVertex->m_Position) * 0.5f;
-	//	for( auto V : cv1->m_verts )
-	//	{
-	//		//Vertex* vertex = (Vertex*)m_PolyModel->m_verts[ vertexIndex ];
-	//		Vertex* vertex = (Vertex*)V;
-	//		vertex->m_Boneinds = targetVertex->m_Boneinds;
-	//		vertex->m_Color = targetVertex->m_Color;
-	//		vertex->m_Normal = targetVertex->m_Normal;
-	//		vertex->m_Normal_fix = targetVertex->m_Normal_fix;
-	//			vertex->m_Position = targetVertex->m_Position;
-	//			vertex->m_Position_fix = targetVertex->m_Position_fix;
-	//		vertex->m_UV = targetVertex->m_UV;
-	//		vertex->m_Weights = targetVertex->m_Weights;
-	//		vertex->m_weld = true;
-	//		targetVertex->m_weld = true;
-	//	}
-
-	//}
-	//else
-	//{
-	//	return;
-	//}
-	//
-	//std::unordered_set<Polygon3D*> polysForNormRecalculate;
-	//for( auto V : cv1->m_verts )
-	//{
-	//	Vertex* vertex = (Vertex*)V;
-	//	polysForNormRecalculate.insert(vertex->m_parentPolygon);
-	//}
-
-	//if(is_edge)
-	//{
-
-	//	Polygon3D* P1 = edge->m_firstPolygon;
-	//	Polygon3D* P2 = nullptr;
-	//	if(edge->m_secondPolygon )
-	//	{
-	//		P2 = edge->m_secondPolygon;
-	//	}
-
-	//	// удалить вершину из полигона и из основного массива
-	//	if(P1->m_verts.size() > 3)
-	//	{
-	//		// теперь нужно удалить вершину из полигона и из массива с вершинами
-	//		// нужно найти вершину внутри контрольной вершины, которая принадлежит данному полигону
-	//		kkVertex * vertex_for_delete = nullptr;
-	//		for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
-	//		{
-	//			//for( auto vertexIndex_CV : cv1->m_vertexIndex )
-	//			for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
-	//			{
-	//				if( cv1->m_verts[ j ] == P1->m_verts[ i ] )
-	//				{
-	//					vertex_for_delete = P1->m_verts[ i ];
-	//					goto end;
-	//				}
-	//			}
-	//		}
-	//		end:;
-	//		if(vertex_for_delete)
-	//		{
-	//			P1->m_verts.erase_first(vertex_for_delete);
-	//			m_PolyModel->m_verts.erase_first(vertex_for_delete);
-	//			kkDestroy(vertex_for_delete);
-	//		}
-	//	}
-	//	else
-	//	{
-	//		for( u64 i = 0, sz = P1->m_verts.size(); i < sz; ++i )
-	//		{
-	//			auto V = P1->m_verts[i];
-	//			m_PolyModel->m_verts.erase_first(V);
-	//			kkDestroy(V);
-	//		}
-
-	//		m_PolyModel->m_polygons.erase_first(P1);
-	//		kkDestroy(P1);
-	//		polysForNormRecalculate.erase(P1);
-	//	}
-
-	//	if(P2)
-	//	{
-	//		if(P2->m_verts.size() > 3)
-	//		{
-	//			kkVertex * vertex_for_delete = nullptr;
-	//			for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
-	//			{
-	//				for( u64 j = 0, jsz = cv1->m_verts.size(); j < jsz; ++j )
-	//				{
-	//					if( cv1->m_verts[ j ] == P2->m_verts[ i ] )
-	//					{
-	//						vertex_for_delete = P2->m_verts[ i ];
-	//						goto end2;
-	//					}
-	//				}
-	//			}
-	//			end2:;
-	//			if(vertex_for_delete)
-	//			{
-	//				P2->m_verts.erase_first(vertex_for_delete);
-	//				m_PolyModel->m_verts.erase_first(vertex_for_delete);
-	//				kkDestroy(vertex_for_delete);
-	//			}
-	//		}
-	//		else
-	//		{
-	//			for( u64 i = 0, sz = P2->m_verts.size(); i < sz; ++i )
-	//			{
-	//				auto V = P2->m_verts[i];
-	//				m_PolyModel->m_verts.erase_first(V);
-	//				kkDestroy(V);
-	//			}
-	//			m_PolyModel->m_polygons.erase_first(P2);
-	//			kkDestroy(P2);
-	//			polysForNormRecalculate.erase(P2);
-	//		}
-	//	}
-	//}
-
-	//for(auto P : polysForNormRecalculate)
-	//{
-	//	P->CalculateNormals();
-	//}
-	//
-	//for( u64 i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
-	//{
-	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlVerts[i];
-
-	//	bool sel = CV->isSelected();
-	//	for( auto V : CV->m_verts )
-	//	{
-	//		Vertex* vertex = (Vertex*)V;
-	//		vertex->m_isCVSelected = sel;
-	//	}
-
-	//}
-
-	//m_PolyModel->createControlPoints();
-
-	//for( u64 i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
-	//{
-	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlVerts[i];
-	//	if(((Vertex*)CV->m_verts[0])->m_isCVSelected)
-	//	{
-	//		CV->select();
-	//	}
-	//}
-
-	//this->_rebuildModel();
-	//updateModelPointsColors();
+	kkLogWriteInfo("Target weld\n");
+	if( m_polyModel->weld(V1,V2) )
+	{
+		kkLogWriteInfo("\t -  - Done P[%u] V[%u]\n", m_polyModel->m_polygonsCount, m_polyModel->m_vertsCount);
+		_rebuildModel();
+		updateModelPointsColors();
+	}
 }
 
 void Scene3DObject::WeldSelectedVerts(f32 len)

@@ -91,22 +91,21 @@ void planeCallback(s32 id, void * d )
 		{
 			gc->BeginPolygon();
 			
-			gc->AddPosition(begin_x+segment_size_w-half_width,  0,   begin_z-half_height);
-			gc->AddNormal(0.,1.,0.);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
-			
-			gc->AddPosition(begin_x+segment_size_w-half_width,  0,   begin_z+segment_size_h-half_height);
-			gc->AddNormal(0.,1.,0.);
-			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
-			
-			gc->AddPosition(begin_x-half_width,  0,   begin_z+segment_size_h-half_height);
-			gc->AddNormal(0.,1.,0.);
-			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
-
-			gc->AddPosition(begin_x-half_width,   0,   begin_z-half_height);
+			gc->AddPosition(begin_x-half_width,   0.f,   begin_z-half_height);
 			gc->AddNormal(0.,1.,0.);
 			gc->AddUV(uv_begin_x, uv_begin_y);
 			
+			gc->AddPosition(begin_x-half_width,  0.f,   begin_z+segment_size_h-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(begin_x+segment_size_w-half_width,  0.f,   begin_z+segment_size_h-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y-uv_segment_size_h);
+			
+			gc->AddPosition(begin_x+segment_size_w-half_width,  0.f,   begin_z-half_height);
+			gc->AddNormal(0.,1.,0.);
+			gc->AddUV(uv_begin_x+uv_segment_size_w, uv_begin_y);
 			
 			gc->EndPolygon(1,0);
 

@@ -13,6 +13,57 @@
 #include "PolygonalModel.h"
 #include "../SelectionFrust.h"
 
+void kkPolygon_calculateNormals(kkPolygon* P)
+{
+	if(!P->m_normals.size())
+		return;
+
+	kkVector4 e1, e2, no;
+	for( u32 i = 0; i < P->m_vertexCount; ++i )
+	{
+		P->m_normals[i].set(0.f,0.f,0.f);
+	}
+	kkVertex * base_vertex = P->m_verts->m_element;
+	auto v_node1 = P->m_verts->m_right;
+	auto v_node2 = v_node1->m_right;
+	u64 index2, index3;
+	for( u64 i2 = 0, sz2 = P->m_vertexCount - 2; i2 < sz2; ++i2 )
+	{
+		kkVertex * vertex3 = v_node1->m_element;
+		kkVertex * vertex2 = v_node2->m_element;
+		
+		e1 = vertex2->m_position - base_vertex->m_position;
+		e2 = vertex3->m_position - base_vertex->m_position;
+		//no;
+		e1.cross(e2, no);
+
+		index2  = i2+1;
+		index3  = index2 + 1;
+		if( index3 == P->m_vertexCount )
+			index3 = 0;
+
+		P->m_normals[ 0 ].x -= no._f32[0];
+		P->m_normals[ 0 ].y -= no._f32[1];
+		P->m_normals[ 0 ].z -= no._f32[2];
+		P->m_normals[ index2 ].x -= no._f32[0];
+		P->m_normals[ index2 ].y -= no._f32[1];
+		P->m_normals[ index2 ].z -= no._f32[2];
+		P->m_normals[ index3 ].x -= no._f32[0];
+		P->m_normals[ index3 ].y -= no._f32[1];
+		P->m_normals[ index3 ].z -= no._f32[2];
+
+		v_node1 = v_node2;
+		v_node2 = v_node2->m_right;
+	}
+
+	for( u64 i2 = 0; i2 < P->m_vertexCount; ++i2 )
+	{
+		P->m_normals[i2].normalize2();
+	}
+	P->m_facenormal._f32[0] = P->m_normals[ 0 ].x;
+	P->m_facenormal._f32[1] = P->m_normals[ 0 ].y;
+	P->m_facenormal._f32[2] = P->m_normals[ 0 ].z;
+}
 void kkPolygon_replaceVertex(kkVertex* old_vertex, kkVertex* new_vertex, kkPolygon* p)
 {
 	auto vertex = p->m_verts;
@@ -121,6 +172,41 @@ void kkPolygon_addEdge(kkEdge* e, kkPolygon* p)
 }
 void kkPolygon_removeVertex(kkLoopNode<kkVertex>* vn, kkPolygon* p)
 {
+	u32 vertex_index = 0;
+	auto vn_curr = p->m_verts;
+	for(u32 i = 0; i < p->m_vertexCount; ++i)
+	{
+		if(vn_curr == vn)
+		{
+			vertex_index = i;
+			break;
+		}
+		vn_curr = vn_curr->m_right;
+	}
+
+	if(p->m_normals.size())
+	{
+		p->m_normals.erase(vertex_index);
+		/*if(vertex_index < p->m_vertexCount - 1)
+		{
+			for(u32 i = vertex_index; i < p->m_vertexCount; ++i)
+			{
+				p->m_normals[i] = p->m_normals[i+1];
+			}
+		}*/
+	}
+	if(p->m_tcoords.size())
+	{
+		p->m_tcoords.erase(vertex_index);
+		/*if(vertex_index < p->m_vertexCount - 1)
+		{
+			for(u32 i = vertex_index; i < p->m_vertexCount; ++i)
+			{
+				p->m_tcoords[i] = p->m_tcoords[i+1];
+			}
+		}*/
+	}
+
 	vn->m_left->m_right = vn->m_right;
 	vn->m_right->m_left = vn->m_left;
 	if(vn == p->m_verts)
@@ -129,6 +215,26 @@ void kkPolygon_removeVertex(kkLoopNode<kkVertex>* vn, kkPolygon* p)
 		p->m_verts = nullptr;
 	--p->m_vertexCount;
 	kkDestroy(vn);
+}
+void kkPolygon_removeVertex(kkVertex* v, kkPolygon* p)
+{
+	kkLoopNode<kkVertex>* vn = nullptr;
+	auto curr = p->m_verts;
+	for(u64 i = 0; i < p->m_vertexCount; ++i)
+	{
+		if(curr->m_element == v)
+		{
+			vn = curr;
+			break;
+		}
+		curr = curr->m_right;
+	}
+	if(!vn)
+	{
+		kkLogWriteWarning("`kkPolygon_removeVertex` - curr is null.\n");
+		return;
+	}
+	kkPolygon_removeVertex(vn, p);
 }
 void kkVertex_removePolygon(kkVertex* v, kkPolygon* p)
 {
@@ -302,10 +408,10 @@ void PolygonalModel::DeletePolygon(kkPolygon* p)
 		m_polygons = m_polygons->m_mainNext;
 	_removePolygonFromList(p);
 
-	if(p->m_normals)
+	/*if(p->m_normals)
 		kkMemory::freeAligned(p->m_normals);
 	if(p->m_tcoords)
-		kkMemory::freeAligned(p->m_tcoords);
+		kkMemory::freeAligned(p->m_tcoords);*/
 
 	kkDestroy(p);
 }
@@ -320,14 +426,16 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 	kkPolygon* new_polygon = kkCreate<kkPolygon>();
 	
 	auto positionSize = gi->m_position.size();
-	if(gi->m_normal.size())
+	bool withNormals = gi->m_normal.size() > 0;
+	bool withTCoords = gi->m_tcoords.size() > 0;
+	/*if(gi->m_normal.size())
 	{
 		new_polygon->m_normals = (v3f*)kkMemory::allocateAligned(sizeof(v3f)*positionSize,4);
 	}
 	if(gi->m_tcoords.size())
 	{
 		new_polygon->m_tcoords = (v2f*)kkMemory::allocateAligned(sizeof(v2f)*positionSize,4);
-	}
+	}*/
 
 	for( u64 i = 0; i < positionSize; ++i )
 	{
@@ -335,9 +443,9 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 		VertexHash vh;
 		vh.set(&pos);
 
-		if(new_polygon->m_normals)
+		if(withNormals)
 		{
-			new_polygon->m_normals[i] = gi->m_normal[i];
+			new_polygon->m_normals.push_back( gi->m_normal[i] );
 			if( flip )
 			{
 				new_polygon->m_normals[i].x = -new_polygon->m_normals[i].x;
@@ -345,9 +453,9 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 				new_polygon->m_normals[i].z = -new_polygon->m_normals[i].z;
 			}
 		}
-		if(new_polygon->m_tcoords)
+		if(withTCoords)
 		{
-			new_polygon->m_tcoords[i] = gi->m_tcoords[i];
+			new_polygon->m_tcoords.push_back( gi->m_tcoords[i] );
 		}
 
 		kkVertex * new_vertex = nullptr;
@@ -556,9 +664,14 @@ void PolygonalModel::generateNormals(bool flat)
 	auto current_polygon = m_polygons;
 	for( size_t i = 0; i < m_polygonsCount; ++i )
 	{
-		if(!current_polygon->m_normals)
+		if(current_polygon->m_normals.size() != current_polygon->m_vertexCount)
 		{
-			current_polygon->m_normals = (v3f*)kkMemory::allocateAligned(sizeof(v3f)*current_polygon->m_vertexCount,4);
+			while (true)
+			{
+				current_polygon->m_normals.push_back(v3f());
+				if(current_polygon->m_normals.size() == current_polygon->m_vertexCount)
+					break;
+			}
 		}
 		for( u64 i2 = 0; i2 < current_polygon->m_vertexCount; ++i2 )
 		{
@@ -807,42 +920,37 @@ void PolygonalModel::prepareForRaytracing(kkRenderInfo* ri)
 			kkVertex * vertex3 = v_node1->m_element;
 			kkVertex * vertex2 = v_node2->m_element;
 
-			//auto e1 = vertex2->m_position - base_vertex->m_position;
-			//auto e2 = vertex3->m_position - base_vertex->m_position;
-
 			kkTriangleRayTestResult rtr;
 			rtr.triangle.v1 = math::mul( base_vertex->m_position, matrix) + pivot;
 			rtr.triangle.v2 = math::mul( vertex2->m_position, matrix) + pivot;
 			rtr.triangle.v3 = math::mul( vertex3->m_position, matrix) + pivot;
 			rtr.triangle.update();
-			/*rtr.triangle.e1 = e1;
-			rtr.triangle.e2 = e2;*/
 
 			index2  = i2+1;
 			index3  = index2 + 1;
 			if( index3 == current_polygon->m_vertexCount )
 				index3 = 0;
 
-			if(current_polygon->m_normals)
+			if(current_polygon->m_normals.size())
 			{
 				rtr.triangle.normal1._f32[0] = current_polygon->m_normals[ 0 ].x;
 				rtr.triangle.normal1._f32[1] = current_polygon->m_normals[ 0 ].y;
 				rtr.triangle.normal1._f32[2] = current_polygon->m_normals[ 0 ].z;
-				rtr.triangle.normal2._f32[0] = current_polygon->m_normals[ index2 ].x;
-				rtr.triangle.normal2._f32[1] = current_polygon->m_normals[ index2 ].y;
-				rtr.triangle.normal2._f32[2] = current_polygon->m_normals[ index2 ].z;
-				rtr.triangle.normal3._f32[0] = current_polygon->m_normals[ index3 ].x;
-				rtr.triangle.normal3._f32[1] = current_polygon->m_normals[ index3 ].y;
-				rtr.triangle.normal3._f32[2] = current_polygon->m_normals[ index3 ].z;
+				rtr.triangle.normal2._f32[0] = current_polygon->m_normals[ index3 ].x;
+				rtr.triangle.normal2._f32[1] = current_polygon->m_normals[ index3 ].y;
+				rtr.triangle.normal2._f32[2] = current_polygon->m_normals[ index3 ].z;
+				rtr.triangle.normal3._f32[0] = current_polygon->m_normals[ index2 ].x;
+				rtr.triangle.normal3._f32[1] = current_polygon->m_normals[ index2 ].y;
+				rtr.triangle.normal3._f32[2] = current_polygon->m_normals[ index2 ].z;
 			}
-			if(current_polygon->m_tcoords)
+			if(current_polygon->m_tcoords.size())
 			{
 				rtr.triangle.t1._f32[0] = current_polygon->m_tcoords[ 0 ].x;
 				rtr.triangle.t1._f32[1] = current_polygon->m_tcoords[ 0 ].y;
-				rtr.triangle.t2._f32[0] = current_polygon->m_tcoords[ index2 ].x;
-				rtr.triangle.t2._f32[1] = current_polygon->m_tcoords[ index2 ].y;
-				rtr.triangle.t3._f32[0] = current_polygon->m_tcoords[ index3 ].x;
-				rtr.triangle.t3._f32[1] = current_polygon->m_tcoords[ index3 ].y;
+				rtr.triangle.t2._f32[0] = current_polygon->m_tcoords[ index3 ].x;
+				rtr.triangle.t2._f32[1] = current_polygon->m_tcoords[ index3 ].y;
+				rtr.triangle.t3._f32[0] = current_polygon->m_tcoords[ index2 ].x;
+				rtr.triangle.t3._f32[1] = current_polygon->m_tcoords[ index2 ].y;
 			}
 
 			kkAabb taabb;
@@ -1116,7 +1224,6 @@ void PolygonalModel::_rayTestTriangle( std::vector<kkTriangleRayTestResult>& out
 		T.intersectionPoint = ray.m_origin + ray.m_direction * len;
 		T.length = len;
 		T.material = renderObjectMaterial;
-		//triangle->object = 
 		outTriangles.push_back(T);
 	}
 }
@@ -1172,7 +1279,7 @@ void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertM
 	auto other_polygon = other->m_polygons;
 	for( u64 i = 0; i < other->m_polygonsCount; ++i )
 	{
-		if(other_polygon->m_normals)
+		if(other_polygon->m_normals.size())
 		{
 			for( u64 i2 = 0; i2 < other_polygon->m_vertexCount; ++i2 )
 			{
@@ -1267,4 +1374,100 @@ bool PolygonalModel::breakVerts()
 		_addVertexToList(newVerts[i]);
 	}
 	return newVerts.size() != 0;
+}
+
+kkEdge* PolygonalModel::isEdge(kkVertex* V1, kkVertex* V2)
+{
+	auto edge = m_edges;
+	for(u32 i = 0; i < m_edgesCount; ++i)
+	{
+		if((edge->m_v1 == V1 && edge->m_v2 == V2)
+			|| (edge->m_v1 == V2 && edge->m_v2 == V1))
+		{
+			return edge;
+		}
+		edge = edge->m_mainNext;
+	}
+	return nullptr;
+}
+bool PolygonalModel::isOnEdge(kkVertex* V)
+{
+	auto E = V->m_edges;
+	for(u32 i = 0; i < V->m_edgeCount; ++i)
+	{
+		if((E->m_element->m_p1 && !E->m_element->m_p2)
+			|| (!E->m_element->m_p1 && E->m_element->m_p2))
+			return true;
+		E = E->m_right;
+	}
+	return false;
+}
+bool PolygonalModel::weld(kkVertex* V1, kkVertex* V2)
+{
+	//// есть 2 случая, когда надо делать weld
+	//// 1. когда точки образуют ребро
+	//// 2. когда хоть 1 ребро у каждой точки имеет только 1 полигон на стороне (то есть точка как бы снаружи)
+	bool result = false;
+	auto edge = isEdge(V1, V2);
+	if(edge)
+	{
+		// нужно взять полигоны вершины, такие,
+		// которые не являются частью ребра
+		// и заменить вершину полигона которая потом
+		// будетт удалена (V1) на вершину V2
+		auto V1PolygonNode = V1->m_polygons;
+		for(u32 i = 0; i < V1->m_polygonCount; ++i)
+		{
+			if(V1PolygonNode->m_element != edge->m_p1
+				&& V1PolygonNode->m_element != edge->m_p2)
+			{
+				// заменить вершину
+				kkPolygon_replaceVertex(V1, V2, V1PolygonNode->m_element);
+				// и добавить полигон в вершину V2
+				kkVertex_addPolygon(V2,V1PolygonNode->m_element);
+				kkPolygon_calculateNormals(V1PolygonNode->m_element);
+				result = true;
+			}
+			V1PolygonNode = V1PolygonNode->m_right;
+		}
+		// потом, нужно удалить V1 из полигонов ребра
+		if(edge->m_p1)
+		{
+			kkPolygon_removeVertex(V1,edge->m_p1);
+			// если у полигона остаётся 2 вершины то нужно удалить полигон
+			if(edge->m_p1->m_vertexCount < 3)
+				DeletePolygon(edge->m_p1);
+			result = true;
+		}
+		if(edge->m_p2)
+		{
+			kkPolygon_removeVertex(V1,edge->m_p2);
+			if(edge->m_p2->m_vertexCount < 3)
+				DeletePolygon(edge->m_p2);
+			result = true;
+		}
+		_removeVertexFromList(V1);
+		kkDestroy(V1);
+	}
+	else
+	{
+		// если вершины на краю
+		if(isOnEdge(V1) && isOnEdge(V2))
+		{
+			// беру полигоны вершины V1 и заменяю в нём вершину V1 на вершину V2
+			auto P = V1->m_polygons;
+			for(u32 i = 0; i < V1->m_polygonCount; ++i)
+			{
+				kkPolygon_replaceVertex(V1, V2, P->m_element);
+				kkVertex_addPolygon(V2,P->m_element); // потом добавить этот полигон в вершину V2
+				kkPolygon_calculateNormals(P->m_element);
+				result = true;
+				P = P->m_right;
+			}
+
+			_removeVertexFromList(V1);
+			kkDestroy(V1);
+		}
+	}
+	return result;
 }

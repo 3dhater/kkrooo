@@ -50,8 +50,11 @@ struct kkPolygon
 
 	kkVector4 m_facenormal;
 
-	v3f * m_normals = nullptr;
+	/*v3f * m_normals = nullptr;
 	v2f * m_tcoords = nullptr;
+	u32 m_elementsAllocated = 0;*/
+	kkArray<v3f> m_normals = kkArray<v3f>(4);
+	kkArray<v2f> m_tcoords = kkArray<v2f>(4);
 
 	enum _flags
 	{

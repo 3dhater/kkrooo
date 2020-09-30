@@ -389,6 +389,7 @@ bool ViewportObject::updateInputCamera(bool inFocus)
 			}
 		}
 	}
+	processShortcuts();
 	return res;
 }
 // return true if this viewport set focus
@@ -623,7 +624,6 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	/*if( g_mouseState.LMB_DOWN && m_cursorInRect )
 	{
 	}*/
-	processShortcuts();
 }
 
 kkVertex* ViewportObject::pickVertex(kkScene3DObject** object)
