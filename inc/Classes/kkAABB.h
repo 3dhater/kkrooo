@@ -35,6 +35,17 @@ public:
 		if( point.KK_Z > m_max.KK_Z ) m_max.KK_Z = point.KK_Z;
 	}
 
+	void add( const v3f& point )
+	{
+		if( point.x < m_min.KK_X ) m_min.KK_X = point.x;
+		if( point.y < m_min.KK_Y ) m_min.KK_Y = point.y;
+		if( point.z < m_min.KK_Z ) m_min.KK_Z = point.z;
+
+		if( point.x > m_max.KK_X ) m_max.KK_X = point.x;
+		if( point.y > m_max.KK_Y ) m_max.KK_Y = point.y;
+		if( point.z > m_max.KK_Z ) m_max.KK_Z = point.z;
+	}
+
 	void add( const kkAabb& box )
 	{
 		if( box.m_min.KK_X < m_min.KK_X ) m_min.KK_X = box.m_min.KK_X;

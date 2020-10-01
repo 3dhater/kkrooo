@@ -4,8 +4,6 @@
 #include "Classes/Math/kkVector4.h"
 #include "Classes/Containers/kkList.h"
 
-//void kkVertex_addPolygon(kkVertex*, kkPolygon*);
-
 template<typename T>
 struct kkLoopNode
 {
@@ -15,6 +13,7 @@ struct kkLoopNode
 	T * m_element = nullptr;
 };
 
+#pragma pack(1)
 struct kkEdge
 {
 	// предидущий\следующий в главном списке
@@ -33,9 +32,11 @@ struct kkEdge
 	{
 		EF_SELECTED = 1
 	};
-	u32 m_flags = 0;
+	u8 m_flags = 0;
 };
+#pragma pack()
 
+#pragma pack(1)
 struct kkPolygon
 {
 	// предидущий\следующий в главном списке
@@ -43,31 +44,29 @@ struct kkPolygon
 	kkPolygon* m_mainNext = nullptr;
 
 	kkLoopNode<kkVertex> * m_verts = nullptr;
-	u64        m_vertexCount = 0;
-
 	kkLoopNode<kkEdge> * m_edges = nullptr;
-	u64 m_edgeCount = 0;
+	u16 m_vertexCount = 0;
+	u16 m_edgeCount = 0;
 
-	kkVector4 m_facenormal;
+	v3f m_facenormal;
 
-	/*v3f * m_normals = nullptr;
-	v2f * m_tcoords = nullptr;
-	u32 m_elementsAllocated = 0;*/
-	kkArray<v3f> m_normals = kkArray<v3f>(4);
-	kkArray<v2f> m_tcoords = kkArray<v2f>(4);
+	kkArraySmall<v3f> m_normals;
+	kkArraySmall<v2f> m_tcoords;
 
 	enum _flags
 	{
 		EF_SELECTED = 1
 	};
-	u32 m_flags = 0;
+	u8 m_flags = 0;
 };
+#pragma pack()
 
+#pragma pack(1)
 struct kkVertex
 {
-	kkVector4 m_position;
-	kkVector4 m_positionFix;
-	kkVector4 m_normal;
+	v3f m_position;
+	v3f m_positionFix;
+	v3f m_normal;
 	//kkVector4 m_normalFix;
 
 	// предидущий\следующий в главном списке
@@ -75,30 +74,30 @@ struct kkVertex
 	kkVertex* m_mainNext = nullptr;
 	
 	kkLoopNode<kkPolygon> * m_polygons = nullptr;
-	u32 m_polygonCount = 0;
+	u16 m_polygonCount = 0;
 	
 	kkLoopNode<kkEdge> * m_edges = nullptr;
-	u32 m_edgeCount = 0;
+	u16 m_edgeCount = 0;
 
 	// Индекс software модели для точек
-	u32 m_pointsModelIndex = 0;
-	u32 m_pointsVertexIndex = 0;
+	u16 m_pointsModelIndex = 0;
+	u16 m_pointsVertexIndex = 0;
 
 	// при создании software модели нужно запомнить индекс вершины (в software буфере)
 	//   чтобы потом иметь возможно быстро найти нужную вершину
 	// значение устанавливается при перестройке модели
-	std::vector<std::pair<u32,u32>> m_vertexIndexForSoftware      ; // вершина полигона может создавать множество hardware точек
+	kkArraySmall<std::pair<u16,u16>> m_vertexIndexForSoftware      ; // вершина полигона может создавать множество hardware точек
 	                                             // перед перестройкой модели нужно очищать список
 	                                             // индекс в мешбуфере, индекс софтваре модели
-	std::vector<std::pair<u32,u32>> m_vertexIndexForSoftware_lines;
+	kkArraySmall<std::pair<u16,u16>> m_vertexIndexForSoftware_lines;
 
 	enum _flags
 	{
 		EF_SELECTED = 1
 	};
-	u32 m_flags = 0;
-
+	u8 m_flags = 0;
 };
+#pragma pack()
 
 struct kkTriangle
 {

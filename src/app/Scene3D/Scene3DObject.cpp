@@ -172,7 +172,7 @@ void Scene3DObject::_createSoftwareModel_polys()
 		}
 		auto v_node1 = current_polygon->m_verts->m_right;
 		auto v_node2 = v_node1->m_right;
-		for( u64 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
+		for( u16 i2 = 0, sz2 = current_polygon->m_vertexCount - 2; i2 < sz2; ++i2 )
 		{
 			kkVertex * vertex3 = v_node1->m_element;
 			kkVertex * vertex2 = v_node2->m_element;
@@ -189,9 +189,9 @@ void Scene3DObject::_createSoftwareModel_polys()
 			
 
 			verts_ptr->Color = color;
-			verts_ptr->Position.x = base_vertex->m_position._f32[0];
-			verts_ptr->Position.y = base_vertex->m_position._f32[1];
-			verts_ptr->Position.z = base_vertex->m_position._f32[2];
+			verts_ptr->Position.x = base_vertex->m_position.x;
+			verts_ptr->Position.y = base_vertex->m_position.y;
+			verts_ptr->Position.z = base_vertex->m_position.z;
 			if(current_polygon->m_normals.size())
 			{
 				verts_ptr->Normal   = current_polygon->m_normals[0];
@@ -209,9 +209,9 @@ void Scene3DObject::_createSoftwareModel_polys()
 			++verts_ptr;
 
 			verts_ptr->Color = color;
-			verts_ptr->Position.x = vertex2->m_position._f32[0];
-			verts_ptr->Position.y = vertex2->m_position._f32[1];
-			verts_ptr->Position.z = vertex2->m_position._f32[2];
+			verts_ptr->Position.x = vertex2->m_position.x;
+			verts_ptr->Position.y = vertex2->m_position.y;
+			verts_ptr->Position.z = vertex2->m_position.z;
 			if(current_polygon->m_normals.size())
 			{
 				verts_ptr->Normal   = current_polygon->m_normals[i2+2];
@@ -229,9 +229,9 @@ void Scene3DObject::_createSoftwareModel_polys()
 			++verts_ptr;
 
 			verts_ptr->Color = color;
-			verts_ptr->Position.x = vertex3->m_position._f32[0];
-			verts_ptr->Position.y = vertex3->m_position._f32[1];
-			verts_ptr->Position.z = vertex3->m_position._f32[2];
+			verts_ptr->Position.x = vertex3->m_position.x;
+			verts_ptr->Position.y = vertex3->m_position.y;
+			verts_ptr->Position.z = vertex3->m_position.z;
 			if(current_polygon->m_normals.size())
 			{
 				verts_ptr->Normal   = current_polygon->m_normals[i2+1];
@@ -373,9 +373,9 @@ void Scene3DObject::_createSoftwareModel_edges()
 			index = 0;
 		}
 		
-		verts_ptr->_position.x  = E->m_v1->m_position.KK_X;
-		verts_ptr->_position.y  = E->m_v1->m_position.KK_Y;
-		verts_ptr->_position.z  = E->m_v1->m_position.KK_Z;
+		verts_ptr->_position.x  = E->m_v1->m_position.x;
+		verts_ptr->_position.y  = E->m_v1->m_position.y;
+		verts_ptr->_position.z  = E->m_v1->m_position.z;
 
 		v4f color(1.f,1.f,1.f,1.f);
 		if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Edge )
@@ -397,9 +397,9 @@ void Scene3DObject::_createSoftwareModel_edges()
 		++inds_ptr;
 		++index;
 
-		verts_ptr->_position.x  = E->m_v2->m_position.KK_X;
-		verts_ptr->_position.y  = E->m_v2->m_position.KK_Y;
-		verts_ptr->_position.z  = E->m_v2->m_position.KK_Z;
+		verts_ptr->_position.x  = E->m_v2->m_position.x;
+		verts_ptr->_position.y  = E->m_v2->m_position.y;
+		verts_ptr->_position.z  = E->m_v2->m_position.z;
 		verts_ptr->_color = color;
 		*inds_ptr = index;
 		
@@ -792,7 +792,7 @@ void Scene3DObject::applyMatrices()
 		for( size_t i = 0; i < m_polyModel->m_polygonsCount; ++i )
 		{
 			//auto PN = P->m_normals;
-			for( size_t i2 = 0; i2 < P->m_vertexCount; ++i2 )
+			for( u16 i2 = 0; i2 < P->m_vertexCount; ++i2 )
 			{
 				P->m_normals[i2] = math::mul(P->m_normals[i2], TIM);
 			}
@@ -850,6 +850,7 @@ void Scene3DObject::deleteSelectedPolys()
 			}
 			P = P->m_mainNext;
 		}
+		m_polyModel->deleteEdges();
 		for(auto P : polys)
 		{
 			m_polyModel->DeletePolygon(P);
@@ -887,6 +888,7 @@ void Scene3DObject::deleteSelectedEdges()
 			}
 			E = E->m_mainNext;
 		}
+		m_polyModel->deleteEdges();
 		for(auto P : polys)
 		{
 			m_polyModel->DeletePolygon(P);
@@ -918,7 +920,7 @@ void Scene3DObject::deleteSelectedVerts()
 			if(V->m_flags & V->EF_SELECTED)
 			{
 				auto VP = V->m_polygons;
-				for( size_t i2 = 0; i2 < V->m_polygonCount; ++i2 )
+				for( u16 i2 = 0; i2 < V->m_polygonCount; ++i2 )
 				{
 					polys.insert(VP->m_element);
 					VP = VP->m_right;
@@ -926,6 +928,8 @@ void Scene3DObject::deleteSelectedVerts()
 			}
 			V = V->m_mainNext;
 		}
+
+		m_polyModel->deleteEdges();
 		for(auto P : polys)
 		{
 			m_polyModel->DeletePolygon(P);

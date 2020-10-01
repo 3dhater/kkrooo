@@ -61,26 +61,20 @@ void Scene3DObject::moveVerts(const kkVector4& v, std::unordered_set<kkVertex*>&
 		{
 			verts_ptr       = (DefaultVert*)m_SoftwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ]->m_vertices;
 			verts_ptr = verts_ptr + vertex->m_vertexIndexForSoftware[k].first;
-			verts_ptr->Position.x = vertex->m_position.KK_X;
-			verts_ptr->Position.y = vertex->m_position.KK_Y;
-			verts_ptr->Position.z = vertex->m_position.KK_Z;
+			verts_ptr->Position = vertex->m_position;
 			hardware_models_for_update.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ],m_SoftwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ]));
 		}
 		for( u64 k = 0, ks = vertex->m_vertexIndexForSoftware_lines.size(); k < ks; ++k )
 		{
 			verts_lines_ptr       = (LineModelVertex*)m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]->m_vertices;
 			verts_lines_ptr = verts_lines_ptr + vertex->m_vertexIndexForSoftware_lines[k].first;
-			verts_lines_ptr->_position.x = vertex->m_position.KK_X;
-			verts_lines_ptr->_position.y = vertex->m_position.KK_Y;
-			verts_lines_ptr->_position.z = vertex->m_position.KK_Z;
+			verts_lines_ptr->_position = vertex->m_position;
 			hardware_models_for_update_lines.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ],m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]));
 		}
 
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ vertex->m_pointsModelIndex ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + vertex->m_pointsVertexIndex;
-		verts_points_ptr->_pos.x = vertex->m_position.KK_X;
-		verts_points_ptr->_pos.y = vertex->m_position.KK_Y;
-		verts_points_ptr->_pos.z = vertex->m_position.KK_Z;
+		verts_points_ptr->_pos = vertex->m_position;
 		hardware_models_for_update_points.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_points[ vertex->m_pointsModelIndex ],
 			m_SoftwareModels_points[ vertex->m_pointsModelIndex ]));
 	}
@@ -155,7 +149,6 @@ void Scene3DObject::rotateVerts(const kkMatrix4& m, std::unordered_set<kkVertex*
 	{
 		// сначала меняю координату полигональной модели
 		auto V = vertex->m_positionFix - C;
-		V.KK_W = 1.f;
 		vertex->m_position = math::mul(V,M) + C;
 
 		// потом меняю сетку для software модели и потом кидаю её в hardware
@@ -164,25 +157,19 @@ void Scene3DObject::rotateVerts(const kkMatrix4& m, std::unordered_set<kkVertex*
 		{
 			verts_ptr       = (DefaultVert*)m_SoftwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ]->m_vertices;
 			verts_ptr = verts_ptr + vertex->m_vertexIndexForSoftware[k].first;
-			verts_ptr->Position.x = vertex->m_position.KK_X;
-			verts_ptr->Position.y = vertex->m_position.KK_Y;
-			verts_ptr->Position.z = vertex->m_position.KK_Z;
+			verts_ptr->Position = vertex->m_position;
 			hardware_models_for_update.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ],m_SoftwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ]));
 		}
 		for( u64 k = 0, ks = vertex->m_vertexIndexForSoftware_lines.size(); k < ks; ++k )
 		{
 			verts_lines_ptr       = (LineModelVertex*)m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]->m_vertices;
 			verts_lines_ptr = verts_lines_ptr + vertex->m_vertexIndexForSoftware_lines[k].first;
-			verts_lines_ptr->_position.x = vertex->m_position.KK_X;
-			verts_lines_ptr->_position.y = vertex->m_position.KK_Y;
-			verts_lines_ptr->_position.z = vertex->m_position.KK_Z;
+			verts_lines_ptr->_position = vertex->m_position;
 			hardware_models_for_update_lines.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ],m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]));
 		}
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ vertex->m_pointsModelIndex ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + vertex->m_pointsVertexIndex;
-		verts_points_ptr->_pos.x = vertex->m_position.KK_X;
-		verts_points_ptr->_pos.y = vertex->m_position.KK_Y;
-		verts_points_ptr->_pos.z = vertex->m_position.KK_Z;
+		verts_points_ptr->_pos = vertex->m_position;
 		hardware_models_for_update_points.insert(
 			std::pair<kkMesh*,kkSMesh*>(
 				m_HardwareModels_points[ vertex->m_pointsModelIndex ],
@@ -267,25 +254,19 @@ void Scene3DObject::scaleVerts(const kkMatrix4& m, std::unordered_set<kkVertex*>
 		{
 			verts_ptr       = (DefaultVert*)m_SoftwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ]->m_vertices;
 			verts_ptr = verts_ptr + vertex->m_vertexIndexForSoftware[k].first;
-			verts_ptr->Position.x = vertex->m_position.KK_X;
-			verts_ptr->Position.y = vertex->m_position.KK_Y;
-			verts_ptr->Position.z = vertex->m_position.KK_Z;
+			verts_ptr->Position = vertex->m_position;
 			hardware_models_for_update.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ],m_SoftwareModels_polys[ vertex->m_vertexIndexForSoftware[k].second ]));
 		}
 		for( u64 k = 0, ks = vertex->m_vertexIndexForSoftware_lines.size(); k < ks; ++k )
 		{
 			verts_lines_ptr       = (LineModelVertex*)m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]->m_vertices;
 			verts_lines_ptr = verts_lines_ptr + vertex->m_vertexIndexForSoftware_lines[k].first;
-			verts_lines_ptr->_position.x = vertex->m_position.KK_X;
-			verts_lines_ptr->_position.y = vertex->m_position.KK_Y;
-			verts_lines_ptr->_position.z = vertex->m_position.KK_Z;
+			verts_lines_ptr->_position = vertex->m_position;
 			hardware_models_for_update_lines.insert(std::pair<kkMesh*,kkSMesh*>(m_HardwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ],m_SoftwareModels_edges[ vertex->m_vertexIndexForSoftware_lines[k].second ]));
 		}
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ vertex->m_pointsModelIndex ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + vertex->m_pointsVertexIndex;
-		verts_points_ptr->_pos.x = vertex->m_position.KK_X;
-		verts_points_ptr->_pos.y = vertex->m_position.KK_Y;
-		verts_points_ptr->_pos.z = vertex->m_position.KK_Z;
+		verts_points_ptr->_pos = vertex->m_position;
 		hardware_models_for_update_points.insert(
 			std::pair<kkMesh*,kkSMesh*>(
 				m_HardwareModels_points[ vertex->m_pointsModelIndex ],
@@ -353,9 +334,7 @@ void Scene3DObject::RestorePosition()
 		{
 			verts_ptr       = (DefaultVert*)m_SoftwareModels_polys[ current_vertex->m_vertexIndexForSoftware[k].second ]->m_vertices;
 			verts_ptr = verts_ptr + current_vertex->m_vertexIndexForSoftware[k].first;
-			verts_ptr->Position.x = current_vertex->m_position.KK_X;
-			verts_ptr->Position.y = current_vertex->m_position.KK_Y;
-			verts_ptr->Position.z = current_vertex->m_position.KK_Z;
+			verts_ptr->Position = current_vertex->m_position;
 			hardware_models_for_update.insert(
 				std::pair<kkMesh*,kkSMesh*>(
 					m_HardwareModels_polys[ current_vertex->m_vertexIndexForSoftware[k].second ],
@@ -367,9 +346,7 @@ void Scene3DObject::RestorePosition()
 		{
 			verts_lines_ptr       = (LineModelVertex*)m_SoftwareModels_edges[ current_vertex->m_vertexIndexForSoftware_lines[k].second ]->m_vertices;
 			verts_lines_ptr = verts_lines_ptr + current_vertex->m_vertexIndexForSoftware_lines[k].first;
-			verts_lines_ptr->_position.x = current_vertex->m_position.KK_X;
-			verts_lines_ptr->_position.y = current_vertex->m_position.KK_Y;
-			verts_lines_ptr->_position.z = current_vertex->m_position.KK_Z;
+			verts_lines_ptr->_position = current_vertex->m_position;
 			hardware_models_for_update_lines.insert(
 				std::pair<kkMesh*,kkSMesh*>(
 					m_HardwareModels_edges[ current_vertex->m_vertexIndexForSoftware_lines[k].second ],
@@ -380,9 +357,7 @@ void Scene3DObject::RestorePosition()
 	
 		verts_points_ptr = (verts_points*)m_SoftwareModels_points[ current_vertex->m_pointsModelIndex ]->m_vertices;
 		verts_points_ptr = verts_points_ptr + current_vertex->m_pointsVertexIndex;
-		verts_points_ptr->_pos.x = current_vertex->m_position.KK_X;
-		verts_points_ptr->_pos.y = current_vertex->m_position.KK_Y;
-		verts_points_ptr->_pos.z = current_vertex->m_position.KK_Z;
+		verts_points_ptr->_pos = current_vertex->m_position;
 		hardware_models_for_update_points.insert(
 			std::pair<kkMesh*,kkSMesh*>(
 				m_HardwareModels_points[ current_vertex->m_pointsModelIndex ],

@@ -19,15 +19,15 @@ void kkPolygon_calculateNormals(kkPolygon* P)
 		return;
 
 	kkVector4 e1, e2, no;
-	for( u32 i = 0; i < P->m_vertexCount; ++i )
+	for( u16 i = 0; i < P->m_vertexCount; ++i )
 	{
 		P->m_normals[i].set(0.f,0.f,0.f);
 	}
 	kkVertex * base_vertex = P->m_verts->m_element;
 	auto v_node1 = P->m_verts->m_right;
 	auto v_node2 = v_node1->m_right;
-	u64 index2, index3;
-	for( u64 i2 = 0, sz2 = P->m_vertexCount - 2; i2 < sz2; ++i2 )
+	u16 index2, index3;
+	for( u16 i2 = 0, sz2 = P->m_vertexCount - 2; i2 < sz2; ++i2 )
 	{
 		kkVertex * vertex3 = v_node1->m_element;
 		kkVertex * vertex2 = v_node2->m_element;
@@ -56,18 +56,16 @@ void kkPolygon_calculateNormals(kkPolygon* P)
 		v_node2 = v_node2->m_right;
 	}
 
-	for( u64 i2 = 0; i2 < P->m_vertexCount; ++i2 )
+	for( u16 i2 = 0; i2 < P->m_vertexCount; ++i2 )
 	{
 		P->m_normals[i2].normalize2();
 	}
-	P->m_facenormal._f32[0] = P->m_normals[ 0 ].x;
-	P->m_facenormal._f32[1] = P->m_normals[ 0 ].y;
-	P->m_facenormal._f32[2] = P->m_normals[ 0 ].z;
+	P->m_facenormal = P->m_normals[ 0 ];
 }
 void kkPolygon_replaceVertex(kkVertex* old_vertex, kkVertex* new_vertex, kkPolygon* p)
 {
 	auto vertex = p->m_verts;
-	for(u32 i = 0; i < p->m_vertexCount; ++i)
+	for(u16 i = 0; i < p->m_vertexCount; ++i)
 	{
 		if(vertex->m_element == old_vertex)
 		{
@@ -83,7 +81,7 @@ void kkVertex_removeOtherPolygons(kkVertex* v)
 	if(v->m_polygonCount>1)
 	{
 		auto P = v->m_polygons->m_right;
-		for(u32 i = 1; i < v->m_polygonCount; ++i)
+		for(u16 i = 1; i < v->m_polygonCount; ++i)
 		{
 			auto next = P->m_right;
 			kkDestroy(P);
@@ -269,7 +267,7 @@ PolygonalModel::PolygonalModel()
 }
 PolygonalModel::~PolygonalModel()
 {
-	_deleteEdges();
+	deleteEdges();
 	while(m_polygons)
 	{
 		DeletePolygon(m_polygons);
@@ -425,7 +423,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 	}
 	kkPolygon* new_polygon = kkCreate<kkPolygon>();
 	
-	auto positionSize = gi->m_position.size();
+	u16 positionSize = (u16)gi->m_position.size();
 	bool withNormals = gi->m_normal.size() > 0;
 	bool withTCoords = gi->m_tcoords.size() > 0;
 	/*if(gi->m_normal.size())
@@ -437,7 +435,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 		new_polygon->m_tcoords = (v2f*)kkMemory::allocateAligned(sizeof(v2f)*positionSize,4);
 	}*/
 
-	for( u64 i = 0; i < positionSize; ++i )
+	for( u16 i = 0; i < positionSize; ++i )
 	{
 		auto & pos = gi->m_position[i];
 		VertexHash vh;
@@ -465,7 +463,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 			if( find_result == m_weldMap.end() )
 			{
 				new_vertex = kkCreate<kkVertex>();
-				new_vertex->m_position.set(pos.x, pos.y, pos.z, 1.f);
+				new_vertex->m_position.set(pos.x, pos.y, pos.z);
 				new_vertex->m_positionFix = new_vertex->m_position;
 				m_weldMap[vh.str] = new_vertex;
 				_addVertexToList(new_vertex);
@@ -478,7 +476,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 		else
 		{
 			new_vertex = kkCreate<kkVertex>();
-			new_vertex->m_position.set(pos.x, pos.y, pos.z, 1.f);
+			new_vertex->m_position.set(pos.x, pos.y, pos.z);
 			new_vertex->m_positionFix = new_vertex->m_position;
 			_addVertexToList(new_vertex);
 		}
@@ -487,7 +485,7 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 	}
 	_addPolygonToList(new_polygon);
 }
-void PolygonalModel::_deleteEdges()
+void PolygonalModel::deleteEdges()
 {
 	if(!m_edgesCount)
 		return;
@@ -506,7 +504,7 @@ void PolygonalModel::_deleteEdges()
 		if(P->m_edgeCount)
 		{
 			auto PE_node = P->m_edges;
-			for(u64 o = 0; o < P->m_edgeCount; ++o)
+			for(u16 o = 0; o < P->m_edgeCount; ++o)
 			{
 				auto next = PE_node->m_right;
 				kkDestroy(PE_node);
@@ -523,7 +521,7 @@ void PolygonalModel::_deleteEdges()
 		if(V->m_edgeCount)
 		{
 			auto VE_node = V->m_edges;
-			for(u64 o = 0; o < V->m_edgeCount; ++o)
+			for(u16 o = 0; o < V->m_edgeCount; ++o)
 			{
 				auto next = VE_node->m_right;
 				kkDestroy(VE_node);
@@ -538,7 +536,7 @@ void PolygonalModel::_deleteEdges()
 void PolygonalModel::updateEdges()
 {
 	if(m_edges)
-		_deleteEdges();
+		deleteEdges();
 	if(!m_polygons)
 		return;
 	auto polygon = m_polygons;
@@ -659,7 +657,7 @@ void PolygonalModel::generateNormals(bool flat)
 {
 	kkLogWriteInfo("Generate normals.\n");
 	// flat
-	kkVector4 e1, e2, no;
+	v3f e1, e2, no;
 
 	auto current_polygon = m_polygons;
 	for( size_t i = 0; i < m_polygonsCount; ++i )
@@ -689,22 +687,16 @@ void PolygonalModel::generateNormals(bool flat)
 			e1 = vertex2->m_position - base_vertex->m_position;
 			e2 = vertex3->m_position - base_vertex->m_position;
 			//no;
-			e1.cross(e2, no);
+			no = e1.cross_return(e2);
 
 			index2  = i2+1;
 			index3  = index2 + 1;
 			if( index3 == current_polygon->m_vertexCount )
 				index3 = 0;
 
-			current_polygon->m_normals[ 0 ].x -= no._f32[0];
-			current_polygon->m_normals[ 0 ].y -= no._f32[1];
-			current_polygon->m_normals[ 0 ].z -= no._f32[2];
-			current_polygon->m_normals[ index2 ].x -= no._f32[0];
-			current_polygon->m_normals[ index2 ].y -= no._f32[1];
-			current_polygon->m_normals[ index2 ].z -= no._f32[2];
-			current_polygon->m_normals[ index3 ].x -= no._f32[0];
-			current_polygon->m_normals[ index3 ].y -= no._f32[1];
-			current_polygon->m_normals[ index3 ].z -= no._f32[2];
+			current_polygon->m_normals[ 0 ] -= no;
+			current_polygon->m_normals[ index2 ] -= no;
+			current_polygon->m_normals[ index3 ] -= no;
 
 			base_vertex->m_normal -= no;
 			vertex2->m_normal -= no;
@@ -718,9 +710,7 @@ void PolygonalModel::generateNormals(bool flat)
 		{
 			current_polygon->m_normals[i2].normalize2();
 		}
-		current_polygon->m_facenormal._f32[0] = current_polygon->m_normals[ 0 ].x;
-		current_polygon->m_facenormal._f32[1] = current_polygon->m_normals[ 0 ].y;
-		current_polygon->m_facenormal._f32[2] = current_polygon->m_normals[ 0 ].z;
+		current_polygon->m_facenormal = current_polygon->m_normals[ 0 ];
 		current_polygon = current_polygon->m_mainNext;
 	}
 
@@ -1298,7 +1288,7 @@ void PolygonalModel::attachModel(PolygonalModel* other, const kkMatrix4& invertM
 		other_vertex = other_vertex->m_mainNext;
 	}
 
-	other->_deleteEdges();
+	other->deleteEdges();
 
 	auto verts = other->m_verts;
 	auto polys = other->m_polygons;

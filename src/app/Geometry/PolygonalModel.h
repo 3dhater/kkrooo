@@ -238,7 +238,6 @@ class PolygonalModel : public kkPolygonalModel
 	void _addEdgeToList(kkEdge*);
 	void _removeEdgeFromList(kkEdge*);
 
-	void _deleteEdges();
 public:
 	PolygonalModel();
 	virtual ~PolygonalModel();
@@ -247,6 +246,7 @@ public:
 	virtual void DeletePolygon(kkPolygon*);
 	//virtual void DeleteVertex(kkVertex*);
 
+	void deleteEdges();
 	void  AddPolygon(kkGeometryInformation* gi,bool weld, bool flip);
 
 	void calculateTriangleCount();

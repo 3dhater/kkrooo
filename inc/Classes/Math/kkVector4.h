@@ -53,6 +53,8 @@ subject to the following restrictions:
 #define ATTRIBUTE_ALIGNED16(a) a
 #endif
 
+template<typename> class kkv3;
+
 ATTRIBUTE_ALIGNED16(class)
 kkVector4
 {
@@ -73,6 +75,8 @@ public:
 		_f32[ 2 ] = 0.f;
 		_f32[ 3 ] = 0.f;
 	}
+
+	kkVector4(const kkv3<f32>& other);
 
 
 	kkVector4(f32 v)
@@ -803,6 +807,20 @@ public:
 		return r;
 	}
 
+	void operator-=( const kkv3& v )
+	{
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+	}
+
+	void operator+=( const kkv3& v )
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+
 	kkv3 cross_return( const kkv3& a )const{
 		kkv3 r;
 		r.x = (y * a.z) - (z * a.y);
@@ -944,6 +962,14 @@ public:
 using v4i = kkv4<s32>;
 using v4u = kkv4<u32>;
 using v4f = kkv4<f32>;
+
+inline kkVector4::kkVector4(const kkv3<f32>& other)
+{
+	_f32[ 0 ] = other.x;
+	_f32[ 1 ] = other.y;
+	_f32[ 2 ] = other.z;
+	_f32[ 3 ] = 1.f;
+}
 
 namespace math
 {

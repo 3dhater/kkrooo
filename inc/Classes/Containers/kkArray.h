@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-3.0-only
 #ifndef __KKARRAY_H__
 #define __KKARRAY_H__
 
@@ -225,5 +224,169 @@ public:
 	}
 
 };
+
+#pragma pack(1)
+template<typename type>
+class kkArraySmall
+{
+
+	typedef type* pointer;
+	typedef type& reference;
+	typedef const type& const_reference;
+
+	pointer m_data;
+	u16     m_size;
+	u16     m_allocated;
+
+	void reallocate( u64 new_capacity )
+	{
+		new_capacity += 4;
+		//pointer new_data = m_allocator.allocate( new_capacity /** sizeof( type )*/ );
+		pointer new_data = static_cast<type*>(kkMemory::allocate(new_capacity * sizeof( type )));
+
+		if( m_data )
+		{
+			for( u64 i = 0u; i < m_size; ++i )
+			{
+				//m_allocator.construct( &new_data[i], m_data[i] );
+				new(&new_data[i]) type( m_data[i] );
+
+				//m_allocator.destruct( &m_data[i] );
+				(&m_data[i])->~type();
+			}
+
+			//m_allocator.deallocate( m_data );
+			kkMemory::free(m_data);
+		}
+
+		m_data = new_data;
+		m_allocated = new_capacity;
+	}
+
+public:
+
+	pointer begin()
+	{
+		return m_data;
+	}
+
+	pointer end()
+	{
+		return (m_data+(m_size));
+	}
+
+	kkArraySmall(){}
+	~kkArraySmall(){ clear(); }
+		
+	void setData(pointer ptr) { m_data = ptr; }
+	pointer data() const     { return m_data; }
+	void    setSize( u16 s ) { m_size = s; }
+	u64     size() const     { return m_size; }
+	u64     capacity() const { return m_allocated; }
+	bool    empty() const    { return m_size == 0u; }
+
+	const_reference at( u16 id ) const { return m_data[id]; }
+	reference       at( u16 id ){ return m_data[id]; }
+	const_reference operator[]( u16 id ) const { return m_data[id]; }
+	reference       operator[]( u16 id ){ return m_data[id]; }
+	reference       back(){ return m_data[ m_size - 1u ]; }
+	const_reference back() const { return m_data[ m_size - 1u ]; }
+	const_reference front() const { return m_data[ 0u ]; }
+
+	void reserve( u16 new_capacity )
+	{
+		if( new_capacity > m_allocated )
+			reallocate( new_capacity );
+	}
+
+	void push_back( const_reference object )
+	{
+		u16 new_size = m_size + 1u;
+		if( new_size > m_allocated )
+			reallocate( new_size );
+		//m_allocator.construct( &m_data[m_size], object );
+		new(&m_data[m_size]) type( object );
+		m_size = new_size;
+	}
+
+	void insert(u16 where, const_reference object)
+	{
+		u16 new_size = m_size + 1u;
+		if( new_size > m_allocated )
+			reallocate( new_size );
+		for(u16 i = m_size; i > where;)
+		{
+			m_data[i] = m_data[i-1];
+			--i;
+		}
+		//m_allocator.construct( &m_data[where], object );
+		new(&m_data[where]) type( object );
+		m_size = new_size;
+	}
+	
+	void clear()
+	{
+		if( m_data )
+		{
+			for( u16 i = 0u; i < m_size; ++i )
+			{
+				//m_allocator.destruct( &m_data[i] );
+				(&m_data[i])->~type();
+			}
+			//m_allocator.deallocate( m_data );
+			kkMemory::free(m_data);
+
+			m_allocated = m_size = 0u;
+			m_data = nullptr;
+		}
+	}
+
+	void shrink_to_fit()
+	{
+		reallocate( m_size );
+	}
+
+	void erase( u16 index )
+	{
+		erase( index, index );
+	}
+
+	void erase_first( const_reference ref )
+	{
+		for( u16 i = 0u; i < m_size; ++i )
+		{
+			if( m_data[ i ] == ref )
+			{
+				erase( i );
+				return;
+			}
+		}
+	}
+
+	void erase( u16 begin, u16 end )
+	{
+		if( m_size )
+		{
+			u16 last = m_size - 1u;
+			u16 len = end - begin;
+			for( u16 i = begin; i < m_size; ++i )
+			{
+				//m_allocator.destruct( &m_data[ i ] );
+				(&m_data[i])->~type();
+				if( i < last )
+				{
+					u16 next = i + 1u + len;
+					if( next < m_size )
+					{
+						//m_allocator.construct( &m_data[ i ], m_data[ next ] );
+						new(&m_data[i]) type( m_data[ next ] );
+					}
+				}
+			}
+			m_size = m_size - 1u - len;
+		}
+	}
+};
+#pragma pack()
 
 #endif

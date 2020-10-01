@@ -44,7 +44,6 @@ public:
 
 	Type * allocate( u64 size )
 	{
-		//return static_cast<Type*>( malloc(size * sizeof( Type )) );
 		return static_cast<Type*>(m_allocator.allocate(size * sizeof( Type )));
 	}
 
@@ -55,7 +54,6 @@ public:
 
 	void deallocate( Type * ptr )
 	{
-		//free( ptr );
 		m_allocator.free(ptr);
 	}
 
