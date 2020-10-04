@@ -267,6 +267,7 @@ PolygonalModel::PolygonalModel()
 }
 PolygonalModel::~PolygonalModel()
 {
+	ClearNewMesh();
 	deleteEdges();
 	while(m_polygons)
 	{
@@ -406,11 +407,6 @@ void PolygonalModel::DeletePolygon(kkPolygon* p)
 		m_polygons = m_polygons->m_mainNext;
 	_removePolygonFromList(p);
 
-	/*if(p->m_normals)
-		kkMemory::freeAligned(p->m_normals);
-	if(p->m_tcoords)
-		kkMemory::freeAligned(p->m_tcoords);*/
-
 	kkDestroy(p);
 }
 
@@ -426,14 +422,6 @@ void PolygonalModel::AddPolygon(kkGeometryInformation* gi, bool weld, bool flip)
 	u16 positionSize = (u16)gi->m_position.size();
 	bool withNormals = gi->m_normal.size() > 0;
 	bool withTCoords = gi->m_tcoords.size() > 0;
-	/*if(gi->m_normal.size())
-	{
-		new_polygon->m_normals = (v3f*)kkMemory::allocateAligned(sizeof(v3f)*positionSize,4);
-	}
-	if(gi->m_tcoords.size())
-	{
-		new_polygon->m_tcoords = (v2f*)kkMemory::allocateAligned(sizeof(v2f)*positionSize,4);
-	}*/
 
 	for( u16 i = 0; i < positionSize; ++i )
 	{
@@ -542,6 +530,11 @@ void PolygonalModel::updateEdges()
 	auto polygon = m_polygons;
 	for(u64 i = 0; i < m_polygonsCount; ++i )
 	{
+		if(polygon->m_flags & polygon->EF_OLD)
+		{
+			polygon = polygon->m_mainNext;
+			continue;
+		}
 		auto vertex_node1 = polygon->m_verts;
 		auto vertex_node2 = vertex_node1->m_right;
 		for(u64 o = 0; o < polygon->m_vertexCount; ++o )
@@ -1458,6 +1451,174 @@ bool PolygonalModel::weld(kkVertex* V1, kkVertex* V2)
 			_removeVertexFromList(V1);
 			kkDestroy(V1);
 		}
+	}
+	return result;
+}
+
+bool PolygonalModel::ClearNewMesh()
+{
+	bool res = false;
+	auto P = m_polygons;
+	auto End = P->m_mainPrev;
+	u32 count = 0;
+	deleteEdges();
+	while(true)
+	{
+		auto next = P->m_mainNext;
+		if(P->m_flags & P->EF_OLD)
+		{
+			P->m_flags ^= P->EF_OLD;
+			res = true;
+		}
+		if(P->m_flags & P->EF_NEW)
+		{
+			P->m_flags ^= P->EF_NEW;
+			res = true;
+			DeletePolygon(P);
+			++count;
+		}
+
+		if(P == End)
+			break;
+
+		P = next;
+	}
+	if(count)
+	{
+		kkLogWriteInfo("Clear new mesh: [%u] polygons deleted\n", count);
+	}
+	return res;
+}
+
+void PolygonalModel::_createNewMesh()
+{
+	auto V = m_verts;
+	u32 count = 0;
+	for(u64 i = 0; i < m_vertsCount; ++i)
+	{
+		if(V->m_flags & V->EF_CREATENEW)
+		{
+			// беру полигоны текущей вершины
+			auto VP = V->m_polygons;
+			for(u64 k = 0; k < V->m_polygonCount; ++k)
+			{
+				// если ранее я не брал этот полигон то беру
+				if(!(VP->m_element->m_flags & VP->m_element->EF_MODIF))
+				{
+					VP->m_element->m_flags |= VP->m_element->EF_MODIF;
+					VP->m_element->m_flags |= VP->m_element->EF_OLD;
+					// теперь создаю новый полигон на основе этого
+
+					kkPolygon* new_polygon = kkCreate<kkPolygon>();
+					// нужно пройтись по вершинам VP->m_element
+					// если вершина не EF_CREATENEW то это место
+					// где новый полигон соединяется с главной моделью
+					auto PV = VP->m_element->m_verts;
+					for(u64 o = 0; o < VP->m_element->m_vertexCount; ++o)
+					{
+						kkVertex* new_vertex = nullptr;
+						if(PV->m_element->m_flags & PV->m_element->EF_CREATENEW)
+						{
+							VertexHash vh;
+							vh.set(&PV->m_element->m_position);
+
+							auto find_result = m_weldMap.find(vh.str);
+							if( find_result == m_weldMap.end() )
+							{
+								new_vertex = kkCreate<kkVertex>();
+								new_vertex->m_normal = PV->m_element->m_normal;
+								new_vertex->m_position = PV->m_element->m_position;
+								new_vertex->m_positionFix = PV->m_element->m_positionFix;
+								m_weldMap[vh.str] = new_vertex;
+								_addVertexToList(new_vertex);
+							}
+							else
+							{
+								new_vertex = find_result->second;
+							}
+						}
+						else
+						{
+							new_vertex = PV->m_element;
+						}
+						kkPolygon_addVertex(new_vertex, new_polygon);
+						kkVertex_addPolygon(new_vertex, new_polygon);
+						PV = PV->m_right;
+					}
+					new_polygon->m_flags |= new_polygon->EF_NEW;
+					_addPolygonToList(new_polygon);
+					++count;
+				}
+				VP = VP->m_right;
+			}
+		}
+		V = V->m_mainNext;
+	}
+	if(count)
+	{
+		kkLogWriteInfo("Create new mesh: [%u] polygons created\n", count);
+	}
+	V = m_verts;
+	for(u64 i = 0; i < m_vertsCount; ++i)
+	{
+		if(V->m_flags & V->EF_CREATENEW)
+			V->m_flags ^= V->EF_CREATENEW;
+		V = V->m_mainNext;
+	}
+
+	auto P = m_polygons;
+	for(u64 i = 0; i < m_polygonsCount; ++i)
+	{
+		if( P->m_flags & P->EF_MODIF )
+			P->m_flags ^= P->EF_MODIF;
+		P = P->m_mainNext;
+	}
+
+	m_weldMap.clear();
+}
+// создать новые полигоны на основе полигонов выбранных вершин
+// новые полигоны должны будут иметь флаг EF_NEW
+// старые полигоны должны будут иметь флаг EF_OLD
+// после работы над новой сеткой, нужно вызвать ApplyNewMesh
+// или удалить вызвав ClearNewMesh
+bool PolygonalModel::CreateNewMeshFromSelectedVerts()
+{
+	if(GetNumOfSelectedVerts() < 2)
+		return false;
+	auto V = m_verts;
+	for(u64 i = 0; i < m_vertsCount; ++i)
+	{
+		if(V->m_flags & V->EF_SELECTED)
+		{
+			V->m_flags |= V->EF_CREATENEW;
+		}
+		V = V->m_mainNext;
+	}
+	_createNewMesh();
+	return true;
+}
+
+void PolygonalModel::ApplyNewMesh()
+{
+}
+
+bool PolygonalModel::WeldSelectedVerts(f32 len)
+{
+	if( CreateNewMeshFromSelectedVerts() )
+	{
+		return true;
+	}
+	return false;
+}
+u64 PolygonalModel::GetNumOfSelectedVerts()
+{
+	u64 result = 0;
+	auto V = m_verts;
+	for(u64 i = 0; i < m_vertsCount; ++i)
+	{
+		if(V->m_flags & V->EF_SELECTED)
+			++result;
+		V = V->m_mainNext;
 	}
 	return result;
 }

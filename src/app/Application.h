@@ -28,6 +28,8 @@
 
 #define KKROOO kkSingleton<Application>::s_instance
 
+using AppCallback = void(*)(s32 id, void* data);
+
 enum class EditMode
 {
 	Object,
@@ -416,6 +418,12 @@ public:
 	
 	void setVertexPickMode(void(*callback)(s32 id, void* data));
 	kkVertex* getPickedVertex();
+
+	void EnableVertexTool(AppCallback onSelect, AppCallback onCancel, AppCallback onAccept);
+	AppCallback m_vertexToolCallback_onSelect = nullptr;
+	AppCallback m_vertexToolCallback_onCancel = nullptr;
+	AppCallback m_vertexToolCallback_onAccept = nullptr;
+	bool m_vertexTool = false;
 
 	void setDrawPickLine(bool);
 	void GSSetDepth(bool v);

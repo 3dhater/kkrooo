@@ -134,7 +134,10 @@ bool Gui::GuiSystem::menuBarMenu(const char16_t* text)
 	{
 		m_firstColor.w  = 0.f;
 		m_secondColor.w = 0.f;
-		m_textColor = m_currentMenuBar.m_style->menuBarTextColor;
+		if(!m_currentMenuBar.m_enabled)
+			m_textColor = m_currentMenuBar.m_style->menuBarDisabledTextColor;
+		else
+			m_textColor = m_currentMenuBar.m_style->menuBarTextColor;
 	}
 
 	_addRectangle(rect, rect);

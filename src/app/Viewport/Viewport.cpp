@@ -354,7 +354,7 @@ bool ViewportObject::updateInputCamera(bool inFocus)
 	g_mouseState.MMB_HOLD = m_app->m_event_consumer->isMmbDown();
 	g_mouseState.MMB_UP   = m_app->m_event_consumer->isMmbUp();
 
-	if(  inRect || m_app->m_state_app == AppState_main::CameraTransformation)
+	if( inRect || m_app->m_state_app == AppState_main::CameraTransformation)
 	{
 		if( (m_app->m_event_consumer->isMmbDown()  && g_mouseState.IsFirstClickMMB) 
 			|| m_app->m_event_consumer->isKeyDown( kkKey::K_SPACE )
@@ -418,6 +418,8 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 	
 	if(!inFocus)
 		return;
+
+	bool select = false;
 
 	bool isGizmo = (m_app->m_state_app == AppState_main::Gizmo);
 	if( m_app->m_state_app == AppState_main::Idle )
@@ -495,6 +497,7 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			}
 			else if(!g_mouseState.IsSelectByFrame)
 				m_app->m_current_scene3D->deselectAll();
+			select = true;
 		}
 	}
 	else if( m_app->m_editMode == EditMode::Vertex )
@@ -517,6 +520,7 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 				if( /*g_mouseState.InViewport &&*/ m_app->m_state_keyboard != AppState_keyboard::Alt )
 					m_app->m_current_scene3D->deselectAll();
 			}
+			select = true;
 		}
 	}
 	else if( m_app->m_editMode == EditMode::Edge )
@@ -562,6 +566,7 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 					}
 				}
 			}
+			select = true;
 		}
 	}
 	else if( m_app->m_editMode == EditMode::Polygon )
@@ -572,6 +577,7 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 			&& g_mouseState.IsFirstClickLMB )
 		{
 			m_app->m_current_scene3D->selectPolygons(&m_cursorRay->m_center);
+			select = true;
 		}
 	}
 	if( g_mouseState.LMB_HOLD )
@@ -606,6 +612,7 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 				m_drawObjects, 
 				m_selectionFrame, 
 				g_cursorSelFrust);
+			select = true;
 		}
 	}
 	if(!g_mouseState.LMB_HOLD)
@@ -621,9 +628,14 @@ void ViewportObject::updateInput(const v2i& windowSize, const v2f& mouseDelta, b
 		g_mouseState.IsFirstClickRMB = false;
 	}
 
-	/*if( g_mouseState.LMB_DOWN && m_cursorInRect )
+	if(select)
 	{
-	}*/
+		if(m_app->m_vertexTool && m_app->m_vertexToolCallback_onSelect)
+		{
+			m_app->m_vertexToolCallback_onSelect(0, nullptr);
+			kkDrawAll();
+		}
+	}
 }
 
 kkVertex* ViewportObject::pickVertex(kkScene3DObject** object)
@@ -1447,7 +1459,7 @@ void Viewport::draw(ColorTheme* colorTheme)
 			kkGSSetDepth(false);
 			vp->drawObjectPivot(inFocus);
 			kkGSSetViewport(0,0, m_windowSize.x, m_windowSize.y);
-			if(inFocus)
+			if(inFocus && !m_app->m_vertexTool)
 			{
 				for( auto o : m_app->m_current_scene3D->m_objects_selected )
 				{

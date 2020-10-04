@@ -160,6 +160,12 @@ void Scene3DObject::_createSoftwareModel_polys()
 	u16 index = 0;
 	for(u64 i = 0; i < m_polyModel->m_polygonsCount; ++i)
 	{
+		if(current_polygon->m_flags & current_polygon->EF_OLD)
+		{
+			current_polygon = current_polygon->m_mainNext;
+			continue;
+		}
+
 		kkVertex * base_vertex = current_polygon->m_verts->m_element;
 		v4f color(1.f,1.f,1.f,1.f);
 		if( kkSingleton<Application>::s_instance->getEditMode() == EditMode::Polygon )
@@ -361,6 +367,7 @@ void Scene3DObject::_createSoftwareModel_edges()
 	u32 softwareModelIndex = 0;
 	u16         index         = 0;
 	auto E = m_polyModel->m_edges;
+	//printf("Edge count: [%u]\n",(u32)m_polyModel->m_edgesCount);
 	for(u64 i = 0; i < m_polyModel->m_edgesCount; ++i)
 	{
 		if( lineCount == 0 )
@@ -1438,117 +1445,16 @@ void Scene3DObject::Weld(kkVertex* V1, kkVertex* V2)
 
 void Scene3DObject::WeldSelectedVerts(f32 len)
 {
-	//for( u64 i2 = 0, sz2 = m_PolyModel->m_controlVerts.size(); i2 < sz2; ++i2 )
-	//{
-	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlVerts[i2];
-	//	bool sel = CV->isSelected();
-	//	for( auto V : CV->m_verts )
-	//	{
-	//		Vertex* vertex = (Vertex*)V;
-	//		vertex->m_isCVSelected = sel;
-	//	}
-	//}
-
-	////беру каждую вершину, и проверяю со специальными вершинами которых нужно придумать
-	//struct _weld_vertex
-	//{
-	//	kkVector4 m_center; // единая позиция
-	//	std::vector<Vertex*> m_verts; // вершины которые добавляются в зависимости от расстояния
-	//};
-	//kkArray<_weld_vertex*> weld_verts = kkArray<_weld_vertex*>(0xffff);
-
-	//for( u64 i = 0, sz = m_PolyModel->m_controlVerts.size(); i < sz; ++i )
-	//{
-	//	ControlVertex* CV = (ControlVertex*)m_PolyModel->m_controlVerts[i];
-	//	if(!CV->m_isSelected)
-	//		continue;
-
-	//	Vertex* V = (Vertex*)CV->m_verts[0];
-
-	//	bool vertex_found = false;
-	//	for( u64 k = 0, ksz = weld_verts.size(); k < ksz; ++k )
-	//	{
-	//		auto WV = weld_verts[k];
-	//		if( V->m_Position.distance(WV->m_center) <= len )
-	//		{
-	//			vertex_found = true;
-	//			k = ksz;
-
-	//			kkVector4 vp = WV->m_center - V->m_Position;
-	//			vp *= 0.5f;
-
-	//			for(auto v : CV->m_verts)
-	//			{
-	//				WV->m_verts.emplace_back((Vertex*)v);
-	//			}
-	//			WV->m_center -= vp; 
-	//			break;
-	//		}
-	//	}
-	//	if(!vertex_found)
-	//	{
-	//		_weld_vertex * WV = new _weld_vertex;
-	//		WV->m_center = V->m_Position;
-	//		for(auto v : CV->m_verts)
-	//		{
-	//			WV->m_verts.emplace_back((Vertex*)v);
-	//		}
-	//		weld_verts.push_back(WV);
-	//	}
-	//}
-
-	//// изменяю координаты вершин
-	//for( u64 i = 0, sz = weld_verts.size(); i < sz; ++i )
-	//{
-	//	auto WV = weld_verts[i];
-	//	for( u64 j = 0, jsz = WV->m_verts.size(); j < jsz; ++j )
-	//	{
-	//		auto V = WV->m_verts[j];
-	//		V->m_Position = WV->m_center;
-	//		V->m_Position_fix = WV->m_center;
-	//		V->m_weld = true;
-	//	}
-	//	delete weld_verts[i];
-	//}
-
-	//// проверяю полигоны. если координаты точки равны то лишнюю нужно удалить
-	//// если остаётся 2 и менее вершин то надо удалить сам полигон
-	//auto isPolygonDelete = [&](Polygon3D* P)->bool
-	//{
-	//	begin:
-	//	for( u64 i = 0, sz = P->m_verts.size(); i < sz; ++i )
-	//	{
-	//		Vertex* V1 = (Vertex*)P->m_verts[i];
-	//		for( u64 i2 = i+1, sz2 = P->m_verts.size(); i2 < sz2; ++i2 )
-	//		{
-	//			Vertex* V2 = (Vertex*)P->m_verts[i2];
-	//			if(V1->m_Position == V2->m_Position)
-	//			{
-	//				V2->m_isToDelete = true;
-	//				P->m_verts.erase_first(V2);
-	//				goto begin;
-	//			}
-	//		}
-	//	}
-
-	//	return P->m_verts.size() < 3;
-	//};
-	//
-	//for( u64 i = 0, sz = m_PolyModel->m_polygons.size(); i < sz; ++i )
-	//{
-	//	Polygon3D* P = (Polygon3D*)m_PolyModel->m_polygons[i];
-	//	if( isPolygonDelete(P) )
-	//	{
-	//		P->MarkToDelete();
-	//	}
-	//}
-
-	//// удаление.
-	//m_PolyModel->deleteMarkedPolygons();
-
-	//m_PolyModel->createControlPoints();
-	//this->_rebuildModel();
-	//updateModelPointsColors();
+	auto reb = m_polyModel->ClearNewMesh();
+	kkLogWriteInfo("Weld\n");
+	auto don = m_polyModel->WeldSelectedVerts(len);
+	if( don || reb )
+	{
+		if(don)
+			kkLogWriteInfo("\t -  - Done P[%u] V[%u]\n", m_polyModel->m_polygonsCount, m_polyModel->m_vertsCount);
+		_rebuildModel();
+		updateModelPointsColors();
+	}
 }
 
 void Scene3DObject::ConnectVerts()
@@ -2015,4 +1921,14 @@ void Scene3DObject::ConnectEdges()
 	//	auto e = m_PolyModel->m_edges[i];
 	//	e->m_isAlreadyConnected = false;
 	//}
+}
+
+//bool Scene3DObject::ClearNewMesh()
+//{
+//	return m_polyModel->ClearNewMesh();
+//}
+
+void Scene3DObject::ApplyNewMesh()
+{
+	m_polyModel->ApplyNewMesh();
 }

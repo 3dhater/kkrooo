@@ -73,6 +73,7 @@ namespace Kr
 			float menuBarHoverBGAlpha  = 0.8f;
 			Vec4f menuBarTextHoverColor = 0xFFDDDDDD;
 			Vec4f menuBarTextColor = ColorWhite;
+			Vec4f menuBarDisabledTextColor = ColorGrey;
 
 			float menuItemHeight = 18.f;
 			Vec4f menuItemBGColor1 = 0xff555555;

@@ -362,18 +362,62 @@ void target_weld_vertex(s32 id, void* data)
 	scene->updateSceneAabb();
 	scene->updateSelectionAabb();
 }
-void weld_vertex(s32 id, void* data)
+
+void weldVertex_onAccept(s32 id, void* data)
 {
-	auto app = kkSingleton<Application>::s_instance;
-	Scene3D* scene = *app->getScene3D();
 	auto object = GetSelectedObject();
 	if(object)
 	{
-		object->WeldSelectedVerts(g_EditPolyObjectsGUIElements.m_weld_len);
+		object->ApplyNewMesh();
+		object->UpdateAabb();
+		auto app = kkSingleton<Application>::s_instance;
+		Scene3D* scene = *app->getScene3D();
+		scene->updateObjectVertexSelectList();
+		scene->updateSceneAabb();
+		scene->updateSelectionAabb();
+	}
+}
+void weldVertex_onCancel(s32 id, void* data)
+{
+	auto object = GetSelectedObject();
+	if(object)
+	{
+		auto app = kkSingleton<Application>::s_instance;
+		Scene3D* scene = *app->getScene3D();
+		scene->deselectAll();
+		object->WeldSelectedVerts(0.f);
 		object->UpdateAabb();
 		scene->updateObjectVertexSelectList();
 		scene->updateSceneAabb();
 		scene->updateSelectionAabb();
+	}
+}
+// + onSlider
+void weldVertex_onSelect(s32 id, void* data)
+{
+	auto app = kkSingleton<Application>::s_instance;
+	if(app->m_vertexTool)
+	{
+		auto object = GetSelectedObject();
+		if(object)
+		{
+			object->WeldSelectedVerts(g_EditPolyObjectsGUIElements.m_weld_len);
+			object->UpdateAabb();
+			Scene3D* scene = *app->getScene3D();
+			scene->updateObjectVertexSelectList();
+			scene->updateSceneAabb();
+			scene->updateSelectionAabb();
+		}
+	}
+}
+void weld_vertex(s32 id, void* data)
+{
+	auto app = kkSingleton<Application>::s_instance;
+	auto object = GetSelectedObject();
+	if(object)
+	{
+		app->EnableVertexTool(weldVertex_onSelect, weldVertex_onCancel, weldVertex_onAccept);
+		weldVertex_onSelect(0, nullptr);
 	}
 }
 
@@ -743,7 +787,7 @@ void Application::_initEditParamsWindow()
 	m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
 	m_edit_params_window->AddButton(u"Weld", v2f(60.f, 20.f), weld_vertex,0, kkPluginGUIParameterType::Vertex);
 	m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
-	g_EditPolyObjectsGUIElements.m_weld_len_element = m_edit_params_window->AddValueSelectorFloatLimit(0.f, 99999999.f, &g_EditPolyObjectsGUIElements.m_weld_len, 0.01f, true, v2f(110.f, 20.f), 0, kkPluginGUIParameterType::Vertex);
+	g_EditPolyObjectsGUIElements.m_weld_len_element = m_edit_params_window->AddValueSelectorFloatLimit(0.f, 99999999.f, &g_EditPolyObjectsGUIElements.m_weld_len, 0.01f, true, v2f(110.f, 20.f), weldVertex_onSelect, kkPluginGUIParameterType::Vertex);
 	m_edit_params_window->AddNewLine(7.f, kkPluginGUIParameterType::Vertex);
 	m_edit_params_window->AddMoveLeftRight(10.f, kkPluginGUIParameterType::Vertex);
 	m_edit_params_window->AddButton(u"Connect", v2f(60.f, 20.f), connect_vertex,0, kkPluginGUIParameterType::Vertex);

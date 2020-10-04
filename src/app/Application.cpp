@@ -874,25 +874,59 @@ void Application::updateInput()
 	{
 		// ввод для активного вьюпорта
 		// там-же _processShortcuts для вьюпорта
-		if( !m_cursorInGUI 
-			|| m_state_app == AppState_main::Gizmo
-			|| m_state_app == AppState_main::CameraTransformation
-			|| m_state_app == AppState_main::SelectRectangle
-			|| m_KrGuiSystem->m_mouseIsLMB_up 
-			|| m_KrGuiSystem->m_mouseIsMMB_up 
-			|| m_KrGuiSystem->m_mouseIsRMB_up)
+		if(!m_globalInputBlock)
 		{
-			if( isWindowActive(EWID_MAIN_WINDOW) && !this->isGlobalInputBlocked() )
+			if( !m_cursorInGUI 
+				|| m_state_app == AppState_main::Gizmo
+				|| m_state_app == AppState_main::CameraTransformation
+				|| m_state_app == AppState_main::SelectRectangle
+				|| m_KrGuiSystem->m_mouseIsLMB_up 
+				|| m_KrGuiSystem->m_mouseIsMMB_up 
+				|| m_KrGuiSystem->m_mouseIsRMB_up)
+			{
+				if( isWindowActive(EWID_MAIN_WINDOW) )
+				{
+					m_mainViewport->updateInputCamera();
+					auto md = Kr::Gui::GuiSystem::m_mouseDelta;
+					m_mainViewport->updateInput(v2f(md.x,md.y));
+				}
+			}
+			else
+			{
+			   //m_main_viewport->checkMouseEvents();
+			}
+
+		}else if( 
+			m_vertexTool
+			|| m_state_app == AppState_main::CameraTransformation )
+		{
+			if( isWindowActive(EWID_MAIN_WINDOW) && !m_cursorInGUI  )
 			{
 				m_mainViewport->updateInputCamera();
 				auto md = Kr::Gui::GuiSystem::m_mouseDelta;
 				m_mainViewport->updateInput(v2f(md.x,md.y));
 			}
 		}
-		else
+
+		if(m_vertexTool)
 		{
-		   //m_main_viewport->checkMouseEvents();
+			if( m_event_consumer->isKeyDown(kkKey::K_ENTER) && m_vertexToolCallback_onAccept)
+			{
+				m_vertexToolCallback_onAccept(0,nullptr);
+				m_vertexTool = false;
+				m_globalInputBlock = false;
+				kkDrawAll();
+			}
+			else if( (m_event_consumer->isRmbUp() && m_vertexToolCallback_onAccept)
+				|| (m_event_consumer->isKeyDown(kkKey::K_ESCAPE) && m_vertexToolCallback_onAccept))
+			{
+				m_vertexToolCallback_onCancel(0,nullptr);
+				m_vertexTool = false;
+				m_globalInputBlock = false;
+				kkDrawAll();
+			}
 		}
+
 
 		if(m_objectPickMode && m_event_consumer->isLmbDown() && !m_cursorInGUI)
 		{
@@ -1483,6 +1517,14 @@ void   Application::_drawPreferencesWindow()
 {
 }
 
+void Application::EnableVertexTool(AppCallback onSelect, AppCallback onCancel, AppCallback onAccept)
+{
+	m_vertexToolCallback_onSelect = onSelect;
+	m_vertexToolCallback_onCancel = onCancel;
+	m_vertexToolCallback_onAccept = onAccept;
+	m_vertexTool = true;
+	m_globalInputBlock = true;
+}
 void Application::setObjectPickMode(void(*callback)(s32 id, void* data))
 {
 	m_objectPickMode = true;
@@ -1880,35 +1922,38 @@ void Application::_onEndFrame()
 	}
 
 	auto isEscape = m_event_consumer->isKeyUp(kkKey::K_ESCAPE, false);
-	if(m_event_consumer->isLmbUp() 
-		|| m_event_consumer->isRmbUp() 
-		|| m_event_consumer->isMmbUp()
-		|| isEscape)
+	if(!m_vertexTool)
 	{
-		bool cancel = m_event_consumer->isRmbUp();
-		if(!cancel)
-			cancel = isEscape;
+		if(m_event_consumer->isLmbUp() 
+			|| m_event_consumer->isRmbUp() 
+			|| m_event_consumer->isMmbUp()
+			|| isEscape)
+		{
+			bool cancel = m_event_consumer->isRmbUp();
+			if(!cancel)
+				cancel = isEscape;
 
-	    // если перемещали объект то этот вызов должен применить изменения
-	    if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)
-	    {
-	        m_current_scene3D->moveSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
+			// если перемещали объект то этот вызов должен применить изменения
+			if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_move)
+			{
+				m_current_scene3D->moveSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
 
-	    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale )
-	    {
-	        m_current_scene3D->scaleSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
+			}else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_scale )
+			{
+				m_current_scene3D->scaleSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
 
-	    }else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate )
-	    {
-	        m_current_scene3D->rotateSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
-	    }
+			}else if( m_state_app == AppState_main::Gizmo && m_currentGizmoEvent.type == AppEvent_gizmo::_type::_rotate )
+			{
+				m_current_scene3D->rotateSelectedObjects( &m_currentGizmoEvent.part, false, cancel, false );
+			}
 
-	    if( m_state_app != AppState_main::CancelTransformation )
-	        m_state_app = AppState_main::Idle;
-	    m_currentGizmoEvent.reset();
-	    // при перемещении гизмо остаётся на месте, и луч остаётся там-же
-	    // при отжатии, нужно получить новый луч по курсором
-	    //   убираю видимость активной части гизмо
+			if( m_state_app != AppState_main::CancelTransformation )
+				m_state_app = AppState_main::Idle;
+			m_currentGizmoEvent.reset();
+			// при перемещении гизмо остаётся на месте, и луч остаётся там-же
+			// при отжатии, нужно получить новый луч по курсором
+			//   убираю видимость активной части гизмо
+		}
 	}
 	
 	// попробую здесь настроить перемещение объектов...

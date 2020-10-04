@@ -237,6 +237,7 @@ class PolygonalModel : public kkPolygonalModel
 	void _removePolygonFromList(kkPolygon*);
 	void _addEdgeToList(kkEdge*);
 	void _removeEdgeFromList(kkEdge*);
+	void _createNewMesh();
 
 public:
 	PolygonalModel();
@@ -281,6 +282,14 @@ public:
 	bool weld(kkVertex* V1, kkVertex* V2);
 	kkEdge* isEdge(kkVertex* V1, kkVertex* V2);
 	bool isOnEdge(kkVertex* V);
+
+	bool CreateNewMeshFromSelectedVerts();
+	bool ClearNewMesh();
+	void ApplyNewMesh();
+
+	bool WeldSelectedVerts(f32 len);
+
+	u64 GetNumOfSelectedVerts();
 
 	Scene3DObject* m_object = nullptr;
 };

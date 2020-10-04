@@ -441,6 +441,9 @@ public:
 	void Weld(kkVertex* CV1, kkVertex* CV2);
 	void WeldSelectedVerts(f32 len);
 	void ConnectEdges();
+
+	//bool ClearNewMesh();
+	void ApplyNewMesh();
 };
 
 

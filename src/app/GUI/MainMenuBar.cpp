@@ -18,7 +18,7 @@ using namespace Kr;
 void Application::_drawMainMenuBar()
 {
 	bool redraw = false;
-    if( m_KrGuiSystem->menuBarBegin() )
+    if( m_KrGuiSystem->menuBarBegin(m_globalInputBlock ? false : true) )
 	{
 		if(m_KrGuiSystem->menuBarMenu(u"File"))
 		{

@@ -238,7 +238,7 @@ class kkArraySmall
 	u16     m_size;
 	u16     m_allocated;
 
-	void reallocate( u64 new_capacity )
+	void reallocate( u16 new_capacity )
 	{
 		new_capacity += 4;
 		//pointer new_data = m_allocator.allocate( new_capacity /** sizeof( type )*/ );
@@ -246,7 +246,7 @@ class kkArraySmall
 
 		if( m_data )
 		{
-			for( u64 i = 0u; i < m_size; ++i )
+			for( u16 i = 0u; i < m_size; ++i )
 			{
 				//m_allocator.construct( &new_data[i], m_data[i] );
 				new(&new_data[i]) type( m_data[i] );
